@@ -1,0 +1,78 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'auth_service.dart';
+
+class ApiService {
+  static const String baseUrl = 'http://192.168.3.23:8080/api'; // URL pour l'émulateur Android
+  // static const String baseUrl = 'http://localhost:8080/api'; // URL pour iOS simulator
+
+
+  final AuthService _authService;
+
+  ApiService(this._authService);
+
+
+  Future<Map<String, String>> _getHeaders() async {
+    final token = _authService.token; // accès direct en mémoire
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+
+
+  Future<dynamic> get(String endpoint) async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: headers,
+    );
+
+    return _processResponse(response);
+  }
+
+  Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    return _processResponse(response);
+  }
+
+  Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
+    final headers = await _getHeaders();
+    final response = await http.put(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    return _processResponse(response);
+  }
+
+  Future<dynamic> delete(String endpoint) async {
+    final headers = await _getHeaders();
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: headers,
+    );
+
+    return _processResponse(response);
+  }
+
+  dynamic _processResponse(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) return null;
+      return json.decode(response.body);
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error['message'] ?? 'Une erreur est survenue');
+    }
+  }
+}

@@ -1,0 +1,50 @@
+name: airsoft_game_map
+description: Application mobile pour l'Airsoft Game Map Master
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  # Gestion d'état
+  provider: ^6.0.5
+  # HTTP et WebSocket
+  http: ^0.13.5
+  web_socket_channel: ^2.3.0
+  # Stockage local
+  shared_preferences: ^2.1.0
+  # Scanner QR code
+  mobile_scanner: ^3.5.2
+  qr_flutter: ^4.0.0
+  # Navigation
+  go_router: ^7.0.0
+  # UI
+  flutter_svg: ^2.0.5
+  google_fonts: ^4.0.4
+  # Authentification
+  jwt_decoder: ^2.0.1
+  # Localisation
+  geolocator: ^10.1.0
+  google_maps_flutter: ^2.2.6
+  # Autres
+  intl: ^0.18.0
+  uuid: 4.5.1
+  logger: ^1.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+
+dependency_overrides:
+  geolocator_android: ^4.4.3
