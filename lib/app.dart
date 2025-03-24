@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
 import 'services/websocket_service.dart';
+import 'services/game_state_service.dart';
 import 'screens/common/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
@@ -89,6 +90,8 @@ class App extends StatelessWidget {
           create: (_) => WebSocketService(null),
           update: (_, authService, previous) => previous!..updateAuthService(authService),
         ),
+        // Ajout du nouveau service de gestion d'état du jeu
+        ChangeNotifierProvider(create: (_) => GameStateService()),
       ],
       child: MaterialApp.router(
         title: 'Airsoft Game Master',
