@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:provider/provider.dart';
 import '../../models/game_map.dart';
 import '../../services/api_service.dart';
@@ -96,43 +97,28 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       );
       return;
     }
+    // Utiliser le sélecteur de type "roue" pour les heures et minutes
+    DatePicker.showTimePicker(
+      context,
+      showSecondsColumn: false,
+      onChanged: (time) {
+        // Mise à jour en temps réel pendant que l'utilisateur fait défiler
+      },
+      onConfirm: (time) {
+        // Calculer la durée en minutes
+        int minutes = time.hour * 60 + time.minute;
+        gameStateService.setGameDuration(minutes);
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Définir la durée de la partie'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Durée en minutes (laisser vide pour aucune limite)'),
-            TextField(
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                final duration = value.isEmpty ? null : int.tryParse(value);
-                gameStateService.setGameDuration(duration);
-              },
-              decoration: InputDecoration(
-                hintText: 'Ex: 60',
-                helperText: gameStateService.gameDuration == null
-                    ? 'Aucune limite de temps'
-                    : 'La partie durera ${gameStateService.gameDuration} minutes',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annuler'),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Durée définie: ${time.hour}h ${time.minute}min'),
+            backgroundColor: Colors.green,
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Confirmer'),
-          ),
-        ],
-      ),
+        );
+      },
+      currentTime: DateTime(2022, 1, 1, 0, 0),
+      // Commencer à 00:00
+      locale: LocaleType.fr,
     );
   }
 
@@ -196,11 +182,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   void _selectMap() async {
     final apiService = Provider.of<ApiService>(context, listen: false);
-    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
 
     try {
       final List<dynamic> mapData = await apiService.get('maps/owner/self');
-      final List<GameMap> maps = mapData.map((json) => GameMap.fromJson(json)).toList();
+      final List<GameMap> maps =
+          mapData.map((json) => GameMap.fromJson(json)).toList();
 
       if (maps.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -272,7 +260,6 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

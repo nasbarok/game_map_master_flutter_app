@@ -10,9 +10,13 @@ class ApiService {
 
 
   final AuthService _authService;
+  AuthService get authService => _authService;
 
   ApiService(this._authService);
 
+  factory ApiService.placeholder() {
+    return ApiService(AuthService.placeholder());
+  }
 
   Future<Map<String, String>> _getHeaders() async {
     final token = _authService.token; // accès direct en mémoire

@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'app.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
 import 'services/websocket_service.dart';
+import 'services/notifications.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const initializationSettings = InitializationSettings(
+    android: androidSettings,
+  );
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  await initNotifications();
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
   runApp(
     MultiProvider(
       providers: [
@@ -23,3 +36,4 @@ void main() {
     ),
   );
 }
+

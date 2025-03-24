@@ -1,3 +1,5 @@
+import 'package:airsoft_game_map/services/invitation_service.dart';
+import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -90,8 +92,22 @@ class App extends StatelessWidget {
           create: (_) => WebSocketService(null),
           update: (_, authService, previous) => previous!..updateAuthService(authService),
         ),
-        // Ajout du nouveau service de gestion d'état du jeu
         ChangeNotifierProvider(create: (_) => GameStateService()),
+        ChangeNotifierProxyProvider3<WebSocketService, AuthService, GameStateService, InvitationService>(
+          create: (_) => InvitationService(
+            // Valeurs par défaut temporaires, seront écrasées dans update
+            Provider.debugCheckInvalidValueType != null ? WebSocketService(null) : throw UnimplementedError(),
+            AuthService(),
+            GameStateService(),
+          ),
+          update: (_, webSocketService, authService, gameStateService, __) =>
+              InvitationService(webSocketService, authService, gameStateService),
+        ),
+        ChangeNotifierProxyProvider2<ApiService, GameStateService, TeamService>(
+          create: (_) => TeamService.placeholder(), // constructeur temporaire vide ou par défaut
+          update: (_, apiService, gameStateService, __) =>
+              TeamService(apiService, gameStateService),
+        ),
       ],
       child: MaterialApp.router(
         title: 'Airsoft Game Master',

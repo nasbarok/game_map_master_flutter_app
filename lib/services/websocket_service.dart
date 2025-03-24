@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/io.dart';
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 import 'auth_service.dart';
 
 class WebSocketService with ChangeNotifier {
   static const String wsUrl = 'ws://192.168.3.23:8080/ws';
 
   AuthService? _authService;
-
-  WebSocketChannel? _channel;
+  StompClient? _stompClient;
   bool _isConnected = false;
 
   final StreamController<Map<String, dynamic>> _messageStreamController =
@@ -21,50 +21,66 @@ class WebSocketService with ChangeNotifier {
 
   WebSocketService(this._authService);
 
-  /// Permet de mettre à jour `authService` depuis ChangeNotifierProxyProvider
   void updateAuthService(AuthService authService) {
     _authService = authService;
   }
 
   Future<void> connect() async {
-    if (_isConnected || _authService?.token == null) return;
+    if (_isConnected || _authService?.token == null || _authService?.currentUser?.id == null) return;
 
-    try {
-      final token = _authService!.token!;
-      final uri = Uri.parse('$wsUrl?token=$token');
+    final token = _authService!.token!;
+    final userId = _authService!.currentUser!.id;
+    final uri = '$wsUrl?token=$token';
 
-      _channel = IOWebSocketChannel.connect(uri);
-      _isConnected = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
-      });
+    _stompClient = StompClient(
+      config: StompConfig(
+        url: uri,
+        onConnect: (StompFrame frame) {
+          _isConnected = true;
+          notifyListeners();
 
-      _channel!.stream.listen(
-            (dynamic message) {
-          final decoded = json.decode(message as String) as Map<String, dynamic>;
-          _messageStreamController.add(decoded);
+          // ✅ Abonnement au canal utilisateur
+          _stompClient!.subscribe(
+            destination: '/topic/user/$userId',
+            callback: (frame) {
+              try {
+                final decoded = jsonDecode(frame.body!) as Map<String, dynamic>;
+                _messageStreamController.add(decoded);
+              } catch (e) {
+                print('Erreur de décodage STOMP : $e');
+              }
+            },
+          );
+
+          print('✅ STOMP connecté à $uri et abonné à /topic/user/$userId');
         },
-        onError: (error) {
-          print('WebSocket Error: $error');
+        beforeConnect: () async {
+          print('🔄 Connexion STOMP en cours...');
+        },
+        onDisconnect: (_) {
+          print('🔌 Déconnecté de STOMP');
           _isConnected = false;
           notifyListeners();
           _reconnect();
         },
-        onDone: () {
-          print('WebSocket Connection Closed');
+        onWebSocketError: (error) {
+          print('🛑 Erreur WebSocket : $error');
           _isConnected = false;
           notifyListeners();
           _reconnect();
         },
-      );
+        onStompError: (frame) {
+          print('💥 Erreur STOMP : ${frame.body}');
+          _isConnected = false;
+          notifyListeners();
+        },
+        heartbeatIncoming: const Duration(seconds: 10),
+        heartbeatOutgoing: const Duration(seconds: 10),
+        reconnectDelay: const Duration(seconds: 5),
+      ),
+    );
 
-      print('WebSocket Connected to $uri');
-    } catch (e) {
-      print('WebSocket Connection Error: $e');
-      _isConnected = false;
-      notifyListeners();
-      _reconnect();
-    }
+    _stompClient!.activate();
   }
 
   void _reconnect() {
@@ -75,20 +91,31 @@ class WebSocketService with ChangeNotifier {
     });
   }
 
-  void disconnect() {
-    _channel?.sink.close();
-    _channel = null;
-    _isConnected = false;
-    notifyListeners();
+  Future<void> sendMessage(String destination, Map<String, dynamic> message) async {
+    if (_isConnected && _stompClient != null) {
+      try {
+        _stompClient!.send(
+          destination: destination,
+          body: jsonEncode(message),
+        );
+      } catch (e) {
+        print('Erreur lors de l\'envoi STOMP : $e');
+      }
+    } else {
+      print('❌ Impossible d\'envoyer le message : non connecté');
+      await connect();
+      if (_isConnected) {
+        _stompClient!.send(destination: destination, body: jsonEncode(message));
+      } else {
+        print('❌ La reconnexion a échoué, message non envoyé');
+      }
+    }
   }
 
-  void sendMessage(Map<String, dynamic> message) {
-    if (_isConnected && _channel != null) {
-      _channel!.sink.add(json.encode(message));
-    } else {
-      print('Cannot send message: WebSocket not connected');
-      connect();
-    }
+  void disconnect() {
+    _stompClient?.deactivate();
+    _isConnected = false;
+    notifyListeners();
   }
 
   @override

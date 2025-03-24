@@ -1,41 +1,35 @@
 class Team {
-  final int? id;
-  final String name;
-  final String? description;
-  final String? color;
-  final int? ownerId;
-  final List<int>? memberIds;
+  int id;
+  String name;
+  List<dynamic> players;
+  String? description;
+  String? color;
 
   Team({
-    this.id,
+    required this.id,
     required this.name,
-    this.description,
+    this.players = const [],
+    this.description = '',
     this.color,
-    this.ownerId,
-    this.memberIds,
   });
-
+  
   factory Team.fromJson(Map<String, dynamic> json) {
     return Team(
       id: json['id'],
       name: json['name'],
-      description: json['description'],
+      players: json['players'] ?? [],
+      description: json['description'] ?? '',
       color: json['color'],
-      ownerId: json['ownerId'],
-      memberIds: json['memberIds'] != null 
-          ? List<int>.from(json['memberIds'])
-          : null,
     );
   }
-
+  
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
+      'players': players,
       'description': description,
       'color': color,
-      'ownerId': ownerId,
-      'memberIds': memberIds,
     };
   }
 }

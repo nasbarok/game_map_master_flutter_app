@@ -20,7 +20,9 @@ class AuthService extends ChangeNotifier {
   AuthService() {
     _loadUserFromPrefs();
   }
-  
+  factory AuthService.placeholder() {
+    return AuthService();
+  }
   Future<void> _loadUserFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');

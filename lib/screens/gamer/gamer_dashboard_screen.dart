@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
+import '../../services/game_state_service.dart';
+import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import 'join_team_screen.dart';
 import 'qr_code_scanner_screen.dart';
@@ -37,8 +39,7 @@ class _GamerDashboardScreenState extends State<GamerDashboardScreen> with Single
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
-    final user = authService.currentUser;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gamer Dashboard'),
@@ -56,8 +57,8 @@ class _GamerDashboardScreenState extends State<GamerDashboardScreen> with Single
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.videogame_asset), text: 'Parties'),
-            Tab(icon: Icon(Icons.people), text: 'Équipes'),
+            Tab(icon: Icon(Icons.map), text: 'Terrain'),
+            Tab(icon: Icon(Icons.people), text: 'Joueurs'),
           ],
         ),
       ),
@@ -65,10 +66,8 @@ class _GamerDashboardScreenState extends State<GamerDashboardScreen> with Single
         controller: _tabController,
         children: [
           // Onglet Parties
-          _buildGamesTab(),
-          
-          // Onglet Équipes
-          _buildTeamsTab(),
+          _buildTerrainTab(),
+          _buildPlayersTab(),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -87,63 +86,88 @@ class _GamerDashboardScreenState extends State<GamerDashboardScreen> with Single
       ),
     );
   }
-  
-  Widget _buildGamesTab() {
-    return Center(
+
+  Widget _buildTerrainTab() {
+    final gameState = Provider.of<GameStateService>(context);
+
+    if (!gameState.isTerrainOpen || gameState.selectedMap == null) {
+      return const Center(
+        child: Text(
+          'Aucun terrain connecté',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.videogame_asset, size: 80, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            'Aucune partie en cours',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            'Carte : ${gameState.selectedMap?.name ?? "Inconnue"}',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Scannez un QR code pour rejoindre une partie',
-            style: TextStyle(color: Colors.grey),
+          Text(
+            'Scénario : ${gameState.selectedScenarios != null && gameState.selectedScenarios!.isNotEmpty ? gameState.selectedScenarios!.first['name'] ?? 'Inconnu' : 'Aucun'}',
           ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _showScanQRCodeDialog,
-            icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Scanner un QR code'),
+          const SizedBox(height: 8),
+          if (gameState.timeLeftDisplay != null)
+            Text('Temps restant : ${gameState.timeLeftDisplay}'),
+          const Spacer(),
+          Center(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                // À implémenter : quitter la partie ?
+              },
+              icon: const Icon(Icons.logout),
+              label: const Text('Quitter la partie'),
+            ),
           ),
         ],
       ),
     );
   }
-  
-  Widget _buildTeamsTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.people, size: 80, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            'Vous n\'êtes dans aucune équipe',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Rejoignez une équipe pour participer à des parties',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
+
+  Widget _buildPlayersTab() {
+    final teamService = Provider.of<TeamService>(context);
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final currentUserId = authService.currentUser?.id;
+
+    final players = teamService.connectedPlayers;
+    final myTeamId = teamService.myTeamId;
+
+    if (players.isEmpty) {
+      return const Center(
+        child: Text('Aucun joueur connecté.'),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: players.length,
+      itemBuilder: (context, index) {
+        final player = players[index];
+        final isMe = player['id'] == currentUserId;
+        final isSameTeam = player['teamId'] == myTeamId;
+
+        return ListTile(
+          leading: const CircleAvatar(child: Icon(Icons.person)),
+          title: Text(player['username'] ?? 'Joueur'),
+          subtitle: Text(isSameTeam ? 'Dans votre équipe' : 'Autre équipe'),
+          trailing: isMe
+              ? ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const JoinTeamScreen()),
+                MaterialPageRoute(builder: (_) => const JoinTeamScreen()),
               );
             },
-            icon: const Icon(Icons.group_add),
-            label: const Text('Rejoindre une équipe'),
-          ),
-        ],
-      ),
+            child: const Text('Changer d\'équipe'),
+          )
+              : null,
+        );
+      },
     );
   }
   

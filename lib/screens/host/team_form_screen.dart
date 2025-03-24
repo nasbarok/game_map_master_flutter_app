@@ -58,7 +58,7 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
         final apiService = Provider.of<ApiService>(context, listen: false);
         
         final team = Team(
-          id: widget.team?.id,
+          id: widget.team!.id,
           name: _nameController.text,
           description: _descriptionController.text,
           color: _selectedColor,

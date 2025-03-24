@@ -1,8 +1,12 @@
+import 'package:airsoft_game_map/screens/host/players_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import '../../models/field.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/invitation_service.dart';
+import '../../services/notifications.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import 'field_form_screen.dart';
@@ -30,7 +34,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
     );
   }
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -39,12 +43,57 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
     // Connecter au WebSocket
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final webSocketService = Provider.of<WebSocketService>(context, listen: false);
+      final invitationService = Provider.of<InvitationService>(context, listen: false);
+
       webSocketService.connect();
+
+      invitationService.onInvitationReceivedDialog = _showInvitationDialog;
     });
   }
-  
+
+  Future<void> _showInvitationDialog(Map<String, dynamic> invitation) async {
+    // Vérifie si l'application est visible à l'écran
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      // ✅ Affichage classique du Dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Invitation reçue'),
+          content: Text(
+            'Vous avez été invité par ${invitation['fromUsername']} '
+                'pour rejoindre la carte "${invitation['mapName']}".',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                final invitationService = Provider.of<InvitationService>(context, listen: false);
+                invitationService.respondToInvitation(invitation, false);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Refuser'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final invitationService = Provider.of<InvitationService>(context, listen: false);
+                invitationService.respondToInvitation(invitation, true);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Accepter'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      await showInvitationNotification(invitation);
+    }
+  }
+
+
+
   @override
   void dispose() {
+    final invitationService = Provider.of<InvitationService>(context, listen: false);
+    invitationService.onInvitationReceivedDialog = null;
     _tabController.dispose();
     super.dispose();
   }
@@ -92,8 +141,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
           _buildScenariosTab(),
           
           // Onglet Joueurs (équipes)
-          gameStateService.isTerrainOpen 
-              ? _buildTeamsTab() 
+          gameStateService.isTerrainOpen
+              ? const PlayersScreen()
               : _buildDisabledTeamsTab(),
         ],
       ),
