@@ -1,18 +1,19 @@
-import 'package:airsoft_game_map/services/invitation_service.dart';
-import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'services/auth_service.dart';
-import 'services/api_service.dart';
-import 'services/websocket_service.dart';
-import 'services/game_state_service.dart';
-import 'screens/common/splash_screen.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/auth/register_screen.dart';
-import 'screens/host/host_dashboard_screen.dart';
-import 'screens/gamer/gamer_dashboard_screen.dart';
-import 'widgets/websocket_handler.dart';
+import '../services/auth_service.dart';
+import '../services/api_service.dart';
+import '../services/websocket_service.dart';
+import '../services/game_state_service.dart';
+import '../services/invitation_service.dart';
+import '../services/team_service.dart';
+import '../screens/common/splash_screen.dart';
+import '../screens/auth/login_screen.dart';
+import '../screens/auth/register_screen.dart';
+import '../screens/host/host_dashboard_screen.dart';
+import '../screens/gamer/gamer_dashboard_screen.dart';
+import '../screens/gamer/game_lobby_screen.dart';
+import '../widgets/websocket_handler.dart';
 
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
@@ -42,6 +43,12 @@ class App extends StatelessWidget {
         path: '/gamer',
         builder: (context, state) => WebSocketHandler(
           child: const GamerDashboardScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/gamer/lobby',
+        builder: (context, state) => WebSocketHandler(
+          child: const GameLobbyScreen(),
         ),
       ),
     ],

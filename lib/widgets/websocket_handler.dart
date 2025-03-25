@@ -32,6 +32,16 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
     if (!webSocketService.isConnected) {
       webSocketService.connect();
     }
+
+    // Initialiser le callback pour les invitations
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final invitationService = Provider.of<InvitationService>(context, listen: false);
+        invitationService.onInvitationReceivedDialog = (invitation) {
+          _showInvitationDialog(invitation);
+        };
+      }
+    });
   }
   
   @override
@@ -52,6 +62,15 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
       case 'INVITATION_RESPONSE':
         _handleInvitationResponse(message);
         break;
+      case 'PLAYER_JOINED':
+        _handlePlayerJoined(message);
+        break;
+      case 'PLAYER_LEFT':
+        _handlePlayerLeft(message);
+        break;
+      case 'TERRAIN_CLOSED':
+        _handleTerrainClosed(message);
+        break;
       case 'TEAM_UPDATE':
         _handleTeamUpdate(message);
         break;
@@ -60,6 +79,12 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
         break;
       case 'TREASURE_FOUND':
         _handleTreasureFound(message);
+        break;
+      case 'GAME_STARTED':
+        _handleGameStarted(message);
+        break;
+      case 'GAME_ENDED':
+        _handleGameEnded(message);
         break;
       default:
         print('Message WebSocket non géré: $message');
@@ -99,40 +124,116 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
   // Nouvelle méthode pour afficher le dialogue d'invitation
   void _showInvitationDialog(Map<String, dynamic> invitation) {
     // Utiliser le service de notifications pour afficher une notification
-    notifications.showInvitationNotification(invitation);
+    try {
+      notifications.showInvitationNotification(invitation);
+    } catch (e) {
+      print('Erreur lors de l\'affichage de la notification: $e');
+    }
+
     final payload = invitation['payload'];
     // Afficher également un dialogue
     print('🔔 Ouverture du dialogue pour invitation de ${payload['fromUsername']} sur carte "${payload['mapName']}"');
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Invitation reçue'),
-        content: Text('${payload['fromUsername']} vous invite à rejoindre la carte "${payload['mapName']}"'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Refuser l'invitation
-              print('❌ Invitation refusée par l’utilisateur');
-              final invitationService = Provider.of<InvitationService>(context, listen: false);
-              invitationService.respondToInvitation(invitation, false);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Refuser'),
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Invitation reçue'),
+          content: Text('${payload['fromUsername']} vous invite à rejoindre la carte "${payload['mapName']}"'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Refuser l'invitation
+                print('❌ Invitation refusée par l\'utilisateur');
+                final invitationService = Provider.of<InvitationService>(context, listen: false);
+                invitationService.respondToInvitation(invitation, false);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Refuser'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Accepter l'invitation
+                print('✅ Invitation acceptée par l\'utilisateur');
+                final invitationService = Provider.of<InvitationService>(context, listen: false);
+                invitationService.respondToInvitation(invitation, true);
+                Navigator.of(context).pop();
+
+                // Naviguer vers l'écran de lobby
+                context.go('/gamer/lobby');
+              },
+              child: const Text('Accepter'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  void _handlePlayerJoined(Map<String, dynamic> message) {
+    final payload = message['payload'];
+    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+
+    // Ajouter le joueur à la liste des joueurs connectés
+    final player = {
+      'id': payload['playerId'],
+      'username': payload['username'],
+      'teamId': payload['teamId'],
+    };
+
+    gameStateService.addConnectedPlayer(player);
+
+    // Afficher une notification
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${payload['username']} a rejoint la partie'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  void _handlePlayerLeft(Map<String, dynamic> message) {
+    final payload = message['payload'];
+    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+
+    // Supprimer le joueur de la liste des joueurs connectés
+    gameStateService.removeConnectedPlayer(payload['playerId']);
+
+    // Afficher une notification
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${payload['username']} a quitté la partie'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
+  void _handleTerrainClosed(Map<String, dynamic> message) {
+    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    // Si l'utilisateur est un joueur (non host), naviguer vers l'écran principal
+    if (!authService.currentUser!.hasRole('HOST')) {
+      // Afficher une notification
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Le terrain a été fermé par l\'hôte'),
+            backgroundColor: Colors.red,
           ),
-          ElevatedButton(
-            onPressed: () {
-              // Accepter l'invitation
-              print('✅ Invitation acceptée par l’utilisateur');
-              final invitationService = Provider.of<InvitationService>(context, listen: false);
-              invitationService.respondToInvitation(invitation, true);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Accepter'),
-          ),
-        ],
-      ),
-    );
+        );
+
+        // Naviguer vers l'écran principal
+        context.go('/gamer');
+      }
+    }
+
+    // Mettre à jour l'état du jeu
+    gameStateService.reset();
   }
 
   void _showGameInvitation(Map<String, dynamic> message) {
@@ -175,6 +276,48 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
         backgroundColor: Colors.green,
       ),
     );
+  }
+
+  void _handleGameStarted(Map<String, dynamic> message) {
+    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final payload = message['payload'];
+
+    // Mettre à jour l'état du jeu
+    gameStateService.startGame();
+
+    // Si une durée est spécifiée, synchroniser le temps
+    if (payload['endTime'] != null) {
+      final endTimeStr = payload['endTime'] as String;
+      final endTime = DateTime.parse(endTimeStr);
+      gameStateService.syncGameTime(endTime);
+    }
+
+    // Afficher une notification
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La partie a commencé !'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  void _handleGameEnded(Map<String, dynamic> message) {
+    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+
+    // Mettre à jour l'état du jeu
+    gameStateService.stopGame();
+
+    // Afficher une notification
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La partie est terminée !'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   @override

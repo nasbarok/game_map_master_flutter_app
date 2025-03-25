@@ -16,6 +16,9 @@ class GameStateService extends ChangeNotifier {
   String _timeLeftDisplay = "00:00:00";
   Timer? _gameTimer;
 
+  // Nouvelle liste pour gérer les joueurs connectés
+  List<Map<String, dynamic>> _connectedPlayersList = [];
+
   // Getters
   bool get isTerrainOpen => _isTerrainOpen;
   GameMap? get selectedMap => _selectedMap;
@@ -25,6 +28,7 @@ class GameStateService extends ChangeNotifier {
   bool get isGameRunning => _isGameRunning;
   String get timeLeftDisplay => _timeLeftDisplay;
   DateTime? get gameEndTime => _gameEndTime;
+  List<Map<String, dynamic>> get connectedPlayersList => _connectedPlayersList;
 
   GameStateService();
 
@@ -54,6 +58,7 @@ class GameStateService extends ChangeNotifier {
       _gameTimer?.cancel();
       _gameEndTime = null;
       _timeLeftDisplay = "00:00:00";
+      _connectedPlayersList.clear(); // Vider la liste des joueurs connectés
     }
     
     notifyListeners();
@@ -142,6 +147,37 @@ class GameStateService extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Nouvelles méthodes pour gérer la liste des joueurs connectés
+  void addConnectedPlayer(Map<String, dynamic> player) {
+    // Vérifier si le joueur est déjà connecté
+    final existingIndex = _connectedPlayersList.indexWhere((p) => p['id'] == player['id']);
+
+    if (existingIndex == -1) {
+      _connectedPlayersList.add(player);
+      _connectedPlayers = _connectedPlayersList.length;
+      notifyListeners();
+    }
+  }
+
+  // Méthode pour vérifier si un joueur est déjà connecté
+  bool isPlayerConnected(int playerId) {
+    return _connectedPlayersList.any((p) => p['id'] == playerId);
+  }
+
+  // Méthode pour supprimer un joueur connecté
+  void removeConnectedPlayer(int playerId) {
+    _connectedPlayersList.removeWhere((p) => p['id'] == playerId);
+    _connectedPlayers = _connectedPlayersList.length;
+    notifyListeners();
+  }
+
+  // Méthode pour vider la liste des joueurs connectés (quand le terrain est fermé)
+  void clearConnectedPlayers() {
+    _connectedPlayersList.clear();
+    _connectedPlayers = 0;
+    notifyListeners();
+  }
+
   // Réinitialiser tout l'état
   void reset() {
     _isTerrainOpen = false;
@@ -153,6 +189,7 @@ class GameStateService extends ChangeNotifier {
     _gameTimer?.cancel();
     _gameEndTime = null;
     _timeLeftDisplay = "00:00:00";
+    _connectedPlayersList.clear();
     notifyListeners();
   }
 }

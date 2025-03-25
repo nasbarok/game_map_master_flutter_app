@@ -105,6 +105,34 @@ class InvitationService extends ChangeNotifier {
           notifyListeners();
         }
       }
+    } else if (message['type'] == 'PLAYER_JOINED') {
+      // Nouveau joueur a rejoint la partie
+      final payload = message['payload'];
+      print('👤 Joueur rejoint : ${payload['username']}');
+
+      // Ajouter le joueur à la liste des joueurs connectés
+      final player = {
+        'id': payload['playerId'],
+        'username': payload['username'],
+        'teamId': payload['teamId'],
+      };
+
+      _gameStateService.addConnectedPlayer(player);
+    } else if (message['type'] == 'PLAYER_LEFT') {
+      // Un joueur a quitté la partie
+      final payload = message['payload'];
+      print('👋 Joueur parti : ${payload['username']}');
+
+      // Supprimer le joueur de la liste des joueurs connectés
+      _gameStateService.removeConnectedPlayer(payload['playerId']);
+    } else if (message['type'] == 'TERRAIN_CLOSED') {
+      // Le terrain a été fermé
+      print('🚪 Terrain fermé');
+
+      // Si l'utilisateur n'est pas l'hôte, il doit être déconnecté
+      if (!_authService.currentUser!.hasRole('HOST')) {
+        _gameStateService.reset();
+      }
     }
   }
 
@@ -131,6 +159,45 @@ class InvitationService extends ChangeNotifier {
     await _webSocketService.sendMessage('/app/invitation-response', response);
 
     print('✅ Réponse envoyée avec succès');
+
+    // Si l'invitation est acceptée, mettre à jour l'état du jeu
+    if (accept) {
+      // Pour le joueur qui accepte l'invitation
+      if (_authService.currentUser!.id == payload['toUserId']) {
+        // Mettre à jour l'état du jeu avec les informations de la carte
+        final map = GameMap(
+          id: payload['mapId'],
+          name: payload['mapName'],
+          imageUrl: '', // À compléter si disponible
+          description: '', // À compléter si disponible
+        );
+
+        _gameStateService.selectMap(map);
+        _gameStateService.toggleTerrainOpen(); // Ouvrir le terrain
+
+        // Ajouter le joueur à la liste des joueurs connectés
+        final player = {
+          'id': _authService.currentUser!.id,
+          'username': _authService.currentUser!.username,
+          'teamId': null, // Pas d'équipe par défaut
+        };
+
+        _gameStateService.addConnectedPlayer(player);
+
+        // Envoyer un message PLAYER_JOINED via WebSocket
+        final joinMessage = {
+          'type': 'PLAYER_JOINED',
+          'payload': {
+            'playerId': _authService.currentUser!.id,
+            'username': _authService.currentUser!.username,
+            'mapId': payload['mapId'],
+            'teamId': null,
+          }
+        };
+
+        _webSocketService.sendMessage('/app/player-joined', joinMessage);
+      }
+    }
 
     // Retirer de la liste des invitations en attente
     _pendingInvitations.removeWhere(
