@@ -137,6 +137,11 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
+  void incrementConnectedPlayers() {
+    _connectedPlayers++;
+    notifyListeners();
+  }
+
   // Réinitialiser tout l'état
   void reset() {
     _isTerrainOpen = false;

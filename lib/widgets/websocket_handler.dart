@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/websocket_service.dart';
 import '../services/notifications.dart' as notifications;
 import '../services/invitation_service.dart';
+import '../../services/game_state_service.dart';
 
 class WebSocketHandler extends StatefulWidget {
   final Widget child;
@@ -48,6 +49,9 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
       case 'INVITATION_RECEIVED':
         _showInvitationDialog(message);
         break;
+      case 'INVITATION_RESPONSE':
+        _handleInvitationResponse(message);
+        break;
       case 'TEAM_UPDATE':
         _handleTeamUpdate(message);
         break;
@@ -59,6 +63,36 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
         break;
       default:
         print('Message WebSocket non géré: $message');
+    }
+  }
+
+  void _handleInvitationResponse(Map<String, dynamic> invitationResponse) {
+    final payload = invitationResponse['payload'];
+    final bool accepted = payload['accepted'] == true;
+
+    if (!mounted) return;
+
+    if (!accepted) {
+      // ❌ Refus
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Un joueur a refusé l\'invitation'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } else {
+      // ✅ Accepté → ajout du joueur dans GameStateService
+      final gameStateService = Provider.of<GameStateService>(
+          context, listen: false);
+      gameStateService.incrementConnectedPlayers();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Le joueur ${payload['fromUserId']} a rejoint la carte !'),
+          backgroundColor: Colors.green,
+        ),
+      );
     }
   }
 
