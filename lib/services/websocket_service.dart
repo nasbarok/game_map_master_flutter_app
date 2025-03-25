@@ -45,6 +45,7 @@ class WebSocketService with ChangeNotifier {
             callback: (frame) {
               try {
                 final decoded = jsonDecode(frame.body!) as Map<String, dynamic>;
+                print('✅ Message STOMP reçu: $decoded'); // Log pour débogage
                 _messageStreamController.add(decoded);
               } catch (e) {
                 print('Erreur de décodage STOMP : $e');

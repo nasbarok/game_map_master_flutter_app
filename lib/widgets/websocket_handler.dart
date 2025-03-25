@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/websocket_service.dart';
+import '../services/notifications.dart' as notifications;
+import '../services/invitation_service.dart';
 
 class WebSocketHandler extends StatefulWidget {
   final Widget child;
@@ -19,7 +21,7 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
   void initState() {
     super.initState();
     final webSocketService = Provider.of<WebSocketService>(context, listen: false);
-    
+
     // S'abonner au flux de messages WebSocket
     _subscription = webSocketService.messageStream.listen((message) {
       _handleWebSocketMessage(message);
@@ -40,10 +42,11 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
   void _handleWebSocketMessage(Map<String, dynamic> message) {
     // Traiter les différents types de messages WebSocket
     final String type = message['type'] as String? ?? '';
-    
+    print('📥 Message WebSocket reçu: type=$type');
+    print('🧾 Contenu: $message');
     switch (type) {
-      case 'GAME_INVITATION':
-        _showGameInvitation(message);
+      case 'INVITATION_RECEIVED':
+        _showInvitationDialog(message);
         break;
       case 'TEAM_UPDATE':
         _handleTeamUpdate(message);
@@ -58,12 +61,51 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
         print('Message WebSocket non géré: $message');
     }
   }
-  
+
+  // Nouvelle méthode pour afficher le dialogue d'invitation
+  void _showInvitationDialog(Map<String, dynamic> invitation) {
+    // Utiliser le service de notifications pour afficher une notification
+    notifications.showInvitationNotification(invitation);
+    final payload = invitation['payload'];
+    // Afficher également un dialogue
+    print('🔔 Ouverture du dialogue pour invitation de ${payload['fromUsername']} sur carte "${payload['mapName']}"');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Invitation reçue'),
+        content: Text('${payload['fromUsername']} vous invite à rejoindre la carte "${payload['mapName']}"'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Refuser l'invitation
+              print('❌ Invitation refusée par l’utilisateur');
+              final invitationService = Provider.of<InvitationService>(context, listen: false);
+              invitationService.respondToInvitation(invitation, false);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Refuser'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Accepter l'invitation
+              print('✅ Invitation acceptée par l’utilisateur');
+              final invitationService = Provider.of<InvitationService>(context, listen: false);
+              invitationService.respondToInvitation(invitation, true);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Accepter'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showGameInvitation(Map<String, dynamic> message) {
     final gameData = message['data'] as Map<String, dynamic>? ?? {};
     final gameName = gameData['name'] as String? ?? 'Partie inconnue';
     final hostName = gameData['hostName'] as String? ?? 'Hôte inconnu';
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Invitation à la partie "$gameName" par $hostName'),
@@ -77,7 +119,7 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
       ),
     );
   }
-  
+
   void _handleTeamUpdate(Map<String, dynamic> message) {
     // Mettre à jour l'état de l'équipe dans l'application
     // Cela pourrait déclencher une mise à jour de l'UI

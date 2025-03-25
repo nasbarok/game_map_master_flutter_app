@@ -5,10 +5,13 @@ import 'app.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
 import 'services/websocket_service.dart';
-import 'services/notifications.dart';
+import 'services/notifications.dart' as notifications;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialiser le service de notifications
+  await notifications.initNotifications();
 
   const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -18,7 +21,6 @@ void main() async {
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  await initNotifications();
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   runApp(
