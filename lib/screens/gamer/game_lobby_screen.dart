@@ -6,6 +6,7 @@ import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/invitation_service.dart';
 import 'package:go_router/go_router.dart';
+import '../../models/team.dart';
 
 class GameLobbyScreen extends StatefulWidget {
   const GameLobbyScreen({Key? key}) : super(key: key);
@@ -387,7 +388,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
                     : () {
                         final authService = Provider.of<AuthService>(context, listen: false);
                         final playerId = authService.currentUser!.id;
-                        teamService.assignPlayerToTeam(playerId, team.id);
+                        teamService.assignPlayerToTeam(playerId!, team.id);
                         Navigator.of(context).pop();
                       },
               );
@@ -434,12 +435,4 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
       ),
     );
   }
-}
-
-class Team {
-  final int id;
-  String name;
-  List<dynamic> players;
-
-  Team({required this.id, required this.name, required this.players});
 }

@@ -1,12 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as client;
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/websocket_service.dart';
+import '../models/game_map.dart';
+import '../models/invitation.dart';
+
 
 class InvitationService extends ChangeNotifier {
   final WebSocketService _webSocketService;
@@ -28,6 +32,8 @@ class InvitationService extends ChangeNotifier {
   List<Map<String, dynamic>> get sentInvitations => _sentInvitations;
 
   void Function(Map<String, dynamic> invitation)? onInvitationReceivedDialog;
+
+  get baseUrl => null;
 
   bool canSendInvitations() {
     // Vérifier si l'utilisateur est un host et si son terrain est ouvert
@@ -207,6 +213,66 @@ class InvitationService extends ChangeNotifier {
     );
 
     notifyListeners();
+  }
+
+  // Récupérer toutes les invitations pour l'utilisateur connecté
+  Future<List<Invitation>> getMyInvitations() async {
+    final url = '$baseUrl/api/invitations/me';
+
+    final response = await client.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> invitationsJson = jsonDecode(response.body);
+      return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to get invitations: ${response.body}');
+    }
+  }
+
+// Récupérer les invitations en attente
+  Future<List<Invitation>> getMyPendingInvitations() async {
+    final url = '$baseUrl/api/invitations/me/pending';
+
+    final response = await client.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> invitationsJson = jsonDecode(response.body);
+      return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to get pending invitations: ${response.body}');
+    }
+  }
+
+// Accepter une invitation
+  Future<Invitation> acceptInvitation(int invitationId) async {
+    final url = '$baseUrl/api/invitations/$invitationId/accept';
+
+    final response = await client.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      return Invitation.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to accept invitation: ${response.body}');
+    }
+  }
+
+// Refuser une invitation
+  Future<Invitation> declineInvitation(int invitationId) async {
+    final url = '$baseUrl/api/invitations/$invitationId/decline';
+
+    final response = await client.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      return Invitation.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to decline invitation: ${response.body}');
+    }
   }
 
   @override
