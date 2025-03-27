@@ -284,4 +284,9 @@ class GameStateService extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateConnectedPlayersList(List<Map<String, dynamic>> newList) {
+    _connectedPlayersList = newList;
+    _connectedPlayers = _connectedPlayersList.length;
+    notifyListeners();
+  }
 }

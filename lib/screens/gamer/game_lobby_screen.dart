@@ -35,6 +35,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
       } else {
         print('❌ Aucune carte sélectionnée, impossible de charger les équipes.');
       }
+      teamService.startPeriodicRefresh();
+
     });
   }
 

@@ -6,6 +6,7 @@ import '../../models/game_map.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/player_connection_service.dart';
+import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import 'scenario_selection_dialog.dart';
@@ -23,7 +24,6 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Rien ici pour WebSocketService
   }
 
   @override

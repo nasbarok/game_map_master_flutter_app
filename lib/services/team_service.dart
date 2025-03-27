@@ -101,12 +101,40 @@ class TeamService extends ChangeNotifier {
       await loadTeams(mapId);
       await loadConnectedPlayers();
 
+      // Mettre à jour l'état du jeu pour refléter le changement d'équipe
+      final gameStateService = _gameStateService;
+      final playerIndex = gameStateService.connectedPlayersList.indexWhere((p) => p['id'] == playerId);
+
+      if (playerIndex >= 0) {
+        // Trouver le nom de l'équipe
+        String? teamName;
+        for (var team in _teams) {
+          if (team.id == teamId) {
+            teamName = team.name;
+            break;
+          }
+        }
+
+        // Mettre à jour les informations du joueur
+        final updatedPlayer = Map<String, dynamic>.from(gameStateService.connectedPlayersList[playerIndex]);
+        updatedPlayer['teamId'] = teamId;
+        updatedPlayer['teamName'] = teamName;
+
+        // Remplacer le joueur dans la liste
+        final newList = List<Map<String, dynamic>>.from(gameStateService.connectedPlayersList);
+        newList[playerIndex] = updatedPlayer;
+
+        // Mettre à jour la liste dans GameStateService
+        gameStateService.updateConnectedPlayersList(newList);
+      }
+
       notifyListeners();
     } catch (e, stacktrace) {
       print('❌ Erreur lors de l\'assignation du joueur à l\'équipe: $e');
       print('📌 Stacktrace: $stacktrace');
     }
   }
+
 
   void updateMyTeamId(int myPlayerId) {
     _myTeamId = null;
