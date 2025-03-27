@@ -30,6 +30,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
     // Chargement initial des équipes si le terrain est déjà ouvert
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return; // Vérifier si le widget est toujours monté
+
       final gameStateService = Provider.of<GameStateService>(context, listen: false);
       final teamService = Provider.of<TeamService>(context, listen: false);
 
@@ -43,9 +45,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
-    final teamService = Provider.of<TeamService>(context, listen: false);
-    teamService.stopPeriodicRefresh();
+    // Arrêter explicitement le rafraîchissement périodique
+    if (mounted) {
+      final teamService = Provider.of<TeamService>(context, listen: false);
+      teamService.stopPeriodicRefresh();
+    }
     super.dispose();
   }
 
@@ -351,35 +355,15 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   Widget _buildTeamsTab(TeamService teamService) {
-    final gameStateService = Provider.of<GameStateService>(context);
-    final mapId = getCurrentMapId(context);
-
-    // Charger les équipes si elles ne sont pas déjà chargées
-    if (teamService.teams.isEmpty && mapId != null) {
-      // Utiliser FutureBuilder pour gérer l'état de chargement
-      return FutureBuilder(
-        future: teamService.loadTeams(mapId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          return _buildTeamsContent(teamService, gameStateService);
-        },
-      );
-    }
-
-    return _buildTeamsContent(teamService, gameStateService);
-  }
-
-  Widget _buildTeamsContent(TeamService teamService, GameStateService gameStateService) {
     final teams = teamService.teams;
+    final gameStateService = Provider.of<GameStateService>(context);
     final connectedPlayers = gameStateService.connectedPlayersList;
     final mapId = getCurrentMapId(context);
 
-    // Filtrer les joueurs sans équipe
+    // Modification de la logique pour déterminer les joueurs sans équipe
     final unassignedPlayers = connectedPlayers.where((player) {
-      return !teams.any((team) => team.players.any((p) => p['id'] == player['id']));
+      // Un joueur est considéré comme non assigné s'il n'a pas de teamId
+      return player['teamId'] == null;
     }).toList();
 
     print('📋 connectedPlayers: $connectedPlayers');

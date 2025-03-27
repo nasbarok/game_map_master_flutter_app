@@ -28,6 +28,13 @@ class TeamService extends ChangeNotifier {
   List<dynamic> get previousPlayers => _previousPlayers;
   List<Team> get previousTeamConfigurations => _previousTeamConfigurations;
 
+  @override
+  void dispose() {
+    // S'assurer que le timer est annulé avant de disposer le service
+    stopPeriodicRefresh();
+    super.dispose();
+  }
+
   void clearError() {
     _lastError = null;
     notifyListeners();
@@ -44,6 +51,9 @@ class TeamService extends ChangeNotifier {
       final teamsData = await _apiService.get('teams/map/${_gameStateService.selectedMap!.id}');
       _teams = (teamsData as List).map((team) => Team.fromJson(team)).toList();
 
+      // Synchroniser les joueurs connectés avec les équipes
+      _synchronizePlayersWithTeams();
+
       final currentUserId = _apiService.authService.currentUser?.id;
       if (currentUserId != null) {
         updateMyTeamId(currentUserId);
@@ -52,6 +62,29 @@ class TeamService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print('Erreur lors du chargement des équipes: $e');
+    }
+  }
+
+  // Nouvelle méthode pour synchroniser les joueurs avec les équipes
+  void _synchronizePlayersWithTeams() {
+    // Récupérer la liste des joueurs connectés depuis GameStateService
+    final connectedPlayers = _gameStateService.connectedPlayersList;
+
+    // Pour chaque équipe, vider sa liste de joueurs
+    for (var team in _teams) {
+      team.players = [];
+    }
+
+    // Pour chaque joueur connecté qui a un teamId, l'ajouter à l'équipe correspondante
+    for (var player in connectedPlayers) {
+      if (player['teamId'] != null) {
+        // Trouver l'équipe correspondante
+        final teamIndex = _teams.indexWhere((team) => team.id == player['teamId']);
+        if (teamIndex >= 0) {
+          // Ajouter le joueur à cette équipe
+          _teams[teamIndex].players.add(player);
+        }
+      }
     }
   }
 
@@ -97,11 +130,10 @@ class TeamService extends ChangeNotifier {
       final result = await _apiService.post(url, {});
       print('✅ Joueur assigné : $result');
 
-      // 🔄 Recharge propre de la source de vérité côté backend
-      await loadTeams(mapId);
-      await loadConnectedPlayers();
+      // Mettre à jour directement les données locales avant de recharger depuis le serveur
+      // Cela donne un feedback immédiat à l'utilisateur
 
-      // Mettre à jour l'état du jeu pour refléter le changement d'équipe
+      // 1. Mettre à jour le joueur dans connectedPlayersList
       final gameStateService = _gameStateService;
       final playerIndex = gameStateService.connectedPlayersList.indexWhere((p) => p['id'] == playerId);
 
@@ -115,18 +147,28 @@ class TeamService extends ChangeNotifier {
           }
         }
 
-        // Mettre à jour les informations du joueur
-        final updatedPlayer = Map<String, dynamic>.from(gameStateService.connectedPlayersList[playerIndex]);
-        updatedPlayer['teamId'] = teamId;
-        updatedPlayer['teamName'] = teamName;
-
-        // Remplacer le joueur dans la liste
+        // Créer une copie de la liste pour éviter les modifications directes
         final newList = List<Map<String, dynamic>>.from(gameStateService.connectedPlayersList);
-        newList[playerIndex] = updatedPlayer;
+
+        // Mettre à jour les informations du joueur
+        newList[playerIndex] = {
+          ...newList[playerIndex],
+          'teamId': teamId,
+          'teamName': teamName
+        };
 
         // Mettre à jour la liste dans GameStateService
         gameStateService.updateConnectedPlayersList(newList);
+
+        // 2. Mettre à jour les équipes localement
+        _synchronizePlayersWithTeams();
       }
+
+      // 3. Recharger depuis le serveur pour s'assurer de la cohérence
+      await Future.wait([
+        loadTeams(mapId),
+        loadConnectedPlayers()
+      ]);
 
       notifyListeners();
     } catch (e, stacktrace) {
@@ -134,6 +176,7 @@ class TeamService extends ChangeNotifier {
       print('📌 Stacktrace: $stacktrace');
     }
   }
+
 
 
   void updateMyTeamId(int myPlayerId) {
@@ -269,7 +312,10 @@ class TeamService extends ChangeNotifier {
   }
 
   void stopPeriodicRefresh() {
-    _refreshTimer?.cancel();
-    _refreshTimer = null;
+    if (_refreshTimer != null) {
+      _refreshTimer!.cancel();
+      _refreshTimer = null;
+      print('🛑 Rafraîchissement périodique arrêté');
+    }
   }
 }
