@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/team.dart';
@@ -15,6 +17,9 @@ class TeamService extends ChangeNotifier {
   List<Team> _previousTeamConfigurations = []; // Configurations d'équipes précédentes
   int? _myTeamId;
   int? get myTeamId => _myTeamId;
+  String? _lastError;
+  String? get lastError => _lastError;
+  Timer? _refreshTimer;
 
   TeamService(this._apiService, this._gameStateService);
   
@@ -22,6 +27,11 @@ class TeamService extends ChangeNotifier {
   List<dynamic> get connectedPlayers => _connectedPlayers;
   List<dynamic> get previousPlayers => _previousPlayers;
   List<Team> get previousTeamConfigurations => _previousTeamConfigurations;
+
+  void clearError() {
+    _lastError = null;
+    notifyListeners();
+  }
 
   factory TeamService.placeholder() {
     return TeamService(ApiService.placeholder(), GameStateService.placeholder());
@@ -46,20 +56,21 @@ class TeamService extends ChangeNotifier {
   }
 
   Future<void> createTeam(String name) async {
+    _lastError = null;
     if (!_gameStateService.isTerrainOpen || _gameStateService.selectedMap == null) return;
 
     final mapId = _gameStateService.selectedMap!.id;
-
     try {
       final teamData = await _apiService.post('teams/map/$mapId/create', {
         'name': name,
       });
-
       final newTeam = Team.fromJson(teamData);
       _teams.add(newTeam);
       notifyListeners();
     } catch (e) {
       print('❌ Erreur lors de la création de l\'équipe : $e');
+      _lastError = 'Erreur lors de la création de l\'équipe : $e';
+      notifyListeners();
     }
   }
   
@@ -179,6 +190,35 @@ class TeamService extends ChangeNotifier {
     }
   }
 
+  // Dans team_service.dart
+  Future<void> refreshAllTeamData() async {
+    if (_gameStateService.selectedMap == null) return;
+
+    final mapId = _gameStateService.selectedMap!.id;
+
+    try {
+      // Charger les équipes et les joueurs en parallèle
+      await Future.wait([
+        loadTeams(mapId!),
+        loadConnectedPlayers(),
+      ]);
+
+      // Mettre à jour l'ID de l'équipe du joueur actuel
+      final currentUserId = _apiService.authService.currentUser?.id;
+      if (currentUserId != null) {
+        updateMyTeamId(currentUserId);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Erreur lors du rafraîchissement des données d\'équipe: $e');
+      // Propager l'erreur à l'UI
+      _lastError = e.toString();
+
+      notifyListeners();
+    }
+  }
+
 
   void deleteTeam(int id) {
     final index = _teams.indexWhere((team) => team.id == id);
@@ -186,5 +226,22 @@ class TeamService extends ChangeNotifier {
 
     _teams.removeAt(index);
     notifyListeners();
+  }
+
+  void startPeriodicRefresh() {
+    // Annuler le timer existant s'il y en a un
+    _refreshTimer?.cancel();
+
+    // Créer un nouveau timer qui rafraîchit les données toutes les 10 secondes
+    _refreshTimer = Timer.periodic(Duration(seconds: 10), (_) {
+      if (_gameStateService.isTerrainOpen && _gameStateService.selectedMap != null) {
+        refreshAllTeamData();
+      }
+    });
+  }
+
+  void stopPeriodicRefresh() {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
   }
 }
