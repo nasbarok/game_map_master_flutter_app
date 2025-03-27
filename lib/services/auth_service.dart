@@ -23,6 +23,23 @@ class AuthService extends ChangeNotifier {
   factory AuthService.placeholder() {
     return AuthService();
   }
+
+  Future<void> loadSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final userJson = prefs.getString('user');
+
+    if (token != null && userJson != null) {
+      _token = token;
+      _currentUser = User.fromJson(jsonDecode(userJson));
+
+      // Vérifier que le token est encore valide en appelant le serveur
+      await _fetchUserInfo();
+
+      notifyListeners();
+    }
+  }
+
   Future<void> _loadUserFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');

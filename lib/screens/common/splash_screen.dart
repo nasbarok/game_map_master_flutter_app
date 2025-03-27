@@ -27,19 +27,23 @@ class _SplashScreenState extends State<SplashScreen> {
 
     await Future.delayed(const Duration(milliseconds: 1000)); // Animation splash
 
+    // ✅ Restaurer la session depuis SharedPreferences
+    await authService.loadSession();
+
+    if (!authService.isLoggedIn) {
+      context.go('/login');
+      return;
+    }
+
     try {
       await gameState.restoreSessionIfNeeded(apiService);
     } catch (e) {
       print('❌ Erreur pendant restoreSessionIfNeeded: $e');
     }
 
-    if (!authService.isLoggedIn) {
-      context.go('/login');
-    } else {
-      final user = authService.currentUser!;
-      final route = user.hasRole('HOST') ? '/host' : '/gamer';
-      context.go(route);
-    }
+    final user = authService.currentUser!;
+    final route = user.hasRole('HOST') ? '/host' : '/gamer';
+    context.go(route);
   }
 
   @override

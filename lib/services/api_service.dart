@@ -72,6 +72,10 @@ class ApiService {
   }
 
   dynamic _processResponse(http.Response response) {
+    if (response.statusCode == 401) {
+      print('❌ [API] Non autorisé - utilisateur non connecté');
+      throw Exception('Non autorisé - utilisateur non connecté');
+    }
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return null;
       return json.decode(response.body);

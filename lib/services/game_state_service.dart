@@ -212,8 +212,16 @@ class GameStateService extends ChangeNotifier {
       final activeFieldResponse = await apiService.get('fields/active/current');
       print('📦 [RESTORE] Réponse terrain actif : $activeFieldResponse');
 
-      if (activeFieldResponse == null || activeFieldResponse is! Map || activeFieldResponse['active'] != true) {
-        print('ℹ️ [RESTORE] Aucun terrain actif trouvé ou format inattendu.');
+      // Vérifier si la réponse est valide
+      if (activeFieldResponse == null) {
+        print('ℹ️ [RESTORE] Aucun terrain actif trouvé.');
+        return;
+      }
+
+      // Vérifier si la réponse est au format attendu
+      // Vérifier si c'est un objet avec active=false
+      if (activeFieldResponse is Map && activeFieldResponse['active'] == false) {
+        print('ℹ️ [RESTORE] Aucun terrain actif trouvé.');
         return;
       }
 

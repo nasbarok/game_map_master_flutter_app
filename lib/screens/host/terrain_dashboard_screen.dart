@@ -400,6 +400,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   Widget build(BuildContext context) {
     final gameStateService = Provider.of<GameStateService>(context);
     final authService = Provider.of<AuthService>(context);
+    final teamService = Provider.of<TeamService>(context);
+    final connectedPlayers = gameStateService.connectedPlayersList;
 
     return Scaffold(
       appBar: AppBar(
