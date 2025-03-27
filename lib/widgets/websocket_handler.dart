@@ -19,17 +19,18 @@ class WebSocketHandler extends StatefulWidget {
 
 class _WebSocketHandlerState extends State<WebSocketHandler> {
   late StreamSubscription<Map<String, dynamic>> _subscription;
-  
+
   @override
   void initState() {
     super.initState();
-    final webSocketService = Provider.of<WebSocketService>(context, listen: false);
+    final webSocketService =
+        Provider.of<WebSocketService>(context, listen: false);
 
     // S'abonner au flux de messages WebSocket
     _subscription = webSocketService.messageStream.listen((message) {
       _handleWebSocketMessage(message);
     });
-    
+
     // Connecter au WebSocket si ce n'est pas déjà fait
     if (!webSocketService.isConnected) {
       webSocketService.connect();
@@ -38,20 +39,21 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
     // Initialiser le callback pour les invitations
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final invitationService = Provider.of<InvitationService>(context, listen: false);
+        final invitationService =
+            Provider.of<InvitationService>(context, listen: false);
         invitationService.onInvitationReceivedDialog = (invitation) {
           _showInvitationDialog(invitation);
         };
       }
     });
   }
-  
+
   @override
   void dispose() {
     _subscription.cancel();
     super.dispose();
   }
-  
+
   void _handleWebSocketMessage(Map<String, dynamic> message) {
     // Traiter les différents types de messages WebSocket
     final String type = message['type'] as String? ?? '';
@@ -95,31 +97,47 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
 
   void _handleInvitationResponse(Map<String, dynamic> invitationResponse) {
     final payload = invitationResponse['payload'];
+    final userId = payload['fromUserId'];
+    final username = payload['fromUsername'] ?? 'Joueur';
+    final teamName = payload['teamName'] ?? 'Sans équipe';
     final bool accepted = payload['accepted'] == true;
 
     if (!mounted) return;
 
+    final gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
+
+    print('📥 Invitation response reçue : $payload');
+
     if (!accepted) {
       // ❌ Refus
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Un joueur a refusé l\'invitation'),
+        SnackBar(
+          content: Text( username + ' a refusé l\'invitation'),
           backgroundColor: Colors.orange,
         ),
       );
     } else {
-      // ✅ Accepté → ajout du joueur dans GameStateService
-      final gameStateService = Provider.of<GameStateService>(
-          context, listen: false);
-      gameStateService.incrementConnectedPlayers();
+      print(
+          '✅ Invitation acceptée par ${payload['fromUsername']} (ID: ${payload['fromUserId']})');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Le joueur ${payload['fromUserId']} a rejoint la carte !'),
-          backgroundColor: Colors.green,
-        ),
+      // ✅ Ne rien faire si le joueur est déjà dans la liste
+      final alreadyInList = gameStateService.connectedPlayersList.any(
+        (player) => player['id'] == userId,
       );
+      // ✅ Accepté → ajout du joueur dans GameStateService
+      print('👀 Est déjà dans la liste ? $alreadyInList');
+
+      if (!alreadyInList) {
+        gameStateService.incrementConnectedPlayers(payload);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text( username + ' a rejoint le terrain !'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 
@@ -134,20 +152,23 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
 
     final payload = invitation['payload'];
     // Afficher également un dialogue
-    print('🔔 Ouverture du dialogue pour invitation de ${payload['fromUsername']} sur carte "${payload['mapName']}"');
+    print(
+        '🔔 Ouverture du dialogue pour invitation de ${payload['fromUsername']} sur carte "${payload['mapName']}"');
 
     if (mounted) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Invitation reçue'),
-          content: Text('${payload['fromUsername']} vous invite à rejoindre la carte "${payload['mapName']}"'),
+          content: Text(
+              '${payload['fromUsername']} vous invite à rejoindre la carte "${payload['mapName']}"'),
           actions: [
             TextButton(
               onPressed: () {
                 // Refuser l'invitation
                 print('❌ Invitation refusée par l\'utilisateur');
-                final invitationService = Provider.of<InvitationService>(context, listen: false);
+                final invitationService =
+                    Provider.of<InvitationService>(context, listen: false);
                 invitationService.respondToInvitation(invitation, false);
                 Navigator.of(context).pop();
               },
@@ -157,7 +178,8 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
               onPressed: () {
                 // Accepter l'invitation
                 print('✅ Invitation acceptée par l\'utilisateur');
-                final invitationService = Provider.of<InvitationService>(context, listen: false);
+                final invitationService =
+                    Provider.of<InvitationService>(context, listen: false);
                 invitationService.respondToInvitation(invitation, true);
                 Navigator.of(context).pop();
 
@@ -174,7 +196,8 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
 
   void _handlePlayerJoined(Map<String, dynamic> message) {
     final payload = message['payload'];
-    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
 
     // Ajouter le joueur à la liste des joueurs connectés
     final player = {
@@ -198,7 +221,8 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
 
   void _handlePlayerLeft(Map<String, dynamic> message) {
     final payload = message['payload'];
-    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
 
     // Supprimer le joueur de la liste des joueurs connectés
     gameStateService.removeConnectedPlayer(payload['playerId']);
@@ -215,7 +239,8 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
   }
 
   void _handleTerrainClosed(Map<String, dynamic> message) {
-    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
     final authService = Provider.of<AuthService>(context, listen: false);
 
     // Si l'utilisateur est un joueur (non host), naviguer vers l'écran principal
@@ -261,17 +286,19 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
     // Mettre à jour l'état de l'équipe dans l'application
     // Cela pourrait déclencher une mise à jour de l'UI
   }
-  
+
   void _handleScenarioUpdate(Map<String, dynamic> message) {
     // Mettre à jour l'état du scénario dans l'application
     // Cela pourrait déclencher une mise à jour de l'UI
   }
-  
+
   void _handleTreasureFound(Map<String, dynamic> message) {
     final treasureData = message['data'] as Map<String, dynamic>? ?? {};
-    final playerName = treasureData['playerName'] as String? ?? 'Joueur inconnu';
-    final treasureName = treasureData['treasureName'] as String? ?? 'Trésor inconnu';
-    
+    final playerName =
+        treasureData['playerName'] as String? ?? 'Joueur inconnu';
+    final treasureName =
+        treasureData['treasureName'] as String? ?? 'Trésor inconnu';
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$playerName a trouvé le trésor "$treasureName"!'),
@@ -281,7 +308,8 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
   }
 
   void _handleGameStarted(Map<String, dynamic> message) {
-    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
     final payload = message['payload'];
 
     // Mettre à jour l'état du jeu
@@ -306,7 +334,8 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
   }
 
   void _handleGameEnded(Map<String, dynamic> message) {
-    final gameStateService = Provider.of<GameStateService>(context, listen: false);
+    final gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
 
     // Mettre à jour l'état du jeu
     gameStateService.stopGame();

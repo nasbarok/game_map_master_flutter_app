@@ -12,6 +12,7 @@ class WebSocketService with ChangeNotifier {
   AuthService? _authService;
   StompClient? _stompClient;
   bool _isConnected = false;
+  bool _connecting = false;
 
   final StreamController<Map<String, dynamic>> _messageStreamController =
   StreamController<Map<String, dynamic>>.broadcast();
@@ -26,7 +27,11 @@ class WebSocketService with ChangeNotifier {
   }
 
   Future<void> connect() async {
-    if (_isConnected || _authService?.token == null || _authService?.currentUser?.id == null) return;
+    if (_connecting || _isConnected || _authService?.token == null || _authService?.currentUser?.id == null) {
+      print('⚠️ Connexion déjà en cours ou établie, on ne relance pas.');
+      return;
+    }
+    _connecting = true; // ← ✅ empêcher un double appel
 
     final token = _authService!.token!;
     final userId = _authService!.currentUser!.id;

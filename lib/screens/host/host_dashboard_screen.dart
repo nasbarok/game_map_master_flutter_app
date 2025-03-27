@@ -26,13 +26,7 @@ class HostDashboardScreen extends StatefulWidget {
 }
 
 class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTickerProviderStateMixin {
-  
-  void _showGenerateQRCodeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => const ScenarioSelectionDialog(),
-    );
-  }
+
   late TabController _tabController;
 
   @override
@@ -312,15 +306,6 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Créer un scénario'),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Afficher une boîte de dialogue pour sélectionner un scénario
-                  _showGenerateQRCodeDialog();
-                },
-                icon: const Icon(Icons.qr_code),
-                label: const Text('Générer QR Code'),
               ),
             ],
           ),

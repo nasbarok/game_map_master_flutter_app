@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../services/api_service.dart';
+import '../../services/auth_service.dart';
+import '../../services/game_state_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -12,17 +17,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNextScreen();
+    _navigateAndRestore();
   }
 
-  Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      // Vérifier le rôle de l'utilisateur et rediriger vers l'écran approprié
-      // Pour l'instant, nous redirigeons simplement vers l'écran de connexion
-      if (context.mounted) {
-        context.go('/login');
-      }
+  Future<void> _navigateAndRestore() async {
+    final apiService = Provider.of<ApiService>(context, listen: false);
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final gameState = Provider.of<GameStateService>(context, listen: false);
+
+    await Future.delayed(const Duration(milliseconds: 1000)); // Animation splash
+
+    try {
+      await gameState.restoreSessionIfNeeded(apiService);
+    } catch (e) {
+      print('❌ Erreur pendant restoreSessionIfNeeded: $e');
+    }
+
+    if (!authService.isLoggedIn) {
+      context.go('/login');
+    } else {
+      final user = authService.currentUser!;
+      final route = user.hasRole('HOST') ? '/host' : '/gamer';
+      context.go(route);
     }
   }
 
@@ -37,34 +53,34 @@ class _SplashScreenState extends State<SplashScreen> {
             colors: [Colors.green, Colors.lightGreen],
           ),
         ),
-        child: Center(
+        child: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.map,
                 size: 100,
                 color: Colors.white,
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Airsoft Game Map',
+              SizedBox(height: 20),
+              Text(
+                'Game Map Master',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 10),
-              const Text(
+              SizedBox(height: 10),
+              Text(
                 'Créez et jouez des scénarios 2.0',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 50),
-              const CircularProgressIndicator(
+              SizedBox(height: 50),
+              CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ],

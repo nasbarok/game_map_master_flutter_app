@@ -27,7 +27,7 @@ class TeamService extends ChangeNotifier {
     return TeamService(ApiService.placeholder(), GameStateService.placeholder());
   }
 
-  Future<void> loadTeams() async {
+  Future<void> loadTeams(int mapId) async {
     if (!_gameStateService.isTerrainOpen) return;
     
     try {
@@ -44,21 +44,22 @@ class TeamService extends ChangeNotifier {
       print('Erreur lors du chargement des équipes: $e');
     }
   }
-  
+
   Future<void> createTeam(String name) async {
-    if (!_gameStateService.isTerrainOpen) return;
-    
+    if (!_gameStateService.isTerrainOpen || _gameStateService.selectedMap == null) return;
+
+    final mapId = _gameStateService.selectedMap!.id;
+
     try {
-      final teamData = await _apiService.post('teams', {
+      final teamData = await _apiService.post('teams/map/$mapId/create', {
         'name': name,
-        'mapId': _gameStateService.selectedMap!.id,
       });
-      
+
       final newTeam = Team.fromJson(teamData);
       _teams.add(newTeam);
       notifyListeners();
     } catch (e) {
-      print('Erreur lors de la création de l\'équipe: $e');
+      print('❌ Erreur lors de la création de l\'équipe : $e');
     }
   }
   
@@ -77,31 +78,22 @@ class TeamService extends ChangeNotifier {
       print('Erreur lors du renommage de l\'équipe: $e');
     }
   }
-  
-  Future<void> assignPlayerToTeam(int playerId, int teamId) async {
+
+  Future<void> assignPlayerToTeam(int playerId, int teamId, int mapId) async {
+    final url = 'maps/$mapId/players/$playerId/team/$teamId';
+
     try {
-      await _apiService.post('teams/$teamId/players', {
-        'playerId': playerId,
-      });
-      
-      // Mettre à jour localement
-      final teamIndex = _teams.indexWhere((team) => team.id == teamId);
-      if (teamIndex >= 0) {
-        // Retirer le joueur de son équipe actuelle
-        for (var team in _teams) {
-          team.players.removeWhere((player) => player['id'] == playerId);
-        }
-        
-        // Ajouter à la nouvelle équipe
-        final playerData = _connectedPlayers.firstWhere((player) => player['id'] == playerId, orElse: () => null);
-        if (playerData != null) {
-          _teams[teamIndex].players.add(playerData);
-        }
-        
-        notifyListeners();
-      }
-    } catch (e) {
-      print('Erreur lors de l\'assignation du joueur à l\'équipe: $e');
+      final result = await _apiService.post(url, {});
+      print('✅ Joueur assigné : $result');
+
+      // 🔄 Recharge propre de la source de vérité côté backend
+      await loadTeams(mapId);
+      await loadConnectedPlayers();
+
+      notifyListeners();
+    } catch (e, stacktrace) {
+      print('❌ Erreur lors de l\'assignation du joueur à l\'équipe: $e');
+      print('📌 Stacktrace: $stacktrace');
     }
   }
 
@@ -162,17 +154,37 @@ class TeamService extends ChangeNotifier {
       print('Erreur lors de la sauvegarde de la configuration d\'équipes: $e');
     }
   }
-  
+
   Future<void> applyTeamConfiguration(int configId) async {
+    final mapId = _gameStateService.selectedMap?.id;
+    if (mapId == null) {
+      print('❌ Aucune carte sélectionnée pour appliquer la configuration.');
+      return;
+    }
+
     try {
-      await _apiService.post('maps/${_gameStateService.selectedMap!.id}/apply-team-config', {
+      await _apiService.post('maps/$mapId/apply-team-config', {
         'configId': configId,
       });
-      
-      // Recharger les équipes
-      await loadTeams();
+
+      print('✅ Configuration $configId appliquée à la carte $mapId');
+
+      // 🔄 Recharger équipes et joueurs connectés
+      await loadTeams(mapId);
+      await loadConnectedPlayers();
+
+      notifyListeners();
     } catch (e) {
-      print('Erreur lors de l\'application de la configuration d\'équipes: $e');
+      print('❌ Erreur lors de l\'application de la configuration d\'équipes: $e');
     }
+  }
+
+
+  void deleteTeam(int id) {
+    final index = _teams.indexWhere((team) => team.id == id);
+    if (index < 0) return;
+
+    _teams.removeAt(index);
+    notifyListeners();
   }
 }

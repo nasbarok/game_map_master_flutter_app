@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
@@ -35,14 +36,14 @@ class App extends StatelessWidget {
       ),
       GoRoute(
         path: '/host',
-        builder: (context, state) => WebSocketHandler(
-          child: const HostDashboardScreen(),
+        builder: (context, state) => const WebSocketHandler(
+          child: HostDashboardScreen(),
         ),
       ),
       GoRoute(
         path: '/gamer',
-        builder: (context, state) => WebSocketHandler(
-          child: const GamerDashboardScreen(),
+        builder: (context, state) => const WebSocketHandler(
+          child: GamerDashboardScreen(),
         ),
       ),
       GoRoute(
@@ -91,9 +92,10 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<http.Client>(create: (_) => http.Client()),
         ChangeNotifierProvider(create: (_) => AuthService()),
         ProxyProvider<AuthService, ApiService>(
-          update: (_, authService, __) => ApiService(authService),
+          update: (_, authService, __) => ApiService(authService, http.Client()),
         ),
         ChangeNotifierProxyProvider<AuthService, WebSocketService>(
           create: (_) => WebSocketService(null),

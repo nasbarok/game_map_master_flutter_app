@@ -5,7 +5,14 @@ import '../../services/api_service.dart';
 import 'qr_code_generator_screen.dart';
 
 class ScenarioSelectionDialog extends StatefulWidget {
-  const ScenarioSelectionDialog({Key? key}) : super(key: key);
+  final int mapId;
+  final Function(List<Map<String, dynamic>>) onScenariosSelected;
+
+  const ScenarioSelectionDialog({
+    Key? key,
+    required this.mapId,
+    required this.onScenariosSelected,
+  }) : super(key: key);
 
   @override
   State<ScenarioSelectionDialog> createState() => _ScenarioSelectionDialogState();
@@ -103,15 +110,14 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   onTap: () {
-                                    Navigator.pop(context);
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => QRCodeGeneratorScreen(
-                                          scenarioId: scenario.id!.toString(),
-                                        ),
-                                      ),
-                                    );
+                                    widget.onScenariosSelected([
+                                      {
+                                        'id': scenario.id,
+                                        'name': scenario.name,
+                                        'description': scenario.description,
+                                      }
+                                    ]);
+                                    Navigator.pop(context); // on ferme le dialog
                                   },
                                 );
                               },

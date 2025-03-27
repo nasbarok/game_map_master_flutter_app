@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import '../../models/game_map.dart';
+import 'api_service.dart';
 
 // Service pour gérer l'état du jeu et la communication entre les composants
 class GameStateService extends ChangeNotifier {
@@ -36,6 +37,8 @@ class GameStateService extends ChangeNotifier {
     return GameStateService();
   }
 
+  get gameStateService => null;
+
   // Méthodes pour mettre à jour l'état
   void selectMap(GameMap map) {
     _selectedMap = map;
@@ -46,9 +49,9 @@ class GameStateService extends ChangeNotifier {
     if (_selectedMap == null) {
       return; // Ne rien faire si aucune carte n'est sélectionnée
     }
-    
+
     _isTerrainOpen = !_isTerrainOpen;
-    
+
     if (!_isTerrainOpen) {
       // Réinitialiser les valeurs si on ferme le terrain
       _selectedScenarios = [];
@@ -60,7 +63,7 @@ class GameStateService extends ChangeNotifier {
       _timeLeftDisplay = "00:00:00";
       _connectedPlayersList.clear(); // Vider la liste des joueurs connectés
     }
-    
+
     notifyListeners();
   }
 
@@ -142,20 +145,29 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
-  void incrementConnectedPlayers() {
-    _connectedPlayers++;
-    notifyListeners();
+  void incrementConnectedPlayers(payload) {
+    print('📈 Ajout du joueur depuis payload : ${payload['fromUsername']} (ID: ${payload['fromUserId']})');
+
+    addConnectedPlayer({
+      'id': payload['fromUserId'],
+      'username': payload['fromUsername'] ?? 'Joueur',
+      'teamId': payload['teamId'],
+      'teamName': payload['teamName'],
+    });
   }
 
   // Nouvelles méthodes pour gérer la liste des joueurs connectés
   void addConnectedPlayer(Map<String, dynamic> player) {
-    // Vérifier si le joueur est déjà connecté
     final existingIndex = _connectedPlayersList.indexWhere((p) => p['id'] == player['id']);
+    print('🔍 Vérification si ${player['username']} (ID: ${player['id']}) est déjà dans la liste → index: $existingIndex');
 
     if (existingIndex == -1) {
       _connectedPlayersList.add(player);
       _connectedPlayers = _connectedPlayersList.length;
+      print('✅ Joueur ajouté. Total connectés : $_connectedPlayers');
       notifyListeners();
+    } else {
+      print('⚠️ Joueur déjà présent, non ajouté.');
     }
   }
 
@@ -192,4 +204,84 @@ class GameStateService extends ChangeNotifier {
     _connectedPlayersList.clear();
     notifyListeners();
   }
+
+  Future<void> restoreSessionIfNeeded(ApiService apiService) async {
+    try {
+      // Étape 1 : Terrain actif
+      print('🔎 [RESTORE] Appel GET /fields/active/current');
+      final activeFieldResponse = await apiService.get('fields/active/current');
+      print('📦 [RESTORE] Réponse terrain actif : $activeFieldResponse');
+
+      if (activeFieldResponse == null || activeFieldResponse is! Map || activeFieldResponse['active'] != true) {
+        print('ℹ️ [RESTORE] Aucun terrain actif trouvé ou format inattendu.');
+        return;
+      }
+
+      final fieldId = activeFieldResponse['id'];
+      print('✅ [RESTORE] Terrain actif : ${activeFieldResponse['name']} (ID: $fieldId)');
+
+      // Étape 2 : Carte liée
+      print('🔎 [RESTORE] Appel GET /maps?fieldId=$fieldId');
+      final maps = await apiService.get('maps?fieldId=$fieldId');
+      print('📦 [RESTORE] Réponse cartes : $maps');
+
+      if (maps == null || maps is! List || maps.isEmpty) {
+        print('⚠️ [RESTORE] Aucune carte trouvée pour ce terrain.');
+        return;
+      }
+
+      final selected = GameMap.fromJson(maps[0]);
+      print('✅ [RESTORE] Carte sélectionnée : ${selected.name} (ID: ${selected.id})');
+      selectMap(selected);
+      _isTerrainOpen = true;
+
+      // Étape 3 : Joueurs connectés
+      print('🔎 [RESTORE] Appel GET /maps/${selected.id}/players');
+      final players = await apiService.get('maps/${selected.id}/players');
+      print('📦 [RESTORE] Réponse joueurs connectés : $players');
+
+      if (players == null || players is! List) {
+        print('⚠️ [RESTORE] Format inattendu pour les joueurs connectés.');
+        return;
+      }
+
+      _connectedPlayersList = players.map<Map<String, dynamic>>((p) {
+        final user = p['user'];
+        final team = p['team'];
+        return {
+          'id': user['id'],
+          'username': user['username'],
+          'teamId': team?['id'],
+          'teamName': team?['name'],
+        };
+      }).toList();
+
+      _connectedPlayers = _connectedPlayersList.length;
+
+      print('✅ [RESTORE] Joueurs restaurés : $_connectedPlayers');
+      notifyListeners();
+    } catch (e, stack) {
+      print('❌ [RESTORE] Erreur : $e');
+      print('📌 Stacktrace : $stack');
+    }
+  }
+
+  void setTerrainOpen(bool isOpen) {
+    _isTerrainOpen = isOpen;
+
+    if (!isOpen) {
+      // Réinitialiser les valeurs si on ferme le terrain
+      _selectedScenarios = [];
+      _gameDuration = null;
+      _connectedPlayers = 0;
+      _isGameRunning = false;
+      _gameTimer?.cancel();
+      _gameEndTime = null;
+      _timeLeftDisplay = "00:00:00";
+      _connectedPlayersList.clear();
+    }
+
+    notifyListeners();
+  }
+
 }

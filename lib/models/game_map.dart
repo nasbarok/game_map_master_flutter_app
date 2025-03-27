@@ -1,3 +1,7 @@
+import 'package:airsoft_game_map/models/user.dart';
+
+import 'field.dart';
+
 class GameMap {
   final int? id;
   final String name;
@@ -8,6 +12,9 @@ class GameMap {
   final String? imageUrl;
   final double? scale;
 
+  final User? owner;
+  final Field? field;
+
   GameMap({
     this.id,
     required this.name,
@@ -17,6 +24,8 @@ class GameMap {
     this.scenarioIds,
     this.imageUrl,
     this.scale,
+    this.owner,
+    this.field,
   });
 
   factory GameMap.fromJson(Map<String, dynamic> json) {
@@ -31,9 +40,10 @@ class GameMap {
           : null,
       imageUrl: json['imageUrl'],
       scale: (json['scale'] as num?)?.toDouble(),
+      owner: json['owner'] != null ? User.fromJson(json['owner']) : null,
+      field: json['field'] != null ? Field.fromJson(json['field']) : null,
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -45,6 +55,35 @@ class GameMap {
       'scenarioIds': scenarioIds,
       'imageUrl': imageUrl,
       'scale': scale,
+      // Ajout optionnel si tu veux renvoyer l’objet complet
+       'owner': owner?.toJson(),
+       'field': field?.toJson(),
     };
+  }
+
+  GameMap copyWith({
+    int? id,
+    String? name,
+    String? description,
+    int? fieldId,
+    int? ownerId,
+    List<int>? scenarioIds,
+    String? imageUrl,
+    double? scale,
+    User? owner,
+    Field? field,
+  }) {
+    return GameMap(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      fieldId: fieldId ?? this.fieldId,
+      ownerId: ownerId ?? this.ownerId,
+      scenarioIds: scenarioIds ?? this.scenarioIds,
+      imageUrl: imageUrl ?? this.imageUrl,
+      scale: scale ?? this.scale,
+      owner: owner ?? this.owner,
+      field: field ?? this.field,
+    );
   }
 }

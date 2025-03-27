@@ -10,12 +10,13 @@ class ApiService {
 
 
   final AuthService _authService;
+  final http.Client client;
   AuthService get authService => _authService;
 
-  ApiService(this._authService);
+  ApiService(this._authService, this.client);
 
   factory ApiService.placeholder() {
-    return ApiService(AuthService.placeholder());
+    return ApiService(AuthService.placeholder(), http.Client());
   }
 
   Future<Map<String, String>> _getHeaders() async {

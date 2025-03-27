@@ -17,20 +17,27 @@ class GameLobbyScreen extends StatefulWidget {
 
 class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
-    // Charger les données initiales
+
+    // Charger les données initiales après le build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final teamService = Provider.of<TeamService>(context, listen: false);
-      teamService.loadConnectedPlayers();
-      teamService.loadTeams();
+      final gameStateService = Provider.of<GameStateService>(context, listen: false);
+      final mapId = gameStateService.selectedMap?.id;
+
+      if (mapId != null) {
+        teamService.loadConnectedPlayers(); // facultatif si ça marche sans paramètre
+        teamService.loadTeams(mapId);       // utiliser l’ID de la carte active
+      } else {
+        print('❌ Aucune carte sélectionnée, impossible de charger les équipes.');
+      }
     });
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -388,7 +395,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
                     : () {
                         final authService = Provider.of<AuthService>(context, listen: false);
                         final playerId = authService.currentUser!.id;
-                        teamService.assignPlayerToTeam(playerId!, team.id);
+                        teamService.assignPlayerToTeam(playerId!, team.id, Provider.of<GameStateService>(context, listen: false).selectedMap!.id!);
                         Navigator.of(context).pop();
                       },
               );

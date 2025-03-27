@@ -18,6 +18,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
 
+  int? getCurrentMapId(BuildContext context) {
+    return Provider.of<GameStateService>(context, listen: false)
+        .selectedMap
+        ?.id;
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -40,7 +46,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
       final results = await apiService.get('users/search?query=$query');
-      
+
       setState(() {
         _searchResults = results as List;
         _isSearching = false;
@@ -59,8 +65,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   void _sendInvitation(int userId, String username) {
-    final invitationService = Provider.of<InvitationService>(context, listen: false);
-    
+    final invitationService =
+        Provider.of<InvitationService>(context, listen: false);
+
     try {
       invitationService.sendInvitation(userId, username);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,7 +91,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     final gameStateService = Provider.of<GameStateService>(context);
     final invitationService = Provider.of<InvitationService>(context);
     final teamService = Provider.of<TeamService>(context);
-    
+
     // Si le terrain n'est pas ouvert, afficher un message
     if (!gameStateService.isTerrainOpen) {
       return Center(
@@ -133,10 +140,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
           children: [
             // Onglet Recherche
             _buildSearchTab(),
-            
+
             // Onglet Invitations
             _buildInvitationsTab(invitationService),
-            
+
             // Onglet Équipes
             _buildTeamsTab(teamService),
           ],
@@ -148,7 +155,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   Widget _buildSearchTab() {
     final invitationService = Provider.of<InvitationService>(context);
     final canInvite = invitationService.canSendInvitations();
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -212,7 +219,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   Widget _buildInvitationsTab(InvitationService invitationService) {
     final pendingInvitations = invitationService.pendingInvitations;
     final sentInvitations = invitationService.sentInvitations;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -240,17 +247,20 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       final invitation = pendingInvitations[index];
                       return Card(
                         child: ListTile(
-                          title: Text('Invitation de ${invitation['fromUsername']}'),
+                          title: Text(
+                              'Invitation de ${invitation['fromUsername']}'),
                           subtitle: Text('Carte: ${invitation['mapName']}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               TextButton(
-                                onPressed: () => invitationService.respondToInvitation(invitation, false),
+                                onPressed: () => invitationService
+                                    .respondToInvitation(invitation, false),
                                 child: const Text('Refuser'),
                               ),
                               ElevatedButton(
-                                onPressed: () => invitationService.respondToInvitation(invitation, true),
+                                onPressed: () => invitationService
+                                    .respondToInvitation(invitation, true),
                                 child: const Text('Accepter'),
                               ),
                             ],
@@ -282,11 +292,13 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     itemBuilder: (context, index) {
                       final invitation = sentInvitations[index];
                       final status = invitation['status'] ?? 'pending';
-                      
+
                       return Card(
                         child: ListTile(
-                          title: Text('Invitation à ${invitation['toUsername']}'),
-                          subtitle: Text('Statut: ${status == 'pending' ? 'En attente' : status == 'accepted' ? 'Acceptée' : 'Refusée'}'),
+                          title:
+                              Text('Invitation à ${invitation['toUsername']}'),
+                          subtitle: Text(
+                              'Statut: ${status == 'pending' ? 'En attente' : status == 'accepted' ? 'Acceptée' : 'Refusée'}'),
                           trailing: status == 'pending'
                               ? const Icon(Icons.hourglass_empty)
                               : status == 'accepted'
@@ -304,8 +316,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   Widget _buildTeamsTab(TeamService teamService) {
     final teams = teamService.teams;
-    final connectedPlayers = teamService.connectedPlayers;
-    
+    final gameStateService = Provider.of<GameStateService>(context);
+    final connectedPlayers = gameStateService.connectedPlayersList;
+    final mapId = getCurrentMapId(context);
+    final unassignedPlayers = connectedPlayers.where((player) {
+      return !teams
+          .any((team) => team.players.any((p) => p['id'] == player['id']));
+    }).toList();
+    print('📋 connectedPlayers: $connectedPlayers');
+    print('📋 teams: ${teams.map((t) => {'id': t.id, 'players': t.players})}');
+    print('📋 unassignedPlayers: $unassignedPlayers');
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -358,7 +378,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          teams.isEmpty
+          (teams.isEmpty && unassignedPlayers.isEmpty)
               ? const Center(
                   child: Text(
                     'Aucune équipe créée',
@@ -366,11 +386,38 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   ),
                 )
               : Expanded(
-                  child: ListView.builder(
-                    itemCount: teams.length,
-                    itemBuilder: (context, index) {
-                      final team = teams[index];
-                      return Card(
+                  child: ListView(children: [
+                    if (unassignedPlayers.isNotEmpty) ...[
+                      Text(
+                        'Joueurs sans équipe',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      ...unassignedPlayers.map((player) => ListTile(
+                            leading:
+                                const CircleAvatar(child: Icon(Icons.person)),
+                            title: Text(player['username'] ?? 'Joueur'),
+                            trailing: DropdownButton<int>(
+                              hint: const Text("Assigner"),
+                              onChanged: (teamId) {
+                                if (teamId != null && mapId != null) {
+                                  teamService.assignPlayerToTeam(
+                                      player['id'], teamId, mapId);
+                                }
+                              },
+                              items: teams
+                                  .map((t) => DropdownMenuItem<int>(
+                                        value: t.id,
+                                        child: Text(t.name),
+                                      ))
+                                  .toList(),
+                            ),
+                          )),
+                      const Divider(),
+                    ],
+                    // ✅ Liste des équipes
+                    ...teams.map(
+                      (team) => Card(
                         child: ExpansionTile(
                           title: Row(
                             children: [
@@ -379,11 +426,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                               IconButton(
                                 icon: const Icon(Icons.edit, size: 16),
                                 onPressed: () {
+                                  final nameController =
+                                      TextEditingController(text: team.name);
                                   // Afficher une boîte de dialogue pour renommer l'équipe
                                   showDialog(
                                     context: context,
                                     builder: (context) {
-                                      final nameController = TextEditingController(text: team.name);
                                       return AlertDialog(
                                         title: const Text('Renommer l\'équipe'),
                                         content: TextField(
@@ -394,13 +442,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                         ),
                                         actions: [
                                           TextButton(
-                                            onPressed: () => Navigator.of(context).pop(),
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
                                             child: const Text('Annuler'),
                                           ),
                                           ElevatedButton(
                                             onPressed: () {
-                                              if (nameController.text.isNotEmpty) {
-                                                teamService.renameTeam(team.id, nameController.text);
+                                              if (nameController
+                                                  .text.isNotEmpty) {
+                                                teamService.renameTeam(team.id,
+                                                    nameController.text);
                                                 Navigator.of(context).pop();
                                               }
                                             },
@@ -412,6 +463,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                   );
                                 },
                               ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, size: 16),
+                                onPressed: () {
+                                  teamService.deleteTeam(team.id);
+                                },
+                              ),
                             ],
                           ),
                           subtitle: Text('${team.players.length} joueurs'),
@@ -421,12 +478,64 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                     child: Icon(Icons.person),
                                   ),
                                   title: Text(player['username'] ?? 'Joueur'),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.remove_circle),
-                                    onPressed: () {
-                                      // Retirer le joueur de l'équipe
-                                      teamService.assignPlayerToTeam(player['id'], 0); // 0 = aucune équipe
+                                  trailing: PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'remove') {
+                                        showDialog(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                            title:
+                                                const Text("Retirer le joueur"),
+                                            content: Text(
+                                                "Retirer ${player['username']} de l'équipe ${team.name} ?"),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text('Annuler'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  final mapId =
+                                                      getCurrentMapId(context);
+                                                  if (mapId != null) {
+                                                    teamService
+                                                        .assignPlayerToTeam(
+                                                            player['id'],
+                                                            0,
+                                                            mapId);
+                                                  } // ID 0 → aucune équipe
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Retirer'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      } else {
+                                        final mapId = getCurrentMapId(context);
+                                        final targetTeam = teams.firstWhere(
+                                            (t) => t.id.toString() == value);
+                                        if (mapId != null) {
+                                          teamService.assignPlayerToTeam(
+                                              player['id'], targetTeam.id, 0);
+                                        }
+                                      }
                                     },
+                                    itemBuilder: (context) => [
+                                      const PopupMenuItem<String>(
+                                        value: 'remove',
+                                        child: Text('Retirer de l\'équipe'),
+                                      ),
+                                      const PopupMenuDivider(),
+                                      ...teams
+                                          .where((t) => t.id != team.id)
+                                          .map((t) => PopupMenuItem<String>(
+                                                value: t.id.toString(),
+                                                child: Text(
+                                                    'Aller dans ${t.name}'),
+                                              )),
+                                    ],
                                   ),
                                 )),
                             const Divider(),
@@ -439,36 +548,55 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                     context: context,
                                     builder: (context) {
                                       return AlertDialog(
-                                        title: const Text('Ajouter des joueurs'),
+                                        title:
+                                            const Text('Ajouter des joueurs'),
                                         content: SizedBox(
                                           width: double.maxFinite,
                                           height: 300,
                                           child: ListView.builder(
                                             itemCount: connectedPlayers.length,
                                             itemBuilder: (context, index) {
-                                              final player = connectedPlayers[index];
+                                              final player =
+                                                  connectedPlayers[index];
                                               // Vérifier si le joueur est déjà dans une équipe
                                               bool isInTeam = false;
                                               for (var t in teams) {
-                                                if (t.players.any((p) => p['id'] == player['id'])) {
+                                                if (t.players.any((p) =>
+                                                    p['id'] == player['id'])) {
                                                   isInTeam = true;
                                                   break;
                                                 }
                                               }
-                                              
+
                                               return ListTile(
                                                 leading: const CircleAvatar(
                                                   child: Icon(Icons.person),
                                                 ),
-                                                title: Text(player['username'] ?? 'Joueur'),
+                                                title: Text(
+                                                    player['username'] ??
+                                                        'Joueur'),
                                                 trailing: isInTeam
-                                                    ? const Text('Déjà dans une équipe')
+                                                    ? const Text(
+                                                        'Déjà dans une équipe')
                                                     : ElevatedButton(
                                                         onPressed: () {
-                                                          teamService.assignPlayerToTeam(player['id'], team.id);
-                                                          Navigator.of(context).pop();
+                                                          final mapId =
+                                                              getCurrentMapId(
+                                                                  context);
+                                                          if (mapId != null) {
+                                                            teamService
+                                                                .assignPlayerToTeam(
+                                                                    player[
+                                                                        'id'],
+                                                                    team.id,
+                                                                    mapId);
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          }
                                                         },
-                                                        child: const Text('Ajouter'),
+                                                        child: const Text(
+                                                            'Ajouter'),
                                                       ),
                                               );
                                             },
@@ -476,7 +604,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                         ),
                                         actions: [
                                           TextButton(
-                                            onPressed: () => Navigator.of(context).pop(),
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
                                             child: const Text('Fermer'),
                                           ),
                                         ],
@@ -490,9 +619,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
                             ),
                           ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                  ]),
                 ),
           const SizedBox(height: 16),
           Row(
@@ -521,7 +650,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           ElevatedButton(
                             onPressed: () {
                               if (nameController.text.isNotEmpty) {
-                                teamService.saveCurrentTeamConfiguration(nameController.text);
+                                teamService.saveCurrentTeamConfiguration(
+                                    nameController.text);
                                 Navigator.of(context).pop();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -554,19 +684,25 @@ class _PlayersScreenState extends State<PlayersScreen> {
                             width: double.maxFinite,
                             height: 300,
                             child: ListView.builder(
-                              itemCount: teamService.previousTeamConfigurations.length,
+                              itemCount:
+                                  teamService.previousTeamConfigurations.length,
                               itemBuilder: (context, index) {
-                                final config = teamService.previousTeamConfigurations[index];
+                                final config = teamService
+                                    .previousTeamConfigurations[index];
                                 return ListTile(
                                   title: Text(config.name),
-                                  subtitle: Text('${config.players.length} joueurs'),
+                                  subtitle:
+                                      Text('${config.players.length} joueurs'),
                                   trailing: ElevatedButton(
                                     onPressed: () {
-                                      teamService.applyTeamConfiguration(config.id);
+                                      teamService
+                                          .applyTeamConfiguration(config.id);
                                       Navigator.of(context).pop();
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         const SnackBar(
-                                          content: Text('Configuration appliquée'),
+                                          content:
+                                              Text('Configuration appliquée'),
                                           backgroundColor: Colors.green,
                                         ),
                                       );
