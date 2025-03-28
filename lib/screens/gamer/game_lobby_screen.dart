@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/screens/gamer/team_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
@@ -212,164 +213,150 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
   }
 
   Widget _buildPlayersTab() {
-    final teamService = Provider.of<TeamService>(context);
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final gameStateService = Provider.of<GameStateService>(context);
+    final authService = Provider.of<AuthService>(context);
+    final connectedPlayers = gameStateService.connectedPlayersList;
     final currentUserId = authService.currentUser?.id;
-
-    final players = teamService.connectedPlayers;
-    final teams = teamService.teams;
-    final myTeamId = teamService.myTeamId;
-
-    if (players.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.people_outline, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'Aucun joueur connecté',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Organiser les joueurs par équipe
-    Map<int?, List<dynamic>> playersByTeam = {};
-    
-    // Initialiser avec toutes les équipes, même vides
-    for (var team in teams) {
-      playersByTeam[team.id] = [];
-    }
-    
-    // Ajouter une catégorie pour les joueurs sans équipe
-    playersByTeam[null] = [];
-    
-    // Répartir les joueurs dans leurs équipes
-    for (var player in players) {
-      int? teamId = player['teamId'];
-      if (!playersByTeam.containsKey(teamId)) {
-        playersByTeam[teamId] = [];
-      }
-      playersByTeam[teamId]!.add(player);
-    }
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Afficher le nombre total de joueurs
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Text(
-            'Joueurs connectés (${players.length})',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-        
-        // Afficher les joueurs par équipe
-        ...playersByTeam.entries.map((entry) {
-          final teamId = entry.key;
-          final teamPlayers = entry.value;
-          
-          if (teamPlayers.isEmpty) {
-            return const SizedBox.shrink(); // Ne pas afficher les équipes vides
-          }
-          
-          final teamName = teamId == null 
-              ? 'Sans équipe' 
-              : teams.firstWhere((t) => t.id == teamId, orElse: () => Team(id: -1, name: 'Équipe inconnue', players: [])).name;
-          
-          final isMyTeam = teamId == myTeamId;
-          
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(bottom: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: isMyTeam 
-                  ? BorderSide(color: Theme.of(context).primaryColor, width: 2) 
-                  : BorderSide.none,
-            ),
+        _buildTeamInfo(),
+        const SizedBox(height: 16),
+        Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isMyTeam ? Theme.of(context).primaryColor.withOpacity(0.1) : Colors.grey.shade200,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
+                Text(
+                  'Joueurs connectés (${connectedPlayers.length})',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (connectedPlayers.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'Aucun joueur connecté',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
+                  )
+                else
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: connectedPlayers.length,
+                    itemBuilder: (context, index) {
+                      final player = connectedPlayers[index];
+                      final isCurrentUser = player['id'] == currentUserId;
+
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: isCurrentUser ? Colors.amber : Colors.blue,
+                          child: const Icon(Icons.person, color: Colors.white),
+                        ),
+                        title: Text(
+                          player['username'] ?? 'Joueur',
+                          style: TextStyle(
+                            fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: player['teamName'] != null
+                            ? Text('Équipe : ${player['teamName']}')
+                            : const Text('Sans équipe', style: TextStyle(fontStyle: FontStyle.italic)),
+                      );
+                    },
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.group,
-                        color: isMyTeam ? Theme.of(context).primaryColor : Colors.grey.shade700,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        teamName,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: isMyTeam ? Theme.of(context).primaryColor : Colors.grey.shade800,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${teamPlayers.length} joueur${teamPlayers.length > 1 ? 's' : ''}',
-                        style: TextStyle(
-                          color: isMyTeam ? Theme.of(context).primaryColor : Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: teamPlayers.length,
-                  itemBuilder: (context, index) {
-                    final player = teamPlayers[index];
-                    final isMe = player['id'] == currentUserId;
-                    
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: isMe ? Theme.of(context).primaryColor : Colors.grey.shade400,
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.white,
-                        ),
-                      ),
-                      title: Text(
-                        player['username'] ?? 'Joueur',
-                        style: TextStyle(
-                          fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      subtitle: isMe ? const Text('Vous') : null,
-                      trailing: isMe && teams.length > 1
-                          ? ElevatedButton(
-                              onPressed: () {
-                                _showChangeTeamDialog(teams);
-                              },
-                              child: const Text('Changer d\'équipe'),
-                            )
-                          : null,
-                    );
-                  },
-                ),
               ],
             ),
-          );
-        }).toList(),
+          ),
+        ),
       ],
     );
   }
+
+
+  // Dans GameLobbyScreen
+
+  Widget _buildTeamInfo() {
+    final teamService = Provider.of<TeamService>(context);
+    final myTeamId = teamService.myTeamId;
+
+    // Trouver l'équipe du joueur
+    String teamName = "Aucune équipe";
+    Color teamColor = Colors.grey;
+
+    if (myTeamId != null) {
+      final teamIndex = teamService.teams.indexWhere((team) => team.id == myTeamId);
+      if (teamIndex >= 0) {
+        teamName = teamService.teams[teamIndex].name;
+        teamColor = Colors.green;
+      }
+    }
+
+    return Card(
+      margin: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Votre équipe',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: teamColor,
+                  child: Icon(
+                    myTeamId != null ? Icons.group : Icons.person,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  teamName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: teamColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TeamManagementScreen()),
+                );
+              },
+              icon: const Icon(Icons.group),
+              label: const Text('Gérer les équipes'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   void _showChangeTeamDialog(List<Team> teams) {
     showDialog(
