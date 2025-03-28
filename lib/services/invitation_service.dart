@@ -55,6 +55,7 @@ class InvitationService extends ChangeNotifier {
       'toUserId': userId,
       'toUsername': username,
       'mapId': _gameStateService.selectedMap!.id,
+      'fieldId': _gameStateService.selectedMap!.field?.id,
       'mapName': _gameStateService.selectedMap!.name,
     };
 
@@ -152,6 +153,7 @@ class InvitationService extends ChangeNotifier {
         'fromUserId': payload['toUserId'],
         'toUserId': payload['fromUserId'],
         'mapId': payload['mapId'],
+        'fieldId': payload['fieldId'],
         'accepted': accept,
         'timestamp': DateTime.now().toIso8601String(),
       }

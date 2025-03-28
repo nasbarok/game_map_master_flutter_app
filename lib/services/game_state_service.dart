@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/models/field.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import '../../models/game_map.dart';
@@ -225,20 +226,16 @@ class GameStateService extends ChangeNotifier {
         return;
       }
 
-      final fieldId = activeFieldResponse['id'];
-      print('✅ [RESTORE] Terrain actif : ${activeFieldResponse['name']} (ID: $fieldId)');
+      final field = Field.fromJson(activeFieldResponse['field']);
+
+      print('✅ [RESTORE] Terrain actif : ${field.name} (ID: ${field.id}');
 
       // Étape 2 : Carte liée
-      print('🔎 [RESTORE] Appel GET /maps?fieldId=$fieldId');
-      final maps = await apiService.get('maps?fieldId=$fieldId');
-      print('📦 [RESTORE] Réponse cartes : $maps');
+      print('🔎 [RESTORE] Appel GET /maps?fieldId=${field.id}');
+      final map = await apiService.get('maps?fieldId=${field.id}');
+      print('📦 [RESTORE] Réponse cartes : $map');
 
-      if (maps == null || maps is! List || maps.isEmpty) {
-        print('⚠️ [RESTORE] Aucune carte trouvée pour ce terrain.');
-        return;
-      }
-
-      final selected = GameMap.fromJson(maps[0]);
+      final selected = GameMap.fromJson(map);
       print('✅ [RESTORE] Carte sélectionnée : ${selected.name} (ID: ${selected.id})');
       selectMap(selected);
       _isTerrainOpen = true;

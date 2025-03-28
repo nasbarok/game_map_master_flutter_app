@@ -55,9 +55,8 @@ class GameMap {
       'scenarioIds': scenarioIds,
       'imageUrl': imageUrl,
       'scale': scale,
-      // Ajout optionnel si tu veux renvoyer l’objet complet
-       'owner': owner?.toJson(),
-       'field': field?.toJson(),
+      'owner': owner?.toJson(),
+      'field': field?.toJson(),
     };
   }
 

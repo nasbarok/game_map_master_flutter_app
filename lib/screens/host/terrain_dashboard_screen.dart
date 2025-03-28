@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
+import '../../models/field.dart';
 import '../../models/game_map.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
@@ -286,28 +287,33 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       return;
     }
 
-    int? fieldId = selectedMap.fieldId;
+    int? fieldId = selectedMap.field?.id;
 
     try {
       // 1️⃣ Créer un terrain si la carte n’en a pas encore
       if (fieldId == null) {
         print('🛠 Création d’un terrain via POST /fields...');
-        final field = await apiService.post('fields', {
+        final fieldResponse  = await apiService.post('fields', {
           'name': 'Terrain de ${selectedMap.name}',
           'description': selectedMap.description ?? '',
         });
 
-        fieldId = field['id'];
-        print('✅ Terrain créé avec ID: $fieldId');
+        final field = Field.fromJson(fieldResponse);
+
+        print('✅ Terrain créé avec ID: $field.id');
 
         // 2️⃣ Mise à jour de la GameMap avec ce fieldId via PUT
-        final updatedMap = selectedMap.copyWith(fieldId: fieldId);
+        final updatedMap = selectedMap.copyWith(field: field);
         final updatedJson = updatedMap.toJson();
+
+        print('field ajouté à la map : $updatedJson');
 
         print('🔁 Mise à jour GameMap via PUT /maps/${selectedMap.id}');
         final mapResponse = await apiService.put('maps/${selectedMap.id}', updatedJson);
 
         selectedMap = GameMap.fromJson(mapResponse);
+
+        print('✅ GameMap mise à jour avec : ${selectedMap.id}');
         gameStateService.selectMap(selectedMap);
       }
 
