@@ -360,6 +360,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           print(
               'ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
         }
+
+        _webSocketService.subscribeToField(fieldId!);
       }
     } catch (e) {
       print('❌ Erreur lors de l’ouverture/fermeture du terrain : $e');

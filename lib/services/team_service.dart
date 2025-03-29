@@ -69,7 +69,7 @@ class TeamService extends ChangeNotifier {
       _teams = (teamsData as List).map((team) => Team.fromJson(team)).toList();
 
       // Synchroniser les joueurs connectés avec les équipes
-      _synchronizePlayersWithTeams();
+      synchronizePlayersWithTeams();
 
       final currentUserId = _apiService.authService.currentUser?.id;
       if (currentUserId != null) {
@@ -83,7 +83,7 @@ class TeamService extends ChangeNotifier {
   }
 
   //synchroniser les joueurs avec les équipes
-  void _synchronizePlayersWithTeams() {
+  void synchronizePlayersWithTeams() {
     // Récupérer la liste des joueurs connectés depuis GameStateService
     final connectedPlayers = _gameStateService.connectedPlayersList;
 
@@ -354,6 +354,14 @@ class TeamService extends ChangeNotifier {
     } catch (e, stacktrace) {
       print('❌ Erreur lors du retrait du joueur de l\'équipe: $e');
       print('📌 Stacktrace: $stacktrace');
+    }
+  }
+
+  void updateTeamName(teamId, newName) {
+    final index = _teams.indexWhere((team) => team.id == teamId);
+    if (index >= 0) {
+      _teams[index].name = newName;
+      safeNotifyListeners();
     }
   }
 }

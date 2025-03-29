@@ -218,6 +218,7 @@ class InvitationService extends ChangeNotifier {
         };
 
         _webSocketService.sendMessage('/app/player-joined', joinMessage);
+        _webSocketService.subscribeToField(field!.id!);
       }
     }
 

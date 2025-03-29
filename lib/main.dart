@@ -1,3 +1,5 @@
+import 'package:airsoft_game_map/services/game_state_service.dart';
+import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
@@ -34,7 +36,18 @@ void main() async {
           update: (_, authService, client, __) => ApiService(authService, client),
         ),
 
-        /// PlayerConnectionService a besoin de ApiService + Client
+        /// GameStateService dépend de ApiService
+        ProxyProvider<ApiService, GameStateService>(
+          update: (_, apiService, __) => GameStateService(apiService),
+        ),
+
+        /// TeamService dépend de ApiService et GameStateService
+        ProxyProvider2<ApiService, GameStateService, TeamService>(
+          update: (_, apiService, gameStateService, __) =>
+              TeamService(apiService, gameStateService),
+        ),
+
+        /// PlayerConnectionService dépend de ApiService + Client
         ProxyProvider2<ApiService, http.Client, PlayerConnectionService>(
           update: (_, apiService, client, __) => PlayerConnectionService(
             baseUrl: ApiService.baseUrl,
@@ -42,9 +55,10 @@ void main() async {
           ),
         ),
 
-        /// WebSocketService a besoin de AuthService
-        ProxyProvider<AuthService, WebSocketService>(
-          update: (_, authService, __) => WebSocketService(authService),
+        /// WebSocketService dépend de AuthService, GameStateService, TeamService
+        ProxyProvider3<AuthService, GameStateService, TeamService, WebSocketService>(
+          update: (_, authService, gameStateService, teamService, __) =>
+              WebSocketService(authService, gameStateService, teamService),
         ),
 
       ],

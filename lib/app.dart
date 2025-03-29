@@ -98,14 +98,14 @@ class App extends StatelessWidget {
           update: (_, authService, __) => ApiService(authService, http.Client()),
         ),
         ChangeNotifierProxyProvider<AuthService, WebSocketService>(
-          create: (_) => WebSocketService(null),
+          create: (_) => WebSocketService(null, null, null), // constructeur temporaire vide ou par défaut
           update: (_, authService, previous) => previous!..updateAuthService(authService),
         ),
         ChangeNotifierProvider(create: (_) => GameStateService(ApiService(AuthService(), http.Client()))),
         ChangeNotifierProxyProvider3<WebSocketService, AuthService, GameStateService, InvitationService>(
           create: (_) => InvitationService(
             // Valeurs par défaut temporaires, seront écrasées dans update
-            Provider.debugCheckInvalidValueType != null ? WebSocketService(null) : throw UnimplementedError(),
+            Provider.debugCheckInvalidValueType != null ? WebSocketService(null,null,null ) : throw UnimplementedError(),
             AuthService(),
             GameStateService(ApiService(AuthService(), http.Client())),
           ),
