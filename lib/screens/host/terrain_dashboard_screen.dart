@@ -337,6 +337,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       // 4️⃣ Récupération des joueurs (si terrain ouvert)
       if (gameStateService.isTerrainOpen) {
         try {
+          await gameStateService.connectHostToField();
+
           final players = await playerConnectionService.getConnectedPlayers(
               fieldId!);
 

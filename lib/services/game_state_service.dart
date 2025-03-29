@@ -33,11 +33,11 @@ class GameStateService extends ChangeNotifier {
   List<Map<String, dynamic>> get connectedPlayersList => _connectedPlayersList;
   DateTime? _gameStartTime;
   DateTime? get gameStartTime => _gameStartTime;
-
-  GameStateService();
+  final ApiService _apiService;
+  GameStateService(this._apiService);
 
   factory GameStateService.placeholder() {
-    return GameStateService();
+    return GameStateService(ApiService.placeholder());
   }
 
   get gameStateService => null;
@@ -411,5 +411,57 @@ class GameStateService extends ChangeNotifier {
     _connectedPlayersList = newList;
     _connectedPlayers = _connectedPlayersList.length;
     notifyListeners();
+  }
+  Future<void> connectHostToField() async {
+    if (!_isTerrainOpen || _selectedMap == null || _selectedMap!.field == null) return;
+
+    final authService = _apiService.authService;
+    if (authService.currentUser == null || !authService.currentUser!.hasRole('HOST')) return;
+
+    try {
+      final fieldId = _selectedMap!.field!.id;
+      final userId = authService.currentUser!.id;
+
+      print('🔄 Connexion automatique du host au terrain');
+      await _apiService.post('fields/$fieldId/join', {});
+
+      // Recharger les joueurs connectés
+      await _loadConnectedPlayers();
+
+      print('✅ Host connecté au terrain');
+    } catch (e) {
+      print('❌ Erreur lors de la connexion automatique du host: $e');
+    }
+  }
+
+  Future<void> _loadConnectedPlayers() async {
+    if (_selectedMap == null || _selectedMap!.field == null) return;
+
+    try {
+      final fieldId = _selectedMap!.field!.id;
+      final players = await _apiService.get('fields/$fieldId/players');
+
+      if (players == null || players is! List) {
+        print('⚠️ Format inattendu pour les joueurs connectés.');
+        return;
+      }
+
+      _connectedPlayersList = players.map<Map<String, dynamic>>((p) {
+        final user = p['user'];
+        final team = p['team'];
+        return {
+          'id': user['id'],
+          'username': user['username'],
+          'teamId': team?['id'],
+          'teamName': team?['name'],
+        };
+      }).toList();
+
+      _connectedPlayers = _connectedPlayersList.length;
+      print('✅ Joueurs connectés chargés : $_connectedPlayers');
+      notifyListeners();
+    } catch (e) {
+      print('❌ Erreur lors du chargement des joueurs connectés: $e');
+    }
   }
 }

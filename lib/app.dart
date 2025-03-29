@@ -76,7 +76,7 @@ class App extends StatelessWidget {
         final user = authService.currentUser;
         print('[Router] Already logged in as ${user?.username}, redirecting to role');
         if (user != null) {
-          final target = user.hasRole('HOST') ? '/host' : '/gamer';
+          final target = user.hasRole('HOST') ? '/host' : '/gamer/lobby';
           print('[Router] Redirect target: $target');
           return target;
         }
@@ -101,13 +101,13 @@ class App extends StatelessWidget {
           create: (_) => WebSocketService(null),
           update: (_, authService, previous) => previous!..updateAuthService(authService),
         ),
-        ChangeNotifierProvider(create: (_) => GameStateService()),
+        ChangeNotifierProvider(create: (_) => GameStateService(ApiService(AuthService(), http.Client()))),
         ChangeNotifierProxyProvider3<WebSocketService, AuthService, GameStateService, InvitationService>(
           create: (_) => InvitationService(
             // Valeurs par défaut temporaires, seront écrasées dans update
             Provider.debugCheckInvalidValueType != null ? WebSocketService(null) : throw UnimplementedError(),
             AuthService(),
-            GameStateService(),
+            GameStateService(ApiService(AuthService(), http.Client())),
           ),
           update: (_, webSocketService, authService, gameStateService, __) =>
               InvitationService(webSocketService, authService, gameStateService),
