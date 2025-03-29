@@ -176,60 +176,8 @@ class TeamService extends ChangeNotifier {
       final result = await _apiService.post(url, {});
       print('✅ Réponse du serveur pour l\'assignation : $result');
 
-      // Mettre à jour directement les données locales avant de recharger depuis le serveur
-
-      // 1. Mettre à jour le joueur dans connectedPlayersList
-      final gameStateService = _gameStateService;
-      final playerIndex = gameStateService.connectedPlayersList
-          .indexWhere((p) => p['id'] == playerId);
-
-      if (playerIndex >= 0) {
-        // Trouver le nom de l'équipe
-        String? teamName;
-        for (var team in _teams) {
-          if (team.id == teamId) {
-            teamName = team.name;
-            break;
-          }
-        }
-
-        print(
-            '🔄 Mise à jour locale du joueur : teamId=$teamId, teamName=$teamName');
-
-        // Créer une copie de la liste pour éviter les modifications directes
-        final newList = List<Map<String, dynamic>>.from(
-            gameStateService.connectedPlayersList);
-
-        // Mettre à jour les informations du joueur
-        newList[playerIndex] = {
-          ...newList[playerIndex],
-          'teamId': teamId,
-          'teamName': teamName
-        };
-
-        // Mettre à jour la liste dans GameStateService
-        gameStateService.updateConnectedPlayersList(newList);
-
-        // 2. Mettre à jour les équipes localement
-        _synchronizePlayersWithTeams();
-
-        print('🔄 Synchronisation des joueurs avec les équipes terminée');
-        print('📋 Teams après synchronisation: ${_teams.map((t) => {
-              'id': t.id,
-              'name': t.name,
-              'players': t.players.map((p) => p['id']).toList()
-            })}');
-      }
-
-      // 3. Recharger depuis le serveur pour s'assurer de la cohérence
-      await Future.wait([loadTeams(mapId), loadConnectedPlayers()]);
-
-      print('🔄 Rechargement depuis le serveur terminé');
-      print('📋 Teams après rechargement: ${_teams.map((t) => {
-            'id': t.id,
-            'name': t.name,
-            'players': t.players.map((p) => p['id']).toList()
-          })}');
+      await loadTeams(mapId);
+      await loadConnectedPlayers();
 
       safeNotifyListeners();
     } catch (e, stacktrace) {
