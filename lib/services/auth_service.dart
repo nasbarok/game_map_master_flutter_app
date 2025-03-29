@@ -30,12 +30,15 @@ class AuthService extends ChangeNotifier {
     final userJson = prefs.getString('user');
 
     if (token != null && userJson != null) {
+      if (_isTokenExpired(token)) {
+        await logout();
+        return;
+      }
+
       _token = token;
       _currentUser = User.fromJson(jsonDecode(userJson));
 
-      // Vérifier que le token est encore valide en appelant le serveur
       await _fetchUserInfo();
-
       notifyListeners();
     }
   }
@@ -147,12 +150,30 @@ class AuthService extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _currentUser = User.fromJson(data);
+      } else if (response.statusCode == 401) {
+        await logout(); // Token expiré côté serveur
       }
     } catch (e) {
       // Gérer l'erreur
+      print('❌ Erreur lors de la récupération des informations utilisateur: $e');
     }
   }
-  
+
+  bool _isTokenExpired(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+
+      final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+      final exp = payload['exp'];
+      final expiryDate = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      return DateTime.now().isAfter(expiryDate);
+    } catch (e) {
+      return true; // En cas d'erreur, on considère le token comme expiré
+    }
+  }
+
+
   Future<void> logout() async {
     _token = null;
     _currentUser = null;

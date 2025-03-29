@@ -76,12 +76,24 @@ class ApiService {
       print('❌ [API] Non autorisé - utilisateur non connecté');
       throw Exception('Non autorisé - utilisateur non connecté');
     }
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return null;
       return json.decode(response.body);
     } else {
-      final error = json.decode(response.body);
-      throw Exception(error['message'] ?? 'Une erreur est survenue');
+      try {
+        // Gestion spéciale du message brut "no_map_found"
+        if (response.statusCode == 404 && response.body == "no_map_found") {
+          throw Exception('NO_MAP_FOUND');
+        }
+
+        final error = json.decode(response.body);
+        throw Exception(error['message'] ?? 'Une erreur est survenue');
+      } catch (e) {
+        // JSON illisible ou message brut
+        throw Exception('Erreur ${response.statusCode}: ${response.body}');
+      }
     }
   }
+
 }

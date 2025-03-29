@@ -338,7 +338,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       if (gameStateService.isTerrainOpen) {
         try {
           final players = await playerConnectionService.getConnectedPlayers(
-              selectedMap.id!);
+              fieldId!);
 
           final playersList = players.map((player) =>
           {
@@ -375,6 +375,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     final user = authService.currentUser!;
     final mapId = gameStateService.selectedMap!.id;
+    final fieldId = gameStateService.selectedMap!.field?.id;
 
     // Vérifier si l'hôte est déjà dans la liste des joueurs
     final isHostPlayer = gameStateService.isPlayerConnected(user.id!);
@@ -382,7 +383,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     try {
       if (!isHostPlayer) {
         // Ajouter l'hôte comme joueur
-        await playerConnectionService.joinMap(mapId!);
+        await playerConnectionService.joinMap(fieldId!);
 
         // Ajouter manuellement l'hôte à la liste des joueurs
         gameStateService.addConnectedPlayer({
@@ -393,7 +394,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         });
       } else {
         // Retirer l'hôte de la liste des joueurs
-        await playerConnectionService.leaveMap(mapId!);
+        await playerConnectionService.leaveField(fieldId!);
 
         // Retirer manuellement l'hôte de la liste des joueurs
         gameStateService.removeConnectedPlayer(user.id!);
@@ -548,7 +549,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
               onPressed: gameStateService.isTerrainOpen
                   ? null // Désactive le bouton si le terrain est ouvert
                   : () {
-                _selectMap;
+                _selectMap();
               },
               icon: const Icon(Icons.map),
               label: Text(

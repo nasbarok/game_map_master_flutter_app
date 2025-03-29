@@ -31,6 +31,8 @@ class GameStateService extends ChangeNotifier {
   String get timeLeftDisplay => _timeLeftDisplay;
   DateTime? get gameEndTime => _gameEndTime;
   List<Map<String, dynamic>> get connectedPlayersList => _connectedPlayersList;
+  DateTime? _gameStartTime;
+  DateTime? get gameStartTime => _gameStartTime;
 
   GameStateService();
 
@@ -46,27 +48,85 @@ class GameStateService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleTerrainOpen() {
-    if (_selectedMap == null) {
-      return; // Ne rien faire si aucune carte n'est sélectionnée
+  Future<void> handleTerrainOpen(Field field, ApiService apiService) async {
+    try {
+      if(field.active == false) {
+        print('ℹ️ [toggleTerrainOpen] Terrain fermé : ${field.name}');
+        return;
+      }
+      _isTerrainOpen = true;
+
+      if (_isTerrainOpen) {
+        print('📡 [OPEN] Terrain en cours d’ouverture : ${field.name}');
+        // Associer à la carte si besoin
+        if (_selectedMap != null && _selectedMap!.field == null) {
+          _selectedMap = _selectedMap!.copyWith(field: field);
+        }
+
+        // Charger joueurs connectés
+        print('👥 [OPEN] Appel GET /fields/${field.id}/players');
+        final players = await apiService.get('fields/${field.id}/players');
+        if (players is List) {
+          _connectedPlayersList = players.map<Map<String, dynamic>>((p) {
+            final user = p['user'];
+            final team = p['team'];
+            return {
+              'id': user['id'],
+              'username': user['username'],
+              'teamId': team?['id'],
+              'teamName': team?['name'],
+            };
+          }).toList();
+          _connectedPlayers = _connectedPlayersList.length;
+          print('✅ [OPEN] Joueurs connectés restaurés ($_connectedPlayers)');
+        }
+
+        // Charger statut de jeu
+        print('🎮 [OPEN] Appel GET /games/${field.id}/status');
+        final gameStatus = await apiService.get('games/${field.id}/status');
+
+        _isGameRunning = false;
+        _gameStartTime = null;
+        _gameEndTime = null;
+
+        if (gameStatus['status'] == 'RUNNING' && gameStatus['active'] == true) {
+          _isGameRunning = true;
+
+          if (gameStatus['startTime'] != null) {
+            _gameStartTime = DateTime.parse(gameStatus['startTime']);
+          }
+
+          if (gameStatus['endTime'] != null) {
+            _gameEndTime = DateTime.parse(gameStatus['endTime']);
+          } else if (_gameStartTime != null && _gameDuration != null) {
+            _gameEndTime = _gameStartTime!.add(Duration(minutes: _gameDuration!));
+          }
+
+          _startGameTimer();
+          print('✅ [OPEN] Partie en cours restaurée');
+        }
+
+      } else {
+        // RESET si fermeture du terrain
+        print('🔒 [CLOSE] Fermeture du terrain');
+        _selectedScenarios = [];
+        _gameDuration = null;
+        _connectedPlayers = 0;
+        _isGameRunning = false;
+        _gameTimer?.cancel();
+        _gameEndTime = null;
+        _gameStartTime = null;
+        _timeLeftDisplay = "00:00:00";
+        _connectedPlayersList.clear();
+      }
+
+      notifyListeners();
+    } catch (e, stack) {
+      print('❌ [toggleTerrainOpen] Erreur : $e');
+      print('📌 Stacktrace : $stack');
     }
-
-    _isTerrainOpen = !_isTerrainOpen;
-
-    if (!_isTerrainOpen) {
-      // Réinitialiser les valeurs si on ferme le terrain
-      _selectedScenarios = [];
-      _gameDuration = null;
-      _connectedPlayers = 0;
-      _isGameRunning = false;
-      _gameTimer?.cancel();
-      _gameEndTime = null;
-      _timeLeftDisplay = "00:00:00";
-      _connectedPlayersList.clear(); // Vider la liste des joueurs connectés
-    }
-
-    notifyListeners();
   }
+
 
   void setSelectedScenarios(List<dynamic> scenarios) {
     _selectedScenarios = scenarios;
@@ -103,32 +163,45 @@ class GameStateService extends ChangeNotifier {
 
   void _startGameTimer() {
     _gameTimer?.cancel();
+
     _gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_gameEndTime == null) {
-        _timeLeftDisplay = "∞"; // Durée illimitée
+      final now = DateTime.now();
+
+      // Cas sans fin de partie connue
+      if (_gameStartTime == null) {
+        _timeLeftDisplay = "∞";
         notifyListeners();
         return;
       }
-      
-      final now = DateTime.now();
-      final difference = _gameEndTime!.difference(now);
-      
-      if (difference.isNegative) {
-        // La partie est terminée
-        _timeLeftDisplay = "00:00:00";
-        stopGame();
-        return;
+
+      // Calculer _gameEndTime si possible
+      if (_gameEndTime == null && _gameDuration != null) {
+        _gameEndTime = _gameStartTime!.add(Duration(minutes: _gameDuration!));
       }
-      
-      // Formater au format HH:MM:SS
-      final hours = difference.inHours.toString().padLeft(2, '0');
-      final minutes = (difference.inMinutes % 60).toString().padLeft(2, '0');
-      final seconds = (difference.inSeconds % 60).toString().padLeft(2, '0');
-      
-      _timeLeftDisplay = "$hours:$minutes:$seconds";
+
+      // Si on a maintenant une _gameEndTime, on calcule le temps restant
+      if (_gameEndTime != null) {
+        final difference = _gameEndTime!.difference(now);
+
+        if (difference.isNegative) {
+          _timeLeftDisplay = "00:00:00";
+          stopGame();
+          return;
+        }
+
+        final hours = difference.inHours.toString().padLeft(2, '0');
+        final minutes = (difference.inMinutes % 60).toString().padLeft(2, '0');
+        final seconds = (difference.inSeconds % 60).toString().padLeft(2, '0');
+
+        _timeLeftDisplay = "$hours:$minutes:$seconds";
+      } else {
+        _timeLeftDisplay = "∞";
+      }
+
       notifyListeners();
     });
   }
+
 
   void stopGame() {
     _isGameRunning = false;
@@ -228,21 +301,66 @@ class GameStateService extends ChangeNotifier {
 
       final field = Field.fromJson(activeFieldResponse['field']);
 
+      if(field.active == false) {
+        print('ℹ️ [RESTORE]  terrain fermé.');
+        return;
+      }
+
       print('✅ [RESTORE] Terrain actif : ${field.name} (ID: ${field.id}');
 
       // Étape 2 : Carte liée
       print('🔎 [RESTORE] Appel GET /maps?fieldId=${field.id}');
       final map = await apiService.get('maps?fieldId=${field.id}');
+      if (map == null) {
+        print('⚠️ [RESTORE] Carte non trouvée (null)');
+        return;
+      }
       print('📦 [RESTORE] Réponse cartes : $map');
 
       final selected = GameMap.fromJson(map);
       print('✅ [RESTORE] Carte sélectionnée : ${selected.name} (ID: ${selected.id})');
       selectMap(selected);
+
+      // Vérifier si l'utilisateur est un host ou un gamer
+      final isHost = apiService.authService.currentUser?.hasRole('HOST') ?? false;
+      final userId = apiService.authService.currentUser?.id;
+
       _isTerrainOpen = true;
 
+      try {
+        print('🔎 [RESTORE] Vérification du statut de la partie via le terrain');
+        final gameStatus = await apiService.get('games/${field.id}/status');
+
+        // S'assurer que isGameRunning est false par défaut
+        _isGameRunning = false;
+
+        if (gameStatus['status'] == 'RUNNING' && gameStatus['active'] == true) {
+          _isGameRunning = true;
+
+          if (gameStatus['startTime'] != null) {
+            final startTimeStr = gameStatus['startTime'];
+            _gameStartTime = DateTime.parse(startTimeStr);
+          }
+
+          if (gameStatus['endTime'] != null) {
+            final endTimeStr = gameStatus['endTime'];
+            _gameEndTime = DateTime.parse(endTimeStr);
+          } else if (_gameStartTime != null && _gameDuration != null) {
+            _gameEndTime = _gameStartTime!.add(Duration(minutes: _gameDuration!));
+          }
+
+          _startGameTimer();
+        }
+
+        print('✅ [RESTORE] Statut de jeu : ${_isGameRunning ? "EN COURS" : "ARRÊTÉ"}');
+      } catch (e) {
+        print('⚠️ [RESTORE] Erreur lors de la vérification du statut de jeu: $e');
+        _isGameRunning = false;
+      }
+
       // Étape 3 : Joueurs connectés
-      print('🔎 [RESTORE] Appel GET /maps/${selected.id}/players');
-      final players = await apiService.get('maps/${selected.id}/players');
+      print('🔎 [RESTORE] Appel GET /fields/${selected.field?.id}/players');
+      final players = await apiService.get('fields/${selected.field?.id}/players');
       print('📦 [RESTORE] Réponse joueurs connectés : $players');
 
       if (players == null || players is! List) {

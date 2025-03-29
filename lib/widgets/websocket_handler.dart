@@ -169,7 +169,7 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
                 print('❌ Invitation refusée par l\'utilisateur');
                 final invitationService =
                     Provider.of<InvitationService>(context, listen: false);
-                invitationService.respondToInvitation(invitation, false);
+                invitationService.respondToInvitation(context,invitation, false);
                 Navigator.of(context).pop();
               },
               child: const Text('Refuser'),
@@ -180,11 +180,11 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
                 print('✅ Invitation acceptée par l\'utilisateur');
                 final invitationService =
                     Provider.of<InvitationService>(context, listen: false);
-                invitationService.respondToInvitation(invitation, true);
+                invitationService.respondToInvitation(context,invitation, true);
                 Navigator.of(context).pop();
 
                 // Naviguer vers l'écran de lobby
-                context.go('/gamer/lobby');
+                context.go('/gamer');
               },
               child: const Text('Accepter'),
             ),

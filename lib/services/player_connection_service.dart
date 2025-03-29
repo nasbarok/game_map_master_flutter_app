@@ -9,8 +9,8 @@ class PlayerConnectionService {
   PlayerConnectionService({required this.baseUrl, required this.client});
 
   // Rejoindre une carte
-  Future<ConnectedPlayer> joinMap(int mapId, {int? teamId}) async {
-    final url = '$baseUrl/api/maps/$mapId/join';
+  Future<ConnectedPlayer> joinMap(int fieldId, {int? teamId}) async {
+    final url = '$baseUrl/api/fields/$fieldId/join';
     final queryParams = <String, dynamic>{};
     if (teamId != null) {
       queryParams['teamId'] = teamId.toString();
@@ -29,8 +29,8 @@ class PlayerConnectionService {
   }
 
   // Quitter une carte
-  Future<void> leaveMap(int mapId) async {
-    final url = '$baseUrl/api/maps/$mapId/leave';
+  Future<void> leaveField(int fieldId) async {
+    final url = '$baseUrl/api/fields/$fieldId/leave';
 
     final response = await client.post(
       Uri.parse(url),
@@ -43,8 +43,8 @@ class PlayerConnectionService {
   }
 
   // Obtenir la liste des joueurs connectés
-  Future<List<ConnectedPlayer>> getConnectedPlayers(int mapId) async {
-    final url = '$baseUrl/api/maps/$mapId/players';
+  Future<List<ConnectedPlayer>> getConnectedPlayers(int fieldId) async {
+    final url = '$baseUrl/api/fields/$fieldId/players';
 
     final response = await client.get(Uri.parse(url));
 
@@ -53,36 +53,6 @@ class PlayerConnectionService {
       return playersJson.map((json) => ConnectedPlayer.fromJson(json)).toList();
     } else {
       throw Exception('Failed to get connected players: ${response.body}');
-    }
-  }
-
-  // Fermer une carte (pour le propriétaire)
-  Future<void> closeMap(int mapId) async {
-    final url = '$baseUrl/api/maps/$mapId/close';
-
-    final response = await client.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to close map: ${response.body}');
-    }
-  }
-
-  // Assigner un joueur à une équipe
-  Future<ConnectedPlayer> assignPlayerToTeam(int mapId, int userId, int teamId) async {
-    final url = '$baseUrl/api/maps/$mapId/players/$userId/team/$teamId';
-
-    final response = await client.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      return ConnectedPlayer.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to assign player to team: ${response.body}');
     }
   }
 }

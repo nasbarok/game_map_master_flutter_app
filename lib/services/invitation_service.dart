@@ -143,10 +143,10 @@ class InvitationService extends ChangeNotifier {
     }
   }
 
-  Future<void> respondToInvitation(Map<String, dynamic> invitation,
+  Future<void> respondToInvitation(BuildContext context,Map<String, dynamic> invitation,
       bool accept) async {
     final payload = invitation['payload'];
-
+    final apiService = Provider.of<ApiService>(context, listen: false);
     final response = {
       'type': 'INVITATION_RESPONSE',
       'payload': {
@@ -179,10 +179,24 @@ class InvitationService extends ChangeNotifier {
           imageUrl: '', // À compléter si disponible
           description: '', // À compléter si disponible
         );
+        final mapId = map.id;
+        print('🔁 Mise à jour GameMap via PUT /maps/${mapId}');
+        final mapResponse = await apiService.get('maps/${mapId}');
+        final selectedMap = GameMap.fromJson(mapResponse);
 
-        _gameStateService.selectMap(map);
-        _gameStateService.toggleTerrainOpen(); // Ouvrir le terrain
-
+        _gameStateService.selectMap(selectedMap);
+        final field = selectedMap.field;
+        if (field != null) {
+          _gameStateService.handleTerrainOpen(field, apiService);
+        } else {
+          print("❌ La carte sélectionnée n'est pas liée à un terrain.");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Aucun terrain associé à cette carte."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         // Ajouter le joueur à la liste des joueurs connectés
         final player = {
           'id': _authService.currentUser!.id,

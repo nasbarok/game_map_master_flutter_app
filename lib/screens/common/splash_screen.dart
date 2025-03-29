@@ -42,8 +42,23 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     final user = authService.currentUser!;
-    final route = user.hasRole('HOST') ? '/host' : '/gamer';
-    context.go(route);
+    final isHost = user.hasRole('HOST');
+    final isTerrainOpen = gameState.isTerrainOpen;
+    final isGameRunning = gameState.isGameRunning;
+
+    if (!isTerrainOpen) {
+      // Aucun terrain ouvert, gamer → scanner | host → dashboard vide
+      context.go(isHost ? '/host' : '/gamer/lobby');
+    } else {
+      if(!isGameRunning) {
+        // Terrain ouvert mais pas de jeu en cours → host → dashboard / gamer → lobby
+        context.go(isHost ? '/host' : '/gamer/lobby');
+
+      }else{
+        // Terrain ouvert et jeu en cours → gamer → lobby
+        context.go(isHost ? '/host' : '/gamer');
+      }
+    }
   }
 
   @override

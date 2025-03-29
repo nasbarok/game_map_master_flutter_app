@@ -308,12 +308,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                             children: [
                               TextButton(
                                 onPressed: () => invitationService
-                                    .respondToInvitation(invitation, false),
+                                    .respondToInvitation(context,invitation, false),
                                 child: const Text('Refuser'),
                               ),
                               ElevatedButton(
                                 onPressed: () => invitationService
-                                    .respondToInvitation(invitation, true),
+                                    .respondToInvitation(context,invitation, true),
                                 child: const Text('Accepter'),
                               ),
                             ],

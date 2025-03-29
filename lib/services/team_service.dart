@@ -168,7 +168,7 @@ class TeamService extends ChangeNotifier {
   }
 
   Future<void> assignPlayerToTeam(int playerId, int teamId, int mapId) async {
-    final url = 'maps/$mapId/players/$playerId/team/$teamId';
+    final url = 'fields/$mapId/players/$playerId/team/$teamId';
 
     try {
       print(
@@ -256,7 +256,7 @@ class TeamService extends ChangeNotifier {
 
     try {
       final playersData = await _apiService
-          .get('maps/${_gameStateService.selectedMap!.id}/players');
+          .get('fields/${_gameStateService.selectedMap?.field?.id}/players');
       _connectedPlayers = playersData as List;
       safeNotifyListeners();
     } catch (e) {

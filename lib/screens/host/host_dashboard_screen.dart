@@ -61,7 +61,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
             TextButton(
               onPressed: () {
                 final invitationService = Provider.of<InvitationService>(context, listen: false);
-                invitationService.respondToInvitation(invitation, false);
+                invitationService.respondToInvitation(context,invitation, false);
                 Navigator.of(context).pop();
               },
               child: const Text('Refuser'),
@@ -69,7 +69,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
             ElevatedButton(
               onPressed: () {
                 final invitationService = Provider.of<InvitationService>(context, listen: false);
-                invitationService.respondToInvitation(invitation, true);
+                invitationService.respondToInvitation(context,invitation, true);
                 Navigator.of(context).pop();
               },
               child: const Text('Accepter'),
