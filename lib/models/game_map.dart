@@ -13,7 +13,7 @@ class GameMap {
   final double? scale;
 
   final User? owner;
-  final Field? field;
+  Field? field;
 
   GameMap({
     this.id,

@@ -45,9 +45,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   void _updateConnectedPlayers() {
     // Cette méthode sera appelée quand le WebSocketService notifie ses listeners
     final gameStateService =
-    Provider.of<GameStateService>(context, listen: false);
+        Provider.of<GameStateService>(context, listen: false);
     final webSocketService =
-    Provider.of<WebSocketService>(context, listen: false);
+        Provider.of<WebSocketService>(context, listen: false);
 
     // Pour l'instant, simulons un nombre aléatoire de joueurs connectés
     if (gameStateService.isTerrainOpen) {
@@ -62,7 +62,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   void _selectScenarios() async {
     final gameStateService =
-    Provider.of<GameStateService>(context, listen: false);
+        Provider.of<GameStateService>(context, listen: false);
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,13 +77,12 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     // Ouvre la boîte de dialogue et récupère les scénarios sélectionnés
     final selectedScenarios = await showDialog<List<Map<String, dynamic>>>(
       context: context,
-      builder: (context) =>
-          ScenarioSelectionDialog(
-            mapId: gameStateService.selectedMap!.id!,
-            onScenariosSelected: (scenarios) {
-              Navigator.of(context).pop(scenarios); // Retourne la sélection
-            },
-          ),
+      builder: (context) => ScenarioSelectionDialog(
+        mapId: gameStateService.selectedMap!.id!,
+        onScenariosSelected: (scenarios) {
+          Navigator.of(context).pop(scenarios); // Retourne la sélection
+        },
+      ),
     );
 
     // Si des scénarios ont été sélectionnés
@@ -99,10 +98,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     }
   }
 
-
   void _setGameDuration() {
     final gameStateService =
-    Provider.of<GameStateService>(context, listen: false);
+        Provider.of<GameStateService>(context, listen: false);
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -140,7 +138,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   void _startGame() {
     final gameStateService =
-    Provider.of<GameStateService>(context, listen: false);
+        Provider.of<GameStateService>(context, listen: false);
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -167,7 +165,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     // Logique pour démarrer la partie via WebSocket
     final webSocketService =
-    Provider.of<WebSocketService>(context, listen: false);
+        Provider.of<WebSocketService>(context, listen: false);
     // webSocketService.startGame(gameStateService.selectedMap!.id, gameStateService.selectedScenarios, gameStateService.gameDuration);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -180,12 +178,12 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   void _stopGame() {
     final gameStateService =
-    Provider.of<GameStateService>(context, listen: false);
+        Provider.of<GameStateService>(context, listen: false);
     gameStateService.stopGame();
 
     // Logique pour arrêter la partie via WebSocket
     final webSocketService =
-    Provider.of<WebSocketService>(context, listen: false);
+        Provider.of<WebSocketService>(context, listen: false);
     // webSocketService.stopGame();
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -199,12 +197,12 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   void _selectMap() async {
     final apiService = Provider.of<ApiService>(context, listen: false);
     final gameStateService =
-    Provider.of<GameStateService>(context, listen: false);
+        Provider.of<GameStateService>(context, listen: false);
 
     try {
       final List<dynamic> mapData = await apiService.get('maps/owner/self');
       final List<GameMap> maps =
-      mapData.map((json) => GameMap.fromJson(json)).toList();
+          mapData.map((json) => GameMap.fromJson(json)).toList();
 
       if (maps.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -278,11 +276,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _toggleTerrainOpen() async {
-    final gameStateService = Provider.of<GameStateService>(
-        context, listen: false);
+    final gameStateService = Provider.of<GameStateService>(context, listen: false);
     final apiService = Provider.of<ApiService>(context, listen: false);
-    final playerConnectionService = Provider.of<PlayerConnectionService>(
-        context, listen: false);
+    final playerConnectionService = Provider.of<PlayerConnectionService>(context, listen: false);
     GameMap selectedMap = gameStateService.selectedMap!;
 
     if (selectedMap == null) {
@@ -290,65 +286,46 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       return;
     }
 
-    int? fieldId = selectedMap.field?.id;
-
     try {
-      // 1️⃣ Créer un terrain si la carte n’en a pas encore
-      if (fieldId == null) {
-        print('🛠 Création d’un terrain via POST /fields...');
-        final fieldResponse = await apiService.post('fields', {
-          'name': 'Terrain de ${selectedMap.name}',
-          'description': selectedMap.description ?? '',
-        });
+      Field? field = selectedMap.field;
 
-        final field = Field.fromJson(fieldResponse);
-
-        print('✅ Terrain créé avec ID: $field.id');
-
-        // 2️⃣ Mise à jour de la GameMap avec ce fieldId via PUT
-        final updatedMap = selectedMap.copyWith(field: field);
-        final updatedJson = updatedMap.toJson();
-
-        print('field ajouté à la map : $updatedJson');
-
-        print('🔁 Mise à jour GameMap via PUT /maps/${selectedMap.id}');
-        final mapResponse = await apiService.put(
-            'maps/${selectedMap.id}', updatedJson);
-
-        selectedMap = GameMap.fromJson(mapResponse);
-
-        print('✅ GameMap mise à jour avec : ${selectedMap.id}');
-        gameStateService.selectMap(selectedMap);
-      }
-
-      // 3️⃣ Ouvrir ou fermer le terrain
+      // 🔁 Si on ouvre le terrain
       if (!gameStateService.isTerrainOpen) {
+        // 🧠 S’il n’y a pas encore de terrain, on en crée un
+        if (field == null || field.closedAt != null) {
+          print('🛠 Création d’un terrain via POST /fields...');
+          final fieldResponse = await apiService.post('fields', {
+            'name': 'Terrain de ${selectedMap.name}',
+            'description': selectedMap.description ?? '',
+          });
+          field = Field.fromJson(fieldResponse);
+          print('✅ Terrain créé avec ID: ${field.id}');
+
+          // 🔁 Mise à jour de la GameMap pour lier le terrain
+          final updatedMap = selectedMap.copyWith(field: field);
+          final mapResponse = await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
+          selectedMap = GameMap.fromJson(mapResponse);
+          gameStateService.selectMap(selectedMap);
+        }
+
+        final fieldId = field.id!;
         print('📡 Requête POST /fields/$fieldId/open');
         final response = await apiService.post('fields/$fieldId/open', {});
         print('✅ Terrain ouvert côté serveur : $response');
         gameStateService.setTerrainOpen(true);
-      } else {
-        print('📡 Requête POST /fields/$fieldId/close');
-        final response = await apiService.post('fields/$fieldId/close', {});
-        print('✅ Terrain fermé côté serveur : $response');
-        gameStateService.setTerrainOpen(false);
-      }
 
-      // 4️⃣ Récupération des joueurs (si terrain ouvert)
-      if (gameStateService.isTerrainOpen) {
         try {
           await gameStateService.connectHostToField();
 
-          final players = await playerConnectionService.getConnectedPlayers(
-              fieldId!);
-
-          final playersList = players.map((player) =>
-          {
+          final players = await playerConnectionService.getConnectedPlayers(fieldId);
+          final playersList = players
+              .map((player) => {
             'id': player.user.id,
             'username': player.user.username,
             'teamId': player.team?.id,
             'teamName': player.team?.name,
-          }).toList();
+          })
+              .toList();
 
           for (var player in playersList) {
             gameStateService.addConnectedPlayer(player);
@@ -356,12 +333,31 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
           print('✅ Joueurs connectés récupérés : ${playersList.length}');
         } catch (e) {
-          // 👉 Ici on ne considère plus ça comme une vraie erreur
-          print(
-              'ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
+          print('ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
         }
 
-        _webSocketService.subscribeToField(fieldId!);
+        _webSocketService.subscribeToField(fieldId);
+      } else {
+        // 🔒 Fermeture du terrain
+        final fieldId = field?.id;
+        if (fieldId == null) {
+          print('❌ Impossible de fermer : aucun terrain associé à la carte');
+          return;
+        }
+
+        print('📡 Requête POST /fields/$fieldId/close');
+        final response = await apiService.post('fields/$fieldId/close', {});
+        print('✅ Terrain fermé côté serveur : $response');
+        gameStateService.setTerrainOpen(false);
+
+        // 🔄 Dissocier le terrain de la carte
+        final updatedMap = selectedMap.copyWith(field: null);
+        final mapResponse =
+        await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
+        print('🧹 Terrain dissocié de la carte');
+
+        // 🧼 Réinitialisation de la carte sélectionnée
+        gameStateService.selectMap(null);
       }
     } catch (e) {
       print('❌ Erreur lors de l’ouverture/fermeture du terrain : $e');
@@ -369,13 +365,14 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
 
+
   // méthode pour gérer l'hôte comme joueur
   void _toggleHostAsPlayer() async {
     final gameStateService =
-    Provider.of<GameStateService>(context, listen: false);
+        Provider.of<GameStateService>(context, listen: false);
     final authService = Provider.of<AuthService>(context, listen: false);
     final playerConnectionService =
-    Provider.of<PlayerConnectionService>(context, listen: false);
+        Provider.of<PlayerConnectionService>(context, listen: false);
 
     final user = authService.currentUser!;
     final mapId = gameStateService.selectedMap!.id;
@@ -442,20 +439,14 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .primaryContainer,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Tableau de bord',
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .headlineMedium),
+                      style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 12,
@@ -471,13 +462,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                         icon: Icons.people,
                         title: 'Joueurs',
                         value:
-                        '${gameStateService.connectedPlayersList.length}',
+                            '${gameStateService.connectedPlayersList.length}',
                       ),
                       _buildInfoCard(
                         icon: Icons.videogame_asset,
                         title: 'Scénarios',
                         value: gameStateService.selectedScenarios?.isEmpty ??
-                            true
+                                true
                             ? 'Aucun'
                             : '${gameStateService.selectedScenarios!.length}',
                       ),
@@ -508,9 +499,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Statut: ${gameStateService.isTerrainOpen
-                        ? "Terrain ouvert"
-                        : "Terrain fermé"}',
+                    'Statut: ${gameStateService.isTerrainOpen ? "Terrain ouvert" : "Terrain fermé"}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: gameStateService.isTerrainOpen
@@ -542,10 +531,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             // Configuration de la partie
             Text(
               'Configuration de la partie',
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -553,8 +539,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
               onPressed: gameStateService.isTerrainOpen
                   ? null // Désactive le bouton si le terrain est ouvert
                   : () {
-                _selectMap();
-              },
+                      _selectMap();
+                    },
               icon: const Icon(Icons.map),
               label: Text(
                 gameStateService.selectedMap != null
@@ -604,9 +590,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                     onChanged: gameStateService.isTerrainOpen
                         ? (value) => _toggleHostAsPlayer()
                         : null,
-                    activeColor: Theme
-                        .of(context)
-                        .primaryColor,
+                    activeColor: Theme.of(context).primaryColor,
                   ),
                 ],
               ),
@@ -615,85 +599,81 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             // Bouton Start/Stop
             gameStateService.isGameRunning
                 ? ElevatedButton.icon(
-              onPressed: _stopGame,
-              icon: const Icon(Icons.stop),
-              label: const Text('Arrêter la partie'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            )
+                    onPressed: _stopGame,
+                    icon: const Icon(Icons.stop),
+                    label: const Text('Arrêter la partie'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  )
                 : ElevatedButton.icon(
-              onPressed: gameStateService.isTerrainOpen &&
-                  (gameStateService.selectedScenarios?.isNotEmpty ??
-                      false)
-                  ? _startGame
-                  : null,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Lancer la partie'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
+                    onPressed: gameStateService.isTerrainOpen &&
+                            (gameStateService.selectedScenarios?.isNotEmpty ??
+                                false)
+                        ? _startGame
+                        : null,
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Lancer la partie'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
 
             const SizedBox(height: 32),
 
             // ✅ Liste des joueurs connectés (scrollable vers le bas)
             Text(
               'Joueurs connectés',
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             gameStateService.connectedPlayersList.isNotEmpty
                 ? ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: gameStateService.connectedPlayersList.length,
-              itemBuilder: (context, index) {
-                final player = gameStateService.connectedPlayersList[index];
-                final isHost =
-                    player['id'] == authService.currentUser!.id;
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: gameStateService.connectedPlayersList.length,
+                    itemBuilder: (context, index) {
+                      final player =
+                          gameStateService.connectedPlayersList[index];
+                      final isHost =
+                          player['id'] == authService.currentUser!.id;
 
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isHost
-                        ? Theme
-                        .of(context)
-                        .primaryColor
-                        : Colors.grey.shade400,
-                    child: const Icon(Icons.person, color: Colors.white),
-                  ),
-                  title: Text(
-                    player['username'] ?? 'Joueur',
-                    style: TextStyle(
-                      fontWeight:
-                      isHost ? FontWeight.bold : FontWeight.normal,
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: isHost
+                              ? Theme.of(context).primaryColor
+                              : Colors.grey.shade400,
+                          child: const Icon(Icons.person, color: Colors.white),
+                        ),
+                        title: Text(
+                          player['username'] ?? 'Joueur',
+                          style: TextStyle(
+                            fontWeight:
+                                isHost ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: Text(
+                          player['teamName'] != null
+                              ? 'Équipe: ${player['teamName']}'
+                              : 'Sans équipe',
+                        ),
+                        trailing: isHost ? const Text('Vous (Hôte)') : null,
+                      );
+                    },
+                  )
+                : const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'Aucun joueur connecté',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                   ),
-                  subtitle: Text(
-                    player['teamName'] != null
-                        ? 'Équipe: ${player['teamName']}'
-                        : 'Sans équipe',
-                  ),
-                  trailing: isHost ? const Text('Vous (Hôte)') : null,
-                );
-              },
-            )
-                : const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  'Aucun joueur connecté',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-            ),
           ],
         ),
       ),

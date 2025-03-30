@@ -9,16 +9,12 @@ class InvitationApiService {
   InvitationApiService({required this.baseUrl, required this.client});
 
   // Créer une invitation
-  Future<Invitation> createInvitation(int scenarioId, int userId, {int? teamId}) async {
+  Future<Invitation> createInvitation(int fieldId, int userId) async {
     final url = '$baseUrl/api/invitations';
     final queryParams = {
-      'scenarioId': scenarioId.toString(),
+      'fieldId': fieldId.toString(),
       'userId': userId.toString(),
     };
-    
-    if (teamId != null) {
-      queryParams['teamId'] = teamId.toString();
-    }
     
     final response = await client.post(
       Uri.parse(url).replace(queryParameters: queryParams),

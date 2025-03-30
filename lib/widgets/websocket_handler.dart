@@ -184,7 +184,7 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
                 Navigator.of(context).pop();
 
                 // Naviguer vers l'écran de lobby
-                context.go('/gamer');
+                context.go('/gamer/lobby');
               },
               child: const Text('Accepter'),
             ),

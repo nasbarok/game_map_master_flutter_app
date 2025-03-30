@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (user.hasRole('HOST')) {
             context.go('/host');
           } else {
-            context.go('/gamer');
+            context.go('/gamer/lobby');
           }
         }
       } else if (mounted) {

@@ -43,7 +43,7 @@ class GameStateService extends ChangeNotifier {
   get gameStateService => null;
 
   // Méthodes pour mettre à jour l'état
-  void selectMap(GameMap map) {
+  void selectMap(GameMap? map) {
     _selectedMap = map;
     notifyListeners();
   }

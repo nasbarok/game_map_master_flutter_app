@@ -1,8 +1,10 @@
 import 'package:airsoft_game_map/screens/gamer/team_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/field.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
+import '../../services/player_connection_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/invitation_service.dart';
@@ -51,15 +53,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameStateService>(context);
     final authService = Provider.of<AuthService>(context);
-
-    // Si le terrain n'est pas ouvert, rediriger vers l'écran principal
-    if (!gameState.isTerrainOpen) {
-      // Utiliser un Future.microtask pour éviter de modifier l'UI pendant le build
-      Future.microtask(() {
-        context.go('/gamer');
-      });
-      return const Center(child: CircularProgressIndicator());
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -197,7 +190,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
           Center(
             child: ElevatedButton.icon(
               onPressed: () {
-                _showLeaveConfirmationDialog();
+                _showLeaveConfirmationDialog(gameState.selectedMap!.field!);
               },
               icon: const Icon(Icons.logout),
               label: const Text('Quitter la partie'),
@@ -403,7 +396,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
     );
   }
 
-  void _showLeaveConfirmationDialog() {
+  void _showLeaveConfirmationDialog(Field field) {
+    final playerConnectionService =
+    Provider.of<PlayerConnectionService>(context, listen: false);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -419,7 +414,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.go('/gamer');
+              playerConnectionService.leaveField(field.id!);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
