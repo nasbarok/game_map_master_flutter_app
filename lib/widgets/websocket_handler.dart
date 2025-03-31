@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../models/websocket/websocket_message.dart';
 import '../services/auth_service.dart';
 import '../services/websocket_service.dart';
 import '../services/notifications.dart' as notifications;
@@ -18,7 +20,7 @@ class WebSocketHandler extends StatefulWidget {
 }
 
 class _WebSocketHandlerState extends State<WebSocketHandler> {
-  late StreamSubscription<Map<String, dynamic>> _subscription;
+  late StreamSubscription<WebSocketMessage> _subscription;
 
   @override
   void initState() {
@@ -27,9 +29,7 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
         Provider.of<WebSocketService>(context, listen: false);
 
     // S'abonner au flux de messages WebSocket
-    _subscription = webSocketService.messageStream.listen((message) {
-      _handleWebSocketMessage(message);
-    });
+    _subscription = webSocketService.messageStream.listen(_handleWebSocketMessage as void Function(WebSocketMessage event)?);
 
     // Connecter au WebSocket si ce n'est pas déjà fait
     if (!webSocketService.isConnected) {
@@ -54,44 +54,48 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
     super.dispose();
   }
 
-  void _handleWebSocketMessage(Map<String, dynamic> message) {
+  void _handleWebSocketMessage(WebSocketMessage message) {
     // Traiter les différents types de messages WebSocket
-    final String type = message['type'] as String? ?? '';
+    final type = message.type;
+    final messageToJson = message.toJson();
     print('📥 Message WebSocket reçu: type=$type');
     print('🧾 Contenu: $message');
     switch (type) {
       case 'INVITATION_RECEIVED':
-        _showInvitationDialog(message);
+        _showInvitationDialog(messageToJson);
         break;
       case 'INVITATION_RESPONSE':
-        _handleInvitationResponse(message);
+        _handleInvitationResponse(messageToJson);
         break;
       case 'PLAYER_JOINED':
-        _handlePlayerJoined(message);
+        _handlePlayerJoined(messageToJson);
+        break;
+      case 'PLAYER_KICKED':
+        _handlePlayerKicked(messageToJson);
         break;
       case 'PLAYER_LEFT':
-        _handlePlayerLeft(message);
+        _handlePlayerLeft(messageToJson);
         break;
       case 'TERRAIN_CLOSED':
-        _handleTerrainClosed(message);
+        _handleTerrainClosed(messageToJson);
         break;
       case 'TEAM_UPDATE':
-        _handleTeamUpdate(message);
+        _handleTeamUpdate(messageToJson);
         break;
       case 'SCENARIO_UPDATE':
-        _handleScenarioUpdate(message);
+        _handleScenarioUpdate(messageToJson);
         break;
       case 'TREASURE_FOUND':
-        _handleTreasureFound(message);
+        _handleTreasureFound(messageToJson);
         break;
       case 'GAME_STARTED':
-        _handleGameStarted(message);
+        _handleGameStarted(messageToJson);
         break;
       case 'GAME_ENDED':
-        _handleGameEnded(message);
+        _handleGameEnded(messageToJson);
         break;
       default:
-        print('Message WebSocket non géré: $message');
+        print('Message WebSocket non géré: $messageToJson');
     }
   }
 
@@ -283,8 +287,32 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
   }
 
   void _handleTeamUpdate(Map<String, dynamic> message) {
-    // Mettre à jour l'état de l'équipe dans l'application
-    // Cela pourrait déclencher une mise à jour de l'UI
+    print('🟦 TEAM_UPDATE reçu : $message');
+
+    final payload = message['payload'];
+    final mapId = payload['mapId'];
+    final userId = payload['userId'];
+    final teamId = payload['teamId'];
+    final action = payload['action'];
+    int playerId = payload['playerId'];
+
+    final gameStateService =
+    Provider.of<GameStateService>(context, listen: false);
+    final TeamService teamService = Provider.of<TeamService>(context, listen: false);
+
+    print('🧩 mapId: $mapId');
+    print('👤 userId: $userId');
+    print('🪧 teamId: $teamId');
+    print('🔁 action: $action');
+
+    if (action == 'REMOVE_FROM_TEAM') {
+      print('➖ Suppression du joueur de son équipe');
+      teamService.assignPlayerToTeam(playerId, teamId, mapId);
+    } else {
+      print('❓ Action non supportée ou inconnue : $action');
+    }
+
+    print('✅ TEAM_UPDATE traité');
   }
 
   void _handleScenarioUpdate(Map<String, dynamic> message) {
@@ -349,6 +377,45 @@ class _WebSocketHandlerState extends State<WebSocketHandler> {
         ),
       );
     }
+  }
+  void _handlePlayerKicked(Map<String, dynamic> message) {
+    final payload = message['payload'];
+    final userId = message['playerId'];
+    final _gameStateService =
+        Provider.of<GameStateService>(context, listen: false);
+    final _authService = Provider.of<AuthService>(context, listen: false);
+    final currentUserId = _authService.currentUser?.id;
+
+    // Si c'est l'utilisateur actuel qui a été déconnecté
+    if (userId == currentUserId) {
+      // Réinitialiser l'état du jeu
+      _gameStateService.reset();
+      // Afficher une notification à l'utilisateur
+      _showKickedNotification();
+    } else {
+      // Mettre à jour la liste des joueurs connectés
+      _gameStateService.removeConnectedPlayer(userId);
+    }
+
+    // Afficher une notification
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${payload['username']} a été exclu de la partie'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showKickedNotification() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Vous avez été déconnecté de la partie par l\'hôte'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 5),
+      ),
+    );
   }
 
   @override

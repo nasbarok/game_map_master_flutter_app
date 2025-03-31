@@ -37,6 +37,7 @@ dependencies:
   flutter_datetime_picker_plus: ^2.1.0
   stomp_dart_client: ^0.4.4
   flutter_local_notifications: ^19.0.0
+  get_it: ^7.6.0
 
 dev_dependencies:
   flutter_test:

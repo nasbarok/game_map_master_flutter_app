@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
@@ -5,6 +6,7 @@ import '../../services/game_state_service.dart';
 import '../../services/invitation_service.dart';
 import '../../services/team_service.dart';
 import '../../services/api_service.dart';
+import '../../services/websocket_service.dart';
 
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({Key? key}) : super(key: key);
@@ -136,6 +138,55 @@ class _PlayersScreenState extends State<PlayersScreen> {
     if (mapId != null) {
       // Utiliser null au lieu de 0 pour indiquer "pas d'équipe"
       teamService.removePlayerFromTeam(playerId, mapId);
+    }
+  }
+
+  // Dans _PlayersScreenState
+  Future<void> kickPlayer(int playerId, String playerName) async {
+    try {
+      final gameStateService =
+          Provider.of<GameStateService>(context, listen: false);
+      final mapId = gameStateService.selectedMap?.id;
+
+      if (mapId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur: Aucune carte sélectionnée'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final apiService = Provider.of<ApiService>(context, listen: false);
+      final webSocketService =
+          Provider.of<WebSocketService>(context, listen: false);
+
+      // Appel à l'API pour déconnecter le joueur
+      await apiService.post('field/$mapId/players/$playerId/kick', {});
+
+      // Envoyer un message WebSocket pour notifier tous les clients
+      webSocketService.sendMessage(
+          '/app/player-kicked',
+          {
+            'mapId': mapId,
+            'playerId': playerId,
+          } as WebSocketMessage);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$playerName a été déconnecté de la partie'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('❌ Erreur lors de la déconnexion du joueur: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de la déconnexion du joueur: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -298,22 +349,28 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     itemCount: pendingInvitations.length,
                     itemBuilder: (context, index) {
                       final invitation = pendingInvitations[index];
+                      final invitationToJson = invitation.toJson();
+                      final payload = invitationToJson['payload'] ?? {};
+                      // Accéder au payload de manière sécurisée
+                      final fromUsername = payload['fromUsername'] ?? 'Inconnu';
+                      final mapName = payload['mapName'] ?? 'Carte inconnue';
                       return Card(
                         child: ListTile(
-                          title: Text(
-                              'Invitation de ${invitation['fromUsername']}'),
-                          subtitle: Text('Carte: ${invitation['mapName']}'),
+                          title: Text('Invitation de $fromUsername'),
+                          subtitle: Text('Carte: $mapName'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               TextButton(
-                                onPressed: () => invitationService
-                                    .respondToInvitation(context,invitation, false),
+                                onPressed: () =>
+                                    invitationService.respondToInvitation(
+                                        context, invitationToJson, false),
                                 child: const Text('Refuser'),
                               ),
                               ElevatedButton(
-                                onPressed: () => invitationService
-                                    .respondToInvitation(context,invitation, true),
+                                onPressed: () =>
+                                    invitationService.respondToInvitation(
+                                        context, invitationToJson, true),
                                 child: const Text('Accepter'),
                               ),
                             ],
@@ -344,14 +401,24 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     itemCount: sentInvitations.length,
                     itemBuilder: (context, index) {
                       final invitation = sentInvitations[index];
-                      final status = invitation['status'] ?? 'pending';
+                      final invitationToJson = invitation.toJson();
+                      final payload = invitationToJson['payload'] ?? {};
+                      final status = invitationToJson['status'] ?? 'pending';
+                      final toUsername = payload['toUsername'] ?? 'Inconnu';
+
+                      String statusText;
+                      if (status == 'pending') {
+                        statusText = 'En attente';
+                      } else if (status == 'accepted') {
+                        statusText = 'Acceptée';
+                      } else {
+                        statusText = 'Refusée';
+                      }
 
                       return Card(
                         child: ListTile(
-                          title:
-                              Text('Invitation à ${invitation['toUsername']}'),
-                          subtitle: Text(
-                              'Statut: ${status == 'pending' ? 'En attente' : status == 'accepted' ? 'Acceptée' : 'Refusée'}'),
+                          title: Text('Invitation à $toUsername'),
+                          subtitle: Text('Statut: $statusText'),
                           trailing: status == 'pending'
                               ? const Icon(Icons.hourglass_empty)
                               : status == 'accepted'
@@ -367,94 +434,131 @@ class _PlayersScreenState extends State<PlayersScreen> {
     );
   }
 
+  Widget _buildUnassignedPlayerTile(Map<String, dynamic> player,
+      List<dynamic> teams, TeamService teamService, int? mapId) {
+    return ListTile(
+      leading: const CircleAvatar(
+        backgroundColor: Colors.grey,
+        child: Icon(Icons.person, color: Colors.white),
+      ),
+      title: Text(player['username'] ?? 'Joueur inconnu'),
+      subtitle: const Text('Non assigné'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DropdownButton<int>(
+            hint: const Text('Assigner'),
+            onChanged: (teamId) {
+              if (teamId != null && mapId != null) {
+                teamService.assignPlayerToTeam(player['id'], teamId, mapId);
+              }
+            },
+            items: [
+              for (var team in teams)
+                DropdownMenuItem(
+                  value: team.id,
+                  child: Text(team.name),
+                ),
+            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.exit_to_app, color: Colors.red),
+            tooltip: 'Déconnecter le joueur',
+            onPressed: () => kickPlayer(player['id'], player['username']),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeamPlayerTile(
+      Map<String, dynamic> player,
+      int teamId,
+      String teamName,
+      TeamService teamService,
+      int? mapId,
+      List<dynamic> teams) {
+    return ListTile(
+      leading: const CircleAvatar(
+        backgroundColor: Colors.blue,
+        child: Icon(Icons.person, color: Colors.white),
+      ),
+      title: Text(player['username'] ?? 'Joueur inconnu'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.group_remove),
+            tooltip: 'Retirer de l\'équipe',
+            onPressed: () {
+              if (mapId != null) {
+                teamService.removePlayerFromTeam(player['id'], mapId);
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.exit_to_app, color: Colors.red),
+            tooltip: 'Déconnecter le joueur',
+            onPressed: () => kickPlayer(player['id'], player['username']),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTeamsTab(TeamService teamService) {
     final teams = teamService.teams;
     final gameStateService = Provider.of<GameStateService>(context);
     final connectedPlayers = gameStateService.connectedPlayersList;
     final mapId = getCurrentMapId(context);
 
-    // Modification de la logique pour déterminer les joueurs sans équipe
     final unassignedPlayers = connectedPlayers.where((player) {
-      // Un joueur est considéré comme non assigné si :
-      // 1. Il n'a pas de teamId OU
-      // 2. Son teamId n'existe pas dans la liste des équipes OU
-      // 3. Il n'est pas présent dans la liste des joueurs de son équipe
-
-      if (player['teamId'] == null) {
-        return true; // Pas de teamId, donc non assigné
-      }
-
-      // Vérifier si l'équipe existe
+      if (player['teamId'] == null) return true;
       final teamIndex = teams.indexWhere((team) => team.id == player['teamId']);
-      if (teamIndex < 0) {
-        return true; // L'équipe n'existe pas, donc considéré comme non assigné
-      }
-
-      // Vérifier si le joueur est dans la liste des joueurs de l'équipe
+      if (teamIndex < 0) return true;
       final isInTeam =
-          teams[teamIndex].players.any((p) => p['id'] == player['id']);
-      return !isInTeam; // Si pas dans l'équipe, alors non assigné
+      teams[teamIndex].players.any((p) => p['id'] == player['id']);
+      return !isInTeam;
     }).toList();
 
-/*    print('📋 connectedPlayers: $connectedPlayers');
-    print('📋 teams: ${teams.map((t) => {'id': t.id, 'players': t.players})}');
-    print('📋 unassignedPlayers: $unassignedPlayers');
-    print('🔍 Détail des équipes:');
-    for (var team in teams) {
-      print('  📋 Équipe ${team.name} (ID: ${team.id}):');
-      print('    👥 Joueurs: ${team.players.map((p) => '${p['username']} (ID: ${p['id']})').join(', ')}');
-    }
-
-    print('🔍 Détail des joueurs connectés:');
-    for (var player in connectedPlayers) {
-      print('  👤 Joueur ${player['username']} (ID: ${player['id']}):');
-      print('    🏷️ TeamId: ${player['teamId']}, TeamName: ${player['teamName']}');
-    }*/
-    // Reste du code d'affichage...
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ✅ Titre + bouton
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Équipes',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text('Équipes', style: Theme.of(context).textTheme.titleLarge),
               ElevatedButton.icon(
                 onPressed: () {
-                  // Afficher une boîte de dialogue pour créer une équipe
+                  final nameController = TextEditingController();
                   showDialog(
                     context: context,
-                    builder: (context) {
-                      final nameController = TextEditingController();
-                      return AlertDialog(
-                        title: const Text('Créer une équipe'),
-                        content: TextField(
-                          controller: nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nom de l\'équipe',
-                          ),
+                    builder: (context) => AlertDialog(
+                      title: const Text('Créer une équipe'),
+                      content: TextField(
+                        controller: nameController,
+                        decoration:
+                        const InputDecoration(labelText: 'Nom de l\'équipe'),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Annuler'),
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Annuler'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (nameController.text.isNotEmpty) {
-                                teamService.createTeam(nameController.text);
-                                Navigator.of(context).pop();
-                              }
-                            },
-                            child: const Text('Créer'),
-                          ),
-                        ],
-                      );
-                    },
+                        ElevatedButton(
+                          onPressed: () {
+                            if (nameController.text.isNotEmpty) {
+                              teamService.createTeam(nameController.text);
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: const Text('Créer'),
+                        ),
+                      ],
+                    ),
                   );
                 },
                 icon: const Icon(Icons.add),
@@ -463,359 +567,200 @@ class _PlayersScreenState extends State<PlayersScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          (teams.isEmpty && unassignedPlayers.isEmpty)
-              ? const Center(
-                  child: Text(
-                    'Aucune équipe créée',
-                    style: TextStyle(color: Colors.grey),
+
+          // ✅ Liste scrollable dans Expanded dans Column (et plus dans Row)
+          Expanded(
+            child: (teams.isEmpty && unassignedPlayers.isEmpty)
+                ? const Center(
+              child: Text(
+                'Aucune équipe créée',
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
+                : ListView(
+              children: [
+                if (unassignedPlayers.isNotEmpty) ...[
+                  Text('Joueurs sans équipe',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  ...unassignedPlayers.map((player) =>
+                      _buildUnassignedPlayerTile(
+                          player, teams, teamService, mapId)),
+                  const Divider(),
+                ],
+                ...teams.map((team) => _buildTeamCard(
+                  team,
+                  teams,
+                  teamService,
+                  mapId,
+                  connectedPlayers,
+                )),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ✅ Bouton en bas
+          ElevatedButton.icon(
+            onPressed: () {
+              final nameController = TextEditingController();
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Sauvegarder la configuration'),
+                  content: TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nom de la configuration',
+                    ),
                   ),
-                )
-              : Expanded(
-                  child: ListView(children: [
-                    if (unassignedPlayers.isNotEmpty) ...[
-                      Text(
-                        'Joueurs sans équipe',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      ...unassignedPlayers.map((player) => ListTile(
-                            leading:
-                                const CircleAvatar(child: Icon(Icons.person)),
-                            title: Text(player['username'] ?? 'Joueur'),
-                            trailing: DropdownButton<int>(
-                              hint: const Text("Assigner"),
-                              onChanged: (teamId) {
-                                if (teamId != null && mapId != null) {
-                                  teamService.assignPlayerToTeam(
-                                      player['id'], teamId, mapId);
-                                }
-                              },
-                              items: teams
-                                  .map((t) => DropdownMenuItem<int>(
-                                        value: t.id,
-                                        child: Text(t.name),
-                                      ))
-                                  .toList(),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Annuler'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (nameController.text.isNotEmpty) {
+                          teamService.saveCurrentTeamConfiguration(
+                              nameController.text);
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Configuration sauvegardée'),
+                              backgroundColor: Colors.green,
                             ),
-                          )),
-                      const Divider(),
+                          );
+                        }
+                      },
+                      child: const Text('Sauvegarder'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            icon: const Icon(Icons.save),
+            label: const Text('Sauvegarder configuration'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildTeamCard(
+    dynamic team,
+    List<dynamic> allTeams,
+    TeamService teamService,
+    int? mapId,
+    List<dynamic> connectedPlayers,
+  ) {
+    return Card(
+      child: ExpansionTile(
+        title: Row(
+          children: [
+            Text(team.name),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.edit, size: 16),
+              onPressed: () {
+                final nameController = TextEditingController(text: team.name);
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Renommer l\'équipe'),
+                    content: TextField(
+                      controller: nameController,
+                      decoration:
+                          const InputDecoration(labelText: 'Nouveau nom'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Annuler'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (nameController.text.isNotEmpty) {
+                            teamService.renameTeam(
+                                team.id, nameController.text);
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: const Text('Renommer'),
+                      ),
                     ],
-                    // ✅ Liste des équipes
-                    ...teams.map(
-                      (team) => Card(
-                        child: ExpansionTile(
-                          title: Row(
-                            children: [
-                              Text(team.name),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 16),
-                                onPressed: () {
-                                  final nameController =
-                                      TextEditingController(text: team.name);
-                                  // Afficher une boîte de dialogue pour renommer l'équipe
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text('Renommer l\'équipe'),
-                                        content: TextField(
-                                          controller: nameController,
-                                          decoration: const InputDecoration(
-                                            labelText: 'Nouveau nom',
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                            child: const Text('Annuler'),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              if (nameController
-                                                  .text.isNotEmpty) {
-                                                teamService.renameTeam(team.id,
-                                                    nameController.text);
-                                                Navigator.of(context).pop();
-                                              }
-                                            },
-                                            child: const Text('Renommer'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, size: 16),
-                                onPressed: () {
-                                  teamService.deleteTeam(team.id);
-                                },
-                              ),
-                            ],
-                          ),
-                          subtitle: Text('${team.players.length} joueurs'),
-                          children: [
-                            ...team.players.map((player) => ListTile(
-                                  leading: const CircleAvatar(
-                                    child: Icon(Icons.person),
-                                  ),
-                                  title: Text(player['username'] ?? 'Joueur'),
-                                  trailing: PopupMenuButton<String>(
-                                    onSelected: (value) {
-                                      if (value == 'remove') {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) => AlertDialog(
-                                            title:
-                                                const Text("Retirer le joueur"),
-                                            content: Text(
-                                                "Retirer ${player['username']} de l'équipe ${team.name} ?"),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  removePlayerFromTeam(
-                                                      player['id']);
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text('Annuler'),
-                                              ),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  final mapId =
-                                                      getCurrentMapId(context);
-                                                  if (mapId != null) {
-                                                    teamService
-                                                        .assignPlayerToTeam(
-                                                            player['id'],
-                                                            0,
-                                                            mapId);
-                                                  } // ID 0 → aucune équipe
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text('Retirer'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      } else {
-                                        final mapId = getCurrentMapId(context);
-                                        final targetTeam = teams.firstWhere(
-                                            (t) => t.id.toString() == value);
-                                        if (mapId != null) {
-                                          teamService.assignPlayerToTeam(
-                                              player['id'], targetTeam.id, 0);
-                                        }
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, size: 16),
+              onPressed: () {
+                teamService.deleteTeam(team.id);
+              },
+            ),
+          ],
+        ),
+        subtitle: Text('${team.players.length} joueurs'),
+        children: [
+          ...team.players.map(
+            (player) => _buildTeamPlayerTile(
+                player, team.id, team.name, teamService, mapId, allTeams),
+          ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Ajouter des joueurs'),
+                    content: SizedBox(
+                      width: double.maxFinite,
+                      height: 300,
+                      child: ListView.builder(
+                        itemCount: connectedPlayers.length,
+                        itemBuilder: (context, index) {
+                          final player = connectedPlayers[index];
+                          bool isInTeam = allTeams.any((t) =>
+                              t.players.any((p) => p['id'] == player['id']));
+
+                          return ListTile(
+                            leading: const CircleAvatar(
+                              child: Icon(Icons.person),
+                            ),
+                            title: Text(player['username'] ?? 'Joueur inconnu'),
+                            trailing: isInTeam
+                                ? const Text('Déjà dans une équipe')
+                                : ElevatedButton(
+                                    onPressed: () {
+                                      if (mapId != null) {
+                                        teamService.assignPlayerToTeam(
+                                            player['id'], team.id, mapId);
+                                        Navigator.of(context).pop();
                                       }
                                     },
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem<String>(
-                                        value: 'remove',
-                                        child: Text('Retirer de l\'équipe'),
-                                      ),
-                                      const PopupMenuDivider(),
-                                      ...teams
-                                          .where((t) => t.id != team.id)
-                                          .map((t) => PopupMenuItem<String>(
-                                                value: t.id.toString(),
-                                                child: Text(
-                                                    'Aller dans ${t.name}'),
-                                              )),
-                                    ],
+                                    child: const Text('Ajouter'),
                                   ),
-                                )),
-                            const Divider(),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  // Afficher une boîte de dialogue pour ajouter des joueurs
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title:
-                                            const Text('Ajouter des joueurs'),
-                                        content: SizedBox(
-                                          width: double.maxFinite,
-                                          height: 300,
-                                          child: ListView.builder(
-                                            itemCount: connectedPlayers.length,
-                                            itemBuilder: (context, index) {
-                                              final player =
-                                                  connectedPlayers[index];
-                                              // Vérifier si le joueur est déjà dans une équipe
-                                              bool isInTeam = false;
-                                              for (var t in teams) {
-                                                if (t.players.any((p) =>
-                                                    p['id'] == player['id'])) {
-                                                  isInTeam = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              return ListTile(
-                                                leading: const CircleAvatar(
-                                                  child: Icon(Icons.person),
-                                                ),
-                                                title: Text(
-                                                    player['username'] ??
-                                                        'Joueur'),
-                                                trailing: isInTeam
-                                                    ? const Text(
-                                                        'Déjà dans une équipe')
-                                                    : ElevatedButton(
-                                                        onPressed: () {
-                                                          final mapId =
-                                                              getCurrentMapId(
-                                                                  context);
-                                                          if (mapId != null) {
-                                                            teamService
-                                                                .assignPlayerToTeam(
-                                                                    player[
-                                                                        'id'],
-                                                                    team.id,
-                                                                    mapId);
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          }
-                                                        },
-                                                        child: const Text(
-                                                            'Ajouter'),
-                                                      ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                            child: const Text('Fermer'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                icon: const Icon(Icons.person_add),
-                                label: const Text('Ajouter des joueurs'),
-                              ),
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
-                  ]),
-                ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Afficher une boîte de dialogue pour sauvegarder la configuration
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      final nameController = TextEditingController();
-                      return AlertDialog(
-                        title: const Text('Sauvegarder la configuration'),
-                        content: TextField(
-                          controller: nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nom de la configuration',
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Annuler'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (nameController.text.isNotEmpty) {
-                                teamService.saveCurrentTeamConfiguration(
-                                    nameController.text);
-                                Navigator.of(context).pop();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Configuration sauvegardée'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              }
-                            },
-                            child: const Text('Sauvegarder'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                icon: const Icon(Icons.save),
-                label: const Text('Sauvegarder configuration'),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Afficher une boîte de dialogue pour charger une configuration
-                  teamService.loadPreviousTeamConfigurations().then((_) {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('Charger une configuration'),
-                          content: SizedBox(
-                            width: double.maxFinite,
-                            height: 300,
-                            child: ListView.builder(
-                              itemCount:
-                                  teamService.previousTeamConfigurations.length,
-                              itemBuilder: (context, index) {
-                                final config = teamService
-                                    .previousTeamConfigurations[index];
-                                return ListTile(
-                                  title: Text(config.name),
-                                  subtitle:
-                                      Text('${config.players.length} joueurs'),
-                                  trailing: ElevatedButton(
-                                    onPressed: () {
-                                      teamService
-                                          .applyTeamConfiguration(config.id);
-                                      Navigator.of(context).pop();
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content:
-                                              Text('Configuration appliquée'),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                    },
-                                    child: const Text('Appliquer'),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Fermer'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  });
-                },
-                icon: const Icon(Icons.folder_open),
-                label: const Text('Charger configuration'),
-              ),
-            ],
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Fermer'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.person_add),
+              label: const Text('Ajouter des joueurs'),
+            ),
           ),
         ],
       ),

@@ -1,7 +1,9 @@
 import 'package:airsoft_game_map/services/game_state_service.dart';
+import 'package:airsoft_game_map/services/navigation_service.dart';
 import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'app.dart';
@@ -22,6 +24,12 @@ void main() async {
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
+  // Initialiser le service de navigation global
+  GetIt.I.registerSingleton<NavigationService>(NavigationService());
+
+  // Tu peux maintenant récupérer le navigatorKey comme ça :
+  final navigatorKey = GetIt.I<NavigationService>().navigatorKey;
+
   runApp(
     MultiProvider(
       providers: [
@@ -37,8 +45,8 @@ void main() async {
         ),
 
         /// GameStateService dépend de ApiService
-        ProxyProvider<ApiService, GameStateService>(
-          update: (_, apiService, __) => GameStateService(apiService),
+        ProxyProvider2<ApiService, WebSocketService, GameStateService>(
+          update: (_, apiService, wsService, __) => GameStateService(apiService, wsService),
         ),
 
         /// TeamService dépend de ApiService et GameStateService
@@ -58,7 +66,7 @@ void main() async {
         /// WebSocketService dépend de AuthService, GameStateService, TeamService
         ProxyProvider3<AuthService, GameStateService, TeamService, WebSocketService>(
           update: (_, authService, gameStateService, teamService, __) =>
-              WebSocketService(authService, gameStateService, teamService),
+              WebSocketService(authService, gameStateService, teamService, navigatorKey),
         ),
 
       ],

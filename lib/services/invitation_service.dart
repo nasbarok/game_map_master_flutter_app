@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as client;
 import 'package:provider/provider.dart';
@@ -11,25 +12,23 @@ import '../../services/websocket_service.dart';
 import '../models/game_map.dart';
 import '../models/invitation.dart';
 
-
 class InvitationService extends ChangeNotifier {
   final WebSocketService _webSocketService;
   final AuthService _authService;
   final GameStateService _gameStateService;
 
-  List<Map<String, dynamic>> _pendingInvitations = [];
-  List<Map<String, dynamic>> _sentInvitations = [];
-  StreamSubscription<Map<String, dynamic>>? _messageSubscription;
+  List<WebSocketMessage> _pendingInvitations = [];
+  List<WebSocketMessage> _sentInvitations = [];
+  StreamSubscription<WebSocketMessage>? _messageSubscription;
 
   InvitationService(this._webSocketService, this._authService,
       this._gameStateService) {
-    _messageSubscription =
-        _webSocketService.messageStream.listen(_handleWebSocketMessage);
+    _messageSubscription = _webSocketService.messageStream.listen(_handleWebSocketMessage as void Function(WebSocketMessage event)?);
   }
 
-  List<Map<String, dynamic>> get pendingInvitations => _pendingInvitations;
+  List<WebSocketMessage> get pendingInvitations => _pendingInvitations;
 
-  List<Map<String, dynamic>> get sentInvitations => _sentInvitations;
+  List<WebSocketMessage> get sentInvitations => _sentInvitations;
 
   void Function(Map<String, dynamic> invitation)? onInvitationReceivedDialog;
 
@@ -59,7 +58,7 @@ class InvitationService extends ChangeNotifier {
       'mapName': _gameStateService.selectedMap!.name,
     };
 
-    final invitation = {
+    final jsonInvitation = {
       'type': 'GAME_INVITATION',
       'payload': invitationPayload,
       'timestamp': DateTime
@@ -67,85 +66,127 @@ class InvitationService extends ChangeNotifier {
           .millisecondsSinceEpoch,
     };
 
+    final invitation = WebSocketMessage.fromJson(jsonInvitation);
+
     // Envoyer via WebSocket
-    await _webSocketService.sendMessage('/app/invitation', invitation);
+    await _webSocketService.sendMessage(
+        '/app/invitation', invitation);
 
     // Ajouter à la liste des invitations envoyées
     _sentInvitations.add(invitation);
     notifyListeners();
   }
 
-  void _handleWebSocketMessage(Map<String, dynamic> message) {
-    if (message['type'] == 'GAME_INVITATION') {
+  void _handleWebSocketMessage(WebSocketMessage message) {
+    final messageJson = message.toJson();
+    final type = messageJson['type'];
+    final payload = messageJson['payload'];
+    if (type == 'GAME_INVITATION') {
       print('📬 Invitation de jeu reçue');
 
-      final payload = message['payload'];
 
       print('🧾 Payload invitation : $payload');
+      // Vérifier que toUserId existe et correspond à l'utilisateur actuel
+      final toUserId = payload['toUserId'];
+      final currentUserId = _authService.currentUser?.id;
 
-      if (payload['toUserId'] == _authService.currentUser!.id) {
-        _pendingInvitations.add(message);
-        notifyListeners();
-
-        // ➕ Affichage du dialogue si défini
-        if (onInvitationReceivedDialog != null) {
-          onInvitationReceivedDialog!(message);
-        }
-      }
-    } else if (message['type'] == 'INVITATION_RESPONSE') {
-      print('📬 Réponse à une invitation reçue');
-
-      final response = message['payload'];
-
-      print('🧾 Payload réponse : $response');
-
-      if (response['fromUserId'] == _authService.currentUser!.id) {
-        final index = _sentInvitations.indexWhere(
-              (inv) =>
-          inv['payload']['toUserId'] == response['toUserId'] &&
-              inv['payload']['mapId'] == response['mapId'],
-        );
-
-        if (index >= 0) {
-          _sentInvitations[index]['status'] =
-          response['accepted'] ? 'accepted' : 'declined';
+      if (toUserId != null &&
+          currentUserId != null &&
+          toUserId == currentUserId) {
+        {
+          _pendingInvitations.add(message);
           notifyListeners();
+
+          // ➕ Affichage du dialogue si défini
+          if (onInvitationReceivedDialog != null) {
+            onInvitationReceivedDialog!(messageJson);
+          }
         }
-      }
-    } else if (message['type'] == 'PLAYER_JOINED') {
-      // Nouveau joueur a rejoint la partie
-      final payload = message['payload'];
-      print('👤 Joueur rejoint : ${payload['username']}');
+      } else if (messageJson['type'] == 'INVITATION_RESPONSE') {
+        print('📬 Réponse à une invitation reçue');
 
-      // Ajouter le joueur à la liste des joueurs connectés
-      final player = {
-        'id': payload['playerId'],
-        'username': payload['username'],
-        'teamId': payload['teamId'],
-      };
+        final response = messageJson['payload'];
 
-      _gameStateService.addConnectedPlayer(player);
-    } else if (message['type'] == 'PLAYER_LEFT') {
-      // Un joueur a quitté la partie
-      final payload = message['payload'];
-      print('👋 Joueur parti : ${payload['username']}');
+        print('🧾 Payload réponse : $response');
 
-      // Supprimer le joueur de la liste des joueurs connectés
-      _gameStateService.removeConnectedPlayer(payload['playerId']);
-    } else if (message['type'] == 'TERRAIN_CLOSED') {
-      // Le terrain a été fermé
-      print('🚪 Terrain fermé');
+        final fromUserId = response['fromUserId'];
+        final currentUserId = _authService.currentUser?.id;
 
-      // Si l'utilisateur n'est pas l'hôte, il doit être déconnecté
-      if (!_authService.currentUser!.hasRole('HOST')) {
-        _gameStateService.reset();
+        if (fromUserId != null &&
+            currentUserId != null &&
+            fromUserId == currentUserId) {
+          final toUserId = response['toUserId'];
+          final mapId = response['mapId'];
+          if (toUserId != null && mapId != null) {}
+          final index = _sentInvitations.indexWhere(
+                (inv) {
+                  final invToJson = inv.toJson();
+              final invPayload = invToJson['payload'] ?? {};
+              return invPayload['toUserId'] == toUserId &&
+                  invPayload['mapId'] == mapId;
+            },
+          );
+
+          if (index >= 0) {
+            final invitation = _sentInvitations[index];
+            final invitationToJson = invitation.toJson();
+            invitationToJson['status'] =
+            response['accepted'] == true ? 'accepted' : 'declined';
+            notifyListeners();
+          }
+        } else if (messageJson['type'] == 'PLAYER_JOINED') {
+          // Nouveau joueur a rejoint la partie
+          final payload = messageJson['payload'];
+          print('👤 Joueur rejoint : ${payload['username']}');
+
+          // Ajouter le joueur à la liste des joueurs connectés
+          final player = {
+            'id': payload['playerId'],
+            'username': payload['username'],
+            'teamId': payload['teamId'],
+          };
+
+          _gameStateService.addConnectedPlayer(player);
+        } else if (messageJson['type'] == 'PLAYER_LEFT') {
+          // Un joueur a quitté la partie
+          final payload = messageJson['payload'];
+          print('👋 Joueur parti : ${payload['username']}');
+
+          // Supprimer le joueur de la liste des joueurs connectés
+          _gameStateService.removeConnectedPlayer(payload['playerId']);
+        } else if (messageJson['type'] == 'FIELD_CLOSED') {
+          // Le terrain a été fermé
+          print('🚪 Terrain fermé');
+
+          // Si l'utilisateur n'est pas l'hôte, il doit être déconnecté
+          if (!_authService.currentUser!.hasRole('HOST')) {
+            _gameStateService.reset();
+          }
+        }
       }
     }
   }
 
-  Future<void> respondToInvitation(BuildContext context,Map<String, dynamic> invitation,
-      bool accept) async {
-    final payload = invitation['payload'];
+  Future<void> respondToInvitation(BuildContext context,
+      Map<String, dynamic> invitation, bool accept) async {
+    final payload = invitation['payload'] ?? {};
+    // Vérifier que les valeurs nécessaires existent
+    final toUserId = payload['toUserId'];
+    final fromUserId = payload['fromUserId'];
+    final mapId = payload['mapId'];
+    final fieldId = payload['fieldId'];
+
+    if (toUserId == null || fromUserId == null || mapId == null) {
+      print('❌ Données d\'invitation incomplètes');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur: Données d\'invitation incomplètes'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final apiService = Provider.of<ApiService>(context, listen: false);
     final response = {
       'type': 'INVITATION_RESPONSE',
@@ -164,70 +205,102 @@ class InvitationService extends ChangeNotifier {
     print('📨 Envoi via STOMP vers /app/invitation-response...');
 
     // ✅ Envoi via STOMP avec destination explicite
-    await _webSocketService.sendMessage('/app/invitation-response', response);
+    await _webSocketService.sendMessage(
+        '/app/invitation-response', response as WebSocketMessage);
 
     print('✅ Réponse envoyée avec succès');
 
     // Si l'invitation est acceptée, mettre à jour l'état du jeu
     if (accept) {
       // Pour le joueur qui accepte l'invitation
-      if (_authService.currentUser!.id == payload['toUserId']) {
+      final currentUserId = _authService.currentUser?.id;
+      if (currentUserId != null && currentUserId == toUserId) {
         // Mettre à jour l'état du jeu avec les informations de la carte
+        final mapName = payload['mapName'] ?? 'Carte sans nom';
+        final mapId = payload['mapId'];
         final map = GameMap(
-          id: payload['mapId'],
-          name: payload['mapName'],
+          id: mapId,
+          name: mapName,
           imageUrl: '', // À compléter si disponible
           description: '', // À compléter si disponible
         );
-        final mapId = map.id;
-        print('🔁 Mise à jour GameMap via PUT /maps/${mapId}');
-        final mapResponse = await apiService.get('maps/${mapId}');
-        final selectedMap = GameMap.fromJson(mapResponse);
 
-        _gameStateService.selectMap(selectedMap);
-        final field = selectedMap.field;
-        if (field != null) {
-          _gameStateService.handleTerrainOpen(field, apiService);
-        } else {
-          print("❌ La carte sélectionnée n'est pas liée à un terrain.");
+        try {
+          print('🔁 Mise à jour GameMap via PUT /maps/${mapId}');
+          final mapResponse = await apiService.get('maps/${mapId}');
+          if (mapResponse != null) {
+            final selectedMap = GameMap.fromJson(mapResponse);
+            _gameStateService.selectMap(selectedMap);
+
+            final field = selectedMap.field;
+            if (field != null) {
+              _gameStateService.handleTerrainOpen(field, apiService);
+
+              // Ajouter le joueur à la liste des joueurs connectés
+              final currentUsername =
+                  _authService.currentUser?.username ?? 'Joueur';
+              final player = {
+                'id': currentUserId,
+                'username': currentUsername,
+                'teamId': null, // Pas d'équipe par défaut
+              };
+              _gameStateService.addConnectedPlayer(player);
+
+              // Envoyer un message PLAYER_JOINED via WebSocket
+              final joinMessage = {
+                'type': 'PLAYER_JOINED',
+                'payload': {
+                  'playerId': currentUserId,
+                  'username': currentUsername,
+                  'mapId': mapId,
+                  'teamId': null,
+                }
+              };
+
+              _webSocketService.sendMessage(
+                  '/app/player-joined', joinMessage as WebSocketMessage);
+              _webSocketService.subscribeToField(field!.id!);
+            } else {
+              print("❌ La carte sélectionnée n'est pas liée à un terrain.");
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Aucun terrain associé à cette carte."),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          } else {
+            print("❌ Impossible de récupérer les détails de la carte.");
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content:
+                Text("Impossible de récupérer les détails de la carte."),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } catch (e) {
+          print(
+              '❌ Erreur lors de la récupération des détails de la carte : $e');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Aucun terrain associé à cette carte."),
+              content: Text(
+                  'Erreur lors de la récupération des détails de la carte'),
               backgroundColor: Colors.red,
             ),
           );
+          return;
         }
-        // Ajouter le joueur à la liste des joueurs connectés
-        final player = {
-          'id': _authService.currentUser!.id,
-          'username': _authService.currentUser!.username,
-          'teamId': null, // Pas d'équipe par défaut
-        };
-
-        _gameStateService.addConnectedPlayer(player);
-
-        // Envoyer un message PLAYER_JOINED via WebSocket
-        final joinMessage = {
-          'type': 'PLAYER_JOINED',
-          'payload': {
-            'playerId': _authService.currentUser!.id,
-            'username': _authService.currentUser!.username,
-            'mapId': payload['mapId'],
-            'teamId': null,
-          }
-        };
-
-        _webSocketService.sendMessage('/app/player-joined', joinMessage);
-        _webSocketService.subscribeToField(field!.id!);
       }
     }
 
     // Retirer de la liste des invitations en attente
-    _pendingInvitations.removeWhere(
-            (inv) =>
-        inv['payload']['fromUserId'] == payload['fromUserId'] &&
-            inv['payload']['mapId'] == payload['mapId']
-    );
+    _pendingInvitations.removeWhere((inv) {
+      final invToJson = inv.toJson();
+      final invPayload = invToJson['payload'] ?? {};
+      return invPayload['fromUserId'] == fromUserId &&
+          invPayload['mapId'] == mapId;
+    });
 
     notifyListeners();
   }
@@ -240,7 +313,9 @@ class InvitationService extends ChangeNotifier {
 
     if (response.statusCode == 200) {
       final List<dynamic> invitationsJson = jsonDecode(response.body);
-      return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
+      return invitationsJson
+          .map((json) => Invitation.fromJson(json))
+          .toList();
     } else {
       throw Exception('Failed to get invitations: ${response.body}');
     }
@@ -254,13 +329,15 @@ class InvitationService extends ChangeNotifier {
 
     if (response.statusCode == 200) {
       final List<dynamic> invitationsJson = jsonDecode(response.body);
-      return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
+      return invitationsJson
+          .map((json) => Invitation.fromJson(json))
+          .toList();
     } else {
       throw Exception('Failed to get pending invitations: ${response.body}');
     }
   }
 
-// Accepter une invitation
+  // Accepter une invitation
   Future<Invitation> acceptInvitation(int invitationId) async {
     final url = '$baseUrl/api/invitations/$invitationId/accept';
 
@@ -276,7 +353,7 @@ class InvitationService extends ChangeNotifier {
     }
   }
 
-// Refuser une invitation
+  // Refuser une invitation
   Future<Invitation> declineInvitation(int invitationId) async {
     final url = '$baseUrl/api/invitations/$invitationId/decline';
 
@@ -297,5 +374,4 @@ class InvitationService extends ChangeNotifier {
     _messageSubscription?.cancel();
     super.dispose();
   }
-
 }

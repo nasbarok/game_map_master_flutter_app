@@ -1,4 +1,6 @@
+import 'package:airsoft_game_map/services/navigation_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -90,6 +92,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final navigationService = GetIt.instance<NavigationService>();
     return MultiProvider(
       providers: [
         Provider<http.Client>(create: (_) => http.Client()),
@@ -98,14 +101,14 @@ class App extends StatelessWidget {
           update: (_, authService, __) => ApiService(authService, http.Client()),
         ),
         ChangeNotifierProxyProvider<AuthService, WebSocketService>(
-          create: (_) => WebSocketService(null, null, null), // constructeur temporaire vide ou par défaut
+          create: (_) => WebSocketService(null, null, null,navigationService.navigatorKey ), // constructeur temporaire vide ou par défaut
           update: (_, authService, previous) => previous!..updateAuthService(authService),
         ),
         ChangeNotifierProvider(create: (_) => GameStateService(ApiService(AuthService(), http.Client()))),
         ChangeNotifierProxyProvider3<WebSocketService, AuthService, GameStateService, InvitationService>(
           create: (_) => InvitationService(
             // Valeurs par défaut temporaires, seront écrasées dans update
-            Provider.debugCheckInvalidValueType != null ? WebSocketService(null,null,null ) : throw UnimplementedError(),
+            Provider.debugCheckInvalidValueType != null ? WebSocketService(null,null,null,navigationService.navigatorKey ) : throw UnimplementedError(),
             AuthService(),
             GameStateService(ApiService(AuthService(), http.Client())),
           ),

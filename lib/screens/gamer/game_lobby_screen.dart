@@ -34,7 +34,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
 
       if (mapId != null) {
         teamService.loadConnectedPlayers(); // facultatif si ça marche sans paramètre
-        teamService.loadTeams(mapId);       // utiliser l’ID de la carte active
+        teamService.loadTeams(mapId);       // utiliser l’ID de la carte du terrain actif
       } else {
         print('❌ Aucune carte sélectionnée, impossible de charger les équipes.');
       }
@@ -44,15 +44,19 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameStateService>(context);
     final authService = Provider.of<AuthService>(context);
+
+    // Si le terrain est fermé, rediriger vers GamerDashboardScreen
+    if (!gameState.isTerrainOpen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacementNamed('/gamer');
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -426,4 +430,13 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
       ),
     );
   }
+
+
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
 }

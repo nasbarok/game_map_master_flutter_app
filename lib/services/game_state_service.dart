@@ -1,4 +1,6 @@
 import 'package:airsoft_game_map/models/field.dart';
+import 'package:airsoft_game_map/services/auth_service.dart';
+import 'package:airsoft_game_map/services/websocket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import '../../models/game_map.dart';
@@ -34,8 +36,11 @@ class GameStateService extends ChangeNotifier {
   DateTime? _gameStartTime;
   DateTime? get gameStartTime => _gameStartTime;
   final ApiService _apiService;
-  GameStateService(this._apiService);
 
+  WebSocketService? _webSocketService;
+  GameStateService(this._apiService, [this._webSocketService]);
+
+  bool get isReady => _webSocketService != null;
   factory GameStateService.placeholder() {
     return GameStateService(ApiService.placeholder());
   }
@@ -272,14 +277,20 @@ class GameStateService extends ChangeNotifier {
     _gameDuration = null;
     _connectedPlayers = 0;
     _isGameRunning = false;
-    _gameTimer?.cancel();
     _gameEndTime = null;
     _timeLeftDisplay = "00:00:00";
     _connectedPlayersList.clear();
+
+    if (_gameTimer != null) {
+      _gameTimer!.cancel();
+      _gameTimer = null;
+    }
+
     notifyListeners();
   }
 
   Future<void> restoreSessionIfNeeded(ApiService apiService) async {
+
     try {
       // Étape 1 : Terrain actif
       print('🔎 [RESTORE] Appel GET /fields/active/current');
@@ -308,6 +319,12 @@ class GameStateService extends ChangeNotifier {
 
       print('✅ [RESTORE] Terrain actif : ${field.name} (ID: ${field.id}');
 
+      if (_webSocketService == null) {
+        print('🚨 [RESTORE] WebSocketService est toujours null !');
+      } else {
+        print('📡 [RESTORE] WebSocketService injecté correctement');
+        _webSocketService?.subscribeToField(field.id!);
+      }
       // Étape 2 : Carte liée
       print('🔎 [RESTORE] Appel GET /maps?fieldId=${field.id}');
       final map = await apiService.get('maps?fieldId=${field.id}');

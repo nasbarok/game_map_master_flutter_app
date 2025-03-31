@@ -36,6 +36,11 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     try {
+      while (!gameState.isReady) {
+        print('⏳ Attente de la fin de la restauration de la websocket...');
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+      print('✅ websocket restaurée');
       await gameState.restoreSessionIfNeeded(apiService);
     } catch (e) {
       print('❌ Erreur pendant restoreSessionIfNeeded: $e');
