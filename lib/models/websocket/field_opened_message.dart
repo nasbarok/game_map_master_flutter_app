@@ -3,15 +3,18 @@ import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 
 class FieldOpenedMessage extends WebSocketMessage {
   final int fieldId;
+  final int senderId;
 
   FieldOpenedMessage({
     required this.fieldId,
-  }) : super('FIELD_OPENED');
+    required this.senderId,
+  }) : super('FIELD_OPENED',senderId);
 
   @override
   Map<String, dynamic> toJson() {
     return {
       'type': type,
+      'senderId': senderId,
       'payload': {
         'fieldId': fieldId,
       },
@@ -23,6 +26,7 @@ class FieldOpenedMessage extends WebSocketMessage {
     final payload = json['payload'] as Map<String, dynamic>;
     return FieldOpenedMessage(
       fieldId: payload['fieldId'],
+      senderId: json['senderId'],
     );
   }
 }

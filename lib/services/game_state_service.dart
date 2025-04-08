@@ -1,7 +1,9 @@
 import 'package:airsoft_game_map/models/field.dart';
 import 'package:airsoft_game_map/services/auth_service.dart';
+import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:airsoft_game_map/services/websocket_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 import 'dart:async';
 import '../../models/game_map.dart';
 import 'api_service.dart';
@@ -14,7 +16,7 @@ class GameStateService extends ChangeNotifier {
   int? _gameDuration; // en minutes, null si pas de limite de temps
   int _connectedPlayers = 0;
   bool _isGameRunning = false;
-  
+
   // Nouvelles propriétés pour le décompte
   DateTime? _gameEndTime;
   String _timeLeftDisplay = "00:00:00";
@@ -35,12 +37,34 @@ class GameStateService extends ChangeNotifier {
   List<Map<String, dynamic>> get connectedPlayersList => _connectedPlayersList;
   DateTime? _gameStartTime;
   DateTime? get gameStartTime => _gameStartTime;
-  final ApiService _apiService;
+  late final ApiService _apiService;
 
   WebSocketService? _webSocketService;
-  GameStateService(this._apiService, [this._webSocketService]);
+  GameStateService(this._apiService);
+  TeamService? _teamService;
+
+  List<dynamic> pastFields = [];
+
+  void setTeamService(TeamService service) {
+    _teamService = service;
+  }
+  void setWebSocketService(WebSocketService service) {
+    _webSocketService = service;
+  }
+
+  void updateApiService(ApiService service) {
+    _apiService = service;
+  }
 
   bool get isReady => _webSocketService != null;
+  Field? get selectedField => _selectedMap?.field;
+
+
+  void setGameRunning(bool bool) {
+    _isGameRunning = bool;
+    notifyListeners();
+  }
+
   factory GameStateService.placeholder() {
     return GameStateService(ApiService.placeholder());
   }
@@ -257,8 +281,22 @@ class GameStateService extends ChangeNotifier {
 
   // Méthode pour supprimer un joueur connecté
   void removeConnectedPlayer(int playerId) {
-    _connectedPlayersList.removeWhere((p) => p['id'] == playerId);
+    print('🗑️ [GameStateService] [removeConnectedPlayer] Tentative de suppression du joueur avec ID: $playerId');
+
+    // Tentative de suppression
+    final initialLength = _connectedPlayersList.length;
+    _connectedPlayersList = _connectedPlayersList.where((p) => p['id'] != playerId).toList();
+    final finalLength = _connectedPlayersList.length;
+
+    if (finalLength < initialLength) {
+      print('✅ [GameStateService] [removeConnectedPlayer] Joueur ID $playerId supprimé avec succès.');
+    } else {
+      print('⚠️ [GameStateService] [removeConnectedPlayer] Aucun joueur trouvé avec ID $playerId. Pas de suppression.');
+    }
+
     _connectedPlayers = _connectedPlayersList.length;
+
+    // Notifier les listeners (UI)
     notifyListeners();
   }
 
@@ -319,12 +357,6 @@ class GameStateService extends ChangeNotifier {
 
       print('✅ [RESTORE] Terrain actif : ${field.name} (ID: ${field.id}');
 
-      if (_webSocketService == null) {
-        print('🚨 [RESTORE] WebSocketService est toujours null !');
-      } else {
-        print('📡 [RESTORE] WebSocketService injecté correctement');
-        _webSocketService?.subscribeToField(field.id!);
-      }
       // Étape 2 : Carte liée
       print('🔎 [RESTORE] Appel GET /maps?fieldId=${field.id}');
       final map = await apiService.get('maps?fieldId=${field.id}');
@@ -334,15 +366,41 @@ class GameStateService extends ChangeNotifier {
       }
       print('📦 [RESTORE] Réponse cartes : $map');
 
-      final selected = GameMap.fromJson(map);
-      print('✅ [RESTORE] Carte sélectionnée : ${selected.name} (ID: ${selected.id})');
-      selectMap(selected);
+      final selectedMap = GameMap.fromJson(map);
+      print('✅ [RESTORE] Carte sélectionnée : ${selectedMap.name} (ID: ${selectedMap.id})');
+      selectMap(selectedMap);
+
 
       // Vérifier si l'utilisateur est un host ou un gamer
       final isHost = apiService.authService.currentUser?.hasRole('HOST') ?? false;
       final userId = apiService.authService.currentUser?.id;
 
       _isTerrainOpen = true;
+
+      if (_webSocketService == null) {
+        print('❌ [RESTORE] WebSocketService est null !');
+      } else {
+        if (!_webSocketService!.isConnected) {
+          print('⏳ [RESTORE] En attente de connexion WebSocket...');
+          await _webSocketService!.connect();
+
+          // Petite boucle d’attente si le connect() est asynchrone mais non bloquant
+          int attempts = 0;
+          while (!_webSocketService!.isConnected && attempts < 10) {
+            await Future.delayed(const Duration(milliseconds: 300));
+            attempts++;
+          }
+        }
+
+        if (_webSocketService!.isConnected) {
+          final success = _webSocketService!.subscribeToField(field.id!);
+          print(success
+              ? '🔗 Abonnement WebSocket au terrain ${field.id} réussi.'
+              : '⚠️ Échec de l’abonnement WebSocket au terrain ${field.id}.');
+        } else {
+          print('❌ [RESTORE] Connexion WebSocket toujours impossible après tentative.');
+        }
+      }
 
       try {
         print('🔎 [RESTORE] Vérification du statut de la partie via le terrain');
@@ -376,8 +434,8 @@ class GameStateService extends ChangeNotifier {
       }
 
       // Étape 3 : Joueurs connectés
-      print('🔎 [RESTORE] Appel GET /fields/${selected.field?.id}/players');
-      final players = await apiService.get('fields/${selected.field?.id}/players');
+      print('🔎 [RESTORE] Appel GET /fields/${selectedMap.field?.id}/players');
+      final players = await apiService.get('fields/${selectedMap.field?.id}/players');
       print('📦 [RESTORE] Réponse joueurs connectés : $players');
 
       if (players == null || players is! List) {
@@ -399,7 +457,16 @@ class GameStateService extends ChangeNotifier {
       _connectedPlayers = _connectedPlayersList.length;
 
       print('✅ [RESTORE] Joueurs restaurés : $_connectedPlayers');
+
+      _teamService?.loadTeams(selectedMap.id!);
+      if(_teamService!.teams.isNotEmpty) {
+        print('✅ [RESTORE] Équipes restaurées : ${_teamService?.teams.length}');
+      }else{
+        print('⚠️ [RESTORE] Aucune équipe trouvée.');
+      }
+
       notifyListeners();
+
     } catch (e, stack) {
       print('❌ [RESTORE] Erreur : $e');
       print('📌 Stacktrace : $stack');
@@ -443,7 +510,7 @@ class GameStateService extends ChangeNotifier {
       await _apiService.post('fields/$fieldId/join', {});
 
       // Recharger les joueurs connectés
-      await _loadConnectedPlayers();
+      await loadConnectedPlayers();
 
       print('✅ Host connecté au terrain');
     } catch (e) {
@@ -451,7 +518,7 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadConnectedPlayers() async {
+  Future<void> loadConnectedPlayers() async {
     if (_selectedMap == null || _selectedMap!.field == null) return;
 
     try {
@@ -481,4 +548,6 @@ class GameStateService extends ChangeNotifier {
       print('❌ Erreur lors du chargement des joueurs connectés: $e');
     }
   }
+
+
 }

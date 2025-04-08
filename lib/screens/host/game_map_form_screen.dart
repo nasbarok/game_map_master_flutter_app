@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../models/game_map.dart';
 import '../../services/api_service.dart';
@@ -43,8 +44,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
     });
     
     try {
-      final apiService = Provider.of<ApiService>(context, listen: false);
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final apiService = GetIt.I<ApiService>();
+     final authService = GetIt.I<AuthService>();
       final userId = authService.currentUser?.id;
 
       if (userId == null) {
@@ -105,7 +106,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
       });
       
       try {
-        final apiService = Provider.of<ApiService>(context, listen: false);
+        final apiService = GetIt.I<ApiService>();
         
         final gameMap = GameMap(
           id: widget.gameMap?.id,

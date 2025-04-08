@@ -1,4 +1,5 @@
 import 'package:airsoft_game_map/services/navigation_service.dart';
+import 'package:airsoft_game_map/widgets/websocket_initializer.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -14,113 +15,60 @@ import '../screens/common/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/host/host_dashboard_screen.dart';
-import '../screens/gamer/gamer_dashboard_screen.dart';
 import '../screens/gamer/game_lobby_screen.dart';
-import '../widgets/websocket_handler.dart';
-
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
 
-  final _router = GoRouter(
-    initialLocation: '/splash',
-    routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-      ),
-      GoRoute(
-        path: '/host',
-        builder: (context, state) => const WebSocketHandler(
-          child: HostDashboardScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/gamer',
-        builder: (context, state) => const WebSocketHandler(
-          child: GamerDashboardScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/gamer/lobby',
-        builder: (context, state) => WebSocketHandler(
-          child: const GameLobbyScreen(),
-        ),
-      ),
-    ],
-    redirect: (context, state) {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final isLoggedIn = authService.isLoggedIn;
-      final isLoggingIn = state.location == '/login' || state.location == '/register';
-      final isSplash = state.location == '/splash';
-
-      print('[Router] current location: ${state.location}');
-      print('[Router] isLoggedIn: $isLoggedIn');
-
-      if (isSplash) {
-        print('[Router] On splash screen, no redirect');
-        return null;
-      }
-
-      if (!isLoggedIn && !isLoggingIn) {
-        print('[Router] Not logged in, redirecting to /login');
-        return '/login';
-      }
-
-      if (isLoggedIn && isLoggingIn) {
-        final user = authService.currentUser;
-        print('[Router] Already logged in as ${user?.username}, redirecting to role');
-        if (user != null) {
-          final target = user.hasRole('HOST') ? '/host' : '/gamer/lobby';
-          print('[Router] Redirect target: $target');
-          return target;
-        }
-      }
-
-      print('[Router] No redirect needed');
-      return null;
-    },
-
-  );
+  final navigationService = GetIt.instance<NavigationService>();
 
   @override
   Widget build(BuildContext context) {
-    final navigationService = GetIt.instance<NavigationService>();
-    return MultiProvider(
-      providers: [
-        Provider<http.Client>(create: (_) => http.Client()),
-        ChangeNotifierProvider(create: (_) => AuthService()),
-        ProxyProvider<AuthService, ApiService>(
-          update: (_, authService, __) => ApiService(authService, http.Client()),
+    final navigatorKey = navigationService.navigatorKey;
+
+    final router = GoRouter(
+      navigatorKey: navigatorKey,
+      initialLocation: '/splash',
+      routes: [
+        GoRoute(
+          path: '/splash',
+          builder: (context, state) => const SplashScreen(),
         ),
-        ChangeNotifierProxyProvider<AuthService, WebSocketService>(
-          create: (_) => WebSocketService(null, null, null,navigationService.navigatorKey ), // constructeur temporaire vide ou par défaut
-          update: (_, authService, previous) => previous!..updateAuthService(authService),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
         ),
-        ChangeNotifierProvider(create: (_) => GameStateService(ApiService(AuthService(), http.Client()))),
-        ChangeNotifierProxyProvider3<WebSocketService, AuthService, GameStateService, InvitationService>(
-          create: (_) => InvitationService(
-            // Valeurs par défaut temporaires, seront écrasées dans update
-            Provider.debugCheckInvalidValueType != null ? WebSocketService(null,null,null,navigationService.navigatorKey ) : throw UnimplementedError(),
-            AuthService(),
-            GameStateService(ApiService(AuthService(), http.Client())),
-          ),
-          update: (_, webSocketService, authService, gameStateService, __) =>
-              InvitationService(webSocketService, authService, gameStateService),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterScreen(),
         ),
-        ChangeNotifierProxyProvider2<ApiService, GameStateService, TeamService>(
-          create: (_) => TeamService.placeholder(), // constructeur temporaire vide ou par défaut
-          update: (_, apiService, gameStateService, __) =>
-              TeamService(apiService, gameStateService),
+        GoRoute(
+          path: '/host',
+          builder: (context, state) => const HostDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/gamer/lobby',
+          builder: (context, state) => const GameLobbyScreen(),
         ),
       ],
+      redirect: (context, state) {
+       final authService = GetIt.I<AuthService>();
+        final isLoggedIn = authService.isLoggedIn;
+        final isLoggingIn = state.location == '/login' || state.location == '/register';
+        final isSplash = state.location == '/splash';
+
+        if (isSplash) return null;
+        if (!isLoggedIn && !isLoggingIn) return '/login';
+        if (isLoggedIn && isLoggingIn) {
+          final user = authService.currentUser;
+          if (user != null) {
+            return user.hasRole('HOST') ? '/host' : '/gamer/lobby';
+          }
+        }
+        return null;
+      },
+    );
+
+    return WebSocketInitializer(
       child: MaterialApp.router(
         title: 'Airsoft Game Master',
         theme: ThemeData(
@@ -128,7 +76,7 @@ class App extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
           useMaterial3: true,
         ),
-        routerConfig: _router,
+        routerConfig: router,
       ),
     );
   }

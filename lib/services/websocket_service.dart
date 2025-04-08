@@ -1,10 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:airsoft_game_map/services/team_service.dart';
+import 'package:airsoft_game_map/widgets/websocket_message_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:stomp_dart_client/stomp_handler.dart';
+import '../models/websocket/field_closed_message.dart';
+import '../models/websocket/field_opened_message.dart';
+import '../models/websocket/game_ended_message.dart';
+import '../models/websocket/game_started_message.dart';
+import '../models/websocket/player_connected_message.dart';
+import '../models/websocket/player_disconnected_message.dart';
+import '../models/websocket/team_deleted_message.dart';
+import '../models/websocket/team_update_message.dart';
 import '../models/websocket/websocket_message.dart';
 import 'auth_service.dart';
 import 'game_state_service.dart';
@@ -15,6 +25,11 @@ class WebSocketService with ChangeNotifier {
   AuthService? _authService;
   GameStateService? _gameStateService;
   TeamService? _teamService;
+  WebSocketMessageHandler? _webSocketMessageHandler;
+
+  void setMessageHandler(WebSocketMessageHandler handler) {
+    _webSocketMessageHandler = handler;
+  }
 
   StompClient? _stompClient;
   bool _isConnected = false;
@@ -31,7 +46,11 @@ class WebSocketService with ChangeNotifier {
   // Garder une trace des abonnements
   final Set<String> _subscriptions = {};
 
-  WebSocketService(this._authService, this._gameStateService, this._teamService, this._navigatorKey);
+  // Garder une trace des abonnements actifs avec leurs callbacks
+  final Map<String, StompUnsubscribe> _activeSubscriptions = {};
+
+  WebSocketService(this._authService, this._gameStateService, this._teamService,
+      this._navigatorKey);
 
   bool get isConnected => _isConnected;
 
@@ -52,6 +71,7 @@ class WebSocketService with ChangeNotifier {
     final token = _authService!.token!;
     final userId = _authService!.currentUser!.id;
     final uri = '$wsUrl?token=$token';
+    final fieldId = _gameStateService?.selectedField?.id;
 
     _stompClient = StompClient(
       config: StompConfig(
@@ -63,6 +83,12 @@ class WebSocketService with ChangeNotifier {
           // ✅ Abonnement au canal utilisateur
           subscribe('/topic/user/$userId');
 
+          if (fieldId != null) {
+            print('📡 Abonnement au terrain /topic/field/$fieldId');
+            subscribeToField(fieldId);
+          }else{
+            print('⚠️ Pas de terrain sélectionné pour l\'abonnement');
+          }
           print('✅ STOMP connecté à $uri et abonné à /topic/user/$userId');
         },
         beforeConnect: () async {
@@ -113,11 +139,13 @@ class WebSocketService with ChangeNotifier {
       return;
     }
 
-    _stompClient!.subscribe(
+    final unsubscribe = _stompClient!.subscribe(
       destination: destination,
       callback: _onMessageReceived,
     );
 
+    // Stocker la fonction de désabonnement
+    _activeSubscriptions[destination] = unsubscribe;
     _subscriptions.add(destination);
     print('📡 Abonné à $destination');
   }
@@ -125,15 +153,44 @@ class WebSocketService with ChangeNotifier {
   void unsubscribe(String destination) {
     if (!_isConnected || _stompClient == null) return;
 
-    // StompDart ne fournit pas de méthode pour se désabonner d'un topic spécifique
-    // On garde juste la trace pour ne pas s'abonner à nouveau
-    _subscriptions.remove(destination);
-    print('📡 Désabonné de $destination');
+    // Utiliser la fonction de désabonnement stockée
+    final unsubscribe = _activeSubscriptions[destination];
+    if (unsubscribe != null) {
+      unsubscribe();
+      _activeSubscriptions.remove(destination);
+      _subscriptions.remove(destination);
+      print('📡 Désabonné de $destination');
+    }
   }
 
-  void subscribeToField(int fieldId) {
-    print('📡 Abonné au terrain /topic/field/$fieldId');
-    subscribe('/topic/field/$fieldId');
+  bool subscribeToField(int fieldId) {
+    final topic = '/topic/field/$fieldId';
+
+    if (!_isConnected || _stompClient == null) {
+      print('❌ Impossible de s’abonner à $topic : non connecté');
+      return false;
+    }
+
+    if (_subscriptions.contains(topic)) {
+      print('ℹ️ Déjà abonné à $topic');
+      return true;
+    }
+
+    try {
+      final unsubscribe = _stompClient!.subscribe(
+        destination: topic,
+        callback: _onMessageReceived,
+      );
+
+      _activeSubscriptions[topic] = unsubscribe;
+      _subscriptions.add(topic);
+
+      print('✅ Abonnement réussi à $topic');
+      return true;
+    } catch (e) {
+      print('❌ Erreur lors de l’abonnement à $topic : $e');
+      return false;
+    }
   }
 
   void unsubscribeFromField(int fieldId) {
@@ -146,16 +203,24 @@ class WebSocketService with ChangeNotifier {
       if (frame.body == null) return;
 
       final Map<String, dynamic> json = jsonDecode(frame.body!);
-      print('📨 Message STOMP brut reçu : ${json['type']}');
-
+      print('📨 [websocket_message] [_onMessageReceived] Message STOMP brut reçu : ${json['type']}');
+      print('📨 [websocket_message] [_onMessageReceived] Contenu brut complet : $json'); // 👈 Ajoute cette ligne
       try {
         final message = WebSocketMessage.fromJson(json);
         _messageController.add(message);
+
+        //connecter le StreamController aux handlers
+        final context = _navigatorKey.currentContext;
+        if (context != null) {
+          _webSocketMessageHandler?.handleWebSocketMessage(message, context);
+        } else {
+          print('⚠️ [websocket_message] [_onMessageReceived] Aucun contexte disponible pour traiter le message WebSocket');
+        }
       } catch (e) {
-        print('⚠️ Type de message non géré ou parsing échoué : $e');
+        print('❌ [websocket_message] [_onMessageReceived] Type de message non géré ou parsing échoué : $e');
       }
     } catch (e) {
-      print('❌ Erreur de parsing WebSocket JSON : $e');
+      print('❌ [websocket_message] [_onMessageReceived] Erreur de parsing WebSocket JSON : $e');
     }
   }
 
@@ -179,91 +244,18 @@ class WebSocketService with ChangeNotifier {
     }
   }
 
-  void _handleWebSocketMessage(Map<String, dynamic> message) {
-    final type = message['type'];
-    final payload = message['payload'];
-
-    print('📨 Message WebSocket reçu : type=$type, payload=$payload');
-
-    switch (type) {
-      case 'PLAYER_CONNECTED':
-        print('🟢 Traitement de PLAYER_CONNECTED');
-        _handlePlayerConnected(payload);
-        break;
-      case 'PLAYER_DISCONNECTED':
-        print('🔴 Traitement de PLAYER_DISCONNECTED');
-        _handlePlayerDisconnected(payload);
-        break;
-      case 'TEAM_UPDATED':
-        print('🟡 Traitement de TEAM_UPDATED');
-        _handleTeamUpdated(payload);
-        break;
-      case 'TEAM_DELETED':
-        print('⚫️ Traitement de TEAM_DELETED');
-        _handleTeamDeleted(payload);
-        break;
-      default:
-        print('⚠️ Type de message WebSocket non géré : $type');
-        break;
-    }
-  }
-
-  void _handlePlayerConnected(Map<String, dynamic> content) {
-    final player = content['player'];
-    print('👤 Nouveau joueur connecté : $player');
-
-    final list = List<Map<String, dynamic>>.from(
-        _gameStateService!.connectedPlayersList);
-    final index = list.indexWhere((p) => p['id'] == player['id']);
-
-    if (index >= 0) {
-      print('🔁 Mise à jour du joueur existant avec ID=${player['id']}');
-      list[index] = {
-        ...list[index],
-        'teamId': player['teamId'],
-        'teamName': player['teamName'],
-      };
-    } else {
-      print('➕ Ajout d\'un nouveau joueur avec ID=${player['id']}');
-      list.add(player);
-    }
-
-    _gameStateService!.updateConnectedPlayersList(list);
-    _teamService!.synchronizePlayersWithTeams();
-  }
-
-  void _handlePlayerDisconnected(Map<String, dynamic> content) {
-    final userId = content['userId'];
-    print('👋 Joueur déconnecté : ID=$userId');
-
-    final list = List<Map<String, dynamic>>.from(
-        _gameStateService!.connectedPlayersList);
-    list.removeWhere((p) => p['id'] == userId);
-
-    _gameStateService!.updateConnectedPlayersList(list);
-    _teamService!.synchronizePlayersWithTeams();
-  }
-
-  void _handleTeamUpdated(Map<String, dynamic> content) {
-    //@todo faire passer l'objet team pour toutes les modifs
-    final teamId = content['teamId'];
-    final newName = content['teamName'];
-
-    print('✏️ Mise à jour du nom de l\'équipe ID=$teamId -> $newName');
-
-    _teamService!.updateTeamName(teamId, newName);
-  }
-
-  void _handleTeamDeleted(Map<String, dynamic> content) {
-    final teamId = content['teamId'];
-    _teamService!.deleteTeam(teamId);
-  }
-
+// méthode disconnect pour nettoyer correctement
   void disconnect() {
+    // Désabonner de tous les topics
+    _activeSubscriptions.forEach((destination, unsubscribe) {
+      unsubscribe();
+    });
+    _activeSubscriptions.clear();
+    _subscriptions.clear();
+
     _stompClient?.deactivate();
     _isConnected = false;
     _connecting = false;
-    _subscriptions.clear();
   }
 
   void dispose() {

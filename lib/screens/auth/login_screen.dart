@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../services/game_state_service.dart';
+import '../../services/player_connection_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -25,15 +30,47 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final authService = GetIt.I<AuthService>();
+      final gameStateService = GetIt.I<GameStateService>();
+      final apiService = GetIt.I<ApiService>();
+
       final success = await authService.login(
         _usernameController.text,
         _passwordController.text,
       );
 
       if (success && mounted) {
-        // Vérifier le rôle de l'utilisateur et rediriger vers l'écran approprié
-        // Pour l'instant, nous redirigeons simplement vers l'écran host
+        try {
+          // 🌟 1. Restaurer la session du terrain ouvert
+          await gameStateService.restoreSessionIfNeeded(apiService);
+
+          // 🌟 2. Si un terrain est actif, vérifier si l'utilisateur est connecté
+          final fieldId = gameStateService.selectedMap?.field?.id;
+          final userId = authService.currentUser?.id;
+
+          if (fieldId != null && userId != null) {
+            final isAlreadyConnected =
+                gameStateService.isPlayerConnected(userId);
+
+            if (!isAlreadyConnected) {
+              print(
+                  '🚀 Reconnexion automatique de l’utilisateur au terrain...');
+              await GetIt.I<PlayerConnectionService>().joinMap(fieldId);
+
+              // On recharge la session pour bien rafraîchir les joueurs
+              await gameStateService.restoreSessionIfNeeded(apiService);
+            } else {
+              print('ℹ️ Utilisateur déjà connecté au terrain');
+            }
+          } else {
+            print('ℹ️ Aucun terrain ouvert ou utilisateur non connecté.');
+          }
+        } catch (e) {
+          print(
+              '⚠️ Erreur lors de la tentative de reconnexion automatique : $e');
+        }
+
+        // 🌟 3. Redirection après login
         final user = authService.currentUser;
         if (user != null) {
           if (user.hasRole('HOST')) {
@@ -55,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
+    final authService = GetIt.I<AuthService>();
 
     return Scaffold(
       body: SafeArea(

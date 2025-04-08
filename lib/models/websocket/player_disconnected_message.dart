@@ -3,20 +3,26 @@ import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 
 class PlayerDisconnectedMessage extends WebSocketMessage {
   final int playerId;
+  final String playerUsername;
   final int fieldId;
+  final int senderId;
 
   PlayerDisconnectedMessage({
     required this.playerId,
     required this.fieldId,
-  }) : super('PLAYER_DISCONNECTED');
+    required this.senderId,
+    required this.playerUsername,
+  }) : super('PLAYER_DISCONNECTED', senderId);
 
   @override
   Map<String, dynamic> toJson() {
     return {
       'type': type,
+      'senderId': senderId,
       'payload': {
         'playerId': playerId,
         'fieldId': fieldId,
+        'playerUsername': playerUsername,
       },
       'timestamp': timestamp.millisecondsSinceEpoch,
     };
@@ -27,6 +33,8 @@ class PlayerDisconnectedMessage extends WebSocketMessage {
     return PlayerDisconnectedMessage(
       playerId: payload['playerId'],
       fieldId: payload['fieldId'],
+      senderId: json['senderId'],
+      playerUsername: payload['playerUsername'],
     );
   }
 }

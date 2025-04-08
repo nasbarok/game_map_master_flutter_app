@@ -1,14 +1,18 @@
 // lib/services/websocket/team_websocket_handler.dart
+import 'package:airsoft_game_map/models/websocket/team_update_message.dart';
+import 'package:airsoft_game_map/services/auth_service.dart';
+
 import '../../models/websocket/team_deleted_message.dart';
-import '../../models/websocket/team_updated_message.dart';
 import '../team_service.dart';
 
 class TeamWebSocketHandler {
   final TeamService _teamService;
+  final AuthService authService;
 
-  TeamWebSocketHandler(this._teamService);
+  TeamWebSocketHandler(this._teamService,this.authService);
 
-  void handleTeamUpdated(TeamUpdatedMessage message) {
+  void handleTeamUpdate(TeamUpdateMessage message) {
+    final currentUsername = authService.currentUsername;
     final teamId = message.teamId;
     final newName = message.teamName;
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../models/field.dart';
 import '../../services/api_service.dart';
@@ -57,7 +58,7 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
       });
       
       try {
-        final apiService = Provider.of<ApiService>(context, listen: false);
+        final apiService = GetIt.I<ApiService>();
         
         final field = Field(
           id: widget.field?.id,

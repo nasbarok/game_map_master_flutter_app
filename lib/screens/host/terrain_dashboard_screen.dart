@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import '../../models/field.dart';
@@ -32,7 +33,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     super.didChangeDependencies();
 
     // Initialisation sûre ici
-    _webSocketService = Provider.of<WebSocketService>(context, listen: false);
+    _webSocketService = context.read<WebSocketService>();
     _webSocketService.addListener(_updateConnectedPlayers);
   }
 
@@ -44,10 +45,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   void _updateConnectedPlayers() {
     // Cette méthode sera appelée quand le WebSocketService notifie ses listeners
-    final gameStateService =
-        Provider.of<GameStateService>(context, listen: false);
-    final webSocketService =
-        Provider.of<WebSocketService>(context, listen: false);
+    final gameStateService = context.read<GameStateService>();
+    final webSocketService = context.read<WebSocketService>();
 
     // Pour l'instant, simulons un nombre aléatoire de joueurs connectés
     if (gameStateService.isTerrainOpen) {
@@ -61,8 +60,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _selectScenarios() async {
-    final gameStateService =
-        Provider.of<GameStateService>(context, listen: false);
+    final gameStateService = context.read<GameStateService>();
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -99,8 +97,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _setGameDuration() {
-    final gameStateService =
-        Provider.of<GameStateService>(context, listen: false);
+    final gameStateService = context.read<GameStateService>();
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -137,8 +134,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _startGame() {
-    final gameStateService =
-        Provider.of<GameStateService>(context, listen: false);
+    final gameStateService = context.read<GameStateService>();
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -164,8 +160,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     gameStateService.startGame();
 
     // Logique pour démarrer la partie via WebSocket
-    final webSocketService =
-        Provider.of<WebSocketService>(context, listen: false);
+    final webSocketService = GetIt.I<WebSocketService>();
     // webSocketService.startGame(gameStateService.selectedMap!.id, gameStateService.selectedScenarios, gameStateService.gameDuration);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -177,13 +172,11 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _stopGame() {
-    final gameStateService =
-        Provider.of<GameStateService>(context, listen: false);
+    final gameStateService = GetIt.I<GameStateService>();
     gameStateService.stopGame();
 
     // Logique pour arrêter la partie via WebSocket
-    final webSocketService =
-        Provider.of<WebSocketService>(context, listen: false);
+    final webSocketService = GetIt.I<WebSocketService>();
     // webSocketService.stopGame();
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -195,9 +188,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _selectMap() async {
-    final apiService = Provider.of<ApiService>(context, listen: false);
-    final gameStateService =
-        Provider.of<GameStateService>(context, listen: false);
+    final apiService = context.read<ApiService>();
+    final gameStateService = context.read<GameStateService>();
 
     try {
       final List<dynamic> mapData = await apiService.get('maps/owner/self');
@@ -276,9 +268,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _toggleTerrainOpen() async {
-    final gameStateService = Provider.of<GameStateService>(context, listen: false);
-    final apiService = Provider.of<ApiService>(context, listen: false);
-    final playerConnectionService = Provider.of<PlayerConnectionService>(context, listen: false);
+    final gameStateService = context.read<GameStateService>();
+    final apiService = context.read<ApiService>();
+    final playerConnectionService = context.read<PlayerConnectionService>();
     GameMap selectedMap = gameStateService.selectedMap!;
 
     if (selectedMap == null) {
@@ -303,7 +295,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
           // 🔁 Mise à jour de la GameMap pour lier le terrain
           final updatedMap = selectedMap.copyWith(field: field);
-          final mapResponse = await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
+          final mapResponse = await apiService.put(
+              'maps/${selectedMap.id}', updatedMap.toJson());
           selectedMap = GameMap.fromJson(mapResponse);
           gameStateService.selectMap(selectedMap);
         }
@@ -317,14 +310,15 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         try {
           await gameStateService.connectHostToField();
 
-          final players = await playerConnectionService.getConnectedPlayers(fieldId);
+          final players =
+              await playerConnectionService.getConnectedPlayers(fieldId);
           final playersList = players
               .map((player) => {
-            'id': player.user.id,
-            'username': player.user.username,
-            'teamId': player.team?.id,
-            'teamName': player.team?.name,
-          })
+                    'id': player.user.id,
+                    'username': player.user.username,
+                    'teamId': player.team?.id,
+                    'teamName': player.team?.name,
+                  })
               .toList();
 
           for (var player in playersList) {
@@ -333,7 +327,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
           print('✅ Joueurs connectés récupérés : ${playersList.length}');
         } catch (e) {
-          print('ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
+          print(
+              'ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
         }
 
         _webSocketService.subscribeToField(fieldId);
@@ -353,7 +348,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         // 🔄 Dissocier le terrain de la carte
         final updatedMap = selectedMap.copyWith(field: null);
         final mapResponse =
-        await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
+            await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
         print('🧹 Terrain dissocié de la carte');
 
         // 🧼 Réinitialisation de la carte sélectionnée
@@ -364,15 +359,11 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     }
   }
 
-
-
   // méthode pour gérer l'hôte comme joueur
   void _toggleHostAsPlayer() async {
-    final gameStateService =
-        Provider.of<GameStateService>(context, listen: false);
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final playerConnectionService =
-        Provider.of<PlayerConnectionService>(context, listen: false);
+    final gameStateService = context.read<GameStateService>();
+    final authService = context.read<AuthService>();
+    final playerConnectionService = context.read<PlayerConnectionService>();
 
     final user = authService.currentUser!;
     final mapId = gameStateService.selectedMap!.id;
@@ -410,9 +401,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   @override
   @override
   Widget build(BuildContext context) {
-    final gameStateService = Provider.of<GameStateService>(context);
-    final authService = Provider.of<AuthService>(context);
-    final teamService = Provider.of<TeamService>(context);
+    final gameStateService = context.watch<GameStateService>();
+    final authService = context.watch<AuthService>();
+    final teamService = context.watch<TeamService>();
     final connectedPlayers = gameStateService.connectedPlayersList;
 
     return Scaffold(

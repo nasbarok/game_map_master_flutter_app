@@ -1,12 +1,14 @@
 import 'package:airsoft_game_map/screens/host/players_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../models/field.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/invitation_service.dart';
 import '../../services/notifications.dart';
+import '../../services/player_connection_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import 'field_form_screen.dart';
@@ -28,6 +30,8 @@ class HostDashboardScreen extends StatefulWidget {
 class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTickerProviderStateMixin {
 
   late TabController _tabController;
+  late InvitationService _invitationService;
+
 
   @override
   void initState() {
@@ -36,14 +40,22 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
     
     // Connecter au WebSocket
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final webSocketService = Provider.of<WebSocketService>(context, listen: false);
-      final invitationService = Provider.of<InvitationService>(context, listen: false);
+      _invitationService = context.read<InvitationService>();
+      final webSocketService = context.read<WebSocketService>();
 
       webSocketService.connect();
 
-      invitationService.onInvitationReceivedDialog = _showInvitationDialog;
+      _invitationService.onInvitationReceivedDialog = _showInvitationDialog;
     });
   }
+
+  @override
+  void dispose() {
+    _invitationService.onInvitationReceivedDialog = null;
+    _tabController.dispose();
+    super.dispose();
+  }
+
 
   Future<void> _showInvitationDialog(Map<String, dynamic> invitation) async {
     // Vérifie si l'application est visible à l'écran
@@ -60,16 +72,14 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
           actions: [
             TextButton(
               onPressed: () {
-                final invitationService = Provider.of<InvitationService>(context, listen: false);
-                invitationService.respondToInvitation(context,invitation, false);
+                _invitationService.respondToInvitation(context,invitation, false);
                 Navigator.of(context).pop();
               },
               child: const Text('Refuser'),
             ),
             ElevatedButton(
               onPressed: () {
-                final invitationService = Provider.of<InvitationService>(context, listen: false);
-                invitationService.respondToInvitation(context,invitation, true);
+                _invitationService.respondToInvitation(context,invitation, true);
                 Navigator.of(context).pop();
               },
               child: const Text('Accepter'),
@@ -82,20 +92,10 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
     }
   }
 
-
-
-  @override
-  void dispose() {
-    final invitationService = Provider.of<InvitationService>(context, listen: false);
-    invitationService.onInvitationReceivedDialog = null;
-    _tabController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-    final gameStateService = Provider.of<GameStateService>(context);
+    final authService = context.watch<AuthService>();
+    final gameStateService = context.watch<GameStateService>();
     final user = authService.currentUser;
     
     return Scaffold(
@@ -105,7 +105,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await authService.logout();
+              final authService = context.read<AuthService>();
+              await authService.leaveAndLogout(context);
+
               if (mounted) {
                 context.go('/login');
               }
@@ -191,7 +193,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> with SingleTi
   }
   
   Widget _buildMapsTab() {
-    final apiService = Provider.of<ApiService>(context, listen: false);
+    final apiService = context.read<ApiService>();
     
     return FutureBuilder<List<dynamic>>(
       future: apiService.get('maps').then((data) => data as List<dynamic>),

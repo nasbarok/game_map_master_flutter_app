@@ -2,21 +2,27 @@
 import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 
 class PlayerConnectedMessage extends WebSocketMessage {
-  final Map<String, dynamic> player;
+  final int playerId;
+  final String playerUsername;
   final int fieldId;
+  final int senderId;
 
   PlayerConnectedMessage({
-    required this.player,
+    required this.playerId,
     required this.fieldId,
-  }) : super('PLAYER_CONNECTED');
+    required this.senderId,
+    required this.playerUsername,
+  }) : super('PLAYER_CONNECTED',senderId);
 
   @override
   Map<String, dynamic> toJson() {
     return {
       'type': type,
+      'senderId': senderId,
       'payload': {
-        'player': player,
+        'playerId': playerId,
         'fieldId': fieldId,
+        'playerUsername': playerUsername,
       },
       'timestamp': timestamp.millisecondsSinceEpoch,
     };
@@ -25,8 +31,10 @@ class PlayerConnectedMessage extends WebSocketMessage {
   factory PlayerConnectedMessage.fromJson(Map<String, dynamic> json) {
     final payload = json['payload'] as Map<String, dynamic>;
     return PlayerConnectedMessage(
-      player: payload['player'],
+      playerId: payload['playerId'],
       fieldId: payload['fieldId'],
+      senderId: json['senderId'],
+      playerUsername: payload['playerUsername'],
     );
   }
 }

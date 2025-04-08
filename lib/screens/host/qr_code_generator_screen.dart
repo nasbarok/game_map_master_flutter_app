@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../services/api_service.dart';
@@ -34,7 +35,7 @@ class _QRCodeGeneratorScreenState extends State<QRCodeGeneratorScreen> {
     });
 
     try {
-      final apiService = Provider.of<ApiService>(context, listen: false);
+      final apiService = GetIt.I<ApiService>();
       
       // Récupérer les détails du scénario
       final scenarioData = await apiService.get('scenarios/${widget.scenarioId}');

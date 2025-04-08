@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
+import '../../services/team_service.dart';
+import '../../services/websocket_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -21,14 +24,19 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateAndRestore() async {
-    final apiService = Provider.of<ApiService>(context, listen: false);
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final gameState = Provider.of<GameStateService>(context, listen: false);
+    final apiService = GetIt.I<ApiService>();
+   final authService = GetIt.I<AuthService>();
+    final gameState =GetIt.I<GameStateService>();
+    final wsService = GetIt.I<WebSocketService>();
+    gameState.setWebSocketService(wsService);
 
     await Future.delayed(const Duration(milliseconds: 1000)); // Animation splash
 
     // ✅ Restaurer la session depuis SharedPreferences
     await authService.loadSession();
+
+    // ✅ évite l’erreur si le widget est démonté
+    if (!mounted) return;
 
     if (!authService.isLoggedIn) {
       context.go('/login');
@@ -36,12 +44,14 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     try {
-      while (!gameState.isReady) {
-        print('⏳ Attente de la fin de la restauration de la websocket...');
-        await Future.delayed(const Duration(milliseconds: 50));
+      if (gameState.isReady) {
+        await gameState.restoreSessionIfNeeded(apiService);
+      } else {
+        print('⏳ WebSocketService pas encore prêt, attente...');
+        await Future.delayed(const Duration(milliseconds: 100));
+        gameState.setWebSocketService(GetIt.I<WebSocketService>());
+        await gameState.restoreSessionIfNeeded(apiService);
       }
-      print('✅ websocket restaurée');
-      await gameState.restoreSessionIfNeeded(apiService);
     } catch (e) {
       print('❌ Erreur pendant restoreSessionIfNeeded: $e');
     }
@@ -50,6 +60,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final isHost = user.hasRole('HOST');
     final isTerrainOpen = gameState.isTerrainOpen;
     final isGameRunning = gameState.isGameRunning;
+
+    if(!mounted){
+      print('❌ [splash_screen ] Le widget n’est plus monté, arrêt de la navigation');
+      return;
+    }
 
     if (!isTerrainOpen) {
       // Aucun terrain ouvert, gamer → scanner | host → dashboard vide

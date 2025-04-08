@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as client;
 import 'package:provider/provider.dart';
 import 'dart:convert';
@@ -9,8 +10,11 @@ import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/websocket_service.dart';
+import '../models/field.dart';
 import '../models/game_map.dart';
 import '../models/invitation.dart';
+import '../models/websocket/game_invitation_message.dart';
+import '../models/websocket/invitation_response_message.dart';
 
 class InvitationService extends ChangeNotifier {
   final WebSocketService _webSocketService;
@@ -48,34 +52,23 @@ class InvitationService extends ChangeNotifier {
           'Vous devez être un host avec un terrain ouvert pour envoyer des invitations');
     }
 
-    final invitationPayload = {
-      'fromUserId': _authService.currentUser!.id,
-      'fromUsername': _authService.currentUser!.username,
-      'toUserId': userId,
-      'toUsername': username,
-      'mapId': _gameStateService.selectedMap!.id,
-      'fieldId': _gameStateService.selectedMap!.field?.id,
-      'mapName': _gameStateService.selectedMap!.name,
-    };
+    final fieldId = _gameStateService.selectedMap!.field!.id!;
+    final senderId = _authService.currentUser!.id;
 
-    final jsonInvitation = {
-      'type': 'GAME_INVITATION',
-      'payload': invitationPayload,
-      'timestamp': DateTime
-          .now()
-          .millisecondsSinceEpoch,
-    };
+    final invitation = GameInvitationMessage(
+      fieldId: fieldId,
+      senderId: senderId!,
+      targetUserId: userId,
+    );
 
-    final invitation = WebSocketMessage.fromJson(jsonInvitation);
+    // ✅ Envoi typé via WebSocket
+    await _webSocketService.sendMessage('/app/invitation', invitation);
 
-    // Envoyer via WebSocket
-    await _webSocketService.sendMessage(
-        '/app/invitation', invitation);
-
-    // Ajouter à la liste des invitations envoyées
+    // 🔄 Optionnel : enregistrer localement l'invitation envoyée
     _sentInvitations.add(invitation);
     notifyListeners();
   }
+
 
   void _handleWebSocketMessage(WebSocketMessage message) {
     final messageJson = message.toJson();
@@ -167,143 +160,66 @@ class InvitationService extends ChangeNotifier {
     }
   }
 
-  Future<void> respondToInvitation(BuildContext context,
-      Map<String, dynamic> invitation, bool accept) async {
-    final payload = invitation['payload'] ?? {};
-    // Vérifier que les valeurs nécessaires existent
-    final toUserId = payload['toUserId'];
-    final fromUserId = payload['fromUserId'];
-    final mapId = payload['mapId'];
-    final fieldId = payload['fieldId'];
+  Future<void> respondToInvitation(
+      BuildContext context,
+      Map<String, dynamic> invitation,
+      bool accept,
+      ) async {
+    try {
+      final senderId = invitation['senderId'];
+      final payload = invitation['payload'];
+      final targetUserId = payload['targetUserId'];
+      final fieldId = payload['fieldId'];
+      final fromUsername = payload['fromUsername'];
+      final mapName = payload['mapName'];
 
-    if (toUserId == null || fromUserId == null || mapId == null) {
-      print('❌ Données d\'invitation incomplètes');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur: Données d\'invitation incomplètes'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final apiService = Provider.of<ApiService>(context, listen: false);
-    final response = {
-      'type': 'INVITATION_RESPONSE',
-      'payload': {
-        'fromUserId': payload['toUserId'],
-        'toUserId': payload['fromUserId'],
-        'mapId': payload['mapId'],
-        'fieldId': payload['fieldId'],
-        'accepted': accept,
-        'timestamp': DateTime.now().toIso8601String(),
-      }
-    };
-
-    print('📤 Envoi de la réponse à l’invitation : accept=$accept');
-    print('🧾 Invitation envoyée : ${jsonEncode(response)}');
-    print('📨 Envoi via STOMP vers /app/invitation-response...');
-
-    // ✅ Envoi via STOMP avec destination explicite
-    await _webSocketService.sendMessage(
-        '/app/invitation-response', response as WebSocketMessage);
-
-    print('✅ Réponse envoyée avec succès');
-
-    // Si l'invitation est acceptée, mettre à jour l'état du jeu
-    if (accept) {
-      // Pour le joueur qui accepte l'invitation
       final currentUserId = _authService.currentUser?.id;
-      if (currentUserId != null && currentUserId == toUserId) {
-        // Mettre à jour l'état du jeu avec les informations de la carte
-        final mapName = payload['mapName'] ?? 'Carte sans nom';
-        final mapId = payload['mapId'];
-        final map = GameMap(
-          id: mapId,
-          name: mapName,
-          imageUrl: '', // À compléter si disponible
-          description: '', // À compléter si disponible
+
+      if (senderId == null || targetUserId == null || fieldId == null || currentUserId == null) {
+        print('❌ [invitation_service] [respondToInvitation] Invitation invalide ou utilisateur non connecté');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur: Invitation invalide.'),
+            backgroundColor: Colors.red,
+          ),
         );
-
-        try {
-          print('🔁 Mise à jour GameMap via PUT /maps/${mapId}');
-          final mapResponse = await apiService.get('maps/${mapId}');
-          if (mapResponse != null) {
-            final selectedMap = GameMap.fromJson(mapResponse);
-            _gameStateService.selectMap(selectedMap);
-
-            final field = selectedMap.field;
-            if (field != null) {
-              _gameStateService.handleTerrainOpen(field, apiService);
-
-              // Ajouter le joueur à la liste des joueurs connectés
-              final currentUsername =
-                  _authService.currentUser?.username ?? 'Joueur';
-              final player = {
-                'id': currentUserId,
-                'username': currentUsername,
-                'teamId': null, // Pas d'équipe par défaut
-              };
-              _gameStateService.addConnectedPlayer(player);
-
-              // Envoyer un message PLAYER_JOINED via WebSocket
-              final joinMessage = {
-                'type': 'PLAYER_JOINED',
-                'payload': {
-                  'playerId': currentUserId,
-                  'username': currentUsername,
-                  'mapId': mapId,
-                  'teamId': null,
-                }
-              };
-
-              _webSocketService.sendMessage(
-                  '/app/player-joined', joinMessage as WebSocketMessage);
-              _webSocketService.subscribeToField(field!.id!);
-            } else {
-              print("❌ La carte sélectionnée n'est pas liée à un terrain.");
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Aucun terrain associé à cette carte."),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          } else {
-            print("❌ Impossible de récupérer les détails de la carte.");
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content:
-                Text("Impossible de récupérer les détails de la carte."),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        } catch (e) {
-          print(
-              '❌ Erreur lors de la récupération des détails de la carte : $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Erreur lors de la récupération des détails de la carte'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
+        return;
       }
+
+      // Créer un message de réponse typé
+      final response = InvitationResponseMessage(
+        senderId: currentUserId,
+        targetUserId: targetUserId,
+        fieldId: fieldId,
+        accepted: accept,
+        fromUsername: fromUsername,
+        mapName: mapName,
+      );
+
+      print('📤 Envoi de la réponse à l’invitation : accept=$accept');
+      await _webSocketService.sendMessage('/app/invitation-response', response);
+
+      // Si l'invitation est acceptée, connecter le joueur au terrain
+      if (accept) {
+        final apiService = GetIt.I<ApiService>();
+        _gameStateService.restoreSessionIfNeeded(apiService);
+      }
+
+      // Supprimer des invitations en attente
+      _pendingInvitations.removeWhere((inv) {
+        final json = inv.toJson();
+        return json['senderId'] == senderId && json['fieldId'] == fieldId;
+      });
+
+      notifyListeners();
+    } catch (e) {
+      print('❌ Erreur respondToInvitation : $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur lors du traitement de l’invitation"), backgroundColor: Colors.red),
+      );
     }
-
-    // Retirer de la liste des invitations en attente
-    _pendingInvitations.removeWhere((inv) {
-      final invToJson = inv.toJson();
-      final invPayload = invToJson['payload'] ?? {};
-      return invPayload['fromUserId'] == fromUserId &&
-          invPayload['mapId'] == mapId;
-    });
-
-    notifyListeners();
   }
+
 
   // Récupérer toutes les invitations pour l'utilisateur connecté
   Future<List<Invitation>> getMyInvitations() async {

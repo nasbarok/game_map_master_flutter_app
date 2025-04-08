@@ -12,6 +12,8 @@ class ApiService {
   final AuthService _authService;
   final http.Client client;
   AuthService get authService => _authService;
+  bool get isAuthenticated => _authService.token != null;
+
 
   ApiService(this._authService, this.client);
 
@@ -30,6 +32,11 @@ class ApiService {
 
 
   Future<dynamic> get(String endpoint) async {
+    if (!isAuthenticated) {
+      print('⚠️ [API] Token nul. Annulation requête GET sur $endpoint');
+      return null;
+    }
+
     final headers = await _getHeaders();
     final response = await http.get(
       Uri.parse('$baseUrl/$endpoint'),
@@ -40,6 +47,10 @@ class ApiService {
   }
 
   Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
+    if (!isAuthenticated) {
+      print('⚠️ [API] Token nul. Annulation requête GET sur $endpoint');
+      return null;
+    }
     final headers = await _getHeaders();
     final response = await http.post(
       Uri.parse('$baseUrl/$endpoint'),
@@ -51,6 +62,11 @@ class ApiService {
   }
 
   Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
+    if (!isAuthenticated) {
+      print('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
+      return null;
+    }
+
     final headers = await _getHeaders();
     final response = await http.put(
       Uri.parse('$baseUrl/$endpoint'),
@@ -62,6 +78,11 @@ class ApiService {
   }
 
   Future<dynamic> delete(String endpoint) async {
+    if (!isAuthenticated) {
+      print('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
+      return null;
+    }
+
     final headers = await _getHeaders();
     final response = await http.delete(
       Uri.parse('$baseUrl/$endpoint'),

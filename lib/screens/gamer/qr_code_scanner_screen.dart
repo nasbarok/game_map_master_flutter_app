@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../../services/api_service.dart';
@@ -56,7 +57,7 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
     _cameraController.stop();
 
     try {
-      final apiService = Provider.of<ApiService>(context, listen: false);
+      final apiService = GetIt.I<ApiService>();
       await apiService.post('games/join', {'invitationCode': code});
 
       if (mounted) {

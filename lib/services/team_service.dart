@@ -12,10 +12,9 @@ class TeamService extends ChangeNotifier {
   final GameStateService _gameStateService;
 
   List<Team> _teams = [];
-  List<dynamic> _connectedPlayers = [];
   List<dynamic> _previousPlayers = []; // Joueurs précédemment connectés
   List<Team> _previousTeamConfigurations =
-      []; // Configurations d'équipes précédentes
+  []; // Configurations d'équipes précédentes
   int? _myTeamId;
 
   int? get myTeamId => _myTeamId;
@@ -28,19 +27,17 @@ class TeamService extends ChangeNotifier {
 
   List<Team> get teams => _teams;
 
-  List<dynamic> get connectedPlayers => _connectedPlayers;
-
   List<dynamic> get previousPlayers => _previousPlayers;
 
   List<Team> get previousTeamConfigurations => _previousTeamConfigurations;
 
   bool _disposed = false;
+  bool _isUpdating = false;
 
   @override
   void dispose() {
     _disposed = true;
     // S'assurer que le timer est annulé avant de disposer le service
-    stopPeriodicRefresh();
     super.dispose();
   }
 
@@ -68,6 +65,7 @@ class TeamService extends ChangeNotifier {
           .get('teams/map/${_gameStateService.selectedMap!.id}');
       _teams = (teamsData as List).map((team) => Team.fromJson(team)).toList();
 
+      print('🔄 [team_service] [loadTeams] Chargement des équipes pour la carte $mapId: ${_teams.length} équipes');
       // Synchroniser les joueurs connectés avec les équipes
       synchronizePlayersWithTeams();
 
@@ -78,7 +76,7 @@ class TeamService extends ChangeNotifier {
 
       safeNotifyListeners();
     } catch (e) {
-      print('Erreur lors du chargement des équipes: $e');
+      print('[team_service] Erreur lors du chargement des équipes: $e');
     }
   }
 
@@ -87,6 +85,8 @@ class TeamService extends ChangeNotifier {
     // Récupérer la liste des joueurs connectés depuis GameStateService
     final connectedPlayers = _gameStateService.connectedPlayersList;
 
+    //print('📋 Début de synchronisation - Joueurs connectés: ${connectedPlayers.length}, Équipes: ${_teams.length}');
+
     // Pour chaque équipe, vider sa liste de joueurs
     for (var team in _teams) {
       team.players = [];
@@ -94,10 +94,15 @@ class TeamService extends ChangeNotifier {
 
     // Pour chaque joueur connecté qui a un teamId, l'ajouter à l'équipe correspondante
     for (var player in connectedPlayers) {
-      if (player['teamId'] != null) {
+      final playerId = player['id'];
+      final teamId = player['teamId'];
+
+      //print('🔄 Traitement du joueur ${player['username']} (ID: $playerId) - TeamId: $teamId');
+
+      if (teamId != null) {
         // Trouver l'équipe correspondante
-        final teamIndex =
-            _teams.indexWhere((team) => team.id == player['teamId']);
+        final teamIndex = _teams.indexWhere((team) => team.id == teamId);
+
         if (teamIndex >= 0) {
           // Créer une copie du joueur pour éviter les références partagées
           final playerCopy = Map<String, dynamic>.from(player);
@@ -105,29 +110,55 @@ class TeamService extends ChangeNotifier {
           // Ajouter le joueur à cette équipe
           _teams[teamIndex].players.add(playerCopy);
 
-          //print('✅ Joueur ${player['username']} (ID: ${player['id']}) ajouté à l\'équipe ${_teams[teamIndex].name} (ID: ${_teams[teamIndex].id})');
+          //print('✅ Joueur ${player['username']} (ID: $playerId) ajouté à l\'équipe ${_teams[teamIndex].name} (ID: ${_teams[teamIndex].id})');
         } else {
-          print(
-              '⚠️ Équipe avec ID ${player['teamId']} non trouvée pour le joueur ${player['username']}');
+          //   print(
+          //      '⚠️ Équipe avec ID ${player['teamId']} non trouvée pour le joueur ${player['username']}');
 
           // Si l'équipe n'existe pas, mettre à jour le joueur pour enlever le teamId
-          final playerIndex = _gameStateService.connectedPlayersList
-              .indexWhere((p) => p['id'] == player['id']);
-          if (playerIndex >= 0) {
-            final updatedPlayer = Map<String, dynamic>.from(player);
-            updatedPlayer.remove('teamId');
-            updatedPlayer.remove('teamName');
-
-            final newList = List<Map<String, dynamic>>.from(
-                _gameStateService.connectedPlayersList);
-            newList[playerIndex] = updatedPlayer;
-            _gameStateService.updateConnectedPlayersList(newList);
-
-            print(
-                '🔄 TeamId supprimé pour le joueur ${player['username']} car l\'équipe n\'existe pas');
-          }
+          _updatePlayerTeamReference(player, null, null);
         }
       }
+    }
+    // Mettre à jour l'ID de l'équipe du joueur actuel
+    final currentUserId = _apiService.authService.currentUser?.id;
+    if (currentUserId != null) {
+      updateMyTeamId(currentUserId);
+      // print('🔄 MyTeamId mis à jour: $_myTeamId');
+    }
+
+    //  print('📋 Fin de synchronisation - Équipes avec leurs joueurs:');
+    //for (var team in _teams) {
+    //print('   - ${team.name} (ID: ${team.id}): ${team.players.length} joueurs');
+    //}
+    notifyListeners();
+  }
+
+  // méthode pour mettre à jour les références d'équipe d'un joueur
+  void _updatePlayerTeamReference(Map<String, dynamic> player, int? teamId,
+      String? teamName) {
+    final playerIndex = _gameStateService.connectedPlayersList
+        .indexWhere((p) => p['id'] == player['id']);
+
+    if (playerIndex >= 0) {
+      final updatedPlayer = Map<String, dynamic>.from(player);
+
+      if (teamId == null) {
+        updatedPlayer.remove('teamId');
+        updatedPlayer.remove('teamName');
+        print('🔄 TeamId supprimé pour le joueur ${player['username']}');
+      } else {
+        updatedPlayer['teamId'] = teamId;
+        updatedPlayer['teamName'] = teamName;
+        print(
+            '🔄 TeamId mis à jour pour le joueur ${player['username']}: $teamId ($teamName)');
+      }
+
+      final newList = List<Map<String, dynamic>>.from(
+          _gameStateService.connectedPlayersList);
+      newList[playerIndex] = updatedPlayer;
+      _gameStateService.updateConnectedPlayersList(newList);
+      notifyListeners();
     }
   }
 
@@ -177,8 +208,9 @@ class TeamService extends ChangeNotifier {
       print('✅ Réponse du serveur pour l\'assignation : $result');
 
       await loadTeams(mapId);
-      await loadConnectedPlayers();
+      await _gameStateService.loadConnectedPlayers();
 
+      synchronizePlayersWithTeams();
       safeNotifyListeners();
     } catch (e, stacktrace) {
       print('❌ Erreur lors de l\'assignation du joueur à l\'équipe: $e');
@@ -199,23 +231,10 @@ class TeamService extends ChangeNotifier {
     safeNotifyListeners();
   }
 
-  Future<void> loadConnectedPlayers() async {
-    if (!_gameStateService.isTerrainOpen) return;
-
-    try {
-      final playersData = await _apiService
-          .get('fields/${_gameStateService.selectedMap?.field?.id}/players');
-      _connectedPlayers = playersData as List;
-      safeNotifyListeners();
-    } catch (e) {
-      print('Erreur lors du chargement des joueurs connectés: $e');
-    }
-  }
-
   Future<void> loadPreviousPlayers() async {
     try {
       final previousPlayersData =
-          await _apiService.get('host/previous-players');
+      await _apiService.get('host/previous-players');
       _previousPlayers = previousPlayersData as List;
       safeNotifyListeners();
     } catch (e) {
@@ -226,7 +245,7 @@ class TeamService extends ChangeNotifier {
   Future<void> loadPreviousTeamConfigurations() async {
     try {
       final configurationsData =
-          await _apiService.get('host/team-configurations');
+      await _apiService.get('host/team-configurations');
       _previousTeamConfigurations = (configurationsData as List)
           .map((config) => Team.fromJson(config))
           .toList();
@@ -264,7 +283,7 @@ class TeamService extends ChangeNotifier {
 
       // 🔄 Recharger équipes et joueurs connectés
       await loadTeams(mapId);
-      await loadConnectedPlayers();
+      await _gameStateService.loadConnectedPlayers();
 
       safeNotifyListeners();
     } catch (e) {
@@ -277,28 +296,36 @@ class TeamService extends ChangeNotifier {
   Future<void> refreshAllTeamData() async {
     if (_gameStateService.selectedMap == null) return;
 
+    if (_isUpdating) {
+      print('⚠️ Mise à jour déjà en cours, ignorée');
+      return;
+    }
+    _isUpdating = true;
     final mapId = _gameStateService.selectedMap!.id;
 
     try {
       // Charger les équipes et les joueurs en parallèle
       await Future.wait([
-        loadTeams(mapId!),
-        loadConnectedPlayers(),
-      ]);
+      loadTeams(mapId!),
+    _gameStateService.loadConnectedPlayers(),
+    ]);
 
-      // Mettre à jour l'ID de l'équipe du joueur actuel
-      final currentUserId = _apiService.authService.currentUser?.id;
-      if (currentUserId != null) {
-        updateMyTeamId(currentUserId);
-      }
+    // Mettre à jour l'ID de l'équipe du joueur actuel
+    final currentUserId = _apiService.authService.currentUser?.id;
+    if (currentUserId != null) {
+    updateMyTeamId(currentUserId);
+    }
 
-      safeNotifyListeners();
+    safeNotifyListeners();
     } catch (e) {
-      print('Erreur lors du rafraîchissement des données d\'équipe: $e');
-      // Propager l'erreur à l'UI
-      _lastError = e.toString();
 
-      safeNotifyListeners();
+    print('Erreur lors du rafraîchissement des données d\'équipe: $e');
+    // Propager l'erreur à l'UI
+    _lastError = e.toString();
+    safeNotifyListeners();
+
+    }finally {
+    _isUpdating = false;
     }
   }
 
@@ -318,27 +345,6 @@ class TeamService extends ChangeNotifier {
     }
   }
 
-  void startPeriodicRefresh() {
-    // Annuler le timer existant s'il y en a un
-    _refreshTimer?.cancel();
-
-    // Créer un nouveau timer qui rafraîchit les données toutes les 10 secondes
-    _refreshTimer = Timer.periodic(Duration(seconds: 10), (_) {
-      if (_gameStateService.isTerrainOpen &&
-          _gameStateService.selectedMap != null) {
-        refreshAllTeamData();
-      }
-    });
-  }
-
-  void stopPeriodicRefresh() {
-    if (_refreshTimer != null) {
-      _refreshTimer!.cancel();
-      _refreshTimer = null;
-      print('🛑 Rafraîchissement périodique arrêté');
-    }
-  }
-
   Future<void> removePlayerFromTeam(int playerId, int mapId) async {
     try {
       // Appel à un endpoint spécifique pour retirer un joueur d'une équipe
@@ -348,8 +354,8 @@ class TeamService extends ChangeNotifier {
 
       // Mettre à jour les données locales
       await loadTeams(mapId);
-      await loadConnectedPlayers();
-
+      await _gameStateService.loadConnectedPlayers();
+      synchronizePlayersWithTeams();
       safeNotifyListeners();
     } catch (e, stacktrace) {
       print('❌ Erreur lors du retrait du joueur de l\'équipe: $e');
@@ -364,4 +370,82 @@ class TeamService extends ChangeNotifier {
       safeNotifyListeners();
     }
   }
+
+  int? getTeamIdForPlayer(int userId) {
+    for (final team in _teams) {
+      if (team.players.any((p) => p['id'] == userId)) {
+        return team.id;
+      }
+    }
+    return null;
+  }
+
+  void removePlayerLocally(int playerId, int mapId) {
+    for (final team in _teams) {
+      final initialCount = team.players.length;
+      team.players.removeWhere((p) => p['id'] == playerId);
+      final newCount = team.players.length;
+
+      if (initialCount != newCount) {
+        print('🗑️ Joueur $playerId retiré localement de l\'équipe ${team.id}');
+        break;
+      }
+    }
+
+    // 🔧 Mise à jour directe du joueur dans connectedPlayersList
+    try {
+      final connectedPlayer = _gameStateService.connectedPlayersList
+          .firstWhere((p) => p['id'] == playerId);
+      connectedPlayer['teamId'] = null;
+      print('🔄 teamId du joueur $playerId mis à jour à null');
+    } catch (e) {
+      print('⚠️ Joueur $playerId non trouvé dans connectedPlayersList');
+    }
+
+    synchronizePlayersWithTeams();
+    safeNotifyListeners();
+  }
+
+  void addTeam(Map<String, dynamic> teamData, int mapId) {
+    final teamId = teamData['id'];
+    final teamName = teamData['name'];
+    if (teamId == null || teamName == null) return;
+
+    // Vérifie que l'équipe n'existe pas déjà
+    if (_teams.any((t) => t.id == teamId)) {
+      print('ℹ️ Équipe déjà existante : $teamId');
+      return;
+    }
+
+    _teams.add(
+      Team(id: teamId, name: teamName, players: []),
+    );
+    print('✅ Équipe ajoutée localement : $teamName (ID: $teamId)');
+    safeNotifyListeners();
+  }
+
+  void deleteTeamLocally(int teamId, int mapId) {
+    print('🗑️ Suppression locale de l\'équipe ID=$teamId');
+
+    final index = _teams.indexWhere((team) => team.id == teamId);
+    if (index == -1) {
+      print('⚠️ Équipe $teamId non trouvée');
+      return;
+    }
+
+    _teams.removeAt(index);
+
+    // Nettoyage des joueurs connectés
+    for (var player in _gameStateService.connectedPlayersList) {
+      if (player['teamId'] == teamId) {
+        player['teamId'] = null;
+        player['teamName'] = null;
+      }
+    }
+
+    synchronizePlayersWithTeams();
+    safeNotifyListeners();
+  }
+
+
 }

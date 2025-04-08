@@ -1,6 +1,7 @@
 // lib/screens/gamer/team_management_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../services/team_service.dart';
 import '../../services/game_state_service.dart';
@@ -36,8 +37,8 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> with Single
     });
 
     try {
-      final gameStateService = Provider.of<GameStateService>(context, listen: false);
-      final teamService = Provider.of<TeamService>(context, listen: false);
+      final gameStateService =context.watch<GameStateService>();
+      final teamService = context.watch<TeamService>();
 
       final selectedMap = gameStateService.selectedMap;
       if (selectedMap != null && selectedMap.id != null) {
@@ -58,9 +59,9 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> with Single
     });
 
     try {
-      final gameStateService = Provider.of<GameStateService>(context, listen: false);
-      final teamService = Provider.of<TeamService>(context, listen: false);
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final gameStateService =GetIt.I<GameStateService>();
+      final teamService = GetIt.I<TeamService>();
+     final authService = GetIt.I<AuthService>();
 
       if (gameStateService.selectedMap != null && authService.currentUser != null) {
         await teamService.assignPlayerToTeam(authService.currentUser!.id!, teamId, gameStateService.selectedMap!.id!);
@@ -89,12 +90,12 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> with Single
 
   @override
   Widget build(BuildContext context) {
-    final teamService = Provider.of<TeamService>(context);
-    final gameStateService = Provider.of<GameStateService>(context);
+    final teamService = context.watch<TeamService>();
+    final gameStateService = context.watch<GameStateService>();
     final teams = teamService.teams;
     final myTeamId = teamService.myTeamId;
     final connectedPlayers = gameStateService.connectedPlayersList;
-    final authService = Provider.of<AuthService>(context, listen: false);
+   final authService = GetIt.I<AuthService>();
     final currentUserId = authService.currentUser?.id;
 
     return Scaffold(

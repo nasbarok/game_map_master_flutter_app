@@ -1,7 +1,10 @@
 import 'package:airsoft_game_map/screens/gamer/team_management_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../models/field.dart';
+import '../../models/websocket/player_left_message.dart';
+import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/player_connection_service.dart';
@@ -18,45 +21,59 @@ class GameLobbyScreen extends StatefulWidget {
   State<GameLobbyScreen> createState() => _GameLobbyScreenState();
 }
 
-class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProviderStateMixin {
+class _GameLobbyScreenState extends State<GameLobbyScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late GameStateService _gameStateService;
+  late WebSocketService _webSocketService;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialiser avec un seul onglet par défaut
     _tabController = TabController(length: 2, vsync: this);
 
-    // Charger les données initiales après le build
+    _gameStateService = Provider.of<GameStateService>(context, listen: false);
+    _webSocketService = Provider.of<WebSocketService>(context, listen: false);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final teamService = Provider.of<TeamService>(context, listen: false);
-      final gameStateService = Provider.of<GameStateService>(context, listen: false);
-      final mapId = gameStateService.selectedMap?.id;
 
-      if (mapId != null) {
-        teamService.loadConnectedPlayers(); // facultatif si ça marche sans paramètre
-        teamService.loadTeams(mapId);       // utiliser l’ID de la carte du terrain actif
+      _webSocketService.connect(); // 👈 AJOUTER CETTE LIGNE
+
+      final mapId = _gameStateService.selectedMap?.id;
+      final fieldId = _gameStateService.selectedMap?.field?.id;
+
+      if (fieldId != null) {
+        print('📡 Abonnement au topic du terrain depuis GameLobbyScreen');
+        _webSocketService.subscribeToField(fieldId);
+        if (mapId != null) {
+          _gameStateService.loadConnectedPlayers();
+          teamService.loadTeams(mapId);
+        }
       } else {
-        print('❌ Aucune carte sélectionnée, impossible de charger les équipes.');
+        print('❌ Pas de terrain ouvert en cours');
       }
-      teamService.startPeriodicRefresh();
-
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final gameState = Provider.of<GameStateService>(context);
-    final authService = Provider.of<AuthService>(context);
+    final gameState = context.watch<GameStateService>();
+    final authService = context.watch<AuthService>();
 
-    // Si le terrain est fermé, rediriger vers GamerDashboardScreen
-    if (!gameState.isTerrainOpen) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacementNamed('/gamer');
-      });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    final selectedMap = gameState.selectedMap;
+    final terrainOuvert = gameState.isTerrainOpen;
+
+    print('🧭 [GameLobbyScreen] build() déclenché');
+    print('🔍 Carte sélectionnée : ${selectedMap?.name ?? "Aucune"}');
+    print('🔓 Terrain ouvert : $terrainOuvert');
+
+    final bool isConnectedToField = gameState.isTerrainOpen;
+
+    // ✅ Rendu normal
+    print('✅ Affichage de l’interface GameLobbyScreen');
 
     return Scaffold(
       appBar: AppBar(
@@ -65,7 +82,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await authService.logout();
+              final authService = context.read<AuthService>();
+              await authService.leaveAndLogout(context);
               if (mounted) {
                 context.go('/login');
               }
@@ -74,7 +92,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
+          tabs:  const [
             Tab(icon: Icon(Icons.map), text: 'Terrain'),
             Tab(icon: Icon(Icons.people), text: 'Joueurs'),
           ],
@@ -93,7 +111,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
   }
 
   Widget _buildTerrainTab() {
-    final gameState = Provider.of<GameStateService>(context);
+    final gameState = context.watch<GameStateService>();
+
+    if (!gameState.isTerrainOpen || gameState.selectedMap == null) {
+      // Afficher la liste des anciens terrains
+      return _buildPreviousFieldsList();
+    }
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -197,7 +220,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
                 _showLeaveConfirmationDialog(gameState.selectedMap!.field!);
               },
               icon: const Icon(Icons.logout),
-              label: const Text('Quitter la partie'),
+              label: const Text('Quitter le terrain'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
@@ -209,11 +232,226 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
     );
   }
 
+  // Méthode pour afficher la liste des anciens terrains
+  Widget _buildPreviousFieldsList() {
+    return FutureBuilder<List<Field>>(
+      future: _loadPreviousFields(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Erreur: ${snapshot.error}'),
+          );
+        }
+
+        final fields = snapshot.data ?? [];
+
+        if (fields.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.map, size: 80, color: Colors.grey.withOpacity(0.5)),
+                const SizedBox(height: 16),
+                const Text(
+                  'Aucun terrain visité',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Attendez une invitation pour rejoindre un terrain',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: fields.length,
+          itemBuilder: (context, index) {
+            final field = fields[index];
+            final isOpen = field.active;
+
+            String openedAtStr = field.openedAt != null
+                ? 'Ouvert le ${_formatDate(field.openedAt!)}'
+                : 'Date d\'ouverture inconnue';
+
+            String closedAtStr = field.closedAt != null
+                ? 'Fermé le ${_formatDate(field.closedAt!)}'
+                : 'Encore actif';
+
+            String ownerName = field.owner?.username != null
+                ? 'Propriétaire : ${field.owner!.username}'
+                : 'Propriétaire inconnu';
+
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: isOpen ? Colors.green : Colors.grey,
+                  child: const Icon(
+                    Icons.map,
+                    color: Colors.white,
+                  ),
+                ),
+                title: Text(field.name),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(isOpen ? 'Ouvert' : 'Fermé'),
+                    Text(openedAtStr),
+                    Text(closedAtStr),
+                    Text(ownerName),
+                  ],
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isOpen)
+                      ElevatedButton(
+                        onPressed: () => _joinField(field.id!),
+                        child: const Text('Rejoindre'),
+                      ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      tooltip: 'Supprimer de l\'historique',
+                      onPressed: () => _deleteHistoryEntry(field),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
+  // Méthode pour charger les anciens terrains
+  Future<List<Field>> _loadPreviousFields() async {
+    try {
+      final apiService = GetIt.I<ApiService>();
+      final response = await apiService.get('fields-history/history');
+
+      if (response == null || !(response is List)) {
+        return [];
+      }
+
+      final fields = (response as List).map((data) => Field.fromJson(data)).toList();
+      // 🔥 NOUVEAU : pour chaque terrain actif, tenter de s'abonner
+      for (final field in fields) {
+        if (field.active == true && field.id != null) {
+          print('📡 Tentative d\'abonnement WebSocket au terrain ${field.name} (ID: ${field.id})');
+          _webSocketService.subscribeToField(field.id!);
+        }
+      }
+
+      return fields;
+    } catch (e) {
+      print('❌ Erreur lors du chargement des terrains: $e');
+      return [];
+    }
+  }
+
+  // Méthode pour rejoindre un terrain
+  Future<void> _joinField(int fieldId) async {
+    try {
+      final apiService = GetIt.I<ApiService>();
+      final authService = GetIt.I<AuthService>();
+      final gameStateService =
+      GetIt.I<GameStateService>();
+
+      if (authService.currentUser == null) {
+        return;
+      }
+
+      final userId = authService.currentUser!.id;
+
+      // Appeler l'API pour rejoindre le terrain
+      final response = await apiService.post('fields/$fieldId/join', {
+        'userId': userId,
+      });
+
+      if (response != null) {
+        // Mettre à jour l'état du jeu
+        await gameStateService.restoreSessionIfNeeded(apiService);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vous avez rejoint le terrain avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Erreur lors de la connexion au terrain: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _leaveField() async {
+    try {
+      final gameStateService =
+      GetIt.I<GameStateService>();
+      final authService = GetIt.I<AuthService>();
+      final webSocketService =
+      GetIt.I<WebSocketService>();
+
+      if (gameStateService.selectedMap == null ||
+          authService.currentUser == null) {
+        return;
+      }
+
+      final fieldId = gameStateService.selectedMap!.field!.id;
+      final userId = authService.currentUser!.id;
+
+      // Envoyer un message WebSocket pour quitter le terrain
+      final message = PlayerLeftMessage(
+        senderId: userId!,
+        fieldId: fieldId!,
+      );
+      await webSocketService.sendMessage('/app/leave-field', message);
+      // Réinitialiser l'état du jeu
+      gameStateService.reset();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous avez quitté le terrain'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+    } catch (e) {
+      print('❌ Erreur lors de la déconnexion du terrain: $e');
+    }
+  }
+
   Widget _buildPlayersTab() {
-    final gameStateService = Provider.of<GameStateService>(context);
-    final authService = Provider.of<AuthService>(context);
+
+
+    final gameStateService = context.watch<GameStateService>();
+    final teamService = context.watch<TeamService>();
+    final authService = context.watch<AuthService>();
     final connectedPlayers = gameStateService.connectedPlayersList;
+    final teams = teamService.teams;
     final currentUserId = authService.currentUser?.id;
+
+    if (!gameStateService.isTerrainOpen) {
+      return const Center(
+        child: Text("Vous n'êtes pas connecté à un terrain"),
+      );
+    }
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -254,20 +492,42 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
                       final player = connectedPlayers[index];
                       final isCurrentUser = player['id'] == currentUserId;
 
+                      // ✅ Calcul dynamique du nom d'équipe
+                      String teamName = "Sans équipe";
+                      Color teamColor = Colors.grey;
+
+                      final teamId = player['teamId'];
+                      final team = teams.where((t) => t.id == teamId).toList();
+                      if (team.isNotEmpty) {
+                        teamName = team.first.name;
+                        teamColor = Colors.blue;
+                      }
+
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: isCurrentUser ? Colors.amber : Colors.blue,
+                          backgroundColor:
+                              isCurrentUser ? Colors.amber : teamColor,
                           child: const Icon(Icons.person, color: Colors.white),
                         ),
                         title: Text(
                           player['username'] ?? 'Joueur',
                           style: TextStyle(
-                            fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isCurrentUser
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
-                        subtitle: player['teamName'] != null
-                            ? Text('Équipe : ${player['teamName']}')
-                            : const Text('Sans équipe', style: TextStyle(fontStyle: FontStyle.italic)),
+                        subtitle: Text(
+                          teamName,
+                          style: TextStyle(color: teamColor),
+                        ),
+                        trailing: isCurrentUser
+                            ? const Chip(
+                                label: Text('Vous'),
+                                backgroundColor: Colors.amber,
+                                labelStyle: TextStyle(color: Colors.white),
+                              )
+                            : null,
                       );
                     },
                   ),
@@ -279,11 +539,10 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
     );
   }
 
-
   // Dans GameLobbyScreen
 
   Widget _buildTeamInfo() {
-    final teamService = Provider.of<TeamService>(context);
+    final teamService = context.watch<TeamService>();
     final myTeamId = teamService.myTeamId;
 
     // Trouver l'équipe du joueur
@@ -291,7 +550,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
     Color teamColor = Colors.grey;
 
     if (myTeamId != null) {
-      final teamIndex = teamService.teams.indexWhere((team) => team.id == myTeamId);
+      final teamIndex =
+          teamService.teams.indexWhere((team) => team.id == myTeamId);
       if (teamIndex >= 0) {
         teamName = teamService.teams[teamIndex].name;
         teamColor = Colors.green;
@@ -338,7 +598,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const TeamManagementScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const TeamManagementScreen()),
                 );
               },
               icon: const Icon(Icons.group),
@@ -354,7 +615,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
     );
   }
 
-
   void _showChangeTeamDialog(List<Team> teams) {
     showDialog(
       context: context,
@@ -367,21 +627,23 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
             itemCount: teams.length,
             itemBuilder: (context, index) {
               final team = teams[index];
-              final teamService = Provider.of<TeamService>(context, listen: false);
+              final teamService = context.watch<TeamService>();
               final isCurrentTeam = team.id == teamService.myTeamId;
-              
+
               return ListTile(
                 title: Text(team.name),
-                subtitle: Text('${team.players.length} joueur${team.players.length != 1 ? 's' : ''}'),
-                trailing: isCurrentTeam 
-                    ? const Icon(Icons.check_circle, color: Colors.green) 
+                subtitle: Text(
+                    '${team.players.length} joueur${team.players.length != 1 ? 's' : ''}'),
+                trailing: isCurrentTeam
+                    ? const Icon(Icons.check_circle, color: Colors.green)
                     : null,
-                onTap: isCurrentTeam 
-                    ? null 
+                onTap: isCurrentTeam
+                    ? null
                     : () {
-                        final authService = Provider.of<AuthService>(context, listen: false);
+                        final authService = context.watch<AuthService>();
                         final playerId = authService.currentUser!.id;
-                        teamService.assignPlayerToTeam(playerId!, team.id, Provider.of<GameStateService>(context, listen: false).selectedMap!.id!);
+                        teamService.assignPlayerToTeam(playerId!, team.id,
+                            context.watch<GameStateService>().selectedMap!.id!);
                         Navigator.of(context).pop();
                       },
               );
@@ -401,13 +663,13 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
   }
 
   void _showLeaveConfirmationDialog(Field field) {
-    final playerConnectionService =
-    Provider.of<PlayerConnectionService>(context, listen: false);
+    final playerConnectionService = context.read<PlayerConnectionService>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Quitter la partie'),
-        content: const Text('Êtes-vous sûr de vouloir quitter cette partie ? Vous ne pourrez pas la rejoindre à nouveau si elle est fermée.'),
+        title: const Text('Quitter le terrain'),
+        content: const Text(
+            'Êtes-vous sûr de vouloir quitter ce terrain ? Vous ne pourrez pas la rejoindre à nouveau si elle est fermée.'),
         actions: [
           TextButton(
             onPressed: () {
@@ -431,12 +693,59 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> with SingleTickerProv
     );
   }
 
+  Future<void> _deleteHistoryEntry(Field field) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer ce terrain ?'),
+        content: const Text('Voulez-vous vraiment supprimer ce terrain de votre historique ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
 
+    if (confirm != true) return;
+
+    try {
+      final apiService = GetIt.I<ApiService>();
+      await apiService.delete('fields-history/history/${field.id}');
+
+      setState(() {}); // ❗ Recharge le FutureBuilder (déclenche à nouveau _loadPreviousFields)
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Terrain supprimé de l’historique')),
+      );
+    } catch (e) {
+      print('❌ Erreur suppression terrain : $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erreur lors de la suppression')),
+      );
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+  }
 
   @override
   void dispose() {
+    final fieldId = _gameStateService.selectedMap?.field?.id;
+    if (fieldId != null) {
+      print('📡 Désabonnement du topic du terrain depuis GameLobbyScreen');
+      _webSocketService.unsubscribeFromField(fieldId);
+    }
+
     _tabController.dispose();
     super.dispose();
   }
-
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../models/scenario.dart';
 import '../../services/api_service.dart';
@@ -36,7 +37,7 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
     });
 
     try {
-      final apiService = Provider.of<ApiService>(context, listen: false);
+      final apiService = GetIt.I<ApiService>();
       final scenariosData = await apiService.get('scenarios');
 
       setState(() {

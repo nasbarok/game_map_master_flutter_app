@@ -1,5 +1,6 @@
 import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
@@ -17,13 +18,15 @@ class PlayersScreen extends StatefulWidget {
 
 class _PlayersScreenState extends State<PlayersScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late TeamService teamService;
+  late GameStateService gameStateService;
+
+
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
 
   int? getCurrentMapId(BuildContext context) {
-    return Provider.of<GameStateService>(context, listen: false)
-        .selectedMap
-        ?.id;
+    return context.watch<GameStateService>().selectedMap?.id;
   }
 
   @override
@@ -34,27 +37,19 @@ class _PlayersScreenState extends State<PlayersScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return; // Vérifier si le widget est toujours monté
 
-      final gameStateService =
-          Provider.of<GameStateService>(context, listen: false);
-      final teamService = Provider.of<TeamService>(context, listen: false);
-
       if (gameStateService.isTerrainOpen &&
           gameStateService.selectedMap != null) {
         teamService.loadTeams(gameStateService.selectedMap!.id!);
-        teamService.loadConnectedPlayers();
-        teamService
-            .startPeriodicRefresh(); // Activer le rafraîchissement périodique
+        print(
+            '🌀 [players_screen] [initState] Chargement des équipes et des joueurs connectés');
+        gameStateService.loadConnectedPlayers();
       }
     });
   }
 
+
   @override
   void dispose() {
-    // Arrêter explicitement le rafraîchissement périodique
-    if (mounted) {
-      final teamService = Provider.of<TeamService>(context, listen: false);
-      teamService.stopPeriodicRefresh();
-    }
     super.dispose();
   }
 
@@ -62,18 +57,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final gameStateService = Provider.of<GameStateService>(context);
-    final teamService = Provider.of<TeamService>(context, listen: false);
-
-    // Si le terrain vient d'être ouvert et qu'une carte est sélectionnée
-    if (gameStateService.isTerrainOpen &&
-        gameStateService.selectedMap != null) {
-      teamService.loadTeams(gameStateService.selectedMap!.id!);
-      teamService.loadConnectedPlayers();
-      teamService.startPeriodicRefresh();
-    } else if (!gameStateService.isTerrainOpen) {
-      teamService.stopPeriodicRefresh();
-    }
+    teamService = context.watch<TeamService>();
+    gameStateService = context.watch<GameStateService>();
   }
 
   Future<void> _searchUsers(String query) async {
@@ -90,7 +75,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     });
 
     try {
-      final apiService = Provider.of<ApiService>(context, listen: false);
+      final apiService = context.read<ApiService>();
       final results = await apiService.get('users/search?query=$query');
 
       setState(() {
@@ -111,8 +96,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   void _sendInvitation(int userId, String username) {
-    final invitationService =
-        Provider.of<InvitationService>(context, listen: false);
+    final invitationService = context.read<InvitationService>();
 
     try {
       invitationService.sendInvitation(userId, username);
@@ -134,7 +118,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   void removePlayerFromTeam(int playerId) {
     final mapId = getCurrentMapId(context);
-    final teamService = Provider.of<TeamService>(context, listen: false);
+    final teamService = context.watch<TeamService>();
     if (mapId != null) {
       // Utiliser null au lieu de 0 pour indiquer "pas d'équipe"
       teamService.removePlayerFromTeam(playerId, mapId);
@@ -143,35 +127,25 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   // Dans _PlayersScreenState
   Future<void> kickPlayer(int playerId, String playerName) async {
+    if (!mounted) return;
     try {
-      final gameStateService =
-          Provider.of<GameStateService>(context, listen: false);
-      final mapId = gameStateService.selectedMap?.id;
+      final gameStateService = context.read<GameStateService>();
+      final fieldId = gameStateService.selectedMap?.field?.id;
 
-      if (mapId == null) {
+      if (fieldId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Erreur: Aucune carte sélectionnée'),
+            content: Text('Erreur: Aucun terrain sélectionnée'),
             backgroundColor: Colors.red,
           ),
         );
         return;
       }
 
-      final apiService = Provider.of<ApiService>(context, listen: false);
-      final webSocketService =
-          Provider.of<WebSocketService>(context, listen: false);
+      final apiService = context.read<ApiService>();
 
       // Appel à l'API pour déconnecter le joueur
-      await apiService.post('field/$mapId/players/$playerId/kick', {});
-
-      // Envoyer un message WebSocket pour notifier tous les clients
-      webSocketService.sendMessage(
-          '/app/player-kicked',
-          {
-            'mapId': mapId,
-            'playerId': playerId,
-          } as WebSocketMessage);
+      await apiService.post('fields/$fieldId/players/$playerId/kick', {});
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -192,9 +166,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final gameStateService = Provider.of<GameStateService>(context);
-    final invitationService = Provider.of<InvitationService>(context);
-    final teamService = Provider.of<TeamService>(context);
+    final gameStateService = context.watch<GameStateService>();
+    final invitationService = context.watch<InvitationService>();
 
     // Si le terrain n'est pas ouvert, afficher un message
     if (!gameStateService.isTerrainOpen) {
@@ -249,7 +222,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
             _buildInvitationsTab(invitationService),
 
             // Onglet Équipes
-            _buildTeamsTab(teamService),
+            _buildTeamsTab(teamService, gameStateService),
           ],
         ),
       ),
@@ -257,7 +230,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   Widget _buildSearchTab() {
-    final invitationService = Provider.of<InvitationService>(context);
+    final invitationService = context.watch<InvitationService>();
     final canInvite = invitationService.canSendInvitations();
 
     return Padding(
@@ -506,18 +479,19 @@ class _PlayersScreenState extends State<PlayersScreen> {
     );
   }
 
-  Widget _buildTeamsTab(TeamService teamService) {
-    final teams = teamService.teams;
-    final gameStateService = Provider.of<GameStateService>(context);
+  Widget _buildTeamsTab(
+      TeamService teamService, GameStateService gameStateService) {
     final connectedPlayers = gameStateService.connectedPlayersList;
     final mapId = getCurrentMapId(context);
+    final teams = teamService.teams;
+    print('🌀 Rebuild TeamsTab : ${teams.length} équipe(s)');
 
     final unassignedPlayers = connectedPlayers.where((player) {
       if (player['teamId'] == null) return true;
       final teamIndex = teams.indexWhere((team) => team.id == player['teamId']);
       if (teamIndex < 0) return true;
       final isInTeam =
-      teams[teamIndex].players.any((p) => p['id'] == player['id']);
+          teams[teamIndex].players.any((p) => p['id'] == player['id']);
       return !isInTeam;
     }).toList();
 
@@ -540,8 +514,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       title: const Text('Créer une équipe'),
                       content: TextField(
                         controller: nameController,
-                        decoration:
-                        const InputDecoration(labelText: 'Nom de l\'équipe'),
+                        decoration: const InputDecoration(
+                            labelText: 'Nom de l\'équipe'),
                       ),
                       actions: [
                         TextButton(
@@ -572,31 +546,31 @@ class _PlayersScreenState extends State<PlayersScreen> {
           Expanded(
             child: (teams.isEmpty && unassignedPlayers.isEmpty)
                 ? const Center(
-              child: Text(
-                'Aucune équipe créée',
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
+                    child: Text(
+                      'Aucune équipe créée',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
                 : ListView(
-              children: [
-                if (unassignedPlayers.isNotEmpty) ...[
-                  Text('Joueurs sans équipe',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  ...unassignedPlayers.map((player) =>
-                      _buildUnassignedPlayerTile(
-                          player, teams, teamService, mapId)),
-                  const Divider(),
-                ],
-                ...teams.map((team) => _buildTeamCard(
-                  team,
-                  teams,
-                  teamService,
-                  mapId,
-                  connectedPlayers,
-                )),
-              ],
-            ),
+                    children: [
+                      if (unassignedPlayers.isNotEmpty) ...[
+                        Text('Joueurs sans équipe',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 8),
+                        ...unassignedPlayers.map((player) =>
+                            _buildUnassignedPlayerTile(
+                                player, teams, teamService, mapId)),
+                        const Divider(),
+                      ],
+                      ...teams.map((team) => _buildTeamCard(
+                            team,
+                            teams,
+                            teamService,
+                            mapId,
+                            connectedPlayers,
+                          )),
+                    ],
+                  ),
           ),
 
           const SizedBox(height: 16),
@@ -647,7 +621,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
       ),
     );
   }
-
 
   Widget _buildTeamCard(
     dynamic team,

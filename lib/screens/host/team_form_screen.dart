@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../models/team.dart';
 import '../../services/api_service.dart';
@@ -55,7 +56,7 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
       });
       
       try {
-        final apiService = Provider.of<ApiService>(context, listen: false);
+        final apiService = GetIt.I<ApiService>();
         
         final team = Team(
           id: widget.team!.id,

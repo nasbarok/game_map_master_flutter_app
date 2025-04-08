@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'package:airsoft_game_map/services/game_state_service.dart';
+import 'package:airsoft_game_map/services/player_connection_service.dart';
+import 'package:airsoft_game_map/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import 'package:provider/provider.dart';
 
 class AuthService extends ChangeNotifier {
   static const String baseUrl = 'http://192.168.3.23:8080/api/auth'; // URL pour l'émulateur Android
@@ -16,7 +20,7 @@ class AuthService extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _token != null;
   bool get isLoggedIn => _currentUser != null;
-
+  String? get currentUsername => _currentUser?.username;
   AuthService() {
     _loadUserFromPrefs();
   }
@@ -181,4 +185,34 @@ class AuthService extends ChangeNotifier {
     await _saveUserToPrefs();
     notifyListeners();
   }
+
+  Future<void> leaveAndLogout(BuildContext context) async {
+    final webSocketService = context.read<WebSocketService>();
+    final playerConnectionService = context.read<PlayerConnectionService>();
+    final gameStateService = context.read<GameStateService>();
+
+    final userId = _currentUser?.id;
+    final fieldId = gameStateService.selectedMap?.field?.id;
+
+    try {
+      if (userId != null && fieldId != null) {
+        final isConnected = gameStateService.isPlayerConnected(userId);
+
+        if (isConnected) {
+          print('🚪 Déconnexion du terrain avant logout...');
+          try {
+            await playerConnectionService.leaveField(fieldId);
+            webSocketService.unsubscribeFromField(fieldId);
+          } catch (e) {
+            print('⚠️ [leaveAndLogout] Erreur non bloquante pendant leaveField : $e');
+          }
+        }
+      }
+    } catch (e) {
+      print('⚠️ [leaveAndLogout] Erreur inattendue : $e');
+    } finally {
+      await logout();
+    }
+  }
+
 }

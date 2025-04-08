@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../models/scenario.dart';
 import '../../models/game_map.dart';
@@ -50,7 +51,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
     });
 
     try {
-      final apiService = Provider.of<ApiService>(context, listen: false);
+      final apiService = GetIt.I<ApiService>();
       final mapsData = await apiService.get('maps');
 
       final maps = List<GameMap>.from(
@@ -114,7 +115,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
       });
       
       try {
-        final apiService = Provider.of<ApiService>(context, listen: false);
+        final apiService = GetIt.I<ApiService>();
         
         final scenario = Scenario(
           id: widget.scenario?.id,
