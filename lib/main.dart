@@ -1,7 +1,10 @@
+import 'package:airsoft_game_map/services/game_map_service.dart';
 import 'package:airsoft_game_map/services/game_state_service.dart';
 import 'package:airsoft_game_map/services/invitation_service.dart';
 import 'package:airsoft_game_map/services/navigation_service.dart';
+import 'package:airsoft_game_map/services/scenario_service.dart';
 import 'package:airsoft_game_map/services/team_service.dart';
+import 'package:airsoft_game_map/services/websocket/treasure_hunt_websocket_handler.dart';
 import 'package:airsoft_game_map/services/websocket/websocket_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -15,6 +18,7 @@ import 'services/api_service.dart';
 import 'services/websocket_service.dart';
 import 'services/notifications.dart' as notifications;
 import 'services/player_connection_service.dart';
+import 'services/scenario/treasure_hunt/treasure_hunt_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +46,12 @@ void main() async {
         Provider<NavigationService>.value(value: GetIt.I<NavigationService>()),
         Provider<WebSocketManager>.value(value: GetIt.I<WebSocketManager>()),
         Provider<PlayerConnectionService>.value(value: GetIt.I<PlayerConnectionService>()),
-        // tu peux ajouter d'autres services ici si nécessaire
+        Provider<TreasureHuntService>.value(value: GetIt.I<TreasureHuntService>()),
+        Provider<TreasureHuntService>.value(value: GetIt.I<TreasureHuntService>()),
+        Provider<TreasureHuntWebSocketHandler>.value(value: GetIt.I<TreasureHuntWebSocketHandler>()),
+        ChangeNotifierProvider<GameMapService>.value(value: GetIt.I<GameMapService>()),
+        ChangeNotifierProvider<ScenarioService>.value(value: GetIt.I<ScenarioService>()),
+        // Ajouter obligatoirement les nouveaux services ici
       ],
       child: App(),
     ),

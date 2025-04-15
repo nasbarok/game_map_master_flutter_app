@@ -5,6 +5,7 @@ import 'package:airsoft_game_map/models/websocket/invitation_response_message.da
 import 'package:airsoft_game_map/models/websocket/player_connected_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_disconnected_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_kicked_message.dart';
+import 'package:airsoft_game_map/models/websocket/scenario_update_message.dart';
 import 'package:airsoft_game_map/models/websocket/team_created_message.dart';
 import 'package:airsoft_game_map/models/websocket/team_deleted_message.dart';
 import 'package:airsoft_game_map/models/websocket/team_update_message.dart';
@@ -52,6 +53,8 @@ abstract class WebSocketMessage {
         return FieldClosedMessage.fromJson(json);
       case 'FIELD_OPENED':
         return FieldOpenedMessage.fromJson(json);
+      case 'SCENARIO_UPDATE':
+        return ScenarioUpdateMessage.fromJson(json);
       case 'GAME_STARTED':
         return GameStartedMessage.fromJson(json);
       case 'GAME_ENDED':

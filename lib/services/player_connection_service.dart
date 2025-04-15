@@ -22,7 +22,9 @@ class PlayerConnectionService {
     await _apiService.post('fields/$fieldId/leave', {});
     _gameStateService.reset();
   }
-
+  Future<void> leaveFieldForHost(int fieldId) async {
+    await _apiService.post('fields/$fieldId/leave', {});
+  }
   // Obtenir la liste des joueurs connectés
   Future<List<ConnectedPlayer>> getConnectedPlayers(int fieldId) async {
     final response = await _apiService.get('fields/$fieldId/players');

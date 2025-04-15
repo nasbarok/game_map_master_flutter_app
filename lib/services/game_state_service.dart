@@ -1,11 +1,14 @@
 import 'package:airsoft_game_map/models/field.dart';
 import 'package:airsoft_game_map/services/auth_service.dart';
+import 'package:airsoft_game_map/services/scenario/treasure_hunt/treasure_hunt_service.dart';
 import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:airsoft_game_map/services/websocket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'dart:async';
 import '../../models/game_map.dart';
+import '../models/game_session.dart';
+import '../models/scenario/scenario_dto.dart';
 import 'api_service.dart';
 
 // Service pour gérer l'état du jeu et la communication entre les composants
@@ -27,27 +30,55 @@ class GameStateService extends ChangeNotifier {
 
   // Getters
   bool get isTerrainOpen => _isTerrainOpen;
+
   GameMap? get selectedMap => _selectedMap;
+
   List<dynamic>? get selectedScenarios => _selectedScenarios;
+
   int? get gameDuration => _gameDuration;
+
   int get connectedPlayers => _connectedPlayers;
+
   bool get isGameRunning => _isGameRunning;
+
   String get timeLeftDisplay => _timeLeftDisplay;
+
   DateTime? get gameEndTime => _gameEndTime;
+
   List<Map<String, dynamic>> get connectedPlayersList => _connectedPlayersList;
   DateTime? _gameStartTime;
+
   DateTime? get gameStartTime => _gameStartTime;
   late final ApiService _apiService;
 
   WebSocketService? _webSocketService;
-  GameStateService(this._apiService);
+  final TreasureHuntService _treasureHuntService;
+
   TeamService? _teamService;
 
   List<dynamic> pastFields = [];
 
+  bool get isReady => _webSocketService != null;
+
+  Field? get selectedField => _selectedMap?.field;
+
+  GameSession? _currentGameSession;
+  final _gameSessionController = StreamController<GameSession?>.broadcast();
+
+  Stream<GameSession?> get gameSessionStream => _gameSessionController.stream;
+
+  GameStateService(this._apiService, this._treasureHuntService);
+
+  void dispose() {
+    _gameTimer?.cancel();
+    _gameSessionController.close(); // ✅ fermer aussi ce stream
+    super.dispose();
+  }
+
   void setTeamService(TeamService service) {
     _teamService = service;
   }
+
   void setWebSocketService(WebSocketService service) {
     _webSocketService = service;
   }
@@ -56,17 +87,23 @@ class GameStateService extends ChangeNotifier {
     _apiService = service;
   }
 
-  bool get isReady => _webSocketService != null;
-  Field? get selectedField => _selectedMap?.field;
-
-
   void setGameRunning(bool bool) {
     _isGameRunning = bool;
     notifyListeners();
   }
 
   factory GameStateService.placeholder() {
-    return GameStateService(ApiService.placeholder());
+    return GameStateService(
+        ApiService.placeholder(), TreasureHuntService(ApiService.placeholder()))
+      .._isTerrainOpen = false
+      .._selectedMap = null
+      .._selectedScenarios = []
+      .._gameDuration = null
+      .._connectedPlayers = 0
+      .._isGameRunning = false
+      .._gameEndTime = null
+      .._timeLeftDisplay = "00:00:00"
+      .._connectedPlayersList = [];
   }
 
   get gameStateService => null;
@@ -79,7 +116,7 @@ class GameStateService extends ChangeNotifier {
 
   Future<void> handleTerrainOpen(Field field, ApiService apiService) async {
     try {
-      if(field.active == false) {
+      if (field.active == false) {
         print('ℹ️ [toggleTerrainOpen] Terrain fermé : ${field.name}');
         return;
       }
@@ -128,13 +165,13 @@ class GameStateService extends ChangeNotifier {
           if (gameStatus['endTime'] != null) {
             _gameEndTime = DateTime.parse(gameStatus['endTime']);
           } else if (_gameStartTime != null && _gameDuration != null) {
-            _gameEndTime = _gameStartTime!.add(Duration(minutes: _gameDuration!));
+            _gameEndTime =
+                _gameStartTime!.add(Duration(minutes: _gameDuration!));
           }
 
           _startGameTimer();
           print('✅ [OPEN] Partie en cours restaurée');
         }
-
       } else {
         // RESET si fermeture du terrain
         print('🔒 [CLOSE] Fermeture du terrain');
@@ -156,7 +193,6 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
-
   void setSelectedScenarios(List<dynamic> scenarios) {
     _selectedScenarios = scenarios;
     notifyListeners();
@@ -169,24 +205,6 @@ class GameStateService extends ChangeNotifier {
 
   void updateConnectedPlayers(int count) {
     _connectedPlayers = count;
-    notifyListeners();
-  }
-
-  void startGame() {
-    if (!_isTerrainOpen || _selectedScenarios == null || _selectedScenarios!.isEmpty) {
-      return; // Ne rien faire si les conditions ne sont pas remplies
-    }
-    
-    _isGameRunning = true;
-    
-    // Calculer l'heure de fin si une durée est définie
-    if (_gameDuration != null) {
-      _gameEndTime = DateTime.now().add(Duration(minutes: _gameDuration!));
-      _startGameTimer();
-    } else {
-      _timeLeftDisplay = "∞"; // Durée illimitée
-    }
-    
     notifyListeners();
   }
 
@@ -231,7 +249,6 @@ class GameStateService extends ChangeNotifier {
     });
   }
 
-
   void stopGame() {
     _isGameRunning = false;
     _gameTimer?.cancel();
@@ -249,7 +266,8 @@ class GameStateService extends ChangeNotifier {
   }
 
   void incrementConnectedPlayers(payload) {
-    print('📈 Ajout du joueur depuis payload : ${payload['fromUsername']} (ID: ${payload['fromUserId']})');
+    print(
+        '📈 Ajout du joueur depuis payload : ${payload['fromUsername']} (ID: ${payload['fromUserId']})');
 
     addConnectedPlayer({
       'id': payload['fromUserId'],
@@ -261,8 +279,10 @@ class GameStateService extends ChangeNotifier {
 
   // Nouvelles méthodes pour gérer la liste des joueurs connectés
   void addConnectedPlayer(Map<String, dynamic> player) {
-    final existingIndex = _connectedPlayersList.indexWhere((p) => p['id'] == player['id']);
-    print('🔍 Vérification si ${player['username']} (ID: ${player['id']}) est déjà dans la liste → index: $existingIndex');
+    final existingIndex =
+        _connectedPlayersList.indexWhere((p) => p['id'] == player['id']);
+    print(
+        '🔍 Vérification si ${player['username']} (ID: ${player['id']}) est déjà dans la liste → index: $existingIndex');
 
     if (existingIndex == -1) {
       _connectedPlayersList.add(player);
@@ -281,17 +301,21 @@ class GameStateService extends ChangeNotifier {
 
   // Méthode pour supprimer un joueur connecté
   void removeConnectedPlayer(int playerId) {
-    print('🗑️ [GameStateService] [removeConnectedPlayer] Tentative de suppression du joueur avec ID: $playerId');
+    print(
+        '🗑️ [GameStateService] [removeConnectedPlayer] Tentative de suppression du joueur avec ID: $playerId');
 
     // Tentative de suppression
     final initialLength = _connectedPlayersList.length;
-    _connectedPlayersList = _connectedPlayersList.where((p) => p['id'] != playerId).toList();
+    _connectedPlayersList =
+        _connectedPlayersList.where((p) => p['id'] != playerId).toList();
     final finalLength = _connectedPlayersList.length;
 
     if (finalLength < initialLength) {
-      print('✅ [GameStateService] [removeConnectedPlayer] Joueur ID $playerId supprimé avec succès.');
+      print(
+          '✅ [GameStateService] [removeConnectedPlayer] Joueur ID $playerId supprimé avec succès.');
     } else {
-      print('⚠️ [GameStateService] [removeConnectedPlayer] Aucun joueur trouvé avec ID $playerId. Pas de suppression.');
+      print(
+          '⚠️ [GameStateService] [removeConnectedPlayer] Aucun joueur trouvé avec ID $playerId. Pas de suppression.');
     }
 
     _connectedPlayers = _connectedPlayersList.length;
@@ -309,6 +333,7 @@ class GameStateService extends ChangeNotifier {
 
   // Réinitialiser tout l'état
   void reset() {
+    print('🔄 Réinitialisation de l\'état du systeme du jeu');
     _isTerrainOpen = false;
     _selectedMap = null;
     _selectedScenarios = [];
@@ -328,7 +353,6 @@ class GameStateService extends ChangeNotifier {
   }
 
   Future<void> restoreSessionIfNeeded(ApiService apiService) async {
-
     try {
       // Étape 1 : Terrain actif
       print('🔎 [RESTORE] Appel GET /fields/active/current');
@@ -343,14 +367,15 @@ class GameStateService extends ChangeNotifier {
 
       // Vérifier si la réponse est au format attendu
       // Vérifier si c'est un objet avec active=false
-      if (activeFieldResponse is Map && activeFieldResponse['active'] == false) {
+      if (activeFieldResponse is Map &&
+          activeFieldResponse['active'] == false) {
         print('ℹ️ [RESTORE] Aucun terrain actif trouvé.');
         return;
       }
 
       final field = Field.fromJson(activeFieldResponse['field']);
 
-      if(field.active == false) {
+      if (field.active == false) {
         print('ℹ️ [RESTORE]  terrain fermé.');
         return;
       }
@@ -367,12 +392,13 @@ class GameStateService extends ChangeNotifier {
       print('📦 [RESTORE] Réponse cartes : $map');
 
       final selectedMap = GameMap.fromJson(map);
-      print('✅ [RESTORE] Carte sélectionnée : ${selectedMap.name} (ID: ${selectedMap.id})');
+      print(
+          '✅ [RESTORE] Carte sélectionnée : ${selectedMap.name} (ID: ${selectedMap.id})');
       selectMap(selectedMap);
 
-
       // Vérifier si l'utilisateur est un host ou un gamer
-      final isHost = apiService.authService.currentUser?.hasRole('HOST') ?? false;
+      final isHost =
+          apiService.authService.currentUser?.hasRole('HOST') ?? false;
       final userId = apiService.authService.currentUser?.id;
 
       _isTerrainOpen = true;
@@ -398,12 +424,14 @@ class GameStateService extends ChangeNotifier {
               ? '🔗 Abonnement WebSocket au terrain ${field.id} réussi.'
               : '⚠️ Échec de l’abonnement WebSocket au terrain ${field.id}.');
         } else {
-          print('❌ [RESTORE] Connexion WebSocket toujours impossible après tentative.');
+          print(
+              '❌ [RESTORE] Connexion WebSocket toujours impossible après tentative.');
         }
       }
 
       try {
-        print('🔎 [RESTORE] Vérification du statut de la partie via le terrain');
+        print(
+            '🔎 [RESTORE] Vérification du statut de la partie via le terrain');
         final gameStatus = await apiService.get('games/${field.id}/status');
 
         // S'assurer que isGameRunning est false par défaut
@@ -421,21 +449,48 @@ class GameStateService extends ChangeNotifier {
             final endTimeStr = gameStatus['endTime'];
             _gameEndTime = DateTime.parse(endTimeStr);
           } else if (_gameStartTime != null && _gameDuration != null) {
-            _gameEndTime = _gameStartTime!.add(Duration(minutes: _gameDuration!));
+            _gameEndTime =
+                _gameStartTime!.add(Duration(minutes: _gameDuration!));
           }
 
           _startGameTimer();
         }
 
-        print('✅ [RESTORE] Statut de jeu : ${_isGameRunning ? "EN COURS" : "ARRÊTÉ"}');
+        print(
+            '✅ [RESTORE] Statut de jeu : ${_isGameRunning ? "EN COURS" : "ARRÊTÉ"}');
       } catch (e) {
-        print('⚠️ [RESTORE] Erreur lors de la vérification du statut de jeu: $e');
+        print(
+            '⚠️ [RESTORE] Erreur lors de la vérification du statut de jeu: $e');
         _isGameRunning = false;
       }
 
-      // Étape 3 : Joueurs connectés
+      // Étape 3 : Récupération des scénarios sélectionnés
+      try {
+        print('🔎 [RESTORE] Appel GET /fields/${field.id}/scenarios');
+        final scenariosResponse =
+            await apiService.get('fields/${field.id}/scenarios');
+        print('📦 [RESTORE] Réponse scénarios : $scenariosResponse');
+
+        if (scenariosResponse == null || scenariosResponse is! List) {
+          print('⚠️ [RESTORE] Format inattendu pour les scénarios.');
+        } else {
+          _selectedScenarios =
+              scenariosResponse.map<ScenarioDTO>((scenarioJson) {
+            return ScenarioDTO.fromJson(
+                Map<String, dynamic>.from(scenarioJson));
+          }).toList();
+
+          print(
+              '✅ [RESTORE] Scénarios restaurés : ${_selectedScenarios?.length}');
+        }
+      } catch (e) {
+        print('⚠️ [RESTORE] Erreur lors de la récupération des scénarios : $e');
+      }
+
+      // Étape 4 : Joueurs connectés
       print('🔎 [RESTORE] Appel GET /fields/${selectedMap.field?.id}/players');
-      final players = await apiService.get('fields/${selectedMap.field?.id}/players');
+      final players =
+          await apiService.get('fields/${selectedMap.field?.id}/players');
       print('📦 [RESTORE] Réponse joueurs connectés : $players');
 
       if (players == null || players is! List) {
@@ -459,14 +514,13 @@ class GameStateService extends ChangeNotifier {
       print('✅ [RESTORE] Joueurs restaurés : $_connectedPlayers');
 
       _teamService?.loadTeams(selectedMap.id!);
-      if(_teamService!.teams.isNotEmpty) {
+      if (_teamService!.teams.isNotEmpty) {
         print('✅ [RESTORE] Équipes restaurées : ${_teamService?.teams.length}');
-      }else{
+      } else {
         print('⚠️ [RESTORE] Aucune équipe trouvée.');
       }
 
       notifyListeners();
-
     } catch (e, stack) {
       print('❌ [RESTORE] Erreur : $e');
       print('📌 Stacktrace : $stack');
@@ -496,11 +550,14 @@ class GameStateService extends ChangeNotifier {
     _connectedPlayers = _connectedPlayersList.length;
     notifyListeners();
   }
+
   Future<void> connectHostToField() async {
-    if (!_isTerrainOpen || _selectedMap == null || _selectedMap!.field == null) return;
+    if (!_isTerrainOpen || _selectedMap == null || _selectedMap!.field == null)
+      return;
 
     final authService = _apiService.authService;
-    if (authService.currentUser == null || !authService.currentUser!.hasRole('HOST')) return;
+    if (authService.currentUser == null ||
+        !authService.currentUser!.hasRole('HOST')) return;
 
     try {
       final fieldId = _selectedMap!.field!.id;
@@ -549,5 +606,104 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
+  Future<GameSession?> getCurrentGameSession() async {
+    try {
+      final response =
+          await _apiService.get('game/current-session/${selectedField?.id}');
+      if (response != null) {
+        _currentGameSession = GameSession.fromJson(response);
+        _gameSessionController.add(_currentGameSession);
+        return _currentGameSession;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Erreur lors de la récupération de la session de jeu: $e');
+      return null;
+    }
+  }
 
+  Future<bool> isGameActive(int scenarioId) async {
+    try {
+      final session = await getCurrentGameSession();
+      if (session == null || !session.active) {
+        return false;
+      }
+
+      // Vérifier si le scénario est actif
+      final scenario =
+          await _treasureHuntService.getTreasureHuntScenario(scenarioId);
+      return scenario.active;
+    } catch (e) {
+      debugPrint('Erreur lors de la vérification de l\'état du jeu: $e');
+      return false;
+    }
+  }
+
+  Future<bool> startGame(int gameId) async {
+    if (!_isTerrainOpen ||
+        _selectedScenarios == null ||
+        _selectedScenarios!.isEmpty) {
+      return false; // Ne rien faire si les conditions ne sont pas remplies
+    }
+
+    _isGameRunning = true;
+    if (_gameDuration != null) {
+      _gameEndTime = DateTime.now().add(Duration(minutes: _gameDuration!));
+      _startGameTimer();
+    } else {
+      _timeLeftDisplay = "∞"; // Durée illimitée
+    }
+
+    if (gameId == 0) {
+      print('lancement de la partie côté serveur');
+      try {
+        final gameState = GetIt.I<GameStateService>();
+        final apiService = GetIt.I<ApiService>();
+
+        final fieldId = gameState.selectedMap?.field?.id;
+        final scenarioId = gameState.selectedScenarios?.first.scenario.id;
+
+        if (fieldId == null || scenarioId == null) {
+          debugPrint('Impossible de démarrer : fieldId ou scenarioId null');
+          return false;
+        }
+
+        final response = await apiService.post('game/$fieldId/start', {});
+        if (response != null) {
+          debugPrint('✅ Partie démarrée côté serveur.');
+          return true;
+        }
+        return false;
+      } catch (e) {
+        debugPrint('Erreur lors du démarrage du jeu: $e');
+        return false;
+      }
+    } else {
+      try {
+        final response = await _apiService.post('game/session/$gameId', {});
+        if (response != null) {
+          return true;
+        }
+        return false;
+      } catch (e) {
+        debugPrint('Erreur lors du démarrage du jeu: $e');
+        return false;
+      }
+    }
+  }
+
+  Future<bool> endGame(int gameId) async {
+    try {
+      final response = await _apiService.post('games/$gameId/end', {});
+      if (response != null) {
+        _currentGameSession = null;
+        _gameSessionController.add(null);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Erreur lors de la fin du jeu: $e');
+      return false;
+    }
+  }
 }

@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../models/scenario/scenario_dto.dart';
+import '../models/scenario/treasure_hunt/treasure_hunt_notification.dart';
 import '../models/websocket/player_kicked_message.dart';
 import '../models/websocket/websocket_message.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 import '../services/websocket_service.dart';
 import '../services/notifications.dart' as notifications;
 import '../services/invitation_service.dart';
@@ -32,7 +35,7 @@ class WebSocketMessageHandler {
     final currentUserId = authService.currentUser?.id;
 
     // Attention : on n'ignore PAS PLAYER_KICKED même si senderId == currentUserId
-    if (message.senderId == currentUserId && type != 'PLAYER_KICKED') {
+    if (message.senderId == currentUserId && type != 'PLAYER_KICKED' && type != 'INVITATION_RESPONSE') {
       print('⏩ Ignoré : message envoyé par moi-même');
       return;
     }
@@ -380,33 +383,64 @@ class WebSocketMessageHandler {
     print('✅ TEAM_UPDATE traité');
   }
 
-  void _handleScenarioUpdate(
-      Map<String, dynamic> message, BuildContext context) {
-    // Mettre à jour l'état du scénario dans l'application
-    // Cela pourrait déclencher une mise à jour de l'UI
+  void _handleScenarioUpdate(Map<String, dynamic> message, BuildContext context) {
+    final payload = message['payload'] as Map<String, dynamic>?;
+    if (payload == null) {
+      print('❌ [WebSocketHandler] Payload manquant dans SCENARIO_UPDATE');
+      return;
+    }
+
+    final fieldId = payload['fieldId'];
+    final List<Map<String, dynamic>>? scenarioDtosMapList = payload['scenarioDtos'];
+    if (scenarioDtosMapList == null) {
+      print('❌ [WebSocketHandler] SCENARIO_UPDATE sans scénarioDtos');
+      return;
+    }
+    final List<ScenarioDTO> scenarioDtos = scenarioDtosMapList
+        .map((dto) => ScenarioDTO.fromJson(dto))
+        .toList();
+
+    print('📥 [WebSocketHandler] SCENARIO_UPDATE reçu pour fieldId=$fieldId');
+
+    if (scenarioDtos == null || scenarioDtos.isEmpty) {
+      print('⚠️ Aucun scénario reçu dans SCENARIO_UPDATE');
+      return;
+    }
+
+    final gameStateService = context.read<GameStateService>();
+    gameStateService.setSelectedScenarios(scenarioDtos);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✅ Scénarios mis à jour sur le terrain'),
+        backgroundColor: Colors.blueAccent,
+      ),
+    );
   }
 
-  void _handleTreasureFound(
-      Map<String, dynamic> message, BuildContext context) {
-    final treasureData = message['data'] as Map<String, dynamic>? ?? {};
-    final playerName =
-        treasureData['playerName'] as String? ?? 'Joueur inconnu';
-    final treasureName =
-        treasureData['treasureName'] as String? ?? 'Trésor inconnu';
+
+
+  void _handleTreasureFound(Map<String, dynamic> message, BuildContext context) {
+    final payload = message['payload'];
+    final treasureFoundData = TreasureFoundData.fromJson(payload);
+
+    final treasureHuntService = GetIt.I<TreasureHuntService>();
+    treasureHuntService.addTreasureFoundEvent(treasureFoundData);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$playerName a trouvé le trésor "$treasureName"!'),
+        content: Text('${treasureFoundData.username} a trouvé le trésor "${treasureFoundData.treasureName}"'),
         backgroundColor: Colors.green,
       ),
     );
   }
 
+
   void _handleGameStarted(Map<String, dynamic> message, BuildContext context) {
     final payload = message['payload'];
-
+    final gameId = payload['gameId'];
     // Mettre à jour l'état du jeu
-    gameStateService.startGame();
+    gameStateService.startGame(gameId);
 
     // Si une durée est spécifiée, synchroniser le temps
     if (payload['endTime'] != null) {

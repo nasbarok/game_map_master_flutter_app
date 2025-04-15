@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
-import 'package:stomp_dart_client/stomp_handler.dart';
 import '../models/websocket/field_closed_message.dart';
 import '../models/websocket/field_opened_message.dart';
 import '../models/websocket/game_ended_message.dart';
@@ -26,91 +25,48 @@ class WebSocketService with ChangeNotifier {
   GameStateService? _gameStateService;
   TeamService? _teamService;
   WebSocketMessageHandler? _webSocketMessageHandler;
+  final GlobalKey<NavigatorState> _navigatorKey;
+
+  final _connectionStatusController = StreamController<bool>.broadcast();
+  Stream<bool> get connectionStatusStream => _connectionStatusController.stream;
+
+  final _messageController = StreamController<WebSocketMessage>.broadcast();
+  Stream<WebSocketMessage> get messageStream => _messageController.stream;
+
+  StompClient? _stompClient;
+  bool _isConnected = false;
+  bool _connecting = false;
+  bool get isConnected => _isConnected;
+
+  final Set<String> _subscriptions = {};
+  final Map<String, void Function()> _activeSubscriptions = {};
+
+  WebSocketService(this._authService, this._gameStateService, this._teamService, this._navigatorKey);
 
   void setMessageHandler(WebSocketMessageHandler handler) {
     _webSocketMessageHandler = handler;
   }
 
-  StompClient? _stompClient;
-  bool _isConnected = false;
-  bool _connecting = false;
-
-  // Utiliser un StreamController typé
-  final StreamController<WebSocketMessage> _messageController =
-      StreamController<WebSocketMessage>.broadcast();
-
-  // Exposer le stream pour que d'autres services puissent s'y abonner
-  Stream<WebSocketMessage> get messageStream => _messageController.stream;
-  final GlobalKey<NavigatorState> _navigatorKey;
-
-  // Garder une trace des abonnements
-  final Set<String> _subscriptions = {};
-
-  // Garder une trace des abonnements actifs avec leurs callbacks
-  final Map<String, StompUnsubscribe> _activeSubscriptions = {};
-
-  WebSocketService(this._authService, this._gameStateService, this._teamService,
-      this._navigatorKey);
-
-  bool get isConnected => _isConnected;
-
-  void updateAuthService(AuthService authService) {
-    _authService = authService;
-  }
-
   Future<void> connect() async {
-    if (_connecting ||
-        _isConnected ||
-        _authService?.token == null ||
-        _authService?.currentUser?.id == null) {
+    if (_connecting || _isConnected || _authService?.token == null || _authService?.currentUser?.id == null) {
       print('⚠️ Connexion déjà en cours ou établie, on ne relance pas.');
       return;
     }
-    _connecting = true; // ← ✅ empêcher un double appel
+    _connecting = true;
 
     final token = _authService!.token!;
-    final userId = _authService!.currentUser!.id;
+    final userId = _authService!.currentUser!.id!;
     final uri = '$wsUrl?token=$token';
     final fieldId = _gameStateService?.selectedField?.id;
 
     _stompClient = StompClient(
       config: StompConfig(
         url: uri,
-        onConnect: (StompFrame frame) {
-          _isConnected = true;
-          _connecting = false;
-
-          // ✅ Abonnement au canal utilisateur
-          subscribe('/topic/user/$userId');
-
-          if (fieldId != null) {
-            print('📡 Abonnement au terrain /topic/field/$fieldId');
-            subscribeToField(fieldId);
-          }else{
-            print('⚠️ Pas de terrain sélectionné pour l\'abonnement');
-          }
-          print('✅ STOMP connecté à $uri et abonné à /topic/user/$userId');
-        },
-        beforeConnect: () async {
-          print('🔄 Connexion STOMP en cours...');
-        },
-        onDisconnect: (_) {
-          print('🔌 Déconnecté de STOMP');
-          _isConnected = false;
-          _connecting = false;
-          _reconnect();
-        },
-        onWebSocketError: (error) {
-          print('🛑 Erreur WebSocket : $error');
-          _isConnected = false;
-          _connecting = false;
-          _reconnect();
-        },
-        onStompError: (frame) {
-          print('💥 Erreur STOMP : ${frame.body}');
-          _isConnected = false;
-          _connecting = false;
-        },
+        beforeConnect: () async => print('🔄 Connexion STOMP en cours...'),
+        onConnect: (frame) => _onConnect(frame, userId, fieldId),
+        onDisconnect: (frame) => _onDisconnect(),
+        onWebSocketError: (error) => _onError(error),
+        onStompError: (frame) => _onError(frame.body),
         heartbeatIncoming: const Duration(seconds: 10),
         heartbeatOutgoing: const Duration(seconds: 10),
         reconnectDelay: const Duration(seconds: 5),
@@ -118,6 +74,38 @@ class WebSocketService with ChangeNotifier {
     );
 
     _stompClient!.activate();
+  }
+
+  void _onConnect(StompFrame frame, int userId, int? fieldId) {
+    _isConnected = true;
+    _connecting = false;
+    _connectionStatusController.add(true);
+
+    subscribe('/topic/user/$userId');
+
+    if (fieldId != null) {
+      subscribeToField(fieldId);
+    } else {
+      print('⚠️ Pas de terrain sélectionné pour l\'abonnement');
+      }
+
+          print('✅ STOMP connecté et abonné au canal utilisateur.');
+    }
+
+  void _onDisconnect() {
+    print('🔌 Déconnecté de STOMP');
+    _isConnected = false;
+    _connecting = false;
+    _connectionStatusController.add(false);
+    _reconnect();
+  }
+
+  void _onError(dynamic error) {
+    print('🛑 Erreur WebSocket : $error');
+    _isConnected = false;
+    _connecting = false;
+    _connectionStatusController.add(false);
+    _reconnect();
   }
 
   void _reconnect() {
@@ -129,137 +117,106 @@ class WebSocketService with ChangeNotifier {
   }
 
   void subscribe(String destination) {
-    if (!_isConnected || _stompClient == null) {
-      print('⚠️ Impossible de s\'abonner : non connecté');
-      return;
-    }
+    if (!_isConnected || _stompClient == null) return;
 
-    if (_subscriptions.contains(destination)) {
-      print('ℹ️ Déjà abonné à $destination');
-      return;
-    }
+    if (_subscriptions.contains(destination)) return;
 
     final unsubscribe = _stompClient!.subscribe(
       destination: destination,
       callback: _onMessageReceived,
     );
 
-    // Stocker la fonction de désabonnement
     _activeSubscriptions[destination] = unsubscribe;
     _subscriptions.add(destination);
-    print('📡 Abonné à $destination');
   }
 
   void unsubscribe(String destination) {
     if (!_isConnected || _stompClient == null) return;
 
-    // Utiliser la fonction de désabonnement stockée
     final unsubscribe = _activeSubscriptions[destination];
     if (unsubscribe != null) {
       unsubscribe();
       _activeSubscriptions.remove(destination);
       _subscriptions.remove(destination);
-      print('📡 Désabonné de $destination');
     }
   }
 
   bool subscribeToField(int fieldId) {
     final topic = '/topic/field/$fieldId';
 
-    if (!_isConnected || _stompClient == null) {
-      print('❌ Impossible de s’abonner à $topic : non connecté');
-      return false;
-    }
+    if (!_isConnected || _stompClient == null) return false;
 
-    if (_subscriptions.contains(topic)) {
-      print('ℹ️ Déjà abonné à $topic');
-      return true;
-    }
+    if (_subscriptions.contains(topic)) return true;
 
     try {
       final unsubscribe = _stompClient!.subscribe(
         destination: topic,
         callback: _onMessageReceived,
       );
-
       _activeSubscriptions[topic] = unsubscribe;
       _subscriptions.add(topic);
-
-      print('✅ Abonnement réussi à $topic');
       return true;
     } catch (e) {
-      print('❌ Erreur lors de l’abonnement à $topic : $e');
+      print('❌ Erreur abonnement field : $e');
       return false;
     }
   }
 
   void unsubscribeFromField(int fieldId) {
-    print('📡 Désabonné du terrain /topic/field/$fieldId');
     unsubscribe('/topic/field/$fieldId');
   }
 
   void _onMessageReceived(StompFrame frame) {
     try {
       if (frame.body == null) return;
-
+      print('📩 Message reçu : ${frame.body}');
       final Map<String, dynamic> json = jsonDecode(frame.body!);
-      print('📨 [websocket_message] [_onMessageReceived] Message STOMP brut reçu : ${json['type']}');
-      print('📨 [websocket_message] [_onMessageReceived] Contenu brut complet : $json'); // 👈 Ajoute cette ligne
-      try {
-        final message = WebSocketMessage.fromJson(json);
-        _messageController.add(message);
+      final message = WebSocketMessage.fromJson(json);
+      _messageController.add(message);
 
-        //connecter le StreamController aux handlers
-        final context = _navigatorKey.currentContext;
-        if (context != null) {
-          _webSocketMessageHandler?.handleWebSocketMessage(message, context);
-        } else {
-          print('⚠️ [websocket_message] [_onMessageReceived] Aucun contexte disponible pour traiter le message WebSocket');
-        }
-      } catch (e) {
-        print('❌ [websocket_message] [_onMessageReceived] Type de message non géré ou parsing échoué : $e');
+      final context = _navigatorKey.currentContext;
+      if (context != null) {
+        _webSocketMessageHandler?.handleWebSocketMessage(message, context);
+      } else {
+        print('⚠️ Aucun contexte pour traiter le message WebSocket');
       }
     } catch (e) {
-      print('❌ [websocket_message] [_onMessageReceived] Erreur de parsing WebSocket JSON : $e');
+      print('❌ Erreur traitement WebSocket : $e');
     }
   }
 
   Future<void> sendMessage(String destination, WebSocketMessage message) async {
     if (!_isConnected || _stompClient == null) {
-      print('❌ Impossible d\'envoyer le message : non connecté');
       await connect();
       if (!_isConnected) {
-        print('❌ La reconnexion a échoué, message non envoyé');
+        print('❌ Impossible d\'envoyer le message, WebSocket non connecté');
         return;
-      }
-    }
-    try {
-      _stompClient!.send(
+        }
+        }
+        try {
+        _stompClient!.send(
         destination: destination,
         body: jsonEncode(message.toJson()),
-      );
-      print('📤 Message envoyé à $destination : ${message.type}');
-    } catch (e) {
-      print('❌ Erreur lors de l\'envoi STOMP : $e');
-    }
-  }
+        );
+        } catch (e) {
+          print('❌ Erreur envoi STOMP : $e');
+        }
+      }
 
-// méthode disconnect pour nettoyer correctement
   void disconnect() {
-    // Désabonner de tous les topics
-    _activeSubscriptions.forEach((destination, unsubscribe) {
-      unsubscribe();
-    });
+    _activeSubscriptions.forEach((destination, unsubscribe) => unsubscribe?.call());
     _activeSubscriptions.clear();
     _subscriptions.clear();
 
     _stompClient?.deactivate();
     _isConnected = false;
     _connecting = false;
+    _connectionStatusController.add(false);
   }
 
   void dispose() {
     disconnect();
     _messageController.close();
+    _connectionStatusController.close();
   }
 }

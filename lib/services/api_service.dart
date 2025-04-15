@@ -61,6 +61,22 @@ class ApiService {
     return _processResponse(response);
   }
 
+  Future<dynamic> postList(String endpoint, List<dynamic> data) async {
+    if (!isAuthenticated) {
+      print('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
+      return null;
+    }
+
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    return _processResponse(response);
+  }
+
   Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
     if (!isAuthenticated) {
       print('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');

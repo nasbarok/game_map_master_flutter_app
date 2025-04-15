@@ -92,7 +92,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs:  const [
+          tabs: const [
             Tab(icon: Icon(Icons.map), text: 'Terrain'),
             Tab(icon: Icon(Icons.people), text: 'Joueurs'),
           ],
@@ -135,11 +135,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Scénarios : ${gameState.selectedScenarios != null && gameState.selectedScenarios!.isNotEmpty ? gameState.selectedScenarios!.map((s) => s['name']).join(", ") : "Aucun"}',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 16),
+                  _buildSelectedScenarios(),
+                  const SizedBox(height: 24),
                   if (gameState.isGameRunning)
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -231,6 +228,49 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       ),
     );
   }
+
+  Widget _buildSelectedScenarios() {
+    final gameState = context.watch<GameStateService>();
+
+    final scenarios = gameState.selectedScenarios ?? [];
+
+    if (scenarios.isEmpty) {
+      return const Text(
+        'Aucun scénario sélectionné',
+        style: TextStyle(color: Colors.grey),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Scénarios sélectionnés :',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        ...scenarios.map((scenario) {
+          final String name = scenario.scenario.name;
+          final treasure = scenario.treasureHuntScenario;
+          final String description = treasure != null
+              ? 'Chasse au trésor : ${treasure.totalTreasures} QR codes (${treasure.defaultSymbol})'
+              : (scenario.scenario.description ?? 'Pas de description');
+
+          return Card(
+            elevation: 2,
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            child: ListTile(
+              leading: const Icon(Icons.flag),
+              title: Text(name),
+              subtitle: Text(description),
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+
 
   // Méthode pour afficher la liste des anciens terrains
   Widget _buildPreviousFieldsList() {
@@ -332,8 +372,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     );
   }
 
-
-
   // Méthode pour charger les anciens terrains
   Future<List<Field>> _loadPreviousFields() async {
     try {
@@ -344,11 +382,13 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         return [];
       }
 
-      final fields = (response as List).map((data) => Field.fromJson(data)).toList();
+      final fields =
+          (response as List).map((data) => Field.fromJson(data)).toList();
       // 🔥 NOUVEAU : pour chaque terrain actif, tenter de s'abonner
       for (final field in fields) {
         if (field.active == true && field.id != null) {
-          print('📡 Tentative d\'abonnement WebSocket au terrain ${field.name} (ID: ${field.id})');
+          print(
+              '📡 Tentative d\'abonnement WebSocket au terrain ${field.name} (ID: ${field.id})');
           _webSocketService.subscribeToField(field.id!);
         }
       }
@@ -365,8 +405,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     try {
       final apiService = GetIt.I<ApiService>();
       final authService = GetIt.I<AuthService>();
-      final gameStateService =
-      GetIt.I<GameStateService>();
+      final gameStateService = GetIt.I<GameStateService>();
 
       if (authService.currentUser == null) {
         return;
@@ -403,11 +442,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
   Future<void> _leaveField() async {
     try {
-      final gameStateService =
-      GetIt.I<GameStateService>();
+      final gameStateService = GetIt.I<GameStateService>();
       final authService = GetIt.I<AuthService>();
-      final webSocketService =
-      GetIt.I<WebSocketService>();
+      final webSocketService = GetIt.I<WebSocketService>();
 
       if (gameStateService.selectedMap == null ||
           authService.currentUser == null) {
@@ -438,8 +475,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Widget _buildPlayersTab() {
-
-
     final gameStateService = context.watch<GameStateService>();
     final teamService = context.watch<TeamService>();
     final authService = context.watch<AuthService>();
@@ -698,7 +733,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Supprimer ce terrain ?'),
-        content: const Text('Voulez-vous vraiment supprimer ce terrain de votre historique ?'),
+        content: const Text(
+            'Voulez-vous vraiment supprimer ce terrain de votre historique ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -718,7 +754,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       final apiService = GetIt.I<ApiService>();
       await apiService.delete('fields-history/history/${field.id}');
 
-      setState(() {}); // ❗ Recharge le FutureBuilder (déclenche à nouveau _loadPreviousFields)
+      setState(
+          () {}); // ❗ Recharge le FutureBuilder (déclenche à nouveau _loadPreviousFields)
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Terrain supprimé de l’historique')),
