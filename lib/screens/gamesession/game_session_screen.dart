@@ -1,0 +1,460 @@
+import 'dart:async';
+import 'package:airsoft_game_map/services/scenario_service.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+import '../../models/game_session.dart';
+import '../../models/game_session_participant.dart';
+import '../../models/game_session_scenario.dart';
+import '../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
+import '../../services/game_session_service.dart';
+import '../../services/game_state_service.dart';
+import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
+import '../../services/websocket/web_socket_game_session_handler.dart';
+import '../../widgets/participants_card.dart';
+import '../../widgets/qr_code_scanner_widgets.dart';
+import '../../widgets/time_remaining_card.dart';
+import '../../widgets/treasure_hunt_scoreboard_card.dart';
+import '../scenario/treasure_hunt/treasure_hunt_scanner_screen.dart';
+
+class GameSessionScreen extends StatefulWidget {
+  GameSession gameSession;
+  final int userId;
+  final int? teamId;
+  final bool isHost;
+
+  GameSessionScreen({
+    Key? key,
+    required this.gameSession,
+    required this.userId,
+    this.teamId,
+    required this.isHost,
+  }) : super(key: key);
+
+  @override
+  _GameSessionScreenState createState() => _GameSessionScreenState();
+}
+
+class _GameSessionScreenState extends State<GameSessionScreen> {
+  final GameSessionService _gameSessionService = GetIt.I<GameSessionService>();
+  final TreasureHuntScoreService _treasureHuntScoreService = GetIt.I<TreasureHuntScoreService>();
+
+  bool _isTreasureHuntActive = false;
+  GameSession? _gameSession;
+  Timer? _timeTimer;
+  int _displayedTimeInSeconds = 0;
+  bool _isCountdownMode = false;
+
+  List<GameSessionParticipant> _participants = [];
+  List<GameSessionScenario> _scenarios = [];
+  TreasureHuntScoreboard? _scoreboard;
+  int _remainingTimeInSeconds = 0;
+  bool _isLoading = true;
+  String? _errorMessage;
+  late var treasureHuntScenarioDTO = null;
+
+  // Couleurs pour les équipes
+  final Map<int, Color> _teamColors = {
+    1: Colors.blue,
+    2: Colors.red,
+    3: Colors.green,
+    4: Colors.orange,
+    5: Colors.purple,
+    6: Colors.teal,
+    7: Colors.pink,
+    8: Colors.indigo,
+  };
+
+  // Contrôleur pour les notifications de trésors trouvés
+  final ScrollController _scrollController = ScrollController();
+
+  // Notifications de trésors trouvés
+  List<Map<String, dynamic>> _treasureFoundNotifications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    print('🟢 [GameSessionScreen] initState: Chargement initial des données');
+    _loadInitialData();
+
+    // ✅ Abonnement registerOnScoreboardUpdate
+    GetIt.I<WebSocketGameSessionHandler>().registerOnScoreboardUpdate((scoreboard) {
+      if (mounted) {
+        setState(() {
+          _scoreboard = scoreboard;
+        });
+      }
+    });
+  }
+
+  Future<void> _loadInitialData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    print('🔄 [GameSessionScreen] _loadInitialData: Start');
+
+    try {
+      // ✅ 1. Utiliser directement les données si déjà présentes
+      final gameSession = widget.gameSession;
+      print('✅ GameSession reçue via constructeur: ID=${gameSession.id}');
+
+      List<GameSessionParticipant> participants = _participants;
+      if (_participants.isEmpty) {
+        participants = await _gameSessionService.getActiveParticipants(gameSession.id!);
+        print('👥 Participants chargés: ${participants.length}');
+      }
+
+      List<GameSessionScenario> scenarios = _scenarios;
+      if (_scenarios.isEmpty) {
+        scenarios = await _gameSessionService.getScenarios(gameSession.id!);
+        print('🎯 Scénarios chargés: ${scenarios.length}');
+      }
+
+      final remainingTimeResponse = await _gameSessionService.getRemainingTime(gameSession.id!);
+      print('⏱️ Temps restant récupéré: ${remainingTimeResponse['remainingTimeInSeconds']} secondes');
+
+      TreasureHuntScoreboard? scoreboard;
+      final scenarioService = context.read<ScenarioService>();
+      for (final scenario in scenarios) {
+        print('🔍 Traitement du scénario ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
+
+        if (scenario.active != true) {
+          print('⏭️ Scénario inactif, ignoré');
+          continue;
+        }
+
+        switch (scenario.scenarioType) {
+          case 'treasure_hunt':
+            print('🗺️ Scénario treasure_hunt actif trouvé, chargement du scoreboard...');
+            _isTreasureHuntActive = true;
+            try {
+              scoreboard = await _treasureHuntScoreService.getScoreboard(scenario.scenarioId, gameSession.id!);
+              print('📊 Scoreboard chargé pour TREASURE_HUNT');
+            } catch (e) {
+              print('❌ Erreur lors du chargement du scoreboard: $e');
+            }
+            //construction du treasureHuntScenarioDTO
+            scenarioService.getScenarioDTOById(scenario.scenarioId).then((dto) {
+              setState(() {
+                treasureHuntScenarioDTO = dto;
+              });
+            });
+            break;
+          default:
+            print('⚠️ Type de scénario inconnu ou non géré: ${scenario.scenarioType}');
+        }
+      }
+
+      setState(() {
+        _gameSession = gameSession;
+        _participants = participants;
+        _scenarios = scenarios;
+        _scoreboard = scoreboard;
+        _remainingTimeInSeconds = remainingTimeResponse['remainingTimeInSeconds'];
+        _isLoading = false;
+      });
+      print('✅ [GameSessionScreen] Données initiales chargées avec succès');
+      // Annuler le précédent timer s'il existe
+      _timeTimer?.cancel();
+
+      if (gameSession.active) {
+        _isCountdownMode = _remainingTimeInSeconds > 0;
+
+        if (_isCountdownMode) {
+          // ⏳ Mode compte à rebours
+          _displayedTimeInSeconds = _remainingTimeInSeconds;
+        } else {
+          // ⏱️ Mode chronomètre : calculer le temps écoulé depuis startTime
+          if (_gameSession?.startTime != null) {
+            _displayedTimeInSeconds = DateTime.now().difference(_gameSession!.startTime!).inSeconds;
+          }
+        }
+        // POUR ÉVITER DE LANCER LE TIMER SI LA SESSION EST TERMINÉE
+        if (!mounted || _gameSession?.active != true) return;
+
+        _timeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          setState(() {
+            if (_isCountdownMode) {
+              if (_displayedTimeInSeconds > 0) {
+                _displayedTimeInSeconds--;
+              } else {
+                timer.cancel(); // Fin du temps
+              }
+            } else {
+              _displayedTimeInSeconds++;
+            }
+          });
+        });
+      }
+    } catch (e) {
+      print('❌ [GameSessionScreen] _loadInitialData Erreur lors du chargement initial: $e');
+      setState(() {
+        _errorMessage = 'Erreur lors du chargement des données: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _navigateToQRCodeScanner() {
+    print('📷 [GameSessionScreen] Ouverture scanner QR code');
+
+    if (treasureHuntScenarioDTO?.treasureHuntScenario == null) {
+      print('⚠️ Aucun scénario de chasse au trésor actif trouvé dans le DTO');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Aucun scénario de chasse au trésor actif'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final scenarioId = treasureHuntScenarioDTO!.scenario.id!;
+    print('✅ Scénario de chasse au trésor trouvé, ouverture scanner avec ID: $scenarioId');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TreasureHuntScannerScreen(
+          userId: widget.userId,
+          teamId: widget.teamId,
+          treasureHuntId: scenarioId,
+          gameSessionId: _gameSession!.id!,
+        ),
+      ),
+    );
+  }
+
+  void _endGameSession() async {
+    print('⏹️ [GameSessionScreen] Fin de la partie demandée');
+    try {
+      final updatedSession = await _gameSessionService.endGameSession(_gameSession!.id!);
+      print('✅ Partie terminée avec succès');
+      final gameStateService = context.read<GameStateService>();
+
+      // 🔴 AJOUT ICI : arrêt du timer
+      _timeTimer?.cancel();
+
+      gameStateService.setGameRunning(false);
+      setState(() {
+        _gameSession = updatedSession;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La partie a été arrêtée.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } catch (e) {
+      print('❌ Erreur lors de la fin de la partie: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de la fin de la partie: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+
+
+  Widget _buildScoreboardSection() {
+    if (_scoreboard != null &&
+        (_scoreboard!.individualScores.isNotEmpty || _scoreboard!.teamScores.isNotEmpty)) {
+      print('🧩 Affichage du Scoreboard : '
+          '${_scoreboard!.individualScores.length} scores individuels, '
+          '${_scoreboard!.teamScores.length} scores équipes');
+      return TreasureHuntScoreboardCard(
+        scoreboard: _scoreboard!,
+        currentUserId: widget.userId,
+        currentTeamId: widget.teamId,
+        teamColors: _teamColors,
+        scenarioDTO: treasureHuntScenarioDTO,
+      );
+    } else {
+      print('🕳️ Aucun score à afficher pour le moment');
+      return SizedBox.shrink();
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Session de jeu'),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Session de jeu'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red, size: 48),
+              SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadInitialData,
+                child: Text('Réessayer'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final bool isActive = _gameSession?.active == true;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Session de jeu'),
+        actions: [
+          if (widget.isHost && isActive)
+            IconButton(
+              icon: Icon(Icons.cancel),
+              onPressed: _endGameSession,
+              tooltip: 'Fin de la partie',
+            ),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _loadInitialData,
+            tooltip: 'Actualiser',
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // Contenu principal
+          SingleChildScrollView(
+            controller: _scrollController,
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Carte de temps restant
+                TimeRemainingCard(
+                  remainingTimeInSeconds: _displayedTimeInSeconds,
+                  isActive: isActive,
+                  isCountdown: _isCountdownMode,
+                ),
+                SizedBox(height: 16),
+
+                // Bouton de scan QR code (uniquement si la partie est active)
+                if (isActive && _isTreasureHuntActive)
+                  QRCodeScannerButton(
+                    onPressed: _navigateToQRCodeScanner,
+                    isActive: isActive,
+                  ),
+
+                // Carte des participants
+                ParticipantsCard(
+                  participants: _participants,
+                  teamColors: _teamColors,
+                ),
+                SizedBox(height: 16),
+
+                // Tableau des scores (uniquement si un scénario de chasse au trésor est actif)
+                _buildScoreboardSection(),
+
+                // Espace pour les notifications de trésors trouvés
+                SizedBox(height: 100),
+              ],
+            ),
+          ),
+
+          // Notifications de trésors trouvés
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Column(
+                children: _treasureFoundNotifications.map((notification) {
+                  final username = notification['username'] ?? 'Joueur';
+                  final teamName = notification['teamName'];
+                  final points = notification['points'] ?? 0;
+                  final symbol = notification['symbol'] ?? '🏆';
+
+                  return Card(
+                    color: Colors.green.shade100,
+                    margin: EdgeInsets.only(bottom: 8),
+                    child: Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.green,
+                            child: Text(
+                              symbol,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(color: Colors.black, fontSize: 14),
+                                children: [
+                                  TextSpan(
+                                    text: username,
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  if (teamName != null) ...[
+                                    TextSpan(text: ' de l\'équipe '),
+                                    TextSpan(
+                                      text: teamName,
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                  TextSpan(text: ' a trouvé un trésor de '),
+                                  TextSpan(
+                                    text: '$points points',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                  TextSpan(text: ' !'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    print('🧹 [GameSessionScreen] Dispose: nettoyage des contrôleurs');
+    _scrollController.dispose();
+    _timeTimer?.cancel();
+    super.dispose();
+  }
+}

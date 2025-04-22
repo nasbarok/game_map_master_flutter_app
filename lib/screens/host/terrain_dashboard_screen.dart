@@ -8,10 +8,12 @@ import '../../models/game_map.dart';
 import '../../models/scenario/scenario_dto.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/game_session_service.dart';
 import '../../services/player_connection_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
+import '../gamesession/game_session_screen.dart';
 import 'scenario_selection_dialog.dart';
 
 class TerrainDashboardScreen extends StatefulWidget {
@@ -134,8 +136,21 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   void _startGame() {
     final gameStateService = context.read<GameStateService>();
+    final gameSessionService = context.read<GameSessionService>();
+    final teamService = context.read<TeamService>();
+    final teamId = teamService.myTeamId;
+
+    final user = context.read<AuthService>().currentUser!;
+    final field = gameStateService.selectedMap!.field;
+    final isHost =user.hasRole('HOST') && field!.owner!.id! == user.id;
+
+    print('🧩 [START] Lancement du jeu demandé');
+    print('📋 Terrain ouvert ? ${gameStateService.isTerrainOpen}');
+    print('📋 Scénarios sélectionnés : ${gameStateService.selectedScenarios?.length}');
+    print('📋 User ID: ${user.id}, Host? $isHost, Team ID: $teamId');
 
     if (!gameStateService.isTerrainOpen) {
+      print('❌ Terrain fermé, annulation');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez d\'abord ouvrir une carte'),
@@ -147,6 +162,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     if (gameStateService.selectedScenarios == null ||
         gameStateService.selectedScenarios!.isEmpty) {
+      print('❌ Aucun scénario sélectionné, annulation');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner au moins un scénario'),
@@ -156,24 +172,63 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       return;
     }
 
-    //creation dun gamesession?
-    gameStateService.startGame(0);
+    int fieldId = gameStateService.selectedMap!.field?.id ?? 0;
+    int gameMapId = gameStateService.selectedMap!.id!;
+    int duration = gameStateService.gameDuration ?? 0;
 
-    // Logique pour démarrer la partie via WebSocket
-    final webSocketService = GetIt.I<WebSocketService>();
-    // webSocketService.startGame(gameStateService.selectedMap!.id, gameStateService.selectedScenarios, gameStateService.gameDuration);
+    print('🚀 Création de la GameSession (Field: $fieldId, Map: $gameMapId, Duration: $duration min)');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('La partie a été lancée !'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    gameSessionService.createGameSession( gameMapId, field!, duration).then((gameSession) {
+      print('✅ GameSession créée avec succès : ID = ${gameSession.id}');
+
+      gameSessionService.startGameSession(gameSession.id!).then((startedSession) {
+        print('✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
+        print('🎮 Navigation vers GameSessionScreen...');
+        gameStateService.setGameRunning(true);
+        gameStateService.setActiveGameSession(startedSession);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameSessionScreen(
+              userId: user.id!,
+              teamId: teamId,
+              isHost: isHost,
+              gameSession: startedSession,
+            ),
+          ),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('La partie a été lancée !'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }).catchError((e) {
+        print('❌ Erreur lors du démarrage de la session : $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors du démarrage de la session : $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      });
+    }).catchError((error) {
+      print('❌ Erreur lors de la création de la GameSession : $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors du lancement de la partie : $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    });
   }
+
 
   void _stopGame() {
     final gameStateService = GetIt.I<GameStateService>();
-    gameStateService.stopGame();
+    gameStateService.stopGameLocally();
+    gameStateService.stopGameRemotely();
 
     // Logique pour arrêter la partie via WebSocket
     final webSocketService = GetIt.I<WebSocketService>();
@@ -555,27 +610,66 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           ),
         const SizedBox(height: 24),
         gameStateService.isGameRunning
-            ? ElevatedButton.icon(
-          onPressed: _stopGame,
-          icon: const Icon(Icons.stop),
-          label: const Text('Arrêter la partie'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-          ),
+            ? Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  final user = context.read<AuthService>().currentUser!;
+                  final teamId = context.read<TeamService>().myTeamId;
+                  final field = gameStateService.selectedMap!.field;
+                  final isHost = user.hasRole('HOST') && field!.owner!.id! == user.id;
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GameSessionScreen(
+                        gameSession: gameStateService.activeGameSession!,
+                        userId: user.id!,
+                        teamId: teamId,
+                        isHost: isHost,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.login),
+                label: const Text('Rejoindre'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _stopGame,
+                icon: const Icon(Icons.stop_circle_outlined),
+                label: const Text('Arrêter'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+          ],
         )
-            : ElevatedButton.icon(
-          onPressed: gameStateService.isTerrainOpen &&
-              (gameStateService.selectedScenarios?.isNotEmpty ?? false)
-              ? _startGame
-              : null,
-          icon: const Icon(Icons.play_arrow),
-          label: const Text('Lancer la partie'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            : SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: gameStateService.isTerrainOpen &&
+                (gameStateService.selectedScenarios?.isNotEmpty ?? false)
+                ? _startGame
+                : null,
+            icon: const Icon(Icons.play_arrow),
+            label: const Text('Lancer la partie'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
           ),
         ),
       ],

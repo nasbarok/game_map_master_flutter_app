@@ -5,7 +5,7 @@ import 'package:airsoft_game_map/services/websocket/team_websocket_handler.dart'
 
 import '../../models/websocket/field_closed_message.dart';
 import '../../models/websocket/game_ended_message.dart';
-import '../../models/websocket/game_started_message.dart';
+import '../../models/websocket/game_session_started_message.dart';
 import '../../models/websocket/player_connected_message.dart';
 import '../../models/websocket/player_disconnected_message.dart';
 import '../../models/websocket/team_deleted_message.dart';

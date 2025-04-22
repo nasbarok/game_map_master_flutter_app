@@ -348,7 +348,7 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
                       ),
                     ),
                     title: Text(
-                      score.username,
+                      score.username ?? 'Joueur inconnu',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(

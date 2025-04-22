@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/scenario.dart';
+import '../models/scenario/scenario_dto.dart';
 import 'api_service.dart';
 
 class ScenarioService extends ChangeNotifier {
@@ -48,5 +49,10 @@ class ScenarioService extends ChangeNotifier {
     } catch (e) {
       throw Exception('Erreur lors de la suppression du scénario: $e');
     }
+  }
+
+  Future<ScenarioDTO> getScenarioDTOById(int scenarioId) async {
+    final response = await _apiService.get('scenarios/$scenarioId');
+    return ScenarioDTO.fromJson(response);
   }
 }

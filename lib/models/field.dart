@@ -35,19 +35,20 @@ class Field {
     return Field(
       id: json['id'],
       name: json['name'] ?? 'Terrain sans nom',
-      description: json['description'],
-      address: json['address'],
+      description: json['description'] ?? '',
+      address: json['address'] ?? '',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       sizeX: (json['sizeX'] as num?)?.toDouble(),
       sizeY: (json['sizeY'] as num?)?.toDouble(),
-      imageUrl: json['imageUrl'],
+      imageUrl: json['imageUrl'] ?? '',
       openedAt: json['openedAt'] != null ? DateTime.parse(json['openedAt']) : null,
       closedAt: json['closedAt'] != null ? DateTime.parse(json['closedAt']) : null,
       active: json['active'] ?? false,
       owner: json['owner'] != null ? User.fromJson(json['owner']) : null,
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {

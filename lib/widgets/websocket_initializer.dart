@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import '../services/auth_service.dart';
 import '../services/game_state_service.dart';
 import '../services/team_service.dart';
+import '../services/websocket/web_socket_game_session_handler.dart';
 import '../services/websocket_service.dart';
 import 'websocket_message_handler.dart';
 
@@ -29,11 +30,13 @@ class _WebSocketInitializerState extends State<WebSocketInitializer> {
       final gameState = GetIt.I<GameStateService>();
       final teamService = GetIt.I<TeamService>();
       final webSocketService = GetIt.I<WebSocketService>();
+      final webSocketGameSessionHandler = GetIt.I<WebSocketGameSessionHandler>();
 
       final handler = WebSocketMessageHandler(
         authService: auth,
         gameStateService: gameState,
         teamService: teamService,
+        webSocketGameSessionHandler: webSocketGameSessionHandler,
       );
 
       webSocketService.setMessageHandler(handler);

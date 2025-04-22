@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:airsoft_game_map/services/team_service.dart';
+import 'package:airsoft_game_map/services/websocket/web_socket_game_session_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -20,11 +21,13 @@ class WebSocketMessageHandler {
   final AuthService authService;
   final GameStateService gameStateService;
   final TeamService teamService;
+  final WebSocketGameSessionHandler webSocketGameSessionHandler;
 
   WebSocketMessageHandler({
     required this.authService,
     required this.gameStateService,
     required this.teamService,
+    required this.webSocketGameSessionHandler,
   });
 
   void handleWebSocketMessage(WebSocketMessage message, BuildContext context) {
@@ -35,7 +38,10 @@ class WebSocketMessageHandler {
     final currentUserId = authService.currentUser?.id;
 
     // Attention : on n'ignore PAS PLAYER_KICKED même si senderId == currentUserId
-    if (message.senderId == currentUserId && type != 'PLAYER_KICKED' && type != 'INVITATION_RESPONSE') {
+    if (message.senderId == currentUserId &&
+        type != 'PLAYER_KICKED' &&
+        type != 'INVITATION_RESPONSE' &&
+        type != 'TREASURE_FOUND') {
       print('⏩ Ignoré : message envoyé par moi-même');
       return;
     }
@@ -76,14 +82,35 @@ class WebSocketMessageHandler {
       case 'SCENARIO_UPDATE':
         _handleScenarioUpdate(messageToJson, context);
         break;
+      case 'GAME_SESSION_STARTED':
+        webSocketGameSessionHandler.handleGameSessionStarted(
+            messageToJson, context);
+        break;
+      case 'GAME_SESSION_ENDED':
+        webSocketGameSessionHandler.handleGameSessionEnded(
+            messageToJson, context);
+        break;
+      case 'PARTICIPANT_JOINED':
+        webSocketGameSessionHandler.handleParticipantJoined(
+            messageToJson, context);
+        break;
+      case 'PARTICIPANT_LEFT':
+        webSocketGameSessionHandler.handleParticipantLeft(
+            messageToJson, context);
+        break;
+      case 'SCENARIO_ADDED':
+        webSocketGameSessionHandler.handleScenarioAdded(messageToJson, context);
+        break;
+      case 'SCENARIO_ACTIVATED':
+        webSocketGameSessionHandler.handleScenarioActivated(
+            messageToJson, context);
+        break;
+      case 'SCENARIO_DEACTIVATED':
+        webSocketGameSessionHandler.handleScenarioDeactivated(
+            messageToJson, context);
+        break;
       case 'TREASURE_FOUND':
-        _handleTreasureFound(messageToJson, context);
-        break;
-      case 'GAME_STARTED':
-        _handleGameStarted(messageToJson, context);
-        break;
-      case 'GAME_ENDED':
-        _handleGameEnded(messageToJson, context);
+        webSocketGameSessionHandler.handleTreasureFound(messageToJson, context);
         break;
       default:
         print('Message WebSocket non géré: $messageToJson');
@@ -148,7 +175,8 @@ class WebSocketMessageHandler {
     final payload = invitation['payload'];
     final fieldId = payload['fieldId'];
 
-    if (gameStateService.selectedField?.id == fieldId && gameStateService.isTerrainOpen) {
+    if (gameStateService.selectedField?.id == fieldId &&
+        gameStateService.isTerrainOpen) {
       print('⏩ Invitation ignorée car déjà connecté au terrain $fieldId');
       return;
     }
@@ -188,8 +216,8 @@ class WebSocketMessageHandler {
               final apiService = context.read<ApiService>();
 
               // 1. Envoi réponse ACCEPT
-              await invitationService.respondToInvitation(context, invitation, true);
-
+              await invitationService.respondToInvitation(
+                  context, invitation, true);
 
               // 3. Restore session complète
               await gameStateService.restoreSessionIfNeeded(apiService);
@@ -383,7 +411,8 @@ class WebSocketMessageHandler {
     print('✅ TEAM_UPDATE traité');
   }
 
-  void _handleScenarioUpdate(Map<String, dynamic> message, BuildContext context) {
+  void _handleScenarioUpdate(
+      Map<String, dynamic> message, BuildContext context) {
     final payload = message['payload'] as Map<String, dynamic>?;
     if (payload == null) {
       print('❌ [WebSocketHandler] Payload manquant dans SCENARIO_UPDATE');
@@ -391,14 +420,14 @@ class WebSocketMessageHandler {
     }
 
     final fieldId = payload['fieldId'];
-    final List<Map<String, dynamic>>? scenarioDtosMapList = payload['scenarioDtos'];
+    final List<Map<String, dynamic>>? scenarioDtosMapList =
+        payload['scenarioDtos'];
     if (scenarioDtosMapList == null) {
       print('❌ [WebSocketHandler] SCENARIO_UPDATE sans scénarioDtos');
       return;
     }
-    final List<ScenarioDTO> scenarioDtos = scenarioDtosMapList
-        .map((dto) => ScenarioDTO.fromJson(dto))
-        .toList();
+    final List<ScenarioDTO> scenarioDtos =
+        scenarioDtosMapList.map((dto) => ScenarioDTO.fromJson(dto)).toList();
 
     print('📥 [WebSocketHandler] SCENARIO_UPDATE reçu pour fieldId=$fieldId');
 
@@ -418,9 +447,8 @@ class WebSocketMessageHandler {
     );
   }
 
-
-
-  void _handleTreasureFound(Map<String, dynamic> message, BuildContext context) {
+  void _handleTreasureFound(
+      Map<String, dynamic> message, BuildContext context) {
     final payload = message['payload'];
     final treasureFoundData = TreasureFoundData.fromJson(payload);
 
@@ -429,12 +457,12 @@ class WebSocketMessageHandler {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${treasureFoundData.username} a trouvé le trésor "${treasureFoundData.treasureName}"'),
+        content: Text(
+            '${treasureFoundData.username} a trouvé le trésor "${treasureFoundData.treasureName}"'),
         backgroundColor: Colors.green,
       ),
     );
   }
-
 
   void _handleGameStarted(Map<String, dynamic> message, BuildContext context) {
     final payload = message['payload'];
@@ -460,7 +488,7 @@ class WebSocketMessageHandler {
 
   void _handleGameEnded(Map<String, dynamic> message, BuildContext context) {
     // Mettre à jour l'état du jeu
-    gameStateService.stopGame();
+    gameStateService.stopGameLocally();
 
     // Afficher une notification
     ScaffoldMessenger.of(context).showSnackBar(
@@ -471,7 +499,8 @@ class WebSocketMessageHandler {
     );
   }
 
-  void _handlePlayerKicked(Map<String, dynamic> message, BuildContext context) async {
+  void _handlePlayerKicked(
+      Map<String, dynamic> message, BuildContext context) async {
     try {
       final playerKicked = PlayerKickedMessage.fromJson(message);
       final currentUserId = authService.currentUser?.id;
@@ -488,8 +517,10 @@ class WebSocketMessageHandler {
 
         // Supprimer l'historique localement
         try {
-          await apiService.delete('fields-history/history/${playerKicked.fieldId}');
-          print('🧹 Historique supprimé pour le terrain ${playerKicked.fieldId}');
+          await apiService
+              .delete('fields-history/history/${playerKicked.fieldId}');
+          print(
+              '🧹 Historique supprimé pour le terrain ${playerKicked.fieldId}');
         } catch (e) {
           print('❌ Erreur lors de la suppression de l’historique : $e');
         }
@@ -515,7 +546,8 @@ class WebSocketMessageHandler {
         }
       } else {
         // ➖ Sinon, c'est un autre joueur qui a été kické
-        print('➖ Joueur ${playerKicked.username} (ID ${playerKicked.userId}) a été kické');
+        print(
+            '➖ Joueur ${playerKicked.username} (ID ${playerKicked.userId}) a été kické');
 
         // Supprimer de la liste
         gameStateService.removeConnectedPlayer(playerKicked.userId);
@@ -532,7 +564,6 @@ class WebSocketMessageHandler {
       print('❌ Erreur dans _handlePlayerKicked : $e');
     }
   }
-
 
   void _handleTeamCreated(Map<String, dynamic> message, BuildContext context) {
     print('🟩 TEAM_CREATED reçu : $message');

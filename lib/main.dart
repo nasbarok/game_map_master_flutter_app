@@ -1,10 +1,13 @@
 import 'package:airsoft_game_map/services/game_map_service.dart';
+import 'package:airsoft_game_map/services/game_session_service.dart';
 import 'package:airsoft_game_map/services/game_state_service.dart';
 import 'package:airsoft_game_map/services/invitation_service.dart';
 import 'package:airsoft_game_map/services/navigation_service.dart';
+import 'package:airsoft_game_map/services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import 'package:airsoft_game_map/services/scenario_service.dart';
 import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:airsoft_game_map/services/websocket/treasure_hunt_websocket_handler.dart';
+import 'package:airsoft_game_map/services/websocket/web_socket_game_session_handler.dart';
 import 'package:airsoft_game_map/services/websocket/websocket_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -51,6 +54,9 @@ void main() async {
         Provider<TreasureHuntWebSocketHandler>.value(value: GetIt.I<TreasureHuntWebSocketHandler>()),
         ChangeNotifierProvider<GameMapService>.value(value: GetIt.I<GameMapService>()),
         ChangeNotifierProvider<ScenarioService>.value(value: GetIt.I<ScenarioService>()),
+        Provider<GameSessionService>.value(value: GetIt.I<GameSessionService>()),
+        Provider<TreasureHuntScoreService>.value(value: GetIt.I<TreasureHuntScoreService>()),
+        Provider<WebSocketGameSessionHandler>.value(value: GetIt.I<WebSocketGameSessionHandler>()),
         // Ajouter obligatoirement les nouveaux services ici
       ],
       child: App(),

@@ -32,6 +32,8 @@ class TreasureFoundData {
   final int treasureId;
   final String treasureName;
   final String symbol;
+  final int? gameSessionId;
+  final int? scenarioId;
 
   TreasureFoundData({
     required this.username,
@@ -42,6 +44,8 @@ class TreasureFoundData {
     required this.treasureId,
     required this.treasureName,
     required this.symbol,
+    this.gameSessionId,
+    required this.scenarioId,
   });
 
   factory TreasureFoundData.fromJson(Map<String, dynamic> json) {
@@ -54,6 +58,23 @@ class TreasureFoundData {
       treasureId: json['treasureId'],
       treasureName: json['treasureName'],
       symbol: json['symbol'],
+      gameSessionId: json['gameSessionId'],
+      scenarioId: json['scenarioId'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'teamName': teamName,
+      'points': points,
+      'totalScore': totalScore,
+      'isNewLeader': isNewLeader,
+      'treasureId': treasureId,
+      'treasureName': treasureName,
+      'symbol': symbol,
+      'gameSessionId': gameSessionId,
+      'scenarioId': scenarioId,
+    };
   }
 }

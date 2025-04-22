@@ -2,19 +2,26 @@
 import 'dart:ffi';
 
 import 'package:airsoft_game_map/models/websocket/invitation_response_message.dart';
+import 'package:airsoft_game_map/models/websocket/participant_joined_message.dart';
+import 'package:airsoft_game_map/models/websocket/participant_left_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_connected_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_disconnected_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_kicked_message.dart';
+import 'package:airsoft_game_map/models/websocket/scenario_activated_message.dart';
+import 'package:airsoft_game_map/models/websocket/scenario_deactivated_message.dart';
+import 'package:airsoft_game_map/models/websocket/scenario_added_message.dart';
 import 'package:airsoft_game_map/models/websocket/scenario_update_message.dart';
 import 'package:airsoft_game_map/models/websocket/team_created_message.dart';
 import 'package:airsoft_game_map/models/websocket/team_deleted_message.dart';
 import 'package:airsoft_game_map/models/websocket/team_update_message.dart';
+import 'package:airsoft_game_map/models/websocket/treasure_found_message.dart';
 
 import 'field_closed_message.dart';
 import 'field_opened_message.dart';
 import 'game_ended_message.dart';
 import 'game_invitation_message.dart';
-import 'game_started_message.dart';
+import 'game_session_ended_message.dart';
+import 'game_session_started_message.dart';
 import 'invitation_received_message.dart';
 
 abstract class WebSocketMessage {
@@ -55,10 +62,26 @@ abstract class WebSocketMessage {
         return FieldOpenedMessage.fromJson(json);
       case 'SCENARIO_UPDATE':
         return ScenarioUpdateMessage.fromJson(json);
-      case 'GAME_STARTED':
-        return GameStartedMessage.fromJson(json);
-      case 'GAME_ENDED':
-        return GameEndedMessage.fromJson(json);
+      case 'GAME_SESSION_STARTED':
+        return GameSessionStartedMessage.fromJson(json);
+      case 'GAME_SESSION_ENDED':
+        return GameSessionEndedMessage.fromJson(json);
+      case 'PARTICIPANT_JOINED':
+        return ParticipantJoinedMessage.fromJson(json);
+      case 'PARTICIPANT_LEFT':
+        return ParticipantLeftMessage.fromJson(json);
+      case 'SCENARIO_ADDED':
+        return ScenarioAddedMessage.fromJson(json);
+      case 'SCENARIO_ACTIVATED':
+        return ScenarioActivatedMessage.fromJson(json);
+      case 'SCENARIO_DEACTIVATED':
+        return ScenarioDeactivatedMessage.fromJson(json);
+      case 'TREASURE_FOUND':
+        return TreasureFoundMessage.fromJson(json); // remplace l'ancien si besoin
+/*      case 'SCORES_LOCKED_STATUS_CHANGED':
+        return ScoresLockedStatusChangedMessage.fromJson(json);*/
+    /*  case 'SCORES_RESET':
+        return ScoresResetMessage.fromJson(json);*/
       default:
         throw Exception('Unknown message type: $type');
     }

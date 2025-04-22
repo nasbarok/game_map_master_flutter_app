@@ -13,6 +13,7 @@ import '../../services/websocket_service.dart';
 import '../../services/invitation_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/team.dart';
+import '../gamesession/game_session_screen.dart';
 
 class GameLobbyScreen extends StatefulWidget {
   const GameLobbyScreen({Key? key}) : super(key: key);
@@ -60,8 +61,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
   @override
   Widget build(BuildContext context) {
-    final gameState = context.watch<GameStateService>();
-    final authService = context.watch<AuthService>();
+    final gameState = context.read<GameStateService>();
 
     final selectedMap = gameState.selectedMap;
     final terrainOuvert = gameState.isTerrainOpen;
@@ -165,23 +165,35 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           ),
           const SizedBox(height: 24),
           if (gameState.isGameRunning)
-            const Card(
+            Card(
               elevation: 4,
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Partie en cours',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Text(
+                    const SizedBox(height: 8),
+                    const Text(
                       'Suivez les instructions de l\'hôte et collaborez avec votre équipe pour atteindre les objectifs du scénario.',
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _navigateToGameSession(context),
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Rejoindre la partie'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -230,7 +242,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Widget _buildSelectedScenarios() {
-    final gameState = context.watch<GameStateService>();
+    final gameState = context.read<GameStateService>();
 
     final scenarios = gameState.selectedScenarios ?? [];
 
@@ -475,9 +487,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Widget _buildPlayersTab() {
-    final gameStateService = context.watch<GameStateService>();
-    final teamService = context.watch<TeamService>();
-    final authService = context.watch<AuthService>();
+    final gameStateService = context.read<GameStateService>();
+    final teamService = context.read<TeamService>();
+    final authService = context.read<AuthService>();
     final connectedPlayers = gameStateService.connectedPlayersList;
     final teams = teamService.teams;
     final currentUserId = authService.currentUser?.id;
@@ -577,7 +589,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   // Dans GameLobbyScreen
 
   Widget _buildTeamInfo() {
-    final teamService = context.watch<TeamService>();
+    final teamService = context.read<TeamService>();
     final myTeamId = teamService.myTeamId;
 
     // Trouver l'équipe du joueur
@@ -662,7 +674,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             itemCount: teams.length,
             itemBuilder: (context, index) {
               final team = teams[index];
-              final teamService = context.watch<TeamService>();
+              final teamService = context.read<TeamService>();
               final isCurrentTeam = team.id == teamService.myTeamId;
 
               return ListTile(
@@ -675,10 +687,10 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 onTap: isCurrentTeam
                     ? null
                     : () {
-                        final authService = context.watch<AuthService>();
+                        final authService = context.read<AuthService>();
                         final playerId = authService.currentUser!.id;
                         teamService.assignPlayerToTeam(playerId!, team.id,
-                            context.watch<GameStateService>().selectedMap!.id!);
+                            context.read<GameStateService>().selectedMap!.id!);
                         Navigator.of(context).pop();
                       },
               );
@@ -773,6 +785,36 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
   }
+
+  void _navigateToGameSession(BuildContext context) {
+    final authService = GetIt.I<AuthService>();
+    final gameStateService = GetIt.I<GameStateService>();
+
+    final user = authService.currentUser;
+    final teamId = GetIt.I<TeamService>().myTeamId;
+    final isHost = false;
+    final gameSession = gameStateService.activeGameSession;
+
+    if (user != null && gameSession != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GameSessionScreen(
+            userId: user.id!,
+            teamId: teamId,
+            isHost: isHost,
+            gameSession: gameSession,
+          ),
+        ),
+      );
+    } else {
+      print('❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Impossible de rejoindre la partie')),
+      );
+    }
+  }
+
 
   @override
   void dispose() {

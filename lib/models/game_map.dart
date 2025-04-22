@@ -32,13 +32,13 @@ class GameMap {
     return GameMap(
       id: json['id'] as int?,
       name: json['name'] ?? 'Sans nom',
-      description: json['description'],
+      description: json['description'] ?? '',
       fieldId: json['fieldId'] as int?,
       ownerId: json['ownerId'] as int?,
       scenarioIds: json['scenarioIds'] != null
           ? List<int>.from(json['scenarioIds'])
           : null,
-      imageUrl: json['imageUrl'],
+      imageUrl: json['imageUrl'] ?? '',
       scale: (json['scale'] as num?)?.toDouble(),
       owner: json['owner'] != null ? User.fromJson(json['owner']) : null,
       field: json['field'] != null ? Field.fromJson(json['field']) : null,
