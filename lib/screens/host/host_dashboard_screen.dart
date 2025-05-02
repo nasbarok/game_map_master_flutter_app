@@ -1,25 +1,18 @@
 import 'package:airsoft_game_map/screens/host/players_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
-import '../../models/field.dart';
-import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import '../../services/invitation_service.dart';
 import '../../services/notifications.dart';
-import '../../services/player_connection_service.dart';
 import '../../services/scenario_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
+import '../../widgets/host_history_tab.dart';
 import '../scenario/treasure_hunt/scoreboard_screen.dart';
-import 'field_form_screen.dart';
 import 'team_form_screen.dart';
 import 'scenario_form_screen.dart';
 import 'game_map_form_screen.dart';
-import 'qr_code_generator_screen.dart';
-import 'scenario_selection_dialog.dart';
 import 'terrain_dashboard_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -39,7 +32,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   void initState() {
     super.initState();
     _tabController =
-        TabController(length: 4, vsync: this); // 4 onglets comme demandé
+        TabController(length: 5, vsync: this); // 4 onglets comme demandé
 
     // Connecter au WebSocket
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -128,6 +121,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             Tab(icon: Icon(Icons.map), text: 'Cartes'),
             Tab(icon: Icon(Icons.videogame_asset), text: 'Scénarios'),
             Tab(icon: Icon(Icons.people), text: 'Joueurs'),
+            Tab(icon: Icon(Icons.history), text: 'Historique'),
           ],
         ),
       ),
@@ -147,6 +141,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
           gameStateService.isTerrainOpen
               ? const PlayersScreen()
               : _buildDisabledTeamsTab(),
+          const HostHistoryTab(),
         ],
       ),
       floatingActionButton: FloatingActionButton(

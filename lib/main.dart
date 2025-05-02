@@ -1,6 +1,7 @@
 import 'package:airsoft_game_map/services/game_map_service.dart';
 import 'package:airsoft_game_map/services/game_session_service.dart';
 import 'package:airsoft_game_map/services/game_state_service.dart';
+import 'package:airsoft_game_map/services/history_service.dart';
 import 'package:airsoft_game_map/services/invitation_service.dart';
 import 'package:airsoft_game_map/services/navigation_service.dart';
 import 'package:airsoft_game_map/services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
@@ -57,6 +58,7 @@ void main() async {
         Provider<GameSessionService>.value(value: GetIt.I<GameSessionService>()),
         Provider<TreasureHuntScoreService>.value(value: GetIt.I<TreasureHuntScoreService>()),
         Provider<WebSocketGameSessionHandler>.value(value: GetIt.I<WebSocketGameSessionHandler>()),
+        Provider<HistoryService>.value(value: GetIt.I<HistoryService>()),
         // Ajouter obligatoirement les nouveaux services ici
       ],
       child: App(),

@@ -13,6 +13,7 @@ import '../../services/websocket_service.dart';
 import '../../services/invitation_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/team.dart';
+import '../../widgets/gamer_history_button.dart';
 import '../gamesession/game_session_screen.dart';
 
 class GameLobbyScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final teamService = Provider.of<TeamService>(context, listen: false);
 
-      _webSocketService.connect(); // 👈 AJOUTER CETTE LIGNE
+      _webSocketService.connect();
 
       final mapId = _gameStateService.selectedMap?.id;
       final fieldId = _gameStateService.selectedMap?.field?.id;
@@ -342,44 +343,50 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: isOpen ? Colors.green : Colors.grey,
-                  child: const Icon(
-                    Icons.map,
-                    color: Colors.white,
-                  ),
-                ),
-                title: Text(field.name),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(isOpen ? 'Ouvert' : 'Fermé'),
-                    Text(openedAtStr),
-                    Text(closedAtStr),
-                    Text(ownerName),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isOpen)
-                      ElevatedButton(
-                        onPressed: () => _joinField(field.id!),
-                        child: const Text('Rejoindre'),
-                      ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      tooltip: 'Supprimer de l\'historique',
-                      onPressed: () => _deleteHistoryEntry(field),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isOpen ? Colors.green : Colors.grey,
+                      child: const Icon(Icons.map, color: Colors.white),
                     ),
-                  ],
-                ),
+                    title: Text(field.name),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(isOpen ? 'Ouvert' : 'Fermé'),
+                        Text(openedAtStr),
+                        Text(closedAtStr),
+                        Text(ownerName),
+                      ],
+                    ),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (isOpen)
+                          ElevatedButton(
+                            onPressed: () => _joinField(field.id!),
+                            child: const Text('Rejoindre'),
+                          ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          tooltip: 'Supprimer de l\'historique',
+                          onPressed: () => _deleteHistoryEntry(field),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 👇 Bouton Historique spécifique
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: GamerHistoryButton(fieldId: field.id!),
+                  ),
+                ],
               ),
             );
           },
         );
+
       },
     );
   }

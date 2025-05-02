@@ -9,6 +9,7 @@ import '../services/auth_service.dart';
 import '../services/game_map_service.dart';
 import '../services/game_session_service.dart';
 import '../services/game_state_service.dart';
+import '../services/history_service.dart';
 import '../services/invitation_service.dart';
 import '../services/navigation_service.dart';
 import '../services/player_connection_service.dart';
@@ -43,7 +44,7 @@ void setupServiceLocator() {
 
   final playerConnectionService = PlayerConnectionService(apiService, gameStateService);
   final gameSessionService = GameSessionService(apiService);
-
+  final historyService = HistoryService(apiService);
   // 2. Navigation
   final navigationService = NavigationService();
   final navigatorKey = navigationService.navigatorKey;
@@ -87,7 +88,7 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<TreasureHuntScoreService>(treasureHuntScoreService);
   GetIt.I.registerSingleton<WebSocketGameSessionHandler>(webSocketGameSessionHandler);
   GetIt.I.registerSingleton<GameSessionService>(gameSessionService);
-
+  GetIt.I.registerSingleton<HistoryService>(historyService);
 
   // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
   final invitationService = InvitationService(
