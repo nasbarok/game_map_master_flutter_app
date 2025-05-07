@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/team.dart';
 import '../../widgets/gamer_history_button.dart';
 import '../gamesession/game_session_screen.dart';
+import '../history/field_sessions_screen.dart';
 
 class GameLobbyScreen extends StatefulWidget {
   const GameLobbyScreen({Key? key}) : super(key: key);
@@ -131,9 +132,36 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Carte : ${gameState.selectedMap?.name ?? "Inconnue"}',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Carte : ${gameState.selectedMap?.name ?? "Inconnue"}',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      IconButton(
+                        tooltip: 'Historique des sessions',
+                        icon: const Icon(Icons.history),
+                        onPressed: () {
+                          final fieldId = gameState.selectedMap?.field?.id;
+                          if (fieldId != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    FieldSessionsScreen(fieldId: fieldId),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Aucun terrain associé trouvé')),
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   _buildSelectedScenarios(),
@@ -283,8 +311,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     );
   }
 
-
-
   // Méthode pour afficher la liste des anciens terrains
   Widget _buildPreviousFieldsList() {
     return FutureBuilder<List<Field>>(
@@ -360,8 +386,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                         Text(ownerName),
                       ],
                     ),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    trailing: Wrap(
+                      direction: Axis.vertical,
+                      spacing: 4,
                       children: [
                         if (isOpen)
                           ElevatedButton(
@@ -386,7 +413,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             );
           },
         );
-
       },
     );
   }
@@ -815,13 +841,13 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         ),
       );
     } else {
-      print('❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
+      print(
+          '❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Impossible de rejoindre la partie')),
       );
     }
   }
-
 
   @override
   void dispose() {

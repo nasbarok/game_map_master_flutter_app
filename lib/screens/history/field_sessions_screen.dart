@@ -91,7 +91,7 @@ class _FieldSessionsScreenState extends State<FieldSessionsScreen> {
           return Card(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
-              title: Text('Session #${gameSession.id}'),
+              title: Text('Session #${index + 1}'),
               subtitle: Text(
                 'Statut: ${gameSession.active}\n'
                     '${gameSession.startTime != null ? 'Début: ${_formatDate(gameSession.startTime!)}' : ''}'
@@ -111,7 +111,10 @@ class _FieldSessionsScreenState extends State<FieldSessionsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => GameSessionDetailsScreen(gameSessionId: gameSession.id!),
+                    builder: (context) => GameSessionDetailsScreen(
+                      gameSessionId: gameSession.id!,
+                      sessionIndex: index, // <-- nouvel argument
+                    ),
                   ),
                 ).then((_) => _loadFieldAndSessions());
               },

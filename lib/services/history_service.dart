@@ -184,7 +184,7 @@ class HistoryService {
     }
   }
 
-  // 📊 Statistiques d’une session
+// 📊 Statistiques d’une session
   Future<Map<String, dynamic>> getGameSessionStatistics(int id) async {
     debugPrint('[HistoryService] 📊 Récupération des statistiques pour la session id=$id...');
 
@@ -196,8 +196,10 @@ class HistoryService {
         return {};
       }
 
-      debugPrint('[HistoryService] ✅ Statistiques récupérées pour la session id=$id');
-      return response as Map<String, dynamic>;
+      debugPrint('[HistoryService] ✅ Statistiques brutes reçues : $response');
+      final stats = response as Map<String, dynamic>;
+
+      return stats;
     } catch (e) {
       debugPrint('[HistoryService] ❌ Erreur lors de la récupération des statistiques pour la session id=$id : $e');
       rethrow;
