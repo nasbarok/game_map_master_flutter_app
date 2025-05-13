@@ -9,7 +9,7 @@ import '../models/user.dart';
 import 'package:provider/provider.dart';
 
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://192.168.3.23:8080/api/auth'; // URL pour l'émulateur Android
+  static const String baseUrl = 'http://192.168.3.24:8080/api/auth'; // URL pour l'émulateur Android
   
   User? _currentUser;
   String? _token;
@@ -70,12 +70,14 @@ class AuthService extends ChangeNotifier {
       await prefs.remove('user');
     }
   }
-  
+
   Future<bool> login(String username, String password) async {
     _isLoading = true;
     notifyListeners();
-    
+    print('🔐 Démarrage du login...');
+
     try {
+      print('📡 Envoi de la requête à $baseUrl/login...');
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
@@ -84,30 +86,38 @@ class AuthService extends ChangeNotifier {
           'password': password,
         }),
       );
-      
+      print('📬 Reçu réponse HTTP ${response.statusCode}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print('✅ Token reçu : ${data['accessToken']}');
+
         _token = data['accessToken'];
-        
-        // Récupérer les informations de l'utilisateur
+
+        print('👤 Récupération des infos utilisateur...');
         await _fetchUserInfo();
-        
+        print('📥 Infos utilisateur récupérées.');
+
         _saveUserToPrefs();
+        print('💾 Utilisateur sauvegardé dans les prefs.');
+
         _isLoading = false;
         notifyListeners();
         return true;
       } else {
+        print('❌ Erreur HTTP ${response.statusCode} : ${response.body}');
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
+      print('💥 Exception lors du login : $e');
       _isLoading = false;
       notifyListeners();
       return false;
     }
   }
-  
+
   Future<bool> register(String username, String email, String password, 
       String firstName, String lastName, String phoneNumber, String role) async {
     _isLoading = true;
@@ -144,7 +154,7 @@ class AuthService extends ChangeNotifier {
     
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.3.23:8080/api/users/me'),
+        Uri.parse('http://192.168.3.24:8080/api/users/me'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',

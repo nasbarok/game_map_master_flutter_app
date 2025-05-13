@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.3.23:8080/api'; // URL pour l'émulateur Android
+  static const String baseUrl = 'http://192.168.3.24:8080/api'; // URL pour l'émulateur Android
   // static const String baseUrl = 'http://localhost:8080/api'; // URL pour iOS simulator
 
 

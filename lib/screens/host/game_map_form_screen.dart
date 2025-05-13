@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/screens/map_editor/interactive_map_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,16 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
 
   bool _isLoading = false;
 
+  // State to hold interactive map data received from the editor
+  String? _sourceAddress;
+  double? _centerLatitude;
+  double? _centerLongitude;
+  double? _initialZoom;
+  String? _fieldBoundaryJson;
+  String? _mapZonesJson;
+  String? _mapPointsOfInterestJson;
+  String? _backgroundImageBase64;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +41,16 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
       _nameController.text = widget.gameMap!.name;
       _descriptionController.text = widget.gameMap!.description ?? '';
       _scaleController.text = widget.gameMap!.scale?.toString() ?? '1.0';
+
+      // Initialize interactive map fields if they exist
+      _sourceAddress = widget.gameMap!.sourceAddress;
+      _centerLatitude = widget.gameMap!.centerLatitude;
+      _centerLongitude = widget.gameMap!.centerLongitude;
+      _initialZoom = widget.gameMap!.initialZoom;
+      _fieldBoundaryJson = widget.gameMap!.fieldBoundaryJson;
+      _mapZonesJson = widget.gameMap!.mapZonesJson;
+      _mapPointsOfInterestJson = widget.gameMap!.mapPointsOfInterestJson;
+      _backgroundImageBase64 = widget.gameMap!.backgroundImageBase64;
     }
   }
 
@@ -41,6 +62,53 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
     super.dispose();
   }
 
+  Future<void> _openInteractiveMapEditor() async {
+    // Prepare the GameMap object to pass to the editor
+    // If creating a new map, some fields might be null initially
+    GameMap mapToEdit = widget.gameMap ?? GameMap(name: _nameController.text.isNotEmpty ? _nameController.text : "Nouvelle Carte");
+
+    // Ensure existing interactive data is passed if available
+    mapToEdit = mapToEdit.copyWith(
+      name: _nameController.text.isNotEmpty ? _nameController.text : mapToEdit.name,
+      description: _descriptionController.text,
+      scale: double.tryParse(_scaleController.text),
+      sourceAddress: _sourceAddress,
+      centerLatitude: _centerLatitude,
+      centerLongitude: _centerLongitude,
+      initialZoom: _initialZoom,
+      fieldBoundaryJson: _fieldBoundaryJson,
+      mapZonesJson: _mapZonesJson,
+      mapPointsOfInterestJson: _mapPointsOfInterestJson,
+      backgroundImageBase64: _backgroundImageBase64,
+    );
+
+    final GameMap? updatedMapData = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => InteractiveMapEditorScreen(initialMap: mapToEdit),
+      ),
+    );
+
+    if (updatedMapData != null) {
+      setState(() {
+        // Update the form's state with data from the editor
+        // This is crucial if the editor modifies these fields directly
+        // and returns the full map object.
+        _nameController.text = updatedMapData.name;
+        _descriptionController.text = updatedMapData.description ?? '';
+        _scaleController.text = updatedMapData.scale?.toString() ?? _scaleController.text;
+
+        _sourceAddress = updatedMapData.sourceAddress;
+        _centerLatitude = updatedMapData.centerLatitude;
+        _centerLongitude = updatedMapData.centerLongitude;
+        _initialZoom = updatedMapData.initialZoom;
+        _fieldBoundaryJson = updatedMapData.fieldBoundaryJson;
+        _mapZonesJson = updatedMapData.mapZonesJson;
+        _mapPointsOfInterestJson = updatedMapData.mapPointsOfInterestJson;
+        _backgroundImageBase64 = updatedMapData.backgroundImageBase64;
+      });
+    }
+  }
+
   Future<void> _saveGameMap() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -48,20 +116,36 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
       });
 
       try {
+        // Use the GameMap instance from widget.gameMap if editing, or create a new one
+        // Then, apply all current field values, including those from the interactive editor
         final gameMap = GameMap(
           id: widget.gameMap?.id,
           name: _nameController.text,
           description: _descriptionController.text,
           scale: double.tryParse(_scaleController.text) ?? 1.0,
+          // Interactive map fields populated from state
+          sourceAddress: _sourceAddress,
+          centerLatitude: _centerLatitude,
+          centerLongitude: _centerLongitude,
+          initialZoom: _initialZoom,
+          fieldBoundaryJson: _fieldBoundaryJson,
+          mapZonesJson: _mapZonesJson,
+          mapPointsOfInterestJson: _mapPointsOfInterestJson,
+          backgroundImageBase64: _backgroundImageBase64,
+          // Preserve other fields if editing an existing map
+          fieldId: widget.gameMap?.fieldId,
+          ownerId: widget.gameMap?.ownerId,
+          scenarioIds: widget.gameMap?.scenarioIds,
+          imageUrl: widget.gameMap?.imageUrl, // Keep existing non-interactive image if any
+          owner: widget.gameMap?.owner,
+          field: widget.gameMap?.field,
         );
 
         final gameMapService = context.read<GameMapService>();
 
         if (widget.gameMap == null) {
-          // Créer une nouvelle carte
           await gameMapService.addGameMap(gameMap);
         } else {
-          // Mettre à jour une carte existante
           await gameMapService.updateGameMap(gameMap);
         }
 
@@ -72,11 +156,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
               backgroundColor: Colors.green,
             ),
           );
-
-          // Recharger les cartes depuis l'API après la création ou mise à jour
           await gameMapService.loadGameMaps();
-
-          Navigator.of(context).pop(true);  // Ferme l'écran et revient à la liste
+          Navigator.of(context).pop(true);
         }
       } catch (e) {
         if (mounted) {
@@ -153,6 +234,16 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                 },
               ),
               const SizedBox(height: 24),
+              ElevatedButton.icon(
+                icon: Icon(Icons.map_outlined), // Choose an appropriate icon
+                label: Text(widget.gameMap == null || (_fieldBoundaryJson == null && _mapZonesJson == null && _mapPointsOfInterestJson == null) ? "Définir la carte interactive" : "Modifier la carte interactive"),
+                onPressed: _openInteractiveMapEditor,
+                style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    textStyle: const TextStyle(fontSize: 16)
+                ),
+              ),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _saveGameMap,
                 style: ElevatedButton.styleFrom(
@@ -170,3 +261,4 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
     );
   }
 }
+

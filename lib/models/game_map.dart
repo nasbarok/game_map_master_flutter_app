@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:airsoft_game_map/models/user.dart';
 
+import 'coordinate.dart';
 import 'field.dart';
+import 'map_point_of_interest.dart';
+import 'map_zone.dart';
 
 class GameMap {
   final int? id;
@@ -15,6 +20,17 @@ class GameMap {
   final User? owner;
   Field? field;
 
+  // New fields for interactive map features
+  final String? sourceAddress;
+  final double? centerLatitude;
+  final double? centerLongitude;
+  final double? initialZoom;
+  final String? fieldBoundaryJson; // Stores List<Coordinate> as JSON string
+  final String? mapZonesJson; // Stores List<MapZone> as JSON string
+  final String? mapPointsOfInterestJson; // Stores List<MapPointOfInterest> as JSON string
+  final String? backgroundImageBase64; // Stores Base64 encoded static background image
+
+
   GameMap({
     this.id,
     required this.name,
@@ -26,7 +42,50 @@ class GameMap {
     this.scale,
     this.owner,
     this.field,
+    // New fields
+    this.sourceAddress,
+    this.centerLatitude,
+    this.centerLongitude,
+    this.initialZoom,
+    this.fieldBoundaryJson,
+    this.mapZonesJson,
+    this.mapPointsOfInterestJson,
+    this.backgroundImageBase64,
   });
+
+  // Helper getters to deserialize JSON fields
+  List<Coordinate>? get fieldBoundary {
+    if (fieldBoundaryJson == null || fieldBoundaryJson!.isEmpty) return null;
+    try {
+      final List<dynamic> decodedJson = jsonDecode(fieldBoundaryJson!);
+      return decodedJson.map((item) => Coordinate.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (e) {
+      print('Error decoding fieldBoundaryJson: $e');
+      return null;
+    }
+  }
+
+  List<MapZone>? get mapZones {
+    if (mapZonesJson == null || mapZonesJson!.isEmpty) return null;
+    try {
+      final List<dynamic> decodedJson = jsonDecode(mapZonesJson!);
+      return decodedJson.map((item) => MapZone.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (e) {
+      print('Error decoding mapZonesJson: $e');
+      return null;
+    }
+  }
+
+  List<MapPointOfInterest>? get mapPointsOfInterest {
+    if (mapPointsOfInterestJson == null || mapPointsOfInterestJson!.isEmpty) return null;
+    try {
+      final List<dynamic> decodedJson = jsonDecode(mapPointsOfInterestJson!);
+      return decodedJson.map((item) => MapPointOfInterest.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (e) {
+      print('Error decoding mapPointsOfInterestJson: $e');
+      return null;
+    }
+  }
 
   factory GameMap.fromJson(Map<String, dynamic> json) {
     return GameMap(
@@ -42,6 +101,15 @@ class GameMap {
       scale: (json['scale'] as num?)?.toDouble(),
       owner: json['owner'] != null ? User.fromJson(json['owner']) : null,
       field: json['field'] != null ? Field.fromJson(json['field']) : null,
+      // New fields from JSON
+      sourceAddress: json['sourceAddress'] as String?,
+      centerLatitude: (json['centerLatitude'] as num?)?.toDouble(),
+      centerLongitude: (json['centerLongitude'] as num?)?.toDouble(),
+      initialZoom: (json['initialZoom'] as num?)?.toDouble(),
+      fieldBoundaryJson: json['fieldBoundaryJson'] as String?,
+      mapZonesJson: json['mapZonesJson'] as String?,
+      mapPointsOfInterestJson: json['mapPointsOfInterestJson'] as String?,
+      backgroundImageBase64: json['backgroundImageBase64'] as String?,
     );
   }
 
@@ -57,6 +125,15 @@ class GameMap {
       'scale': scale,
       'owner': owner?.toJson(),
       'field': field?.toJson(),
+      // New fields to JSON
+      'sourceAddress': sourceAddress,
+      'centerLatitude': centerLatitude,
+      'centerLongitude': centerLongitude,
+      'initialZoom': initialZoom,
+      'fieldBoundaryJson': fieldBoundaryJson,
+      'mapZonesJson': mapZonesJson,
+      'mapPointsOfInterestJson': mapPointsOfInterestJson,
+      'backgroundImageBase64': backgroundImageBase64,
     };
   }
 
@@ -71,6 +148,15 @@ class GameMap {
     double? scale,
     User? owner,
     Field? field,
+    // New fields for copyWith
+    String? sourceAddress,
+    double? centerLatitude,
+    double? centerLongitude,
+    double? initialZoom,
+    String? fieldBoundaryJson,
+    String? mapZonesJson,
+    String? mapPointsOfInterestJson,
+    String? backgroundImageBase64,
   }) {
     return GameMap(
       id: id ?? this.id,
@@ -83,6 +169,15 @@ class GameMap {
       scale: scale ?? this.scale,
       owner: owner ?? this.owner,
       field: field ?? this.field,
+      // New fields
+      sourceAddress: sourceAddress ?? this.sourceAddress,
+      centerLatitude: centerLatitude ?? this.centerLatitude,
+      centerLongitude: centerLongitude ?? this.centerLongitude,
+      initialZoom: initialZoom ?? this.initialZoom,
+      fieldBoundaryJson: fieldBoundaryJson ?? this.fieldBoundaryJson,
+      mapZonesJson: mapZonesJson ?? this.mapZonesJson,
+      mapPointsOfInterestJson: mapPointsOfInterestJson ?? this.mapPointsOfInterestJson,
+      backgroundImageBase64: backgroundImageBase64 ?? this.backgroundImageBase64,
     );
   }
 }
