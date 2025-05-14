@@ -28,7 +28,12 @@ class GameMap {
   final String? fieldBoundaryJson; // Stores List<Coordinate> as JSON string
   final String? mapZonesJson; // Stores List<MapZone> as JSON string
   final String? mapPointsOfInterestJson; // Stores List<MapPointOfInterest> as JSON string
-  final String? backgroundImageBase64; // Stores Base64 encoded static background image
+
+  // Fields for dual background images and their bounds
+  final String? backgroundImageBase64; // Stores Base64 encoded static background image (standard map)
+  final String? backgroundBoundsJson; // Stores LatLngBounds for standard map image as JSON string
+  final String? satelliteImageBase64; // Stores Base64 encoded static background image (satellite view)
+  final String? satelliteBoundsJson; // Stores LatLngBounds for satellite image as JSON string
 
 
   GameMap({
@@ -51,6 +56,9 @@ class GameMap {
     this.mapZonesJson,
     this.mapPointsOfInterestJson,
     this.backgroundImageBase64,
+    this.backgroundBoundsJson,
+    this.satelliteImageBase64,
+    this.satelliteBoundsJson,
   });
 
   // Helper getters to deserialize JSON fields
@@ -110,6 +118,9 @@ class GameMap {
       mapZonesJson: json['mapZonesJson'] as String?,
       mapPointsOfInterestJson: json['mapPointsOfInterestJson'] as String?,
       backgroundImageBase64: json['backgroundImageBase64'] as String?,
+      backgroundBoundsJson: json['backgroundBoundsJson'] as String?, // New
+      satelliteImageBase64: json['satelliteImageBase64'] as String?, // New
+      satelliteBoundsJson: json['satelliteBoundsJson'] as String?, // New
     );
   }
 
@@ -134,6 +145,9 @@ class GameMap {
       'mapZonesJson': mapZonesJson,
       'mapPointsOfInterestJson': mapPointsOfInterestJson,
       'backgroundImageBase64': backgroundImageBase64,
+      'backgroundBoundsJson': backgroundBoundsJson,
+      'satelliteImageBase64': satelliteImageBase64,
+      'satelliteBoundsJson': satelliteBoundsJson,
     };
   }
 
@@ -157,6 +171,9 @@ class GameMap {
     String? mapZonesJson,
     String? mapPointsOfInterestJson,
     String? backgroundImageBase64,
+    String? backgroundBoundsJson,
+    String? satelliteImageBase64,
+    String? satelliteBoundsJson,
   }) {
     return GameMap(
       id: id ?? this.id,
@@ -178,6 +195,9 @@ class GameMap {
       mapZonesJson: mapZonesJson ?? this.mapZonesJson,
       mapPointsOfInterestJson: mapPointsOfInterestJson ?? this.mapPointsOfInterestJson,
       backgroundImageBase64: backgroundImageBase64 ?? this.backgroundImageBase64,
+      backgroundBoundsJson: backgroundBoundsJson ?? this.backgroundBoundsJson,
+      satelliteImageBase64: satelliteImageBase64 ?? this.satelliteImageBase64,
+      satelliteBoundsJson: satelliteBoundsJson ?? this.satelliteBoundsJson,
     );
   }
 }

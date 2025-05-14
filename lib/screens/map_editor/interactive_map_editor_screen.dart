@@ -349,7 +349,7 @@ class _InteractiveMapEditorScreenState extends State<InteractiveMapEditorScreen>
         ButtonSegment<MapEditorMode>(value: MapEditorMode.view, label: Text("Vue"), icon: Icon(Icons.visibility)),
         ButtonSegment<MapEditorMode>(value: MapEditorMode.drawBoundary, label: Text("Limites"), icon: Icon(Icons.polyline)),
         ButtonSegment<MapEditorMode>(value: MapEditorMode.drawZone, label: Text("Zone"), icon: Icon(Icons.crop_square)),
-        ButtonSegment<MapEditorMode>(value: MapEditorMode.placePoi, label: Text("Point Stratégique"), icon: Icon(Icons.place)), // Terme POI changé
+        ButtonSegment<MapEditorMode>(value: MapEditorMode.placePoi, label: Text("Points"), icon: Icon(Icons.place)), // Terme POI changé
       ],
       selected: <MapEditorMode>{_editorMode},
       onSelectionChanged: (Set<MapEditorMode> newSelection) {
