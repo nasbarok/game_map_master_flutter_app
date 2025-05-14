@@ -1,5 +1,4 @@
-import "coordinate.dart";
-import "dart:convert"; // For potential use if properties were complex
+import 'coordinate.dart';
 
 class MapZone {
   final String id;
@@ -7,7 +6,8 @@ class MapZone {
   final String type;
   final String color;
   final List<Coordinate> zoneShape;
-  final Map<String, dynamic>? properties; // Changed to Map<String, dynamic> for flexibility
+  final Map<String, dynamic>? properties;
+  final bool visible;
 
   MapZone({
     required this.id,
@@ -16,6 +16,7 @@ class MapZone {
     required this.color,
     required this.zoneShape,
     this.properties,
+    this.visible = true, // Valeur par défaut
   });
 
   factory MapZone.fromJson(Map<String, dynamic> json) {
@@ -27,7 +28,10 @@ class MapZone {
       zoneShape: (json["zoneShape"] as List<dynamic>)
           .map((item) => Coordinate.fromJson(item as Map<String, dynamic>))
           .toList(),
-      properties: json["properties"] != null ? Map<String, dynamic>.from(json["properties"] as Map) : null,
+      properties: json["properties"] != null
+          ? Map<String, dynamic>.from(json["properties"] as Map)
+          : null,
+      visible: json.containsKey("visible") ? json["visible"] as bool : true,
     );
   }
 
@@ -39,7 +43,27 @@ class MapZone {
       "color": color,
       "zoneShape": zoneShape.map((coord) => coord.toJson()).toList(),
       "properties": properties,
+      "visible": visible,
     };
   }
-}
 
+  MapZone copyWith({
+    String? id,
+    String? name,
+    String? type,
+    String? color,
+    List<Coordinate>? zoneShape,
+    Map<String, dynamic>? properties,
+    bool? visible,
+  }) {
+    return MapZone(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      color: color ?? this.color,
+      zoneShape: zoneShape ?? this.zoneShape,
+      properties: properties ?? this.properties,
+      visible: visible ?? this.visible,
+    );
+  }
+}
