@@ -9,7 +9,7 @@ import '../models/user.dart';
 import 'package:provider/provider.dart';
 
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://192.168.3.24:8080/api/auth'; // URL pour l'émulateur Android
+  static const String baseUrl = 'http://10.0.2.2:8080/api/auth'; // URL pour l'émulateur Android
   
   User? _currentUser;
   String? _token;
@@ -154,7 +154,7 @@ class AuthService extends ChangeNotifier {
     
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.3.24:8080/api/users/me'),
+        Uri.parse('http://10.0.2.2:8080/api/users/me'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',

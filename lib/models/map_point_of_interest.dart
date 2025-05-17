@@ -9,6 +9,7 @@ class MapPointOfInterest {
   final String iconIdentifier; // e.g., "ammo_icon", "flag_icon"
   final String type; // e.g., "AMMO_CACHE", "FLAG"
   final Map<String, dynamic>? properties; // Changed to Map<String, dynamic> for flexibility
+  final bool visible;
 
   MapPointOfInterest({
     required this.id,
@@ -19,6 +20,7 @@ class MapPointOfInterest {
     required this.iconIdentifier,
     required this.type,
     this.properties,
+    this.visible = true, // Valeur par défaut à true
   });
 
   Coordinate get position => Coordinate(latitude: latitude, longitude: longitude);
@@ -33,6 +35,7 @@ class MapPointOfInterest {
       iconIdentifier: json["iconIdentifier"] as String,
       type: json["type"] as String,
       properties: json["properties"] != null ? Map<String, dynamic>.from(json["properties"] as Map) : null,
+      visible: json["visible"] as bool? ?? true, // Gestion de la nullité pour la compatibilité ascendante
     );
   }
 
@@ -46,7 +49,22 @@ class MapPointOfInterest {
       "iconIdentifier": iconIdentifier,
       "type": type,
       "properties": properties,
+      "visible": visible,
     };
+  }
+
+  MapPointOfInterest copyWith({required bool visible, required String name, required String iconIdentifier}) {
+    return MapPointOfInterest(
+      id: id,
+      name: name,
+      description: description,
+      latitude: latitude,
+      longitude: longitude,
+      iconIdentifier: iconIdentifier,
+      type: type,
+      properties: properties,
+      visible: visible, // Utilisation de la valeur passée
+    );
   }
 }
 

@@ -9,8 +9,8 @@ import 'map_zone.dart';
 
 class GameMap {
   final int? id;
-  final String name;
-  final String? description;
+  late String name;
+  late String? description;
   final int? fieldId;
   final int? ownerId;
   final List<int>? scenarioIds;
@@ -21,18 +21,18 @@ class GameMap {
   Field? field;
 
   // New fields for interactive map features
-  final String? sourceAddress;
-  final double? centerLatitude;
-  final double? centerLongitude;
-  final double? initialZoom;
-  final String? fieldBoundaryJson; // Stores List<Coordinate> as JSON string
-  final String? mapZonesJson; // Stores List<MapZone> as JSON string
-  final String? mapPointsOfInterestJson; // Stores List<MapPointOfInterest> as JSON string
+  late String? sourceAddress;
+  late double? centerLatitude;
+  late double? centerLongitude;
+  late double? initialZoom;
+  late String? fieldBoundaryJson; // Stores List<Coordinate> as JSON string
+  late String? mapZonesJson; // Stores List<MapZone> as JSON string
+  late String? mapPointsOfInterestJson; // Stores List<MapPointOfInterest> as JSON string
 
   // Fields for dual background images and their bounds
-  final String? backgroundImageBase64; // Stores Base64 encoded static background image (standard map)
+  late String? backgroundImageBase64; // Stores Base64 encoded static background image (standard map)
   final String? backgroundBoundsJson; // Stores LatLngBounds for standard map image as JSON string
-  final String? satelliteImageBase64; // Stores Base64 encoded static background image (satellite view)
+  late String? satelliteImageBase64; // Stores Base64 encoded static background image (satellite view)
   final String? satelliteBoundsJson; // Stores LatLngBounds for satellite image as JSON string
 
 
@@ -123,6 +123,10 @@ class GameMap {
       satelliteBoundsJson: json['satelliteBoundsJson'] as String?, // New
     );
   }
+
+  set backgroundImageBoundsJson(String? backgroundImageBoundsJson) {}
+
+  set satelliteImageBoundsJson(String? satelliteImageBoundsJson) {}
 
   Map<String, dynamic> toJson() {
     return {

@@ -19,7 +19,7 @@ import 'auth_service.dart';
 import 'game_state_service.dart';
 
 class WebSocketService with ChangeNotifier {
-  static const String wsUrl = 'ws://192.168.3.24:8080/ws';
+  static const String wsUrl = 'ws://10.0.2.2:8080/ws';
 
   AuthService? _authService;
   GameStateService? _gameStateService;
