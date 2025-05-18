@@ -477,10 +477,31 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
               selectedMap.description!,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+          if (selectedMap.sourceAddress != null && selectedMap.sourceAddress!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.location_on, color: Colors.grey[700], size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      selectedMap.sourceAddress!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
+
 
   Widget _buildInfoCards(GameStateService gameStateService) {
     return Wrap(

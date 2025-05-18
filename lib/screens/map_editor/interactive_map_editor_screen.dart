@@ -41,14 +41,12 @@ class InteractiveMapEditorScreen extends StatefulWidget {
 class _InteractiveMapEditorScreenState
     extends State<InteractiveMapEditorScreen> {
   final fm.MapController _mapController = fm.MapController();
-  ScreenshotController _screenshotController =
-  ScreenshotController();
+  ScreenshotController _screenshotController = ScreenshotController();
   late GameMapService _gameMapService;
   late GeocodingService _geocodingService;
   var uuid = Uuid();
 
-  GameMap _currentMap =
-  GameMap(name: "Nouvelle Carte Interactive");
+  GameMap _currentMap = GameMap(name: "Nouvelle Carte Interactive");
   MapEditorMode _editorMode = MapEditorMode.view;
   TileLayerType _currentTileLayerType = TileLayerType.osm;
 
@@ -116,10 +114,10 @@ class _InteractiveMapEditorScreenState
 
   IconData _getIconDataFromIdentifier(String identifier) {
     final iconData = _availableIcons.firstWhere(
-            (icon) => icon["identifier"] == identifier,
-        orElse: () => _availableIcons.firstWhere((icon) => icon["identifier"] ==
-            "default_poi_icon") // Fallback
-    );
+        (icon) => icon["identifier"] == identifier,
+        orElse: () => _availableIcons.firstWhere(
+            (icon) => icon["identifier"] == "default_poi_icon") // Fallback
+        );
     return iconData["icon"] as IconData;
   }
 
@@ -135,14 +133,15 @@ class _InteractiveMapEditorScreenState
       _currentMap = widget.initialMap!;
       _mapNameController.text = _currentMap.name;
       _mapDescriptionController.text = _currentMap.description ?? "";
+      _searchAddressController.text = _currentMap.sourceAddress ?? "";
       if (_currentMap.centerLatitude != null &&
           _currentMap.centerLongitude != null) {
         _currentMapCenter =
             LatLng(_currentMap.centerLatitude!, _currentMap.centerLongitude!);
       }
       if (_currentMap.initialZoom != null) {
-        _currentZoom = _currentMap.initialZoom!.clamp(
-            _minZoom, _maxZoom); // Clamp initial zoom too
+        _currentZoom = _currentMap.initialZoom!
+            .clamp(_minZoom, _maxZoom); // Clamp initial zoom too
       }
       _loadMapDetails();
     } else {
@@ -176,7 +175,7 @@ class _InteractiveMapEditorScreenState
       } else {
         _activeTileUrl = _osmTileUrl;
         _activeTileSubdomains =
-        []; // OSM recommande de ne plus utiliser de sous-domaines
+            []; // OSM recommande de ne plus utiliser de sous-domaines
       }
     });
   }
@@ -206,15 +205,10 @@ class _InteractiveMapEditorScreenState
         _currentMap.fieldBoundaryJson!.isNotEmpty) {
       try {
         final List<dynamic> decoded =
-        jsonDecode(_currentMap.fieldBoundaryJson!);
+            jsonDecode(_currentMap.fieldBoundaryJson!);
         _currentBoundaryPoints = decoded
-            .map((p) =>
-            LatLng(Coordinate
-                .fromJson(p)
-                .latitude,
-                Coordinate
-                    .fromJson(p)
-                    .longitude))
+            .map((p) => LatLng(Coordinate.fromJson(p).latitude,
+                Coordinate.fromJson(p).longitude))
             .toList();
       } catch (e) {
         print("Error decoding fieldBoundaryJson: $e");
@@ -237,7 +231,7 @@ class _InteractiveMapEditorScreenState
         _currentMap.mapPointsOfInterestJson!.isNotEmpty) {
       try {
         final List<dynamic> decoded =
-        jsonDecode(_currentMap.mapPointsOfInterestJson!);
+            jsonDecode(_currentMap.mapPointsOfInterestJson!);
         _mapPois = decoded
             .map((p) => MapPointOfInterest.fromJson(p as Map<String, dynamic>))
             .toList();
@@ -260,7 +254,7 @@ class _InteractiveMapEditorScreenState
     FocusScope.of(context).unfocus();
     try {
       List<GeocodingResult> results =
-      await _geocodingService.searchAddress(_searchAddressController.text);
+          await _geocodingService.searchAddress(_searchAddressController.text);
       setState(() {
         _geocodingResults = results;
         _showGeocodingResults = results.isNotEmpty;
@@ -279,8 +273,7 @@ class _InteractiveMapEditorScreenState
     setState(() {
       _currentMapCenter = LatLng(result.latitude, result.longitude);
       _currentZoom = 15.0.clamp(_minZoom, _maxZoom);
-      _searchAddressController.text =
-          result.displayName;
+      _searchAddressController.text = result.displayName;
       _geocodingResults.clear();
       _showGeocodingResults = false;
     });
@@ -310,7 +303,8 @@ class _InteractiveMapEditorScreenState
           return PoiEditDialog();
         },
       );
-      if (result != null && result.containsKey("name") &&
+      if (result != null &&
+          result.containsKey("name") &&
           result.containsKey("iconIdentifier")) {
         setState(() {
           _mapPois.add(MapPointOfInterest(
@@ -352,7 +346,7 @@ class _InteractiveMapEditorScreenState
           color: result["color"]!,
           zoneShape: _currentZonePoints
               .map((p) =>
-              Coordinate(latitude: p.latitude, longitude: p.longitude))
+                  Coordinate(latitude: p.latitude, longitude: p.longitude))
               .toList(),
           visible: true,
         ));
@@ -404,8 +398,7 @@ class _InteractiveMapEditorScreenState
         return AlertDialog(
           title: Text("Supprimer la Zone"),
           content: Text(
-              "Êtes-vous sûr de vouloir supprimer la zone \"${zoneToDelete
-                  .name}\" ?"),
+              "Êtes-vous sûr de vouloir supprimer la zone \"${zoneToDelete.name}\" ?"),
           actions: <Widget>[
             TextButton(
               child: Text("Annuler"),
@@ -437,7 +430,8 @@ class _InteractiveMapEditorScreenState
       },
     );
 
-    if (result != null && result.containsKey("name") &&
+    if (result != null &&
+        result.containsKey("name") &&
         result.containsKey("iconIdentifier")) {
       setState(() {
         final index = _mapPois.indexWhere((p) => p.id == poiToEdit.id);
@@ -456,7 +450,8 @@ class _InteractiveMapEditorScreenState
     setState(() {
       final index = _mapPois.indexWhere((p) => p.id == poiToToggle.id);
       if (index != -1) {
-        _mapPois[index] = poiToToggle.copyWith(visible: !poiToToggle.visible,
+        _mapPois[index] = poiToToggle.copyWith(
+            visible: !poiToToggle.visible,
             name: poiToToggle.name,
             iconIdentifier: poiToToggle.iconIdentifier);
       }
@@ -470,8 +465,7 @@ class _InteractiveMapEditorScreenState
         return AlertDialog(
           title: Text("Supprimer le Point Stratégique"),
           content: Text(
-              "Êtes-vous sûr de vouloir supprimer le point \"${poiToDelete
-                  .name}\" ?"),
+              "Êtes-vous sûr de vouloir supprimer le point \"${poiToDelete.name}\" ?"),
           actions: <Widget>[
             TextButton(
               child: Text("Annuler"),
@@ -537,7 +531,6 @@ class _InteractiveMapEditorScreenState
     }
   }
 
-
   String? _latLngBoundsToJson(fm.LatLngBounds? bounds) {
     if (bounds == null) return null;
     return jsonEncode({
@@ -548,8 +541,8 @@ class _InteractiveMapEditorScreenState
     });
   }
 
-  Future<void> _captureAndStoreMapBackground(TileLayerType layerType,
-      bool isSatelliteViewForStorage) async {
+  Future<void> _captureAndStoreMapBackground(
+      TileLayerType layerType, bool isSatelliteViewForStorage) async {
     String tileUrlToCapture;
     List<String> subdomainsToCapture;
 
@@ -568,80 +561,82 @@ class _InteractiveMapEditorScreenState
       return;
     }
 
-    fm.LatLngBounds currentBounds = fm.LatLngBounds.fromPoints(
-        _currentBoundaryPoints);
+    fm.LatLngBounds currentBounds =
+    fm.LatLngBounds.fromPoints(_currentBoundaryPoints);
 
     _screenshotController = ScreenshotController();
+
+    Uint8List? imageBytes;
 
     try {
       await Future.delayed(Duration(milliseconds: 500));
 
-      Uint8List? imageBytes = await _screenshotController.captureFromWidget(
-        Material(
-          child: SizedBox(
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
-            height: MediaQuery
-                .of(context)
-                .size
-                .height * 0.5,
-            child: fm.FlutterMap(
-              options: fm.MapOptions(
-                initialCenter: currentBounds.center,
-                initialZoom: _currentZoom,
-                minZoom: _minZoom,
-                maxZoom: _maxZoom,
-              ),
-              children: [
-                fm.TileLayer(
-                  urlTemplate: tileUrlToCapture,
-                  subdomains: subdomainsToCapture,
-                  userAgentPackageName: "com.airsoft.gamemapmaster",
-                ),
-                fm.PolygonLayer(
-                  polygons: [
-                    fm.Polygon(
-                        points: _currentBoundaryPoints,
-                        color: Colors.transparent,
-                        borderColor: Colors.red.withOpacity(0.5),
-                        borderStrokeWidth: 2)
+      imageBytes = await _screenshotController.captureFromWidget(
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            body: MediaQuery(
+              data: MediaQueryData(size: Size(800, 600)), // <- Fournit un MediaQuery explicite
+              child: SizedBox(
+                width: 800, // <- Taille fixe indépendante du contexte original
+                height: 600,
+                child: fm.FlutterMap(
+                  options: fm.MapOptions(
+                    initialCenter: currentBounds.center,
+                    initialZoom: _currentZoom,
+                    minZoom: _minZoom,
+                    maxZoom: _maxZoom,
+                  ),
+                  children: [
+                    fm.TileLayer(
+                      urlTemplate: tileUrlToCapture,
+                      subdomains: subdomainsToCapture,
+                      userAgentPackageName: "com.airsoft.gamemapmaster",
+                    ),
+                    fm.PolygonLayer(
+                      polygons: [
+                        fm.Polygon(
+                          points: _currentBoundaryPoints,
+                          color: Colors.transparent,
+                          borderColor: Colors.red.withOpacity(0.5),
+                          borderStrokeWidth: 2,
+                        ),
+                      ],
+                    ),
                   ],
-                )
-              ],
+                ),
+              ),
             ),
           ),
         ),
         delay: Duration(seconds: 1),
       );
-
-      if (imageBytes != null) {
-        String base64Image = base64Encode(imageBytes);
-        if (isSatelliteViewForStorage) {
-          _currentMap.satelliteImageBase64 = base64Image;
-          _currentMap.satelliteImageBoundsJson =
-              _latLngBoundsToJson(currentBounds);
-        } else {
-          _currentMap.backgroundImageBase64 = base64Image;
-          _currentMap.backgroundImageBoundsJson =
-              _latLngBoundsToJson(currentBounds);
-        }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                "Fond de carte ${isSatelliteViewForStorage
-                    ? 'satellite'
-                    : 'standard'} capturé.")));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text("Erreur lors de la capture du fond de carte.")));
-      }
     } catch (e) {
       print("Error capturing map background: $e");
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Erreur technique lors de la capture: $e")));
+      return;
     }
+
+    if (imageBytes != null) {
+      String base64Image = base64Encode(imageBytes);
+      if (isSatelliteViewForStorage) {
+        _currentMap.satelliteImageBase64 = base64Image;
+        _currentMap.satelliteImageBoundsJson =
+            _latLngBoundsToJson(currentBounds);
+      } else {
+        _currentMap.backgroundImageBase64 = base64Image;
+        _currentMap.backgroundImageBoundsJson =
+            _latLngBoundsToJson(currentBounds);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              "Fond de carte ${isSatelliteViewForStorage ? 'satellite' : 'standard'} capturé.")));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur lors de la capture du fond de carte.")));
+    }
+
     _updateActiveTileLayer();
     setState(() {});
   }
@@ -649,8 +644,7 @@ class _InteractiveMapEditorScreenState
   void _defineFieldBoundary() async {
     if (_currentBoundaryPoints.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              "La limite du terrain doit avoir au moins 3 points.")));
+          content: Text("La limite du terrain doit avoir au moins 3 points.")));
       return;
     }
 
@@ -683,8 +677,7 @@ class _InteractiveMapEditorScreenState
     setState(() {
       _currentMap.fieldBoundaryJson = jsonEncode(_currentBoundaryPoints
           .map((p) =>
-          Coordinate(latitude: p.latitude, longitude: p.longitude)
-              .toJson())
+              Coordinate(latitude: p.latitude, longitude: p.longitude).toJson())
           .toList());
 
       _mapZones.clear();
@@ -698,9 +691,9 @@ class _InteractiveMapEditorScreenState
     await _captureAndStoreMapBackground(TileLayerType.osm, false);
     await _captureAndStoreMapBackground(TileLayerType.satellite, true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(
-            "Limites du terrain définies et fonds de carte capturés.")));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content:
+            Text("Limites du terrain définies et fonds de carte capturés.")));
   }
 
   void _saveMap() async {
@@ -717,10 +710,10 @@ class _InteractiveMapEditorScreenState
     _currentMap.initialZoom = _currentZoom;
     _currentMap.sourceAddress = _searchAddressController.text;
 
-    _currentMap.mapZonesJson = jsonEncode(
-        _mapZones.map((z) => z.toJson()).toList());
-    _currentMap.mapPointsOfInterestJson = jsonEncode(
-        _mapPois.map((p) => p.toJson()).toList());
+    _currentMap.mapZonesJson =
+        jsonEncode(_mapZones.map((z) => z.toJson()).toList());
+    _currentMap.mapPointsOfInterestJson =
+        jsonEncode(_mapPois.map((p) => p.toJson()).toList());
 
     try {
       if (_currentMap.id == null) {
@@ -736,8 +729,7 @@ class _InteractiveMapEditorScreenState
         Navigator.of(context).pop(_currentMap);
       });
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Erreur lors de la sauvegarde: $e")));
     }
   }
@@ -757,7 +749,8 @@ class _InteractiveMapEditorScreenState
             value: MapEditorMode.drawZone,
             label: Text("Zone"),
             icon: Icon(Icons.layers)),
-        ButtonSegment<MapEditorMode>(value: MapEditorMode.placePoi,
+        ButtonSegment<MapEditorMode>(
+            value: MapEditorMode.placePoi,
             label: Text("Points"),
             icon: Icon(Icons.place)),
       ],
@@ -856,7 +849,8 @@ class _InteractiveMapEditorScreenState
                   _currentZonePoints.clear();
                 });
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
                   foregroundColor: Colors.white),
             ),
           ],
@@ -949,8 +943,8 @@ class _InteractiveMapEditorScreenState
 
   // Fonctions pour le zoom
   void _zoomIn() {
-    double newZoom = (_mapController.camera.zoom + 1.0).clamp(
-        _minZoom, _maxZoom);
+    double newZoom =
+        (_mapController.camera.zoom + 1.0).clamp(_minZoom, _maxZoom);
     _mapController.move(_mapController.camera.center, newZoom);
     setState(() {
       _currentZoom = newZoom;
@@ -958,8 +952,8 @@ class _InteractiveMapEditorScreenState
   }
 
   void _zoomOut() {
-    double newZoom = (_mapController.camera.zoom - 1.0).clamp(
-        _minZoom, _maxZoom);
+    double newZoom =
+        (_mapController.camera.zoom - 1.0).clamp(_minZoom, _maxZoom);
     _mapController.move(_mapController.camera.center, newZoom);
     setState(() {
       _currentZoom = newZoom;
@@ -1094,9 +1088,9 @@ class _InteractiveMapEditorScreenState
                       ? "Vue Satellite"
                       : "Vue Standard",
                   child: IconButton(
-                    icon: Icon(
-                        _currentTileLayerType == TileLayerType.osm ? Icons
-                            .satellite_alt : Icons.map),
+                    icon: Icon(_currentTileLayerType == TileLayerType.osm
+                        ? Icons.satellite_alt
+                        : Icons.map),
                     onPressed: _toggleTileLayer,
                   ),
                 )
@@ -1142,8 +1136,8 @@ class _InteractiveMapEditorScreenState
                           // pour éviter des mises à jour pendant les mouvements programmatiques (comme _mapController.move)
                           if (position.center != null)
                             _currentMapCenter = position.center!;
-                          if (position.zoom != null) _currentZoom = position
-                              .zoom!;
+                          if (position.zoom != null)
+                            _currentZoom = position.zoom!;
                           // Pas besoin de setState ici si cela cause des rebuilds non désirés pendant le geste
                           // La carte se met à jour visuellement. Sauvegarder ces valeurs lors d'une action explicite (ex: _saveMap)
                         }
@@ -1160,18 +1154,16 @@ class _InteractiveMapEditorScreenState
                     left: 0,
                     right: 0,
                     child: Container(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.25,
+                      height: MediaQuery.of(context).size.height * 0.25,
                       color: Colors.black.withOpacity(0.7),
                       child: Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text("Gestion des Zones", style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
+                            child: Text("Gestion des Zones",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
                           ),
                           Expanded(child: _buildZoneManagementPanel()),
                         ],
@@ -1185,17 +1177,15 @@ class _InteractiveMapEditorScreenState
                     left: 0,
                     right: 0,
                     child: Container(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.25,
+                      height: MediaQuery.of(context).size.height * 0.25,
                       color: Colors.black.withOpacity(0.7),
                       child: Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text("Gestion des Points Stratégiques",
-                                style: TextStyle(color: Colors.white,
+                                style: TextStyle(
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold)),
                           ),
                           Expanded(child: _buildPoiManagementPanel()),
@@ -1233,4 +1223,3 @@ class _InteractiveMapEditorScreenState
     );
   }
 }
-

@@ -65,11 +65,17 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
   Future<void> _openInteractiveMapEditor() async {
     // Prepare the GameMap object to pass to the editor
     // If creating a new map, some fields might be null initially
-    GameMap mapToEdit = widget.gameMap ?? GameMap(name: _nameController.text.isNotEmpty ? _nameController.text : "Nouvelle Carte");
+    GameMap mapToEdit = widget.gameMap ??
+        GameMap(
+            name: _nameController.text.isNotEmpty
+                ? _nameController.text
+                : "Nouvelle Carte");
 
     // Ensure existing interactive data is passed if available
     mapToEdit = mapToEdit.copyWith(
-      name: _nameController.text.isNotEmpty ? _nameController.text : mapToEdit.name,
+      name: _nameController.text.isNotEmpty
+          ? _nameController.text
+          : mapToEdit.name,
       description: _descriptionController.text,
       scale: double.tryParse(_scaleController.text),
       sourceAddress: _sourceAddress,
@@ -95,7 +101,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
         // and returns the full map object.
         _nameController.text = updatedMapData.name;
         _descriptionController.text = updatedMapData.description ?? '';
-        _scaleController.text = updatedMapData.scale?.toString() ?? _scaleController.text;
+        _scaleController.text =
+            updatedMapData.scale?.toString() ?? _scaleController.text;
 
         _sourceAddress = updatedMapData.sourceAddress;
         _centerLatitude = updatedMapData.centerLatitude;
@@ -136,7 +143,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
           fieldId: widget.gameMap?.fieldId,
           ownerId: widget.gameMap?.ownerId,
           scenarioIds: widget.gameMap?.scenarioIds,
-          imageUrl: widget.gameMap?.imageUrl, // Keep existing non-interactive image if any
+          imageUrl: widget.gameMap?.imageUrl,
+          // Keep existing non-interactive image if any
           owner: widget.gameMap?.owner,
           field: widget.gameMap?.field,
         );
@@ -182,83 +190,126 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.gameMap == null ? 'Nouvelle carte' : 'Modifier la carte'),
+        title: Text(
+            widget.gameMap == null ? 'Nouvelle carte' : 'Modifier la carte'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nom de la carte *',
-                  border: OutlineInputBorder(),
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nom de la carte *',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez entrer un nom pour la carte';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: const InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _scaleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Échelle (m/pixel)',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          final scale = double.tryParse(value);
+                          if (scale == null || scale <= 0) {
+                            return 'Veuillez entrer une échelle valide';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    if (_sourceAddress != null && _sourceAddress!.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 24),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.location_on,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Adresse du terrain',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _sourceAddress!,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ElevatedButton.icon(
+                      icon: Icon(
+                          Icons.map_outlined), // Choose an appropriate icon
+                      label: Text(widget.gameMap == null ||
+                              (_fieldBoundaryJson == null &&
+                                  _mapZonesJson == null &&
+                                  _mapPointsOfInterestJson == null)
+                          ? "Définir la carte interactive"
+                          : "Modifier la carte interactive"),
+                      onPressed: _openInteractiveMapEditor,
+                      style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          textStyle: const TextStyle(fontSize: 16)),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _saveGameMap,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        widget.gameMap == null
+                            ? 'Créer la carte'
+                            : 'Mettre à jour la carte',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom pour la carte';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _scaleController,
-                decoration: const InputDecoration(
-                  labelText: 'Échelle (m/pixel)',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value != null && value.isNotEmpty) {
-                    final scale = double.tryParse(value);
-                    if (scale == null || scale <= 0) {
-                      return 'Veuillez entrer une échelle valide';
-                    }
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                icon: Icon(Icons.map_outlined), // Choose an appropriate icon
-                label: Text(widget.gameMap == null || (_fieldBoundaryJson == null && _mapZonesJson == null && _mapPointsOfInterestJson == null) ? "Définir la carte interactive" : "Modifier la carte interactive"),
-                onPressed: _openInteractiveMapEditor,
-                style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    textStyle: const TextStyle(fontSize: 16)
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _saveGameMap,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  widget.gameMap == null ? 'Créer la carte' : 'Mettre à jour la carte',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }
-
