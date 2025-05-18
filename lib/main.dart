@@ -5,6 +5,7 @@ import 'package:airsoft_game_map/services/geocoding_service.dart';
 import 'package:airsoft_game_map/services/history_service.dart';
 import 'package:airsoft_game_map/services/invitation_service.dart';
 import 'package:airsoft_game_map/services/navigation_service.dart';
+import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'package:airsoft_game_map/services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import 'package:airsoft_game_map/services/scenario_service.dart';
 import 'package:airsoft_game_map/services/team_service.dart';
@@ -53,6 +54,7 @@ void main() async {
         Provider<PlayerConnectionService>.value(value: GetIt.I<PlayerConnectionService>()),
         Provider<TreasureHuntService>.value(value: GetIt.I<TreasureHuntService>()),
         Provider<TreasureHuntService>.value(value: GetIt.I<TreasureHuntService>()),
+        Provider<BombOperationScenarioService>.value(value: GetIt.I<BombOperationScenarioService>()),
         Provider<TreasureHuntWebSocketHandler>.value(value: GetIt.I<TreasureHuntWebSocketHandler>()),
         ChangeNotifierProvider<GameMapService>.value(value: GetIt.I<GameMapService>()),
         ChangeNotifierProvider<ScenarioService>.value(value: GetIt.I<ScenarioService>()),

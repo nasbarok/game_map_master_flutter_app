@@ -7,6 +7,7 @@ import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import '../../services/scenario_service.dart';
+import '../scenario/bomb_operation/bomb_operation_integration.dart';
 import '../scenario/treasure_hunt/treasure_hunt_config_screen.dart';
 
 class ScenarioFormScreen extends StatefulWidget {
@@ -31,7 +32,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
 
   final List<Map<String, dynamic>> _scenarioTypes = [
     {'name': 'Chasse au trésor', 'value': 'treasure_hunt'},
-    {'name': 'Capture de drapeau', 'value': 'capture_flag'},
+    {'name': 'Opération Bombe', 'value': 'bomb_operation'},
     {'name': 'Domination', 'value': 'domination'},
   ];
 
@@ -223,19 +224,27 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                         );
                       }).toList(),
                       onChanged: (widget.scenario != null &&
-                              _selectedType == 'treasure_hunt')
-                          ? null // Désactiver si édition et treasure_hunt
+                          (_selectedType == 'treasure_hunt' || _selectedType == 'bomb_operation'))
+                          ? null // Désactiver si édition et type spécial
                           : (value) async {
-                              if (value != null) {
-                                setState(() {
-                                  _selectedType = value;
-                                });
+                        if (value != null) {
+                          setState(() {
+                            _selectedType = value;
+                          });
 
-                                if (value == 'treasure_hunt') {
-                                  await _handleTreasureHuntTypeSelected();
-                                }
-                              }
-                            },
+                          if (value == 'treasure_hunt') {
+                            await _handleTreasureHuntTypeSelected();
+                          } else if (value == 'bomb_operation') {
+                            await BombOperationIntegration.handleBombOperationTypeSelected(
+                              context,
+                              widget.scenario,
+                              _nameController,
+                              _descriptionController,
+                              _selectedMap?.id,
+                            );
+                          }
+                        }
+                      },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Veuillez sélectionner un type de scénario';

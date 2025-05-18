@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 import 'package:flutter/src/widgets/navigator.dart';
@@ -35,6 +36,8 @@ void setupServiceLocator() {
   // TreasureHuntService
   final treasureHuntService = TreasureHuntService(apiService);
   final treasureHuntScoreService = TreasureHuntScoreService(apiService);
+  final bombOperationScenarioService = BombOperationScenarioService(apiService);
+
 
   // 2. Services de base
   final gameStateService = GameStateService(apiService,treasureHuntService);
@@ -93,6 +96,7 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<GameSessionService>(gameSessionService);
   GetIt.I.registerSingleton<HistoryService>(historyService);
   GetIt.I.registerSingleton<GeocodingService>(geocodingService);
+  GetIt.I.registerSingleton<BombOperationScenarioService>(bombOperationScenarioService);
 
   // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
   final invitationService = InvitationService(
