@@ -282,10 +282,10 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                     ElevatedButton.icon(
                       icon: Icon(
                           Icons.map_outlined), // Choose an appropriate icon
-                      label: Text(widget.gameMap == null ||
-                              (_fieldBoundaryJson == null &&
-                                  _mapZonesJson == null &&
-                                  _mapPointsOfInterestJson == null)
+                      label: Text((_backgroundImageBase64 == null ||
+                                  _backgroundImageBase64!.isEmpty) &&
+                              (_fieldBoundaryJson == null ||
+                                  _fieldBoundaryJson!.isEmpty)
                           ? "Définir la carte interactive"
                           : "Modifier la carte interactive"),
                       onPressed: _openInteractiveMapEditor,

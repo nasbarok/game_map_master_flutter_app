@@ -143,6 +143,16 @@ class _InteractiveMapEditorScreenState
         _currentZoom = _currentMap.initialZoom!
             .clamp(_minZoom, _maxZoom); // Clamp initial zoom too
       }
+      // Pour centrer la carte sur l'adresse au chargement
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_currentMap.centerLatitude != null && _currentMap.centerLongitude != null) {
+          _mapController.move(
+              LatLng(_currentMap.centerLatitude!, _currentMap.centerLongitude!),
+              _currentZoom
+          );
+        }
+      });
+
       _loadMapDetails();
     } else {
       _mapNameController.text = _currentMap.name;
@@ -572,13 +582,14 @@ class _InteractiveMapEditorScreenState
       await Future.delayed(Duration(milliseconds: 500));
 
       imageBytes = await _screenshotController.captureFromWidget(
-        MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: Scaffold(
-            body: MediaQuery(
-              data: MediaQueryData(size: Size(800, 600)), // <- Fournit un MediaQuery explicite
-              child: SizedBox(
-                width: 800, // <- Taille fixe indépendante du contexte original
+        MediaQuery(
+          // Fournir un MediaQueryData explicite avec une taille fixe
+          data: MediaQueryData(size: Size(800, 600)),
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              body: SizedBox(
+                width: 800,
                 height: 600,
                 child: fm.FlutterMap(
                   options: fm.MapOptions(
