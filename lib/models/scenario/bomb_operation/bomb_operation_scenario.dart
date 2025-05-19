@@ -10,19 +10,13 @@ class BombOperationScenario {
   
   /// Description du scénario
   final String? description;
-  
-  /// Durée d'un round en secondes
-  final int roundDuration;
-  
+
   /// Durée du timer de la bombe en secondes
   final int bombTimer;
   
   /// Durée nécessaire pour désamorcer la bombe en secondes
   final int defuseTime;
-  
-  /// Nombre de rounds à jouer
-  final int roundsToPlay;
-  
+
   /// Nombre de sites de bombe à activer aléatoirement par round
   final int activeSitesPerRound;
   
@@ -32,18 +26,24 @@ class BombOperationScenario {
   /// Liste des sites de bombe associés à ce scénario
   final List<BombSite>? bombSites;
 
+  /// Indique si les zones de la carte doivent être affichées
+  final bool showZones;
+
+  /// Indique si les points d'intérêt de la carte doivent être affichés
+  final bool showPointsOfInterest;
+
   /// Constructeur
   BombOperationScenario({
     this.id,
     required this.name,
     this.description,
-    required this.roundDuration,
     required this.bombTimer,
     required this.defuseTime,
-    required this.roundsToPlay,
     required this.activeSitesPerRound,
     this.active = true,
     this.bombSites,
+    this.showZones = true,
+    this.showPointsOfInterest = true,
   });
 
   /// Crée une instance de BombOperationScenario à partir d'un objet JSON
@@ -59,13 +59,13 @@ class BombOperationScenario {
       id: json['id'],
       name: json['name'],
       description: json['description'],
-      roundDuration: json['roundDuration'],
       bombTimer: json['bombTimer'],
       defuseTime: json['defuseTime'],
-      roundsToPlay: json['roundsToPlay'],
       activeSitesPerRound: json['activeSitesPerRound'],
       active: json['active'] ?? true,
       bombSites: sites,
+      showZones: json['showZones'] ?? true,
+      showPointsOfInterest: json['showPointsOfInterest'] ?? true,
     );
   }
 
@@ -75,12 +75,12 @@ class BombOperationScenario {
       'id': id,
       'name': name,
       'description': description,
-      'roundDuration': roundDuration,
       'bombTimer': bombTimer,
       'defuseTime': defuseTime,
-      'roundsToPlay': roundsToPlay,
       'activeSitesPerRound': activeSitesPerRound,
       'active': active,
+      'showZones': showZones,
+      'showPointsOfInterest': showPointsOfInterest,
     };
     
     if (bombSites != null) {
@@ -95,25 +95,25 @@ class BombOperationScenario {
     int? id,
     String? name,
     String? description,
-    int? roundDuration,
     int? bombTimer,
     int? defuseTime,
-    int? roundsToPlay,
     int? activeSitesPerRound,
     bool? active,
     List<BombSite>? bombSites,
+    bool? showZones,
+    bool? showPointsOfInterest,
   }) {
     return BombOperationScenario(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      roundDuration: roundDuration ?? this.roundDuration,
       bombTimer: bombTimer ?? this.bombTimer,
       defuseTime: defuseTime ?? this.defuseTime,
-      roundsToPlay: roundsToPlay ?? this.roundsToPlay,
       activeSitesPerRound: activeSitesPerRound ?? this.activeSitesPerRound,
       active: active ?? this.active,
       bombSites: bombSites ?? this.bombSites,
+      showZones: showZones ?? this.showZones,
+      showPointsOfInterest: showPointsOfInterest ?? this.showPointsOfInterest,
     );
   }
 }

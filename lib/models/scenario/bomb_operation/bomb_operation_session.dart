@@ -185,16 +185,4 @@ class BombOperationSession {
     
     return remainingSeconds > 0 ? remainingSeconds : 0;
   }
-  
-  /// Calcule le temps restant pour le round en secondes
-  int? getRemainingRoundTime(BombOperationScenario scenario) {
-    if (gameState != BombOperationState.roundActive || roundStartTime == null) {
-      return null;
-    }
-    
-    final elapsedSeconds = DateTime.now().difference(roundStartTime!).inSeconds;
-    final remainingSeconds = scenario.roundDuration - elapsedSeconds;
-    
-    return remainingSeconds > 0 ? remainingSeconds : 0;
-  }
 }

@@ -22,7 +22,28 @@ class GameMapService extends ChangeNotifier {
     }
   }
 
-  // Méthode pour ajouter une nouvelle carte
+  /// Récupère une carte par son ID
+  Future<GameMap> getGameMapById(int mapId) async {
+    try {
+      // Vérifie d'abord si la carte est déjà en mémoire
+      final cachedMap = _gameMaps.firstWhere(
+        (map) => map.id == mapId,
+        orElse: () => GameMap(name: 'Carte non trouvée'),
+      );
+
+      if (cachedMap.id != null) {
+        return cachedMap;
+      }
+
+      // Sinon, charge depuis l'API
+      final response = await _apiService.get('maps/$mapId');
+      return GameMap.fromJson(response);
+    } catch (e) {
+      throw Exception('Erreur lors de la récupération de la carte: $e');
+    }
+  }
+
+  /// Ajoute une nouvelle carte
   Future<void> addGameMap(GameMap gameMap) async {
     try {
       await _apiService.post('maps', gameMap.toJson());
