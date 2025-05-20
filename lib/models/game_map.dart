@@ -95,6 +95,19 @@ class GameMap {
     }
   }
 
+  /// Vérifie si la carte a des coordonnées géographiques valides
+  bool get hasValidCoordinates {
+    return centerLatitude != null && centerLongitude != null;
+  }
+
+  /// Vérifie si la carte a une configuration interactive complète
+  bool get hasInteractiveMapConfig {
+    return hasValidCoordinates &&
+           initialZoom != null &&
+           fieldBoundaryJson != null &&
+           fieldBoundaryJson!.isNotEmpty;
+  }
+
   factory GameMap.fromJson(Map<String, dynamic> json) {
     return GameMap(
       id: json['id'] as int?,

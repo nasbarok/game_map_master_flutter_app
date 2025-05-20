@@ -26,6 +26,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
   String? _selectedType;
   GameMap? _selectedMap;
   List<GameMap> _availableMaps = [];
+  List<GameMap> _validMaps = []; // Cartes avec configuration interactive valide
 
   bool _isLoading = false;
   bool _isLoadingMaps = true;
@@ -63,21 +64,30 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
       }
       final maps = gameMapService.gameMaps;
 
+      // Filtrer les cartes valides (avec configuration interactive)
+      final validMaps = maps.where((map) => map.hasInteractiveMapConfig).toList();
+
       GameMap? selected;
 
       if (widget.scenario != null &&
-          widget.scenario!.gameMapId != null &&
-          maps.isNotEmpty) {
-        selected = maps.firstWhere(
+          widget.scenario!.gameMapId != null) {
+        // Chercher d'abord dans les cartes valides
+        selected = validMaps.firstWhere(
           (map) => map.id == widget.scenario!.gameMapId,
-          orElse: () => maps.first,
+          orElse: () => maps.firstWhere(
+            (map) => map.id == widget.scenario!.gameMapId,
+            orElse: () => validMaps.isNotEmpty ? validMaps.first : maps.first,
+          ),
         );
+      } else if (validMaps.isNotEmpty) {
+        selected = validMaps.first;
       } else if (maps.isNotEmpty) {
         selected = maps.first;
       }
 
       setState(() {
         _availableMaps = maps;
+        _validMaps = validMaps;
         _selectedMap = selected;
         _isLoadingMaps = false;
       });
@@ -112,6 +122,18 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
           const SnackBar(
             content: Text('Veuillez sélectionner une carte'),
             backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Vérifier si la carte sélectionnée a une configuration interactive valide
+      if (!_selectedMap!.hasInteractiveMapConfig &&
+          (_selectedType == 'bomb_operation' || _selectedType == 'treasure_hunt')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
+            backgroundColor: Colors.orange,
           ),
         );
         return;

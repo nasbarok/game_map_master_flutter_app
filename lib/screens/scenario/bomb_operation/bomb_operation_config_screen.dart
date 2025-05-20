@@ -45,6 +45,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isLoadingMap = true;
+  bool _mapLoadError = false;
 
   // Contrôleurs pour les champs de formulaire
   final _nameController = TextEditingController();
@@ -80,6 +81,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   Future<void> _loadScenario() async {
     setState(() {
       _isLoading = true;
+      _mapLoadError = false;
     });
     
     try {
@@ -133,10 +135,29 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   Future<void> _loadGameMap(int gameMapId) async {
     setState(() {
       _isLoadingMap = true;
+      _mapLoadError = false;
     });
 
     try {
       final gameMap = await _gameMapService.getGameMapById(gameMapId);
+
+      // Vérifier si la carte a une configuration interactive valide
+      if (!gameMap.hasInteractiveMapConfig) {
+        setState(() {
+          _mapLoadError = true;
+          _isLoadingMap = false;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
 
       setState(() {
         _gameMap = gameMap;
@@ -236,7 +257,120 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       ),
     );
   }
-  
+  /// Retourne l'icône associée à un identifiant donné pour un POI
+  IconData _getIconDataFromIdentifier(String iconIdentifier) {
+    switch (iconIdentifier) {
+      case 'location':
+        return Icons.location_on;
+      case 'danger':
+        return Icons.dangerous;
+      case 'info':
+        return Icons.info;
+    // Ajoutez d'autres identifiants et icônes selon vos besoins
+      default:
+        return Icons.help_outline; // Icône par défaut si l'identifiant est inconnu
+    }
+  }
+  /// Construit la carte interactive
+  Widget _buildMap() {
+    if (_gameMap == null) {
+      return const Center(child: Text('Aucune carte disponible'));
+    }
+
+    return fm.FlutterMap(
+      mapController: _mapController,
+      options: fm.MapOptions(
+        center: LatLng(_gameMap!.centerLatitude!, _gameMap!.centerLongitude!),
+        zoom: _gameMap!.initialZoom ?? 15.0,
+        maxZoom: 20.0,
+        minZoom: 3.0,
+      ),
+      children: [
+        fm.TileLayer(
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: const ['a', 'b', 'c'],
+        ),
+
+        // Limites du terrain (toujours affichées)
+        if (_gameMap!.fieldBoundary != null)
+          fm.PolygonLayer(
+            polygons: [
+              fm.Polygon(
+                points: _gameMap!.fieldBoundary!
+                    .map((coord) => LatLng(coord.latitude, coord.longitude))
+                    .toList(),
+                color: Colors.blue.withOpacity(0.3),
+                borderColor: Colors.blue,
+                borderStrokeWidth: 3.0,
+              ),
+            ],
+          ),
+
+        // Zones (conditionnellement affichées)
+        if (_showZones && _gameMap!.mapZones != null)
+          fm.PolygonLayer(
+            polygons: _gameMap!.mapZones!.map((zone) {
+              final color = Color(int.parse(zone.color.replaceAll('#', '0xFF')));
+              return fm.Polygon(
+                points: zone.coordinates
+                    .map((coord) => LatLng(coord.latitude, coord.longitude))
+                    .toList(),
+                color: color.withOpacity(0.3),
+                borderColor: color,
+                borderStrokeWidth: 2.0,
+              );
+            }).toList(),
+          ),
+
+        // Points d'intérêt (conditionnellement affichés)
+        if (_showPointsOfInterest && _gameMap!.mapPointsOfInterest != null)
+          fm.MarkerLayer(
+            markers: _gameMap!.mapPointsOfInterest!.where((poi) => poi.visible).map((poi) {
+              return fm.Marker(
+                width: 80.0, // Largeur de l'icône
+                height: 80.0, // Hauteur de l'icône
+                point: LatLng(poi.latitude, poi.longitude),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getIconDataFromIdentifier(poi.iconIdentifier), // Icone dynamique selon le POI
+                      color: Color(int.parse(poi.color.replaceAll('#', '0xFF'))), // Couleur dynamique
+                      size: 40, // Taille de l'icône
+                    ),
+                    // Vous pouvez ajouter plus de widgets ici si nécessaire, comme des labels ou des infos supplémentaires
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+
+        // Sites de bombe
+        if (_bombSites != null)
+          fm.MarkerLayer(
+            markers: _bombSites!.map((site) {
+              return fm.Marker(
+                point: LatLng(site.latitude, site.longitude),
+                width: 80.0, // Largeur de l'icône
+                height: 80.0, // Hauteur de l'icône
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.dangerous, // Icône de danger pour les sites de bombe
+                      color: Colors.red,
+                      size: 50, // Taille de l'icône
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -550,7 +684,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   }
 
   /// Construit la carte interactive
-  Widget _buildMap() {
+  /*Widget _buildMap() {
     if (_gameMap == null) {
       return const Center(child: Text('Aucune carte disponible'));
     }
@@ -686,5 +820,5 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
           ),
       ],
     );
-  }
+  }*/
 }
