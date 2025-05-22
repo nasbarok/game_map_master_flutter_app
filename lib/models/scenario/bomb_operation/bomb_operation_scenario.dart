@@ -5,11 +5,8 @@ class BombOperationScenario {
   /// Identifiant unique du scénario
   final int? id;
   
-  /// Nom du scénario
-  final String name;
-  
-  /// Description du scénario
-  final String? description;
+  /// scénario
+  final int? scenarioId;
 
   /// Durée du timer de la bombe en secondes
   final int bombTimer;
@@ -18,10 +15,10 @@ class BombOperationScenario {
   final int defuseTime;
 
   /// Nombre de sites de bombe à activer aléatoirement par round
-  final int activeSitesPerRound;
-  
-  /// Indique si le scénario est actif
-  final bool active;
+  final int? activeSites;
+
+  final String? attackTeamName;
+  final String? defenseTeamName;
   
   /// Liste des sites de bombe associés à ce scénario
   final List<BombSite>? bombSites;
@@ -35,12 +32,12 @@ class BombOperationScenario {
   /// Constructeur
   BombOperationScenario({
     this.id,
-    required this.name,
-    this.description,
+    this.scenarioId,
     required this.bombTimer,
     required this.defuseTime,
-    required this.activeSitesPerRound,
-    this.active = true,
+    this.activeSites,
+    this.attackTeamName,
+    this.defenseTeamName,
     this.bombSites,
     this.showZones = true,
     this.showPointsOfInterest = true,
@@ -54,15 +51,15 @@ class BombOperationScenario {
           .map((site) => BombSite.fromJson(site))
           .toList();
     }
-    
+
     return BombOperationScenario(
       id: json['id'],
-      name: json['name'],
-      description: json['description'],
+      scenarioId: json['scenarioId'],
       bombTimer: json['bombTimer'],
       defuseTime: json['defuseTime'],
-      activeSitesPerRound: json['activeSitesPerRound'],
-      active: json['active'] ?? true,
+      activeSites: json['activeSites'],
+      attackTeamName: json['attackTeamName'],
+      defenseTeamName: json['defenseTeamName'],
       bombSites: sites,
       showZones: json['showZones'] ?? true,
       showPointsOfInterest: json['showPointsOfInterest'] ?? true,
@@ -73,12 +70,12 @@ class BombOperationScenario {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {
       'id': id,
-      'name': name,
-      'description': description,
+      'scenarioId': scenarioId,
       'bombTimer': bombTimer,
       'defuseTime': defuseTime,
-      'activeSitesPerRound': activeSitesPerRound,
-      'active': active,
+      'activeSites': activeSites,
+      'attackTeamName': attackTeamName,
+      'defenseTeamName': defenseTeamName,
       'showZones': showZones,
       'showPointsOfInterest': showPointsOfInterest,
     };
@@ -105,12 +102,12 @@ class BombOperationScenario {
   }) {
     return BombOperationScenario(
       id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
+      scenarioId: scenarioId ?? this.scenarioId,
       bombTimer: bombTimer ?? this.bombTimer,
       defuseTime: defuseTime ?? this.defuseTime,
-      activeSitesPerRound: activeSitesPerRound ?? this.activeSitesPerRound,
-      active: active ?? this.active,
+      activeSites: activeSites ?? this.activeSites,
+      attackTeamName: attackTeamName ?? this.attackTeamName,
+      defenseTeamName: defenseTeamName ?? this.defenseTeamName,
       bombSites: bombSites ?? this.bombSites,
       showZones: showZones ?? this.showZones,
       showPointsOfInterest: showPointsOfInterest ?? this.showPointsOfInterest,

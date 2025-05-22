@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/models/scenario.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../models/game_map.dart';
 import '../../../models/scenario/bomb_operation/bomb_operation_scenario.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/game_map_service.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../../../services/scenario_service.dart';
@@ -16,7 +18,7 @@ import 'bomb_site_list_screen.dart';
 class BombOperationConfigScreen extends StatefulWidget {
   /// Identifiant du scénario
   final int scenarioId;
-  
+  final int gameMapId;
   /// Nom du scénario
   final String scenarioName;
 
@@ -25,21 +27,25 @@ class BombOperationConfigScreen extends StatefulWidget {
     Key? key,
     required this.scenarioId,
     required this.scenarioName,
+    required this.gameMapId,
   }) : super(key: key);
 
   @override
-  State<BombOperationConfigScreen> createState() => _BombOperationConfigScreenState();
+  State<BombOperationConfigScreen> createState() =>
+      _BombOperationConfigScreenState();
 }
 
 class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late BombOperationScenarioService _bombOperationService;
   late GameMapService _gameMapService;
-  final fm.MapController _mapController = fm.MapController();
+  late ScenarioService _scenarioService;
 
-  BombOperationScenario? _scenario;
-  GameMap? _gameMap;
+  late final fm.MapControllerImpl _mapController;
+
+  BombOperationScenario? _scenarioBombOperation;
+  late GameMap _gameMap;
   List<BombSite>? _bombSites;
 
   bool _isLoading = true;
@@ -53,7 +59,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   final _bombTimerController = TextEditingController();
   final _defuseTimeController = TextEditingController();
   final _activeSitesPerRoundController = TextEditingController();
-  
+
   // Options d'affichage de la carte
   bool _showZones = true;
   bool _showPointsOfInterest = true;
@@ -63,9 +69,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     super.initState();
     _bombOperationService = GetIt.I<BombOperationScenarioService>();
     _gameMapService = GetIt.I<GameMapService>();
+    _scenarioService = GetIt.I<ScenarioService>();
+    _mapController = fm.MapControllerImpl();
     _loadScenario();
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -76,48 +84,57 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     _mapController.dispose();
     super.dispose();
   }
-  
+
   /// Charge les données du scénario depuis le backend
   Future<void> _loadScenario() async {
     setState(() {
       _isLoading = true;
       _mapLoadError = false;
     });
-    
+
     try {
       // Assure que le scénario BombOperation existe pour cet ID
-      final scenario = await _bombOperationService.ensureBombOperationScenario(widget.scenarioId);
-      
+      final scenarioBombOperation = await _bombOperationService
+          .ensureBombOperationScenario(widget.scenarioId);
+
+      final scenario = await _scenarioService.getScenarioDTOById(scenarioBombOperation.scenarioId!);
+
       // Initialise les contrôleurs avec les valeurs du scénario
-      _nameController.text = scenario.name;
-      _descriptionController.text = scenario.description ?? '';
-      _bombTimerController.text = scenario.bombTimer.toString();
-      _defuseTimeController.text = scenario.defuseTime.toString();
-      _activeSitesPerRoundController.text = scenario.activeSitesPerRound.toString();
-      
+      _nameController.text = scenario.scenario.name;
+      _descriptionController.text = scenario.scenario.description ?? '';
+      _bombTimerController.text = scenarioBombOperation.bombTimer.toString();
+      _defuseTimeController.text = scenarioBombOperation.defuseTime.toString();
+      _activeSitesPerRoundController.text =
+          scenarioBombOperation.activeSites.toString();
+
       // Récupère les options d'affichage
-      _showZones = scenario.showZones;
-      _showPointsOfInterest = scenario.showPointsOfInterest;
+      _showZones = scenarioBombOperation.showZones;
+      _showPointsOfInterest = scenarioBombOperation.showPointsOfInterest;
 
       // Récupère les sites de bombe
       final sites = await _bombOperationService.getBombSites(widget.scenarioId);
 
       // Récupère le scénario principal pour obtenir l'ID de la carte
       final scenarioService = context.read<ScenarioService>();
-      final mainScenario = await scenarioService.getScenarioDTOById(widget.scenarioId);
+      final mainScenario =
+          await scenarioService.getScenarioDTOById(widget.scenarioId);
 
-      if (mainScenario.scenario.gameMapId != null) {
+      if (widget.gameMapId != null) {
         // Charge la carte associée au scénario
-        await _loadGameMap(mainScenario.scenario.gameMapId!);
+        await _loadGameMap(widget.gameMapId!);
+      }else{
+        print('❌ [BombOperationConfigScreen] [_loadScenario] Aucune carte associée au scénario principal');
       }
 
       setState(() {
-        _scenario = scenario;
+        _scenarioBombOperation = scenarioBombOperation;
         _bombSites = sites;
         _isLoading = false;
       });
     } catch (e) {
       if (mounted) {
+        // Affiche un message d'erreur si le chargement échoue
+        print('Erreur lors du chargement du scénario: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors du chargement du scénario: $e'),
@@ -130,9 +147,10 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       }
     }
   }
-  
+
   /// Charge la carte associée au scénario
   Future<void> _loadGameMap(int gameMapId) async {
+    print('📡 [BombOperationConfigScreen] [_loadGameMap] Chargement gameMapId=$gameMapId');
     setState(() {
       _isLoadingMap = true;
       _mapLoadError = false;
@@ -140,22 +158,28 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
     try {
       final gameMap = await _gameMapService.getGameMapById(gameMapId);
+      print('✅ [BombOperationConfigScreen] [_loadGameMap] Reçu: ${gameMap.name}, interactive: ${gameMap.hasInteractiveMapConfig}');
+      print('🎯 [BombOperationConfigScreen] [_loadGameMap] gameMap JSON brut: ${gameMap.toJson()}');
 
       // Vérifier si la carte a une configuration interactive valide
       if (!gameMap.hasInteractiveMapConfig) {
+        print('⚠️ [BombOperationConfigScreen] [_loadGameMap] Carte non interactive, affichage bloqué');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+
         setState(() {
           _mapLoadError = true;
           _isLoadingMap = false;
         });
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
         return;
       }
 
@@ -163,16 +187,22 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         _gameMap = gameMap;
         _isLoadingMap = false;
       });
+      print('🗺️ [BombOperationConfigScreen] [_loadGameMap] Affichage carte préparé');
 
       // Centre la carte sur les coordonnées de la carte
-      if (_gameMap?.centerLatitude != null && _gameMap?.centerLongitude != null) {
-        _mapController.move(
-          LatLng(_gameMap!.centerLatitude!, _gameMap!.centerLongitude!),
-          _gameMap?.initialZoom ?? 15.0,
-        );
+      if (_gameMap?.centerLatitude != null &&
+          _gameMap?.centerLongitude != null) {
+        print('📍 [BombOperationConfigScreen] [_loadGameMap] Centre: ${_gameMap!.centerLatitude}, ${_gameMap!.centerLongitude}');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _mapController.move(
+            LatLng(_gameMap!.centerLatitude!, _gameMap!.centerLongitude!),
+            _gameMap?.initialZoom ?? 15.0,
+          );
+        });
       }
     } catch (e) {
       if (mounted) {
+        print('❌ [BombOperationConfigScreen] [_loadGameMap] Erreur lors du chargement de la carte: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors du chargement de la carte: $e'),
@@ -189,36 +219,50 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   /// Sauvegarde les modifications du scénario
   Future<void> _saveScenario() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() {
       _isSaving = true;
     });
-    
+
     try {
-      final updatedScenario = BombOperationScenario(
-        id: _scenario!.id,
-        name: _nameController.text,
-        description: _descriptionController.text,
+      final updatedScenarioBombOperation = BombOperationScenario(
+        id: _scenarioBombOperation!.id,
         bombTimer: int.parse(_bombTimerController.text),
         defuseTime: int.parse(_defuseTimeController.text),
-        activeSitesPerRound: int.parse(_activeSitesPerRoundController.text),
-        active: _scenario!.active,
-        bombSites: _scenario!.bombSites,
+        activeSites: int.parse(_activeSitesPerRoundController.text),
+        attackTeamName: _scenarioBombOperation!.attackTeamName,
+        defenseTeamName: _scenarioBombOperation!.defenseTeamName,
+        scenarioId: widget.scenarioId,
+        bombSites: _scenarioBombOperation!.bombSites,
         showZones: _showZones,
         showPointsOfInterest: _showPointsOfInterest,
       );
-      
-      await _bombOperationService.updateBombOperationScenario(updatedScenario);
-      
+
+      final scenarioService = context.read<ScenarioService>();
+      final authService = GetIt.I<AuthService>();
+      final updatedScenario = Scenario(
+        id: widget.scenarioId,
+        name: _nameController.text,
+        description: _descriptionController.text,
+        gameMapId: _gameMap?.id,
+        type: 'bomb_operation',
+        active: true,
+        creator: authService.currentUser,
+      );
+      scenarioService.updateScenario(updatedScenario);
+
+      await _bombOperationService.updateBombOperationScenario(updatedScenarioBombOperation);
+
       // Met à jour le scénario principal si le nom a changé
       if (_nameController.text != widget.scenarioName) {
         final scenarioService = context.read<ScenarioService>();
-        final mainScenario = await scenarioService.getScenarioDTOById(widget.scenarioId);
+        final mainScenario =
+            await scenarioService.getScenarioDTOById(widget.scenarioId);
         if (mainScenario.scenario.name != _nameController.text) {
           // TODO: Mettre à jour le nom du scénario principal si nécessaire
         }
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -229,6 +273,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       }
     } catch (e) {
       if (mounted) {
+        print('Erreur lors de la sauvegarde du scénario: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),
@@ -244,7 +289,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       }
     }
   }
-  
+
   /// Navigue vers l'écran de gestion des sites de bombe
   void _navigateToBombSites() {
     Navigator.push(
@@ -253,10 +298,12 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         builder: (context) => BombSiteListScreen(
           scenarioId: widget.scenarioId,
           scenarioName: _nameController.text,
+          gampMap: _gameMap, gameMap: _gameMap,
         ),
       ),
     );
   }
+
   /// Retourne l'icône associée à un identifiant donné pour un POI
   IconData _getIconDataFromIdentifier(String iconIdentifier) {
     switch (iconIdentifier) {
@@ -266,11 +313,13 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         return Icons.dangerous;
       case 'info':
         return Icons.info;
-    // Ajoutez d'autres identifiants et icônes selon vos besoins
+      // Ajoutez d'autres identifiants et icônes selon vos besoins
       default:
-        return Icons.help_outline; // Icône par défaut si l'identifiant est inconnu
+        return Icons
+            .help_outline; // Icône par défaut si l'identifiant est inconnu
     }
   }
+
   /// Construit la carte interactive
   Widget _buildMap() {
     if (_gameMap == null) {
@@ -288,7 +337,6 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       children: [
         fm.TileLayer(
           urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: const ['a', 'b', 'c'],
         ),
 
         // Limites du terrain (toujours affichées)
@@ -310,7 +358,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         if (_showZones && _gameMap!.mapZones != null)
           fm.PolygonLayer(
             polygons: _gameMap!.mapZones!.map((zone) {
-              final color = Color(int.parse(zone.color.replaceAll('#', '0xFF')));
+              final color =
+                  Color(int.parse(zone.color.replaceAll('#', '0xFF')));
               return fm.Polygon(
                 points: zone.coordinates
                     .map((coord) => LatLng(coord.latitude, coord.longitude))
@@ -325,7 +374,9 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         // Points d'intérêt (conditionnellement affichés)
         if (_showPointsOfInterest && _gameMap!.mapPointsOfInterest != null)
           fm.MarkerLayer(
-            markers: _gameMap!.mapPointsOfInterest!.where((poi) => poi.visible).map((poi) {
+            markers: _gameMap!.mapPointsOfInterest!
+                .where((poi) => poi.visible)
+                .map((poi) {
               return fm.Marker(
                 width: 80.0, // Largeur de l'icône
                 height: 80.0, // Hauteur de l'icône
@@ -334,8 +385,10 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      _getIconDataFromIdentifier(poi.iconIdentifier), // Icone dynamique selon le POI
-                      color: Color(int.parse(poi.color.replaceAll('#', '0xFF'))), // Couleur dynamique
+                      _getIconDataFromIdentifier(poi.iconIdentifier),
+                      // Icone dynamique selon le POI
+                      color: Color(int.parse(poi.color
+                          .replaceAll('#', '0xFF'))), // Couleur dynamique
                       size: 40, // Taille de l'icône
                     ),
                     // Vous pouvez ajouter plus de widgets ici si nécessaire, comme des labels ou des infos supplémentaires
@@ -357,7 +410,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
-                      Icons.dangerous, // Icône de danger pour les sites de bombe
+                      Icons.dangerous,
+                      // Icône de danger pour les sites de bombe
                       color: Colors.red,
                       size: 50, // Taille de l'icône
                     ),
@@ -366,7 +420,6 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
               );
             }).toList(),
           ),
-
       ],
     );
   }
@@ -442,7 +495,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ),
                       maxLines: 3,
                     ),
-                    
+
                     // Carte interactive
                     const SizedBox(height: 24),
                     Card(
@@ -506,7 +559,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                               child: _isLoadingMap || _gameMap == null
                                   ? const Center(
                                       child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           CircularProgressIndicator(),
                                           SizedBox(height: 16),
@@ -609,7 +663,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                         labelText: 'Sites actifs par round *',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.place),
-                        helperText: 'Nombre de sites de bombe actifs aléatoirement par round',
+                        helperText:
+                            'Nombre de sites de bombe actifs aléatoirement par round',
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -626,7 +681,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                         return null;
                       },
                     ),
-                    
+
                     // Sites de bombe
                     const SizedBox(height: 24),
                     const Card(
@@ -661,7 +716,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                         backgroundColor: Colors.blueGrey,
                       ),
                     ),
-                    
+
                     // Bouton de sauvegarde
                     const SizedBox(height: 32),
                     ElevatedButton(
@@ -682,143 +737,4 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
             ),
     );
   }
-
-  /// Construit la carte interactive
-  /*Widget _buildMap() {
-    if (_gameMap == null) {
-      return const Center(child: Text('Aucune carte disponible'));
-    }
-
-    return fm.FlutterMap(
-      mapController: _mapController,
-      options: fm.MapOptions(
-        initialCenter: LatLng(
-          _gameMap!.centerLatitude ?? 48.8566,
-          _gameMap!.centerLongitude ?? 2.3522,
-        ),
-        initialZoom: _gameMap!.initialZoom ?? 15.0,
-        interactionOptions: const fm.InteractionOptions(
-          flags: fm.InteractiveFlag.all & ~fm.InteractiveFlag.rotate,
-        ),
-      ),
-      children: [
-        // Fond de carte OpenStreetMap
-        fm.TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.airsoft.gamemapmaster',
-        ),
-
-        // Limites du terrain (toujours affichées)
-        if (_gameMap!.fieldBoundary != null)
-          fm.PolygonLayer(
-            polygons: [
-              fm.Polygon(
-                points: _gameMap!.fieldBoundary!
-                    .map((coord) => LatLng(coord.latitude, coord.longitude))
-                    .toList(),
-                color: Colors.blue.withOpacity(0.2),
-                borderColor: Colors.blue,
-                borderStrokeWidth: 2.0,
-              ),
-            ],
-          ),
-
-        // Zones (affichées selon l'option)
-        if (_showZones && _gameMap!.mapZones != null)
-          fm.PolygonLayer(
-            polygons: _gameMap!.mapZones!.map((zone) {
-              // Convertit la couleur hexadécimale en Color
-              Color zoneColor;
-              try {
-                zoneColor = Color(int.parse(zone.color.replaceAll('#', '0xFF')));
-              } catch (e) {
-                zoneColor = Colors.red; // Couleur par défaut
-              }
-
-              return fm.Polygon(
-                points: zone.coordinates
-                    .map((coord) => LatLng(coord.latitude, coord.longitude))
-                    .toList(),
-                color: zoneColor.withOpacity(0.3),
-                borderColor: zoneColor,
-                borderStrokeWidth: 2.0,
-                label: zone.name,
-              );
-            }).toList(),
-          ),
-
-        // Points d'intérêt (affichés selon l'option)
-        if (_showPointsOfInterest && _gameMap!.mapPointsOfInterest != null)
-          fm.MarkerLayer(
-            markers: _gameMap!.mapPointsOfInterest!.map((poi) {
-              // Convertit la couleur hexadécimale en Color
-              Color poiColor;
-              try {
-                poiColor = Color(int.parse(poi.color.replaceAll('#', '0xFF')));
-              } catch (e) {
-                poiColor = Colors.red; // Couleur par défaut
-              }
-
-              return fm.Marker(
-                point: LatLng(poi.latitude, poi.longitude),
-                width: 30,
-                height: 30,
-                child: Tooltip(
-                  message: poi.name,
-                  child: Icon(
-                    Icons.location_on,
-                    color: poiColor,
-                    size: 30,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-
-        // Sites de bombe
-        if (_bombSites != null)
-          fm.MarkerLayer(
-            markers: _bombSites!.map((site) {
-              // Convertit la couleur hexadécimale en Color
-              Color siteColor;
-              try {
-                siteColor = Color(int.parse(site.color?.replaceAll('#', '0xFF') ?? '0xFFFF0000'));
-              } catch (e) {
-                siteColor = Colors.red; // Couleur par défaut
-              }
-
-              return fm.Marker(
-                point: LatLng(site.latitude, site.longitude),
-                width: 40,
-                height: 40,
-                child: Tooltip(
-                  message: site.name,
-                  child: Stack(
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        color: siteColor,
-                        size: 40,
-                      ),
-                      Positioned.fill(
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Icon(
-                              Icons.warning,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-      ],
-    );
-  }*/
 }

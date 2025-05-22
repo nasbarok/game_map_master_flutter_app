@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/models/game_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
@@ -13,11 +14,14 @@ class BombSiteEditScreen extends StatefulWidget {
   /// Site à éditer (null pour création)
   final BombSite? site;
 
+  final GameMap gameMap;
+
   /// Constructeur
   const BombSiteEditScreen({
     Key? key,
     required this.scenarioId,
     this.site,
+    required this.gameMap,
   }) : super(key: key);
 
   @override
@@ -29,7 +33,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
   
   late BombOperationScenarioService _bombOperationService;
   bool _isSaving = false;
-  
+  bool _satelliteView = false;
   // Contrôleurs pour les champs de formulaire
   final _nameController = TextEditingController();
   final _radiusController = TextEditingController();
@@ -38,31 +42,32 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
   LatLng _position = const LatLng(48.8566, 2.3522); // Paris par défaut
   double _zoom = 15.0;
   final MapController _mapController = MapController();
-  
+  String get _tileUrl => _satelliteView
+      ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+      : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
   // Couleur du site
   Color _siteColor = Colors.red;
   final List<Color> _availableColors = [
     Colors.red,
-    Colors.blue,
-    Colors.green,
     Colors.orange,
-    Colors.purple,
-    Colors.teal,
     Colors.amber,
-    Colors.indigo,
   ];
-  
+  final String _emojiMarker = '💣';
+
   @override
   void initState() {
     super.initState();
     _bombOperationService = GetIt.I<BombOperationScenarioService>();
-    
+    _position = widget.site != null
+        ? LatLng(widget.site!.latitude, widget.site!.longitude)
+        : LatLng(widget.gameMap.centerLatitude!, widget.gameMap.centerLongitude!);
+    _zoom = widget.gameMap.initialZoom ?? 15.0;
     // Initialise les valeurs si on édite un site existant
     if (widget.site != null) {
       _nameController.text = widget.site!.name;
       _radiusController.text = widget.site!.radius.toString();
       _position = LatLng(widget.site!.latitude, widget.site!.longitude);
-      
+
       if (widget.site!.color != null && widget.site!.color!.isNotEmpty) {
         try {
           final colorValue = int.parse(widget.site!.color!.replaceAll('#', '0xFF'));
@@ -95,7 +100,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
     
     try {
       final colorHex = '#${_siteColor.value.toRadixString(16).substring(2)}';
-      
+
       final site = BombSite(
         id: widget.site?.id,
         scenarioId: widget.scenarioId,
@@ -148,6 +153,15 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
               onPressed: _saveSite,
               tooltip: 'Sauvegarder',
             ),
+          IconButton(
+            icon: Icon(_satelliteView ? Icons.map : Icons.satellite_alt),
+            tooltip: _satelliteView ? 'Vue Standard' : 'Vue Satellite',
+            onPressed: () {
+              setState(() {
+                _satelliteView = !_satelliteView;
+              });
+            },
+          ),
         ],
       ),
       body: _isSaving
@@ -174,9 +188,64 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                           ),
                           children: [
                             TileLayer(
-                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              urlTemplate: _tileUrl,
                               userAgentPackageName: 'com.airsoft.gamemapmaster',
                             ),
+                            // ✅ Contours du terrain
+                            if (widget.gameMap.fieldBoundary != null)
+                              PolygonLayer(
+                                polygons: [
+                                  Polygon(
+                                    points: widget.gameMap.fieldBoundary!
+                                        .map((coord) => LatLng(coord.latitude, coord.longitude))
+                                        .toList(),
+                                    color: Colors.blue.withOpacity(0.3),
+                                    borderColor: Colors.blue,
+                                    borderStrokeWidth: 2.0,
+                                  ),
+                                ],
+                              ),
+
+                            // ✅ Zones
+                            if (widget.gameMap.mapZones != null)
+                              PolygonLayer(
+                                polygons: widget.gameMap.mapZones!.map((zone) {
+                                  final color = Color(int.parse(zone.color.replaceAll('#', '0xFF')));
+                                  return Polygon(
+                                    points: zone.coordinates
+                                        .map((coord) => LatLng(coord.latitude, coord.longitude))
+                                        .toList(),
+                                    color: color.withOpacity(0.3),
+                                    borderColor: color,
+                                    borderStrokeWidth: 2.0,
+                                  );
+                                }).toList(),
+                              ),
+
+                            // ✅ POI visibles
+                            if (widget.gameMap.mapPointsOfInterest != null)
+                              MarkerLayer(
+                                markers: widget.gameMap.mapPointsOfInterest!
+                                    .where((poi) => poi.visible)
+                                    .map((poi) => Marker(
+                                  point: LatLng(poi.latitude, poi.longitude),
+                                  width: 60,
+                                  height: 60,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _getPOIIcon(poi.iconIdentifier),
+                                        color: Color(int.parse(poi.color.replaceAll('#', '0xFF'))),
+                                        size: 32,
+                                      ),
+                                    ],
+                                  ),
+                                ))
+                                    .toList(),
+                              ),
+
+                            // ✅ Cercle du site en édition
                             CircleLayer(
                               circles: [
                                 CircleMarker(
@@ -188,16 +257,17 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                                 ),
                               ],
                             ),
+
+                            // ✅ Marqueur d'édition
                             MarkerLayer(
                               markers: [
                                 Marker(
                                   point: _position,
                                   width: 40,
                                   height: 40,
-                                  child: Icon(
-                                    Icons.location_on,
-                                    color: _siteColor,
-                                    size: 40,
+                                  child: Text(
+                                    _emojiMarker,
+                                    style: const TextStyle(fontSize: 36),
                                   ),
                                 ),
                               ],
@@ -385,5 +455,18 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
               ),
             ),
     );
+  }
+}
+
+IconData _getPOIIcon(String identifier) {
+  switch (identifier) {
+    case 'danger':
+      return Icons.dangerous;
+    case 'info':
+      return Icons.info;
+    case 'location':
+      return Icons.location_on;
+    default:
+      return Icons.help_outline;
   }
 }

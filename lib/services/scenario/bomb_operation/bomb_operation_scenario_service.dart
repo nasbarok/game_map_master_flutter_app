@@ -45,28 +45,16 @@ class BombOperationScenarioService {
     return BombOperationScenario.fromJson(response);
   }
 
-  /// Active ou désactive un scénario Opération Bombe
-  Future<void> activateScenario(int scenarioId, bool active) async {
-    await _apiService.post('scenarios/bomb-operation/$scenarioId/activate', {
-      'active': active,
-    });
-  }
-
-  /// Supprime un scénario Opération Bombe
-  Future<void> deleteScenario(int scenarioId) async {
-    await _apiService.delete('scenarios/bomb-operation/$scenarioId');
-  }
-
   /// Récupère tous les sites de bombe d'un scénario
   Future<List<BombSite>> getBombSites(int scenarioId) async {
-    final response = await _apiService.get('scenarios/bomb-operation/$scenarioId/sites');
+    final response = await _apiService.get('scenarios/bomb-operation/$scenarioId/bomb-sites');
     return (response as List).map((item) => BombSite.fromJson(item)).toList();
   }
 
   /// Crée un nouveau site de bombe
   Future<BombSite> createBombSite(BombSite site) async {
     final response = await _apiService.post(
-      'scenarios/bomb-operation/${site.scenarioId}/sites', 
+      'scenarios/bomb-operation/${site.scenarioId}/bomb-sites',
       site.toJson()
     );
     return BombSite.fromJson(response);
@@ -75,7 +63,7 @@ class BombOperationScenarioService {
   /// Met à jour un site de bombe existant
   Future<BombSite> updateBombSite(BombSite site) async {
     final response = await _apiService.put(
-      'scenarios/bomb-operation/sites/${site.id}', 
+      'scenarios/bomb-operation/bomb-sites/${site.id}',
       site.toJson()
     );
     return BombSite.fromJson(response);
@@ -83,14 +71,24 @@ class BombOperationScenarioService {
 
   /// Supprime un site de bombe
   Future<void> deleteBombSite(int siteId) async {
-    await _apiService.delete('scenarios/bomb-operation/sites/$siteId');
+    await _apiService.delete('scenarios/bomb-operation/bomb-sites/$siteId');
   }
 
   /// S'assure qu'un scénario Opération Bombe existe pour l'ID de scénario donné
   /// Si le scénario n'existe pas, il sera créé avec des valeurs par défaut
   Future<BombOperationScenario> ensureBombOperationScenario(int scenarioId) async {
     final response = await _apiService.post('scenarios/bomb-operation/$scenarioId/ensure', {});
-    return BombOperationScenario.fromJson(response);
+
+    // Loguer la réponse brute pour vérifier la structure des données
+    print("[BombOperationScenarioService] [ensureBombOperationScenario] Réponse brute du serveur : $response");
+
+    // Assurer que la réponse est valide et conforme au format attendu
+    try {
+      return BombOperationScenario.fromJson(response);
+    } catch (e) {
+      print("[BombOperationScenarioService] [ensureBombOperationScenario] Erreur lors du parsing de la réponse : $e");
+      rethrow; // Relancer l'exception pour un traitement ultérieur
+    }
   }
 
   /// Récupère les scores d'un scénario Opération Bombe

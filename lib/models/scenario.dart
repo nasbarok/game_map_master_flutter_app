@@ -32,7 +32,7 @@ class Scenario {
       name: json['name'],
       description: json['description'],
       type: json['type'],
-      gameMapId: json['gameMapId'],
+      gameMapId: json['gameMap'] != null ? json['gameMap']['id'] : null,
       creator: json['creator'] != null ? User.fromJson(json['creator']) : null,
       gameSessionId: json['gameSessionId'],
       active: json['active'] ?? false,
@@ -40,14 +40,13 @@ class Scenario {
       endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
       'description': description,
       'type': type,
-      'gameMapId': gameMapId,
+      'gameMap': gameMapId != null ? {'id': gameMapId} : null,
       'creator': creator?.toJson(),
       'gameSessionId': gameSessionId,
       'active': active,

@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/models/game_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
@@ -12,12 +13,16 @@ class BombSiteListScreen extends StatefulWidget {
   
   /// Nom du scénario
   final String scenarioName;
+  /// Carte de jeu associée
+  final GameMap gameMap;
 
   /// Constructeur
   const BombSiteListScreen({
     Key? key,
     required this.scenarioId,
     required this.scenarioName,
+    GameMap? gampMap,
+    required this.gameMap,
   }) : super(key: key);
 
   @override
@@ -70,7 +75,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
       MaterialPageRoute(
         builder: (context) => BombSiteEditScreen(
           scenarioId: widget.scenarioId,
-          site: site,
+          site: site, gameMap: widget.gameMap,
         ),
       ),
     );
