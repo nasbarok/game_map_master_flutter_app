@@ -7,6 +7,7 @@ import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import '../../services/scenario_service.dart';
+import '../scenario/bomb_operation/bomb_operation_config_screen.dart';
 import '../scenario/bomb_operation/bomb_operation_integration.dart';
 import '../scenario/treasure_hunt/treasure_hunt_config_screen.dart';
 
@@ -291,6 +292,29 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                   },
                   icon: const Icon(Icons.settings),
                   label: const Text('Configurer la chasse au trésor'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.blueGrey,
+                  ),
+                ),
+              ],
+              if (widget.scenario != null && _selectedType == 'bomb_operation') ...[
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BombOperationConfigScreen(
+                          scenarioId: widget.scenario!.id!,
+                          scenarioName: widget.scenario!.name,
+                          gameMapId: widget.scenario!.gameMapId!,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Configurer l\'opération bombe'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: Colors.blueGrey,

@@ -46,17 +46,20 @@ class BombOperationScenarioService {
   }
 
   /// Récupère tous les sites de bombe d'un scénario
-  Future<List<BombSite>> getBombSites(int scenarioId) async {
-    final response = await _apiService.get('scenarios/bomb-operation/$scenarioId/bomb-sites');
+  Future<List<BombSite>> getBombSites(int bombOperationScenarioId) async {
+    final response = await _apiService.get('scenarios/bomb-operation/$bombOperationScenarioId/bomb-sites');
     return (response as List).map((item) => BombSite.fromJson(item)).toList();
   }
 
   /// Crée un nouveau site de bombe
   Future<BombSite> createBombSite(BombSite site) async {
+    final json = site.toJson();
+    print('[BombOperationScenarioService] [createBombSite] Payload envoyé: $json');
     final response = await _apiService.post(
       'scenarios/bomb-operation/${site.scenarioId}/bomb-sites',
-      site.toJson()
+      json,
     );
+    print('[BombOperationScenarioService] [createBombSite] Réponse du serveur: $response');
     return BombSite.fromJson(response);
   }
 
@@ -66,6 +69,7 @@ class BombOperationScenarioService {
       'scenarios/bomb-operation/bomb-sites/${site.id}',
       site.toJson()
     );
+    print('[BombOperationScenarioService] [updateBombSite] Réponse du serveur: $response');
     return BombSite.fromJson(response);
   }
 

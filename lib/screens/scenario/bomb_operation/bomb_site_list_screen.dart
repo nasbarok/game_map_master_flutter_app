@@ -5,14 +5,17 @@ import 'package:get_it/get_it.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'bomb_site_edit_screen.dart';
+import 'package:flutter/widgets.dart';
 
 /// Écran de gestion des sites de bombe pour un scénario Opération Bombe
 class BombSiteListScreen extends StatefulWidget {
   /// Identifiant du scénario
   final int scenarioId;
-  
+  final int bombOperationScenarioId;
+
   /// Nom du scénario
   final String scenarioName;
+
   /// Carte de jeu associée
   final GameMap gameMap;
 
@@ -23,6 +26,7 @@ class BombSiteListScreen extends StatefulWidget {
     required this.scenarioName,
     GameMap? gampMap,
     required this.gameMap,
+    required this.bombOperationScenarioId,
   }) : super(key: key);
 
   @override
@@ -33,22 +37,24 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
   late BombOperationScenarioService _bombOperationService;
   List<BombSite> _sites = [];
   bool _isLoading = true;
-  
+  bool _hasChanged = false;
+
   @override
   void initState() {
     super.initState();
     _bombOperationService = GetIt.I<BombOperationScenarioService>();
     _loadSites();
   }
-  
+
   /// Charge la liste des sites de bombe depuis le backend
   Future<void> _loadSites() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      final sites = await _bombOperationService.getBombSites(widget.scenarioId);
+      final sites = await _bombOperationService
+          .getBombSites(widget.bombOperationScenarioId);
       setState(() {
         _sites = sites;
         _isLoading = false;
@@ -67,7 +73,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
       }
     }
   }
-  
+
   /// Navigue vers l'écran d'édition d'un site de bombe
   Future<void> _navigateToEditSite(BombSite? site) async {
     final result = await Navigator.push(
@@ -75,23 +81,30 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
       MaterialPageRoute(
         builder: (context) => BombSiteEditScreen(
           scenarioId: widget.scenarioId,
-          site: site, gameMap: widget.gameMap,
+          bombOperationScenarioId: widget.bombOperationScenarioId,
+          site: site,
+          gameMap: widget.gameMap,
+          otherSites: _sites.where((s) => s.id != site?.id).toList(),
         ),
       ),
     );
-    
+
     if (result == true) {
+      print(
+          '[BombSiteListScreen] Un site a été ajouté ou modifié, on recharge la liste...');
+      _hasChanged = true;
       _loadSites();
     }
   }
-  
+
   /// Supprime un site de bombe
   Future<void> _deleteSite(BombSite site) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la suppression'),
-        content: Text('Êtes-vous sûr de vouloir supprimer le site "${site.name}" ?'),
+        content:
+            Text('Êtes-vous sûr de vouloir supprimer le site "${site.name}" ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -104,12 +117,12 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
         ],
       ),
     );
-    
+
     if (confirm != true) return;
-    
+
     try {
       await _bombOperationService.deleteBombSite(site.id!);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -117,6 +130,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        _hasChanged = true;
         _loadSites();
       }
     } catch (e) {
@@ -130,26 +144,33 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Sites de bombe: ${widget.scenarioName}'),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _sites.isEmpty
-              ? _buildEmptyState()
-              : _buildSiteList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToEditSite(null),
-        tooltip: 'Ajouter un site',
-        child: const Icon(Icons.add),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, _hasChanged); // renvoie `true` ou `false` au parent
+        return false; // empêche le pop automatique
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Sites de bombe: ${widget.scenarioName}'),
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _sites.isEmpty
+            ? _buildEmptyState()
+            : _buildSiteList(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _navigateToEditSite(null),
+          tooltip: 'Ajouter un site',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
-  
+
+
   /// Construit l'état vide (aucun site)
   Widget _buildEmptyState() {
     return Center(
@@ -185,7 +206,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
       ),
     );
   }
-  
+
   /// Construit la liste des sites
   Widget _buildSiteList() {
     return ListView.builder(
@@ -231,13 +252,13 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
       },
     );
   }
-  
+
   /// Obtient la couleur d'un site
   Color _getSiteColor(BombSite site, BuildContext context) {
     if (site.color == null || site.color!.isEmpty) {
       return Theme.of(context).colorScheme.primary;
     }
-    
+
     try {
       final colorValue = int.parse(site.color!.replaceAll('#', '0xFF'));
       return Color(colorValue);

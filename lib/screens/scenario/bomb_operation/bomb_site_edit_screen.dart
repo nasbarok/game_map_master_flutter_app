@@ -5,23 +5,26 @@ import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
+import 'dart:math';
 
 /// Écran d'édition d'un site de bombe
 class BombSiteEditScreen extends StatefulWidget {
   /// Identifiant du scénario
   final int scenarioId;
-  
+  final int bombOperationScenarioId;
   /// Site à éditer (null pour création)
   final BombSite? site;
-
+  final List<BombSite> otherSites;
   final GameMap gameMap;
 
   /// Constructeur
   const BombSiteEditScreen({
     Key? key,
     required this.scenarioId,
+    required this.bombOperationScenarioId,
     this.site,
     required this.gameMap,
+    required this.otherSites,
   }) : super(key: key);
 
   @override
@@ -37,7 +40,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
   // Contrôleurs pour les champs de formulaire
   final _nameController = TextEditingController();
   final _radiusController = TextEditingController();
-  
+
   // Valeurs pour la carte
   LatLng _position = const LatLng(48.8566, 2.3522); // Paris par défaut
   double _zoom = 15.0;
@@ -53,6 +56,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
     Colors.amber,
   ];
   final String _emojiMarker = '💣';
+
 
   @override
   void initState() {
@@ -78,8 +82,9 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
       }
     } else {
       _nameController.text = 'Site ${String.fromCharCode(65 + DateTime.now().microsecond % 26)}'; // A, B, C, etc.
-      _radiusController.text = '10.0';
+      _radiusController.text = '5.0';
     }
+
   }
   
   @override
@@ -100,10 +105,20 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
     
     try {
       final colorHex = '#${_siteColor.value.toRadixString(16).substring(2)}';
+      print('📌 Valeurs avant instanciation du BombSite:');
+      print('- id: ${widget.site?.id}');
+      print('- scenarioId: ${widget.scenarioId}');
+      print('- bombOperationScenarioId: ${widget.bombOperationScenarioId}');
+      print('- name: ${_nameController.text}');
+      print('- latitude: ${_position.latitude}');
+      print('- longitude: ${_position.longitude}');
+      print('- radius: ${_radiusController.text}');
+      print('- color: $_siteColor');
 
       final site = BombSite(
         id: widget.site?.id,
         scenarioId: widget.scenarioId,
+        bombOperationScenarioId: widget.bombOperationScenarioId,
         name: _nameController.text,
         latitude: _position.latitude,
         longitude: _position.longitude,
@@ -112,8 +127,10 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
       );
       
       if (widget.site == null) {
+        print('[BombSiteEditScreen] Création d\'un nouveau site: ${site.toJson()}');
         await _bombOperationService.createBombSite(site);
       } else {
+        print('[BombSiteEditScreen] Mise à jour du site existant: ${site.toJson()}');
         await _bombOperationService.updateBombSite(site);
       }
       
@@ -128,6 +145,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
       }
     } catch (e) {
       if (mounted) {
+        print('[BombSiteEditScreen] Erreur lors de la sauvegarde du site: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),
@@ -137,12 +155,18 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
         setState(() {
           _isSaving = false;
         });
+        Navigator.pop(context, true);
       }
     }
   }
   
   @override
   Widget build(BuildContext context) {
+    final distanceInMeters = double.tryParse(_radiusController.text) ?? 5.0;
+    final zoom = _zoom;
+    final metersPerPixel = 156543.03392 * cos(_position.latitude * pi / 180) / pow(2, zoom);
+    final radiusInPixels = distanceInMeters / metersPerPixel;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.site == null ? 'Nouveau site' : 'Modifier le site'),
@@ -184,6 +208,13 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                               setState(() {
                                 _position = point;
                               });
+                            },
+                            onPositionChanged: (MapPosition pos, bool hasGesture) {
+                              if (pos.zoom != null && pos.zoom != _zoom) {
+                                setState(() {
+                                  _zoom = pos.zoom!;
+                                });
+                              }
                             },
                           ),
                           children: [
@@ -250,28 +281,27 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                               circles: [
                                 CircleMarker(
                                   point: _position,
-                                  radius: double.tryParse(_radiusController.text) ?? 10.0,
+                                  radius: radiusInPixels,
                                   color: _siteColor.withOpacity(0.3),
                                   borderColor: _siteColor,
                                   borderStrokeWidth: 2.0,
                                 ),
                               ],
                             ),
-
-                            // ✅ Marqueur d'édition
-                            MarkerLayer(
-                              markers: [
-                                Marker(
-                                  point: _position,
-                                  width: 40,
-                                  height: 40,
-                                  child: Text(
-                                    _emojiMarker,
-                                    style: const TextStyle(fontSize: 36),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            // 🔘 Autres sites en lecture seule
+                            if (widget.otherSites.isNotEmpty)
+                              CircleLayer(
+                                circles: widget.otherSites.map((site) {
+                                  final grayColor = Colors.grey;
+                                  return CircleMarker(
+                                    point: LatLng(site.latitude, site.longitude),
+                                    radius: radiusInPixels,
+                                    color: grayColor.withOpacity(0.3),
+                                    borderColor: grayColor,
+                                    borderStrokeWidth: 1.5,
+                                  );
+                                }).toList(),
+                              ),
                           ],
                         ),
                         Positioned(
