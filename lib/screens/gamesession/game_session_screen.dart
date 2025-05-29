@@ -9,6 +9,7 @@ import '../../models/game_session_scenario.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
 import '../../services/game_session_service.dart';
 import '../../services/game_state_service.dart';
+import '../../services/player_location_service.dart';
 import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../../services/websocket/web_socket_game_session_handler.dart';
 import '../../widgets/game_map_widget.dart';
@@ -67,6 +68,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     8: Colors.indigo,
   };
 
+
   // Contrôleur pour les notifications de trésors trouvés
   final ScrollController _scrollController = ScrollController();
 
@@ -88,6 +90,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         });
       }
     });
+
+    final locationService = GetIt.I<PlayerLocationService>();
+    locationService.initialize(widget.userId, widget.teamId);
+    locationService.startLocationSharing(widget.gameSession.id!);
   }
 
   Future<void> _loadInitialData() async {

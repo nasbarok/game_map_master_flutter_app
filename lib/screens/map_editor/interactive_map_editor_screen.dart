@@ -555,7 +555,7 @@ class _InteractiveMapEditorScreenState
     });
   }
 
-  Future<void> _captureAndStoreMapBackground(
+  /*Future<void> _captureAndStoreMapBackground(
       TileLayerType layerType, bool isSatelliteViewForStorage) async {
     String tileUrlToCapture;
     List<String> subdomainsToCapture;
@@ -661,7 +661,7 @@ class _InteractiveMapEditorScreenState
 
     _updateActiveTileLayer();
     setState(() {});
-  }
+  }*/
 
   void _defineFieldBoundary() async {
     if (_currentBoundaryPoints.length < 3) {
@@ -710,9 +710,9 @@ class _InteractiveMapEditorScreenState
       _editorMode = MapEditorMode.view;
     });
 
-    await _captureAndStoreMapBackground(TileLayerType.osm, false);
+  /*  await _captureAndStoreMapBackground(TileLayerType.osm, false);
     await _captureAndStoreMapBackground(TileLayerType.satellite, true);
-
+*/
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content:
             Text("Limites du terrain définies et fonds de carte capturés.")));

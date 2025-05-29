@@ -49,6 +49,8 @@ class PlayerLocationService {
 
   /// Démarre le partage de position
   void startLocationSharing(int gameSessionId) async {
+    print('🚀 [PlayerLocationService] [startLocationSharing] Démarrage du partage de position pour gameSessionId=$gameSessionId');
+
     // ✅ Vérifier si le service de localisation est activé
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
