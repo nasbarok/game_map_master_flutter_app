@@ -36,9 +36,25 @@ class GameSessionService {
   }
 
   Future<GameSession> getGameSession(int gameSessionId) async {
+    print('[GameSessionService] 📡 GET /game-sessions/$gameSessionId');
+
     final json = await _apiService.get('game-sessions/$gameSessionId');
-    return GameSession.fromJson(json);
+    final session = GameSession.fromJson(json);
+
+    if (session.gameMap != null) {
+      final map = session.gameMap!;
+      print('[GameSessionService] 🗺️ GameMap ID=${map.id}, name=${map.name}');
+      print('[GameSessionService] 📐 backgroundBoundsJson présent : ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
+      print('[GameSessionService] 📡 satelliteBoundsJson présent : ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
+      print('[GameSessionService] 🖼️ backgroundImageBase64 longueur : ${map.backgroundImageBase64?.length ?? 0}');
+      print('[GameSessionService] 🛰️ satelliteImageBase64 longueur : ${map.satelliteImageBase64?.length ?? 0}');
+    } else {
+      print('[GameSessionService] ⚠️ Aucune GameMap reçue dans la session');
+    }
+
+    return session;
   }
+
 
   Future<List<GameSession>> getAllActiveGameSessions() async {
     final jsonList = await _apiService.get('game-sessions/active');

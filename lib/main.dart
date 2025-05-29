@@ -5,6 +5,7 @@ import 'package:airsoft_game_map/services/geocoding_service.dart';
 import 'package:airsoft_game_map/services/history_service.dart';
 import 'package:airsoft_game_map/services/invitation_service.dart';
 import 'package:airsoft_game_map/services/navigation_service.dart';
+import 'package:airsoft_game_map/services/player_location_service.dart';
 import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'package:airsoft_game_map/services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import 'package:airsoft_game_map/services/scenario_service.dart';
@@ -63,6 +64,7 @@ void main() async {
         Provider<WebSocketGameSessionHandler>.value(value: GetIt.I<WebSocketGameSessionHandler>()),
         Provider<HistoryService>.value(value: GetIt.I<HistoryService>()),
         Provider<GeocodingService>.value(value: GetIt.I<GeocodingService>()),
+        Provider<PlayerLocationService>.value(value: GetIt.I<PlayerLocationService>()),
         // Ajouter obligatoirement les nouveaux services ici
       ],
       child: App(),

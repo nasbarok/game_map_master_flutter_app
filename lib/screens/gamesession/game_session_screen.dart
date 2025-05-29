@@ -11,6 +11,7 @@ import '../../services/game_session_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../../services/websocket/web_socket_game_session_handler.dart';
+import '../../widgets/game_map_widget.dart';
 import '../../widgets/participants_card.dart';
 import '../../widgets/qr_code_scanner_widgets.dart';
 import '../../widgets/time_remaining_card.dart';
@@ -37,7 +38,8 @@ class GameSessionScreen extends StatefulWidget {
 
 class _GameSessionScreenState extends State<GameSessionScreen> {
   final GameSessionService _gameSessionService = GetIt.I<GameSessionService>();
-  final TreasureHuntScoreService _treasureHuntScoreService = GetIt.I<TreasureHuntScoreService>();
+  final TreasureHuntScoreService _treasureHuntScoreService =
+      GetIt.I<TreasureHuntScoreService>();
 
   bool _isTreasureHuntActive = false;
   GameSession? _gameSession;
@@ -78,7 +80,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     _loadInitialData();
 
     // ✅ Abonnement registerOnScoreboardUpdate
-    GetIt.I<WebSocketGameSessionHandler>().registerOnScoreboardUpdate((scoreboard) {
+    GetIt.I<WebSocketGameSessionHandler>()
+        .registerOnScoreboardUpdate((scoreboard) {
       if (mounted) {
         setState(() {
           _scoreboard = scoreboard;
@@ -99,6 +102,18 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       final gameSession = widget.gameSession;
       print('✅ GameSession reçue via constructeur: ID=${gameSession.id}');
 
+      // 🔍 Inspecter les détails de la GameMap
+      final map = gameSession.gameMap;
+      if (map != null) {
+        print('[GameSessionScreen] 🗺️ GameMap ID=${map.id}, name=${map.name}');
+        print('[GameSessionScreen] 🖼️ backgroundImageBase64 length: ${map.backgroundImageBase64?.length ?? 0}');
+        print('[GameSessionScreen] 🛰️ satelliteImageBase64 length: ${map.satelliteImageBase64?.length ?? 0}');
+        print('[GameSessionScreen] 📐 backgroundBoundsJson present: ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
+        print('[GameSessionScreen] 📡 satelliteBoundsJson present: ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
+      } else {
+        print('[GameSessionScreen] ⚠️ Aucune GameMap liée à la session');
+      }
+
       List<GameSessionParticipant> participants = _participants;
       if (_participants.isEmpty) {
         participants = await _gameSessionService.getActiveParticipants(gameSession.id!);
@@ -111,7 +126,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         print('🎯 Scénarios chargés: ${scenarios.length}');
       }
 
-      final remainingTimeResponse = await _gameSessionService.getRemainingTime(gameSession.id!);
+      final remainingTimeResponse =
+      await _gameSessionService.getRemainingTime(gameSession.id!);
       print('⏱️ Temps restant récupéré: ${remainingTimeResponse['remainingTimeInSeconds']} secondes');
 
       TreasureHuntScoreboard? scoreboard;
@@ -129,12 +145,12 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             print('🗺️ Scénario treasure_hunt actif trouvé, chargement du scoreboard...');
             _isTreasureHuntActive = true;
             try {
-              scoreboard = await _treasureHuntScoreService.getScoreboard(scenario.scenarioId, gameSession.id!);
+              scoreboard = await _treasureHuntScoreService.getScoreboard(
+                  scenario.scenarioId, gameSession.id!);
               print('📊 Scoreboard chargé pour TREASURE_HUNT');
             } catch (e) {
               print('❌ Erreur lors du chargement du scoreboard: $e');
             }
-            //construction du treasureHuntScenarioDTO
             scenarioService.getScenarioDTOById(scenario.scenarioId).then((dto) {
               setState(() {
                 treasureHuntScenarioDTO = dto;
@@ -155,22 +171,22 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         _isLoading = false;
       });
       print('✅ [GameSessionScreen] Données initiales chargées avec succès');
-      // Annuler le précédent timer s'il existe
+
+      // Gestion du timer
       _timeTimer?.cancel();
 
       if (gameSession.active) {
         _isCountdownMode = _remainingTimeInSeconds > 0;
 
         if (_isCountdownMode) {
-          // ⏳ Mode compte à rebours
           _displayedTimeInSeconds = _remainingTimeInSeconds;
         } else {
-          // ⏱️ Mode chronomètre : calculer le temps écoulé depuis startTime
           if (_gameSession?.startTime != null) {
-            _displayedTimeInSeconds = DateTime.now().difference(_gameSession!.startTime!).inSeconds;
+            _displayedTimeInSeconds =
+                DateTime.now().difference(_gameSession!.startTime!).inSeconds;
           }
         }
-        // POUR ÉVITER DE LANCER LE TIMER SI LA SESSION EST TERMINÉE
+
         if (!mounted || _gameSession?.active != true) return;
 
         _timeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -179,7 +195,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
               if (_displayedTimeInSeconds > 0) {
                 _displayedTimeInSeconds--;
               } else {
-                timer.cancel(); // Fin du temps
+                timer.cancel();
               }
             } else {
               _displayedTimeInSeconds++;
@@ -211,7 +227,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
 
     final scenarioId = treasureHuntScenarioDTO!.scenario.id!;
-    print('✅ Scénario de chasse au trésor trouvé, ouverture scanner avec ID: $scenarioId');
+    print(
+        '✅ Scénario de chasse au trésor trouvé, ouverture scanner avec ID: $scenarioId');
 
     Navigator.push(
       context,
@@ -229,7 +246,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   void _endGameSession() async {
     print('⏹️ [GameSessionScreen] Fin de la partie demandée');
     try {
-      final updatedSession = await _gameSessionService.endGameSession(_gameSession!.id!);
+      final updatedSession =
+          await _gameSessionService.endGameSession(_gameSession!.id!);
       print('✅ Partie terminée avec succès');
       final gameStateService = context.read<GameStateService>();
 
@@ -258,11 +276,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
   }
 
-
-
   Widget _buildScoreboardSection() {
     if (_scoreboard != null &&
-        (_scoreboard!.individualScores.isNotEmpty || _scoreboard!.teamScores.isNotEmpty)) {
+        (_scoreboard!.individualScores.isNotEmpty ||
+            _scoreboard!.teamScores.isNotEmpty)) {
       print('🧩 Affichage du Scoreboard : '
           '${_scoreboard!.individualScores.length} scores individuels, '
           '${_scoreboard!.teamScores.length} scores équipes');
@@ -278,7 +295,6 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       return SizedBox.shrink();
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -362,16 +378,25 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                     onPressed: _navigateToQRCodeScanner,
                     isActive: isActive,
                   ),
+                // 👉 Ta carte interactive ici
+                SizedBox(height: 16),
 
+                if (_gameSession?.gameMap != null &&
+                    _gameSession!.gameMap!.hasInteractiveMapConfig)
+                  GameMapWidget(
+                    gameSessionId: _gameSession!.id!,
+                    gameMap: _gameSession!.gameMap!,
+                    userId: widget.userId,
+                    teamId: widget.teamId,
+                  ),
+                SizedBox(height: 16),
+                // Tableau des scores (uniquement si un scénario de chasse au trésor est actif)
+                _buildScoreboardSection(),
                 // Carte des participants
                 ParticipantsCard(
                   participants: _participants,
                   teamColors: _teamColors,
                 ),
-                SizedBox(height: 16),
-
-                // Tableau des scores (uniquement si un scénario de chasse au trésor est actif)
-                _buildScoreboardSection(),
 
                 // Espace pour les notifications de trésors trouvés
                 SizedBox(height: 100),
@@ -411,17 +436,20 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                style: TextStyle(color: Colors.black, fontSize: 14),
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 14),
                                 children: [
                                   TextSpan(
                                     text: username,
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   if (teamName != null) ...[
                                     TextSpan(text: ' de l\'équipe '),
                                     TextSpan(
                                       text: teamName,
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                   TextSpan(text: ' a trouvé un trésor de '),

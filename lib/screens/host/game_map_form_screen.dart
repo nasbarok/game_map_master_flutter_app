@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:airsoft_game_map/screens/map_editor/interactive_map_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -152,8 +154,12 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
         final gameMapService = context.read<GameMapService>();
 
         if (widget.gameMap == null) {
+          print('📤 [GameMapFormScreen] Données envoyées pour création :');
+          print(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
           await gameMapService.addGameMap(gameMap);
         } else {
+          print('📤 [GameMapFormScreen] Données envoyées pour update :');
+          print(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
           await gameMapService.updateGameMap(gameMap);
         }
 

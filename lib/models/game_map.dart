@@ -31,9 +31,9 @@ class GameMap {
 
   // Fields for dual background images and their bounds
   late String? backgroundImageBase64; // Stores Base64 encoded static background image (standard map)
-  final String? backgroundBoundsJson; // Stores LatLngBounds for standard map image as JSON string
+  late String? backgroundBoundsJson; // Stores LatLngBounds for standard map image as JSON string
   late String? satelliteImageBase64; // Stores Base64 encoded static background image (satellite view)
-  final String? satelliteBoundsJson; // Stores LatLngBounds for satellite image as JSON string
+  late String? satelliteBoundsJson; // Stores LatLngBounds for satellite image as JSON string
 
 
   GameMap({
@@ -137,11 +137,17 @@ class GameMap {
     );
   }
 
-  set backgroundImageBoundsJson(String? backgroundImageBoundsJson) {}
-
-  set satelliteImageBoundsJson(String? satelliteImageBoundsJson) {}
-
   Map<String, dynamic> toJson() {
+
+    print("🧩 GameMap.toJson called:");
+    print("- backgroundBoundsJson: $backgroundBoundsJson");
+    print("- satelliteBoundsJson: $satelliteBoundsJson");
+    print("- backgroundImageBase64 length: ${backgroundImageBase64?.length ?? 0}");
+    print("- satelliteImageBase64 length: ${satelliteImageBase64?.length ?? 0}");
+    print("- fieldBoundaryJson: $fieldBoundaryJson");
+    print("- mapZonesJson: $mapZonesJson");
+    print("- mapPointsOfInterestJson: $mapPointsOfInterestJson");
+
     return {
       'id': id,
       'name': name,

@@ -28,27 +28,37 @@ class WebSocketService with ChangeNotifier {
   final GlobalKey<NavigatorState> _navigatorKey;
 
   final _connectionStatusController = StreamController<bool>.broadcast();
+
   Stream<bool> get connectionStatusStream => _connectionStatusController.stream;
 
   final _messageController = StreamController<WebSocketMessage>.broadcast();
+
   Stream<WebSocketMessage> get messageStream => _messageController.stream;
 
   StompClient? _stompClient;
   bool _isConnected = false;
   bool _connecting = false;
+
   bool get isConnected => _isConnected;
 
   final Set<String> _subscriptions = {};
   final Map<String, void Function()> _activeSubscriptions = {};
 
-  WebSocketService(this._authService, this._gameStateService, this._teamService, this._navigatorKey);
+  // Liste des callbacks pour les mises à jour de position
+  final List<Function(Map<String, dynamic>)> _positionCallbacks = [];
+
+  WebSocketService(this._authService, this._gameStateService, this._teamService,
+      this._navigatorKey);
 
   void setMessageHandler(WebSocketMessageHandler handler) {
     _webSocketMessageHandler = handler;
   }
 
   Future<void> connect() async {
-    if (_connecting || _isConnected || _authService?.token == null || _authService?.currentUser?.id == null) {
+    if (_connecting ||
+        _isConnected ||
+        _authService?.token == null ||
+        _authService?.currentUser?.id == null) {
       print('⚠️ Connexion déjà en cours ou établie, on ne relance pas.');
       return;
     }
@@ -87,10 +97,10 @@ class WebSocketService with ChangeNotifier {
       subscribeToField(fieldId);
     } else {
       print('⚠️ Pas de terrain sélectionné pour l\'abonnement');
-      }
-
-          print('✅ STOMP connecté et abonné au canal utilisateur.');
     }
+
+    print('✅ STOMP connecté et abonné au canal utilisateur.');
+  }
 
   void _onDisconnect() {
     print('🔌 Déconnecté de STOMP');
@@ -191,20 +201,95 @@ class WebSocketService with ChangeNotifier {
       if (!_isConnected) {
         print('❌ Impossible d\'envoyer le message, WebSocket non connecté');
         return;
-        }
-        }
-        try {
-        _stompClient!.send(
+      }
+    }
+    try {
+      _stompClient!.send(
         destination: destination,
         body: jsonEncode(message.toJson()),
-        );
-        } catch (e) {
-          print('❌ Erreur envoi STOMP : $e');
+      );
+    } catch (e) {
+      print('❌ Erreur envoi STOMP : $e');
+    }
+  }
+
+  /// Enregistre un callback pour les mises à jour de position
+  ///
+  /// @param callback Fonction à appeler lorsqu'une mise à jour de position est reçue
+  void registerOnPlayerPositionUpdate(Function(Map<String, dynamic>) callback) {
+    // Ajouter le callback à la liste
+    _positionCallbacks.add(callback);
+
+    // Si déjà connecté et abonné à une session de jeu, s'abonner au topic des positions
+    if (isConnected && _gameStateService?.activeGameSession?.id != null) {
+      _subscribeToPositionUpdates(_gameStateService!.activeGameSession!.id!);
+    }
+  }
+
+  /// Envoie une position de joueur via WebSocket
+  ///
+  /// @param gameSessionId Identifiant de la session de jeu
+  /// @param latitude Latitude de la position
+  /// @param longitude Longitude de la position
+  /// @param teamId Identifiant de l'équipe (optionnel)
+  void sendPlayerPosition(int gameSessionId, double latitude, double longitude, int? teamId) {
+    if (!isConnected) {
+      print('WebSocket non connecté, impossible d\'envoyer la position');
+      return;
+    }
+
+    final message = {
+      'gameSessionId': gameSessionId,
+      'userId': _authService?.currentUser?.id,
+      'teamId': teamId,
+      'latitude': latitude,
+      'longitude': longitude,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    try {
+      _stompClient?.send(
+        destination: '/app/game-sessions/$gameSessionId/positions',
+        body: jsonEncode(message),
+      );
+    } catch (e) {
+      print('Erreur lors de l\'envoi de la position: $e');
+    }
+  }
+
+  /// S'abonne aux mises à jour de position pour une session de jeu
+  ///
+  /// @param gameSessionId Identifiant de la session de jeu
+  void _subscribeToPositionUpdates(int gameSessionId) {
+    if (!isConnected) return;
+
+    _stompClient?.subscribe(
+      destination: '/topic/game-sessions/$gameSessionId/positions',
+      callback: (StompFrame frame) {
+        if (frame.body != null) {
+          try {
+            final data = jsonDecode(frame.body!);
+
+            // Notifier les callbacks enregistrés
+            for (var callback in _positionCallbacks) {
+              callback(data);
+            }
+          } catch (e) {
+            print('Erreur lors du traitement de la mise à jour de position: $e');
+          }
         }
-      }
+      },
+    );
+  }
+
+  /// Méthode à appeler dans onGameSessionConnected pour s'abonner aux positions
+  void setupPositionUpdates(int gameSessionId) {
+    _subscribeToPositionUpdates(gameSessionId);
+  }
 
   void disconnect() {
-    _activeSubscriptions.forEach((destination, unsubscribe) => unsubscribe?.call());
+    _activeSubscriptions
+        .forEach((destination, unsubscribe) => unsubscribe?.call());
     _activeSubscriptions.clear();
     _subscriptions.clear();
 

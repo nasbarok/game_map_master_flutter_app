@@ -1,3 +1,4 @@
+import 'package:airsoft_game_map/services/player_location_service.dart';
 import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
@@ -70,6 +71,8 @@ void setupServiceLocator() {
 // TreasureHuntWebSocketHandler
   final treasureHuntWebSocketHandler = TreasureHuntWebSocketHandler(webSocketService);
 
+  final playerLocationService = PlayerLocationService(apiService,webSocketService);
+
   // 5. WebSocketManager
   final webSocketManager = WebSocketManager(
     webSocketService,
@@ -97,6 +100,7 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<HistoryService>(historyService);
   GetIt.I.registerSingleton<GeocodingService>(geocodingService);
   GetIt.I.registerSingleton<BombOperationScenarioService>(bombOperationScenarioService);
+  GetIt.I.registerSingleton<PlayerLocationService>(playerLocationService);
 
   // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
   final invitationService = InvitationService(

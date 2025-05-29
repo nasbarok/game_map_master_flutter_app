@@ -24,7 +24,12 @@ class GameStateService extends ChangeNotifier {
   GameSession? get activeGameSession => _activeGameSession;
 
   void setActiveGameSession(GameSession? session) {
-    print('[GameStateService] 🎮 GameStateService.setActiveGameSession appelé (ID: ${session?.id})');
+    print('[GameStateService] 🎮 setActiveGameSession appelé : ID=${session?.id}');
+    if (session?.gameMap != null) {
+      print('[GameStateService] 🗺️ GameMap ID=${session!.gameMap!.id}, name=${session.gameMap!.name}');
+      print('[GameStateService] 📐 backgroundBoundsJson: ${session.gameMap!.backgroundBoundsJson}');
+      print('[GameStateService] 📡 satelliteBoundsJson: ${session.gameMap!.satelliteBoundsJson}');
+    }
     _activeGameSession = session;
     notifyListeners();
   }

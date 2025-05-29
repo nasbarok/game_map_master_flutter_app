@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../services/history_service.dart';
 import 'field_sessions_screen.dart';
+import 'game_replay_screen.dart';
 
 class GameSessionDetailsScreen extends StatefulWidget {
   final int gameSessionId;
@@ -53,6 +54,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
         _gameSessionData = {
           'id': gameSession.id,
           'fieldName': gameSession.field?.name,
+          'gameMap': gameSession.gameMap,
           'fieldId': gameSession.field?.id,
           'active': gameSession.active,
           'startTime': gameSession.startTime,
@@ -170,6 +172,24 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                 Text(
                   'Participants: ${_statistics!['totalParticipants']}',
                   style: Theme.of(context).textTheme.titleMedium,
+                ),
+              const SizedBox(height: 12),
+              if (_gameSessionData != null &&
+                  _gameSessionData!['active'] == false)
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.replay),
+                  label: const Text('Voir le replay'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GameReplayScreen(
+                          gameSessionId: widget.gameSessionId,
+                          gameMap: _gameSessionData!['gameMap'],
+                        ),
+                      ),
+                    );
+                  },
                 ),
             ],
           ),

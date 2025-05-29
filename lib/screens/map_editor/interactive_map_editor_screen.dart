@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
+import 'dart:math' as math;
+
 import "package:airsoft_game_map/models/coordinate.dart";
 import "package:airsoft_game_map/models/game_map.dart";
 import "package:airsoft_game_map/models/geocoding_result.dart";
@@ -145,11 +147,11 @@ class _InteractiveMapEditorScreenState
       }
       // Pour centrer la carte sur l'adresse au chargement
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_currentMap.centerLatitude != null && _currentMap.centerLongitude != null) {
+        if (_currentMap.centerLatitude != null &&
+            _currentMap.centerLongitude != null) {
           _mapController.move(
               LatLng(_currentMap.centerLatitude!, _currentMap.centerLongitude!),
-              _currentZoom
-          );
+              _currentZoom);
         }
       });
 
@@ -541,13 +543,15 @@ class _InteractiveMapEditorScreenState
     }
   }
 
-  String? _latLngBoundsToJson(fm.LatLngBounds? bounds) {
-    if (bounds == null) return null;
+  String _latLngBoundsToJson(fm.LatLngBounds bounds) {
+    final ne = bounds.northEast;
+    final sw = bounds.southWest;
+
     return jsonEncode({
-      "neLat": bounds.northEast.latitude,
-      "neLng": bounds.northEast.longitude,
-      "swLat": bounds.southWest.latitude,
-      "swLng": bounds.southWest.longitude,
+      "neLat": ne.latitude,
+      "neLng": ne.longitude,
+      "swLat": sw.latitude,
+      "swLng": sw.longitude,
     });
   }
 
@@ -570,17 +574,22 @@ class _InteractiveMapEditorScreenState
               "Veuillez définir une zone de terrain (au moins 3 points) avant de capturer le fond.")));
       return;
     }
-
-    fm.LatLngBounds currentBounds =
-    fm.LatLngBounds.fromPoints(_currentBoundaryPoints);
+// Étend de 1 km dans toutes les directions
+    fm.LatLngBounds currentBounds = _expandBoundsByKm(
+        fm.LatLngBounds.fromPoints(_currentBoundaryPoints),
+        1.0); // +20% padding
 
     _screenshotController = ScreenshotController();
 
+
     Uint8List? imageBytes;
 
+    final center = LatLng(
+      _currentMap.centerLatitude!,
+      _currentMap.centerLongitude!,
+    );
     try {
       await Future.delayed(Duration(milliseconds: 500));
-
       imageBytes = await _screenshotController.captureFromWidget(
         MediaQuery(
           // Fournir un MediaQueryData explicite avec une taille fixe
@@ -593,8 +602,8 @@ class _InteractiveMapEditorScreenState
                 height: 600,
                 child: fm.FlutterMap(
                   options: fm.MapOptions(
-                    initialCenter: currentBounds.center,
-                    initialZoom: _currentZoom,
+                    initialCenter: center,
+                    initialZoom:_currentMap.initialZoom!,
                     minZoom: _minZoom,
                     maxZoom: _maxZoom,
                   ),
@@ -631,21 +640,23 @@ class _InteractiveMapEditorScreenState
 
     if (imageBytes != null) {
       String base64Image = base64Encode(imageBytes);
+
       if (isSatelliteViewForStorage) {
         _currentMap.satelliteImageBase64 = base64Image;
-        _currentMap.satelliteImageBoundsJson =
-            _latLngBoundsToJson(currentBounds);
+        _currentMap.satelliteBoundsJson = _latLngBoundsToJson(currentBounds);
       } else {
         _currentMap.backgroundImageBase64 = base64Image;
-        _currentMap.backgroundImageBoundsJson =
-            _latLngBoundsToJson(currentBounds);
+        _currentMap.backgroundBoundsJson = _latLngBoundsToJson(currentBounds);
       }
+      print(
+          "🟡 [InteractiveMapEditorScreen] [_captureAndStoreMapBackground] Captured ${isSatelliteViewForStorage ? 'satellite' : 'standard'} bounds: ${_latLngBoundsToJson(currentBounds)}");
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
               "Fond de carte ${isSatelliteViewForStorage ? 'satellite' : 'standard'} capturé.")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erreur lors de la capture du fond de carte.")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Erreur lors de la capture du fond de carte.")));
     }
 
     _updateActiveTileLayer();
@@ -727,6 +738,10 @@ class _InteractiveMapEditorScreenState
         jsonEncode(_mapPois.map((p) => p.toJson()).toList());
 
     try {
+      print(
+          "🟢 Saving map with backgroundBoundsJson: ${_currentMap.backgroundBoundsJson}");
+      print(
+          "🟢 Saving map with satelliteBoundsJson: ${_currentMap.satelliteBoundsJson}");
       if (_currentMap.id == null) {
         await _gameMapService.addGameMap(_currentMap);
         ScaffoldMessenger.of(context)
@@ -743,6 +758,22 @@ class _InteractiveMapEditorScreenState
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Erreur lors de la sauvegarde: $e")));
     }
+  }
+
+  fm.LatLngBounds _expandBoundsByKm(fm.LatLngBounds original, double km) {
+    const double degreesPerKm = 1 / 111.0; // approximation (valable en France)
+    final delta = km * degreesPerKm;
+
+    final newNE = LatLng(
+      original.northEast.latitude + delta,
+      original.northEast.longitude + delta,
+    );
+    final newSW = LatLng(
+      original.southWest.latitude - delta,
+      original.southWest.longitude - delta,
+    );
+
+    return fm.LatLngBounds.fromPoints([newNE, newSW]);
   }
 
   Widget _buildModeSelector() {
@@ -951,6 +982,26 @@ class _InteractiveMapEditorScreenState
       },
     );
   }
+
+  fm.LatLngBounds _expandBounds(fm.LatLngBounds original, double factor) {
+    final ne = original.northEast;
+    final sw = original.southWest;
+
+    final latSpan = ne.latitude - sw.latitude;
+    final lngSpan = ne.longitude - sw.longitude;
+
+    final newNE = LatLng(
+      ne.latitude + latSpan * factor,
+      ne.longitude + lngSpan * factor,
+    );
+    final newSW = LatLng(
+      sw.latitude - latSpan * factor,
+      sw.longitude - lngSpan * factor,
+    );
+
+    return fm.LatLngBounds.fromPoints([newNE, newSW]);
+  }
+
 
   // Fonctions pour le zoom
   void _zoomIn() {
