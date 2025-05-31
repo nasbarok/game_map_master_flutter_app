@@ -66,10 +66,11 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     _locationService = GetIt.I<PlayerLocationService>();
     _loadPositionHistory();
   }
-  
+
   @override
   void dispose() {
-    _stopPlayback();
+    _playbackTimer?.cancel();
+    _playbackTimer = null;
     super.dispose();
   }
   

@@ -235,6 +235,8 @@ class WebSocketService with ChangeNotifier {
   /// @param teamId Identifiant de l'équipe (optionnel)
   /// Envoie une position via WebSocket en utilisant le topic field centralisé
   void sendPlayerPosition(int fieldId, int gameSessionId, double latitude, double longitude, int? teamId) {
+    print('📡 [sendPlayerPosition] isConnected=$isConnected, currentUser=${_authService?.currentUser}');
+
     if (!isConnected || _authService?.currentUser?.id == null) {
       print('❌ Impossible d\'envoyer la position, WebSocket non connecté ou utilisateur non authentifié');
       return;

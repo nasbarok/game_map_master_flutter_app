@@ -4,6 +4,7 @@ import 'package:airsoft_game_map/models/websocket/scenario_activated_message.dar
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../models/coordinate.dart';
 import '../../models/game_session.dart';
 import '../../models/game_session_participant.dart';
 import '../../models/game_session_scenario.dart';
@@ -19,6 +20,7 @@ import '../../screens/gamesession/game_session_screen.dart';
 import '../auth_service.dart';
 import '../game_session_service.dart';
 import '../game_state_service.dart';
+import '../player_location_service.dart';
 import '../scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../team_service.dart';
 
@@ -248,15 +250,56 @@ class WebSocketGameSessionHandler {
 
   void handlePlayerPosition(Map<String, dynamic> message, BuildContext context) {
     try {
-      // Vérifier que c'est bien un message de type PLAYER_POSITION
+      print("📥 [handlePlayerPosition] Message brut reçu : $message");
+
       final type = message['type'];
+      print("🔍 Type détecté : $type");
       if (type != 'PLAYER_POSITION') {
+        print("⏩ Ignoré : type différent de PLAYER_POSITION");
         return;
       }
 
-      // Traitement du message...
-    } catch (e) {
+      final payload = message['payload'];
+      print("📦 Payload extrait : $payload");
+
+      if (payload == null) {
+        print("❌ Payload nul, arrêt du traitement");
+        return;
+      }
+
+      final userId = message['senderId'];
+      final lat = payload['latitude'];
+      final lon = payload['longitude'];
+      final gameSessionId = payload['gameSessionId'];
+      final teamId = payload['teamId'];
+
+      print("👤 userId=$userId | lat=$lat | lon=$lon | teamId=$teamId | session=$gameSessionId");
+
+      if (userId == null || lat == null || lon == null) {
+        print("❌ Champs manquants dans le payload (userId, lat ou lon)");
+        return;
+      }
+
+      final currentUserId = GetIt.I<AuthService>().currentUser?.id;
+      if (userId == currentUserId) {
+        print("⏩ Ignoré : c'est moi-même (userId=$userId)");
+        return;
+      }
+
+      print("📡 Mise à jour position du joueur $userId");
+
+      GetIt.I<PlayerLocationService>().updatePlayerPosition(
+        userId,
+        Coordinate(latitude: lat, longitude: lon),
+      );
+
+      print("✅ Position du joueur $userId mise à jour : $lat, $lon");
+
+    } catch (e, stack) {
       print('❌ Erreur lors du traitement de la position: $e');
+      print('📄 Stacktrace : $stack');
     }
   }
+
+
 }

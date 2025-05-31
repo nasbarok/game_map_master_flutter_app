@@ -105,6 +105,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
     locationService.initialize(widget.userId, teamId,widget.fieldId!);
     locationService.startLocationSharing(widget.gameSession.id!);
+    print('🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
+    locationService.loadInitialPositions(widget.fieldId!);
   }
 
   Future<void> _loadInitialData() async {

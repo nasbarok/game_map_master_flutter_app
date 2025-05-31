@@ -78,7 +78,9 @@ class PlayerLocationService {
     // ✅ Continuer si les permissions sont OK
     _locationUpdateTimer?.cancel();
 
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    print('📍 Partage de position activé pour gameSessionId=$gameSessionId');
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      print('📡 [PlayerLocationService] Partage de position toutes les 30 secondes pour gameSessionId=$gameSessionId');
       _shareCurrentLocation(gameSessionId);
     });
 
@@ -95,6 +97,7 @@ class PlayerLocationService {
   /// Partage la position actuelle
   Future<void> _shareCurrentLocation(int gameSessionId) async {
     try {
+      print('📍 [_shareCurrentLocation] Démarrage du partage de position pour gameSessionId=$gameSessionId');
       // Obtenir la position actuelle
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high
@@ -103,11 +106,17 @@ class PlayerLocationService {
       // Vérifier si la position a changé significativement
       if (_lastLatitude == null || _lastLongitude == null ||
           (_lastLatitude != position.latitude || _lastLongitude != position.longitude)) {
+        print('📍 [_shareCurrentLocation] Nouvelle position détectée : lat=${position.latitude}, lon=${position.longitude}');
         
         _lastLatitude = position.latitude;
         _lastLongitude = position.longitude;
         
         // Envoyer la position au serveur via WebSocket
+        if (_currentFieldId == null) {
+          print('❌ [_shareCurrentLocation] _currentFieldId est null, impossible d\'envoyer la position.');
+          return;
+        }
+        print('📡 [_shareCurrentLocation] Envoi position vers WebSocket : lat=${position.latitude}, lon=${position.longitude}, fieldId=$_currentFieldId, gameSessionId=$gameSessionId, teamId=$_currentUserTeamId');
         _webSocketService.sendPlayerPosition(
           _currentFieldId!,
           gameSessionId,
@@ -126,6 +135,8 @@ class PlayerLocationService {
           // Notifier les écouteurs
           _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
         }
+      }else{
+        print('📍 [_shareCurrentLocation] Position inchangée, pas d\'envoi nécessaire.');
       }
     } catch (e) {
       print('Erreur lors du partage de la position: $e');
@@ -182,9 +193,43 @@ class PlayerLocationService {
       );
     }
   }
-  
+
+  Future<void> loadInitialPositions(int fieldId) async {
+    print('🔄 [PlayerLocationService] Chargement des positions initiales pour fieldId=$fieldId');
+    try {
+      final response = await _apiService.get('field/$fieldId/positions');
+
+      // Extrait les positions et les met à jour
+      Map<int, Coordinate> loadedPositions = {};
+      response.forEach((key, value) {
+        final userId = int.tryParse(key);
+        if (userId != null) {
+          loadedPositions[userId] = Coordinate(
+            latitude: value['latitude'],
+            longitude: value['longitude'],
+          );
+        }
+      });
+
+      _currentPlayerPositions
+        ..clear()
+        ..addAll(loadedPositions);
+
+      _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
+      print('📡 [PlayerLocationService] Positions initiales chargées : ${_currentPlayerPositions.length} joueurs');
+
+    } catch (e) {
+      print('❌ [PlayerLocationService] Erreur lors du chargement des positions initiales : $e');
+    }
+  }
+
   void dispose() {
     stopLocationSharing();
     _positionStreamController.close();
+  }
+
+  void updatePlayerPosition(int userId, Coordinate coordinate) {
+    _currentPlayerPositions[userId] = coordinate;
+    _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
   }
 }
