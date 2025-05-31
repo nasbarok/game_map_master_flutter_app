@@ -110,8 +110,8 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                     mapController: _mapController,
                     options: MapOptions(
                       center: LatLng(
-                          widget.gameMap.centerLatitude ?? 48.8566,
-                          widget.gameMap.centerLongitude ?? 2.3522
+                          widget.gameMap.centerLatitude!,
+                          widget.gameMap.centerLongitude!
                       ),
                       zoom: widget.gameMap.initialZoom ?? 13.0,
                       minZoom: 3.0,
@@ -122,8 +122,8 @@ class _GameMapWidgetState extends State<GameMapWidget> {
 
                         // Afficher les coordonnées du centre pour le débogage
                         final center = LatLng(
-                            widget.gameMap.centerLatitude ?? 48.8566,
-                            widget.gameMap.centerLongitude ?? 2.3522
+                            widget.gameMap.centerLatitude!,
+                            widget.gameMap.centerLongitude!
                         );
                       },
                     ),
@@ -234,7 +234,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   void _openFullMapScreen(BuildContext context) {
     // S'assurer que le service de localisation est initialisé
     final locationService = GetIt.I<PlayerLocationService>();
-    locationService.initialize(widget.userId, widget.teamId);
+    locationService.initialize(widget.userId, widget.teamId, widget.gameMap.fieldId!);
 
     Navigator.push(
       context,

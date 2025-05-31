@@ -11,6 +11,7 @@ import '../../services/game_session_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/player_location_service.dart';
 import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
+import '../../services/team_service.dart';
 import '../../services/websocket/web_socket_game_session_handler.dart';
 import '../../widgets/game_map_widget.dart';
 import '../../widgets/participants_card.dart';
@@ -22,8 +23,9 @@ import '../scenario/treasure_hunt/treasure_hunt_scanner_screen.dart';
 class GameSessionScreen extends StatefulWidget {
   GameSession gameSession;
   final int userId;
-  final int? teamId;
+  late final int? teamId;
   final bool isHost;
+  final int? fieldId;
 
   GameSessionScreen({
     Key? key,
@@ -31,6 +33,7 @@ class GameSessionScreen extends StatefulWidget {
     required this.userId,
     this.teamId,
     required this.isHost,
+    this.fieldId,
   }) : super(key: key);
 
   @override
@@ -92,7 +95,15 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     });
 
     final locationService = GetIt.I<PlayerLocationService>();
-    locationService.initialize(widget.userId, widget.teamId);
+    final teamService = GetIt.I<TeamService>();
+    int? teamId = widget.teamId;
+        if (teamId == null) {
+      print('🔍 [GameSessionScreen] teamId non fourni, recherche de l\'équipe active');
+      teamId = teamService.getTeamIdForPlayer(widget.userId);
+    } else {
+      print('🔍 [GameSessionScreen] teamId fourni, utilisé directement');
+    }
+    locationService.initialize(widget.userId, teamId,widget.fieldId!);
     locationService.startLocationSharing(widget.gameSession.id!);
   }
 

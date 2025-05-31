@@ -837,6 +837,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             teamId: teamId,
             isHost: isHost,
             gameSession: gameSession,
+            fieldId: gameStateService.selectedMap!.field!.id,
           ),
         ),
       );

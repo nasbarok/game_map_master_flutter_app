@@ -194,6 +194,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
               teamId: teamId,
               isHost: isHost,
               gameSession: startedSession,
+              fieldId: fieldId,
             ),
           ),
         );
@@ -649,6 +650,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                         userId: user.id!,
                         teamId: teamId,
                         isHost: isHost,
+                        fieldId: field?.id!,
                       ),
                     ),
                   );

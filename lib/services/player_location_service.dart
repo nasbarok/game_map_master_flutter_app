@@ -3,6 +3,7 @@ import 'package:airsoft_game_map/models/coordinate.dart';
 import 'package:airsoft_game_map/models/player_position.dart';
 import 'package:airsoft_game_map/models/game_session_position_history.dart';
 import 'package:airsoft_game_map/services/api_service.dart';
+import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:airsoft_game_map/services/websocket_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
@@ -30,16 +31,17 @@ class PlayerLocationService {
   
   // ID de l'utilisateur actuel
   int? _currentUserId;
-
+  int? _currentFieldId;
   PlayerLocationService(this._apiService, this._webSocketService) {
     // S'abonner aux mises à jour de position via WebSocket
     _webSocketService.registerOnPlayerPositionUpdate(_handlePositionUpdate);
   }
 
   /// Initialise le service avec les informations de l'utilisateur actuel
-  void initialize(int userId, int? teamId) {
+  void initialize(int userId, int? teamId, int fieldId) {
     _currentUserId = userId;
     _currentUserTeamId = teamId;
+    _currentFieldId = fieldId;
   }
   
   /// Met à jour l'équipe de l'utilisateur actuel
@@ -97,7 +99,7 @@ class PlayerLocationService {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high
       );
-      
+
       // Vérifier si la position a changé significativement
       if (_lastLatitude == null || _lastLongitude == null ||
           (_lastLatitude != position.latitude || _lastLongitude != position.longitude)) {
@@ -107,8 +109,9 @@ class PlayerLocationService {
         
         // Envoyer la position au serveur via WebSocket
         _webSocketService.sendPlayerPosition(
-          gameSessionId, 
-          position.latitude, 
+          _currentFieldId!,
+          gameSessionId,
+          position.latitude,
           position.longitude,
           _currentUserTeamId
         );

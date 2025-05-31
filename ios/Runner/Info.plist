@@ -47,5 +47,9 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
     <string>Cette application a besoin d'accéder à la caméra pour scanner les QR codes</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Cette application a besoin d'accéder à votre position pour afficher votre emplacement sur la carte pendant les parties d'airsoft.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Cette application a besoin d'accéder à votre position pour afficher votre emplacement sur la carte pendant les parties d'airsoft.</string>
 </dict>
 </plist>

@@ -95,6 +95,7 @@ class WebSocketGameSessionHandler {
             teamId: teamId,
             isHost: isHost,
             gameSession: gameSession,
+            fieldId: gameSession.gameMap?.fieldId
           ),
         ),
       );
@@ -243,5 +244,19 @@ class WebSocketGameSessionHandler {
     _scoreboardController.close();
     _treasureFoundController.close();
     _remainingTimeController.close();
+  }
+
+  void handlePlayerPosition(Map<String, dynamic> message, BuildContext context) {
+    try {
+      // Vérifier que c'est bien un message de type PLAYER_POSITION
+      final type = message['type'];
+      if (type != 'PLAYER_POSITION') {
+        return;
+      }
+
+      // Traitement du message...
+    } catch (e) {
+      print('❌ Erreur lors du traitement de la position: $e');
+    }
   }
 }

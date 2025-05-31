@@ -112,6 +112,9 @@ class WebSocketMessageHandler {
       case 'TREASURE_FOUND':
         webSocketGameSessionHandler.handleTreasureFound(messageToJson, context);
         break;
+      case 'PLAYER_POSITION':
+        webSocketGameSessionHandler.handlePlayerPosition(messageToJson, context);
+        break;
       default:
         print('Message WebSocket non géré: $messageToJson');
     }

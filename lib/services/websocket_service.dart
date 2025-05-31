@@ -12,6 +12,7 @@ import '../models/websocket/game_ended_message.dart';
 import '../models/websocket/game_session_started_message.dart';
 import '../models/websocket/player_connected_message.dart';
 import '../models/websocket/player_disconnected_message.dart';
+import '../models/websocket/player_position_message.dart';
 import '../models/websocket/team_deleted_message.dart';
 import '../models/websocket/team_update_message.dart';
 import '../models/websocket/websocket_message.dart';
@@ -232,30 +233,40 @@ class WebSocketService with ChangeNotifier {
   /// @param latitude Latitude de la position
   /// @param longitude Longitude de la position
   /// @param teamId Identifiant de l'équipe (optionnel)
-  void sendPlayerPosition(int gameSessionId, double latitude, double longitude, int? teamId) {
-    if (!isConnected) {
-      print('WebSocket non connecté, impossible d\'envoyer la position');
+  /// Envoie une position via WebSocket en utilisant le topic field centralisé
+  void sendPlayerPosition(int fieldId, int gameSessionId, double latitude, double longitude, int? teamId) {
+    if (!isConnected || _authService?.currentUser?.id == null) {
+      print('❌ Impossible d\'envoyer la position, WebSocket non connecté ou utilisateur non authentifié');
       return;
     }
 
-    final message = {
-      'gameSessionId': gameSessionId,
-      'userId': _authService?.currentUser?.id,
-      'teamId': teamId,
-      'latitude': latitude,
-      'longitude': longitude,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
+    final userId = _authService!.currentUser!.id!;
+
+    final message = PlayerPositionMessage(
+      senderId: userId,
+      latitude: latitude,
+      longitude: longitude,
+      gameSessionId: gameSessionId,
+      teamId: teamId,
+    );
+
+    final destination = '/app/field/$fieldId';
 
     try {
-      _stompClient?.send(
-        destination: '/app/game-sessions/$gameSessionId/positions',
-        body: jsonEncode(message),
-      );
+      const encoder = JsonEncoder.withIndent('  ');
+      print('🧾 [WebSocketService] [sendPlayerPosition] Message envoyé (PlayerPositionMessage) :');
+      print(encoder.convert(message.toJson()));
+
+      sendMessage(destination, message);
+
+      // 🔍 Ajout des logs complets sans toucher au comportement existant
+      print('📡 [WebSocketService] [sendPlayerPosition] Envoi WebSocket vers $destination');
+      print('🧾 [WebSocketService] [sendPlayerPosition] Message PlayerPositionMessage:\n${jsonEncode(message.toJson())}');
     } catch (e) {
-      print('Erreur lors de l\'envoi de la position: $e');
+      print('❌ [WebSocketService] [sendPlayerPosition] Erreur lors de l\'envoi de la position: $e');
     }
   }
+
 
   /// S'abonne aux mises à jour de position pour une session de jeu
   ///
@@ -264,7 +275,7 @@ class WebSocketService with ChangeNotifier {
     if (!isConnected) return;
 
     _stompClient?.subscribe(
-      destination: '/topic/game-sessions/$gameSessionId/positions',
+      destination: '/topic/field/{fieldId}//$gameSessionId/positions',
       callback: (StompFrame frame) {
         if (frame.body != null) {
           try {

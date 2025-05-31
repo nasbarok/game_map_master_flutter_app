@@ -1,12 +1,11 @@
 // lib/models/websocket/websocket_message.dart
-import 'dart:ffi';
-
 import 'package:airsoft_game_map/models/websocket/invitation_response_message.dart';
 import 'package:airsoft_game_map/models/websocket/participant_joined_message.dart';
 import 'package:airsoft_game_map/models/websocket/participant_left_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_connected_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_disconnected_message.dart';
 import 'package:airsoft_game_map/models/websocket/player_kicked_message.dart';
+import 'package:airsoft_game_map/models/websocket/player_position_message.dart';
 import 'package:airsoft_game_map/models/websocket/scenario_activated_message.dart';
 import 'package:airsoft_game_map/models/websocket/scenario_deactivated_message.dart';
 import 'package:airsoft_game_map/models/websocket/scenario_added_message.dart';
@@ -77,11 +76,9 @@ abstract class WebSocketMessage {
       case 'SCENARIO_DEACTIVATED':
         return ScenarioDeactivatedMessage.fromJson(json);
       case 'TREASURE_FOUND':
-        return TreasureFoundMessage.fromJson(json); // remplace l'ancien si besoin
-/*      case 'SCORES_LOCKED_STATUS_CHANGED':
-        return ScoresLockedStatusChangedMessage.fromJson(json);*/
-    /*  case 'SCORES_RESET':
-        return ScoresResetMessage.fromJson(json);*/
+        return TreasureFoundMessage.fromJson(json);
+      case 'PLAYER_POSITION':
+        return PlayerPositionMessage.fromJson(json);
       default:
         throw Exception('Unknown message type: $type');
     }
