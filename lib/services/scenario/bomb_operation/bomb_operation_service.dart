@@ -14,46 +14,56 @@ class BombOperationService {
 
   // État actuel du scénario
   BombOperationState _currentState = BombOperationState.waiting;
+
   BombOperationState get currentState => _currentState;
 
   // Scénario actif
   BombOperationScenario? _activeScenario;
+
   BombOperationScenario? get activeScenario => _activeScenario;
 
   // Rôles des équipes (teamId -> rôle)
   final Map<int, BombOperationTeam> _teamRoles = {};
+
   Map<int, BombOperationTeam> get teamRoles => Map.unmodifiable(_teamRoles);
 
   // Sites de bombe actifs pour le round actuel
   final Set<int> _activeBombSites = {};
+
   Set<int> get activeBombSites => Set.unmodifiable(_activeBombSites);
 
   // Sites où une bombe est plantée
   final Set<int> _plantedBombSites = {};
+
   Set<int> get plantedBombSites => Set.unmodifiable(_plantedBombSites);
 
   // Temps restant pour la bombe active (en secondes)
   int _bombTimeRemaining = 0;
+
   int get bombTimeRemaining => _bombTimeRemaining;
 
   // Stream pour les mises à jour d'état
-  final _stateStreamController = StreamController<BombOperationState>.broadcast();
+  final _stateStreamController =
+      StreamController<BombOperationState>.broadcast();
+
   Stream<BombOperationState> get stateStream => _stateStreamController.stream;
 
   // Stream pour les mises à jour des sites de bombe
   final _bombSitesStreamController = StreamController<void>.broadcast();
+
   Stream<void> get bombSitesStream => _bombSitesStreamController.stream;
 
   // Timer pour le compte à rebours de la bombe
   Timer? _bombTimer;
 
-  BombOperationService( this._apiService, this._bombOperationWebSocketHandler);
+  BombOperationService(this._apiService, this._bombOperationWebSocketHandler);
 
   /// Initialise le service avec le scénario actif
   Future<void> initialize(int gameSessionId) async {
     try {
       // Récupérer le scénario actif
-      final response = await _apiService.get('game-sessions/$gameSessionId/bomb-operation');
+      final response =
+          await _apiService.get('game-sessions/$gameSessionId/bomb-operation');
 
       // Initialiser le scénario
       _activeScenario = BombOperationScenario.fromJson(response['scenario']);
@@ -87,7 +97,8 @@ class BombOperationService {
       _bombTimeRemaining = response['bombTimeRemaining'] ?? 0;
 
       // Démarrer le timer si une bombe est plantée
-      if (_currentState == BombOperationState.bombPlanted && _bombTimeRemaining > 0) {
+      if (_currentState == BombOperationState.bombPlanted &&
+          _bombTimeRemaining > 0) {
         _startBombTimer();
       }
 
@@ -95,7 +106,8 @@ class BombOperationService {
       _stateStreamController.add(_currentState);
       _bombSitesStreamController.add(null);
 
-      print('🧨 BombOperationService initialisé - gameSessionId: $gameSessionId');
+      print(
+          '🧨 BombOperationService initialisé - gameSessionId: $gameSessionId');
     } catch (e) {
       print('❌ Erreur lors de l\'initialisation du BombOperationService: $e');
     }
@@ -131,7 +143,8 @@ class BombOperationService {
         _bombTimeRemaining = data['bombTimeRemaining'];
 
         // Démarrer ou arrêter le timer selon l'état
-        if (_currentState == BombOperationState.bombPlanted && _bombTimeRemaining > 0) {
+        if (_currentState == BombOperationState.bombPlanted &&
+            _bombTimeRemaining > 0) {
           _startBombTimer();
         } else {
           _stopBombTimer();
@@ -142,9 +155,11 @@ class BombOperationService {
       _stateStreamController.add(_currentState);
       _bombSitesStreamController.add(null);
 
-      print('🧨 État du scénario Bombe mis à jour - état: ${_currentState.displayName}');
+      print(
+          '🧨 État du scénario Bombe mis à jour - état: ${_currentState.displayName}');
     } catch (e) {
-      print('❌ Erreur lors du traitement de la mise à jour du scénario Bombe: $e');
+      print(
+          '❌ Erreur lors du traitement de la mise à jour du scénario Bombe: $e');
     }
   }
 
@@ -157,7 +172,8 @@ class BombOperationService {
     _bombTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_bombTimeRemaining > 0) {
         _bombTimeRemaining--;
-        _bombSitesStreamController.add(null); // Notifier pour mettre à jour l'affichage
+        _bombSitesStreamController
+            .add(null); // Notifier pour mettre à jour l'affichage
       } else {
         _stopBombTimer();
       }
@@ -183,12 +199,14 @@ class BombOperationService {
 
       print('🧨 Action envoyée: planter une bombe sur le site $bombSiteId');
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi de l\'action de plantation de bombe: $e');
+      print(
+          '❌ Erreur lors de l\'envoi de l\'action de plantation de bombe: $e');
     }
   }
 
   /// Envoie une action pour désamorcer une bombe sur un site
-  Future<void> defuseBomb(int fieldId, int gameSessionId, int bombSiteId) async {
+  Future<void> defuseBomb(
+      int fieldId, int gameSessionId, int bombSiteId) async {
     try {
       _bombOperationWebSocketHandler.sendBombOperationAction(
         fieldId: fieldId,
@@ -199,7 +217,8 @@ class BombOperationService {
 
       print('🧨 Action envoyée: désamorcer la bombe sur le site $bombSiteId');
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi de l\'action de désamorçage de bombe: $e');
+      print(
+          '❌ Erreur lors de l\'envoi de l\'action de désamorçage de bombe: $e');
     }
   }
 
@@ -231,11 +250,92 @@ class BombOperationService {
         .toList();
   }
 
+  /// Sauvegarde les rôles des équipes pour une session de jeu
+  Future<void> saveTeamRoles(
+      int gameSessionId, Map<int, BombOperationTeam> teamRoles) async {
+    try {
+      // Convertir les rôles en format API
+      final Map<String, String> rolesForApi = {};
+      teamRoles.forEach((teamId, role) {
+        rolesForApi[teamId.toString()] = role.toString().split('.').last;
+      });
+
+      try {
+        // Essayer d'envoyer au serveur
+        await _apiService.post(
+          'sessions/bomb-operation/$gameSessionId/team-roles',
+          rolesForApi,
+        );
+      } catch (e) {
+        // Si l'API n'est pas disponible, stocker localement uniquement
+        print(
+            '⚠️ API non disponible pour sauvegarder les rôles des équipes: $e');
+        print('⚠️ Les rôles seront stockés uniquement localement');
+      }
+      // Mettre à jour l'état local
+      _teamRoles.clear();
+      _teamRoles.addAll(teamRoles);
+
+      print('🧨 Rôles des équipes sauvegardés pour la session $gameSessionId');
+    } catch (e) {
+      print('❌ Erreur lors de la sauvegarde des rôles des équipes: $e');
+      rethrow;
+    }
+  }
+
+  /// Sélectionne automatiquement des sites de bombe actifs pour une session de jeu
+  Future<void> selectRandomBombSites(int gameSessionId) async {
+    try {
+      // Récupérer le scénario actif
+      if (_activeScenario == null ||
+          _activeScenario!.bombSites == null ||
+          _activeScenario!.bombSites!.isEmpty) {
+        print(
+            '❌ Impossible de sélectionner des sites de bombe : scénario non initialisé ou aucun site défini');
+        return;
+      }
+
+      // Récupérer le nombre de sites à activer depuis les options du scénario
+      final int sitesToActivate = _activeScenario!.activeSites ?? 2;
+
+      // Obtenir tous les IDs de sites disponibles
+      final List<int?> allSiteIds =
+          _activeScenario!.bombSites!.map((site) => site.id).toList();
+
+      // Mélanger la liste pour une sélection aléatoire
+      allSiteIds.shuffle();
+
+      // Sélectionner le nombre requis de sites (ou tous si moins disponibles)
+      final int actualSitesToActivate =
+          sitesToActivate.clamp(1, allSiteIds.length);
+      final List<int?> selectedSites =
+          allSiteIds.take(actualSitesToActivate).toList();
+
+      // Envoyer au serveur
+      await _apiService.post(
+        'game-sessions/$gameSessionId/bomb-operation/active-sites',
+        {'activeSites': selectedSites},
+      );
+
+      // Mettre à jour l'état local
+      _activeBombSites.clear();
+      _activeBombSites.addAll(selectedSites as Iterable<int>);
+
+      // Notifier les écouteurs
+      _bombSitesStreamController.add(null);
+
+      print(
+          '🧨 Sites de bombe actifs sélectionnés aléatoirement pour la session $gameSessionId: $selectedSites');
+    } catch (e) {
+      print('❌ Erreur lors de la sélection aléatoire des sites de bombe: $e');
+      rethrow;
+    }
+  }
+
   void dispose() {
     _stopBombTimer();
     _stateStreamController.close();
     _bombSitesStreamController.close();
     print('🧨 BombOperationService dispose');
   }
-
 }

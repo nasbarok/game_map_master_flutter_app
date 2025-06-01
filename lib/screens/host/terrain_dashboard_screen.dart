@@ -169,18 +169,20 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     );
 
     if (hasBombScenario) {
-      _startGameWithBombOption(); // avec configuration
+      _startGameWithBombOperation(); // avec configuration
     } else {
       _startGameInternal(); // direct
     }
   }
 
-  void _startGameWithBombOption() {
+  Future<void> _startGameWithBombOperation() async {
+    try {
     final teamService = context.read<TeamService>();
     final bombOperationService = context.read<BombOperationService>();
     final teams = teamService.teams;
 
     final activeTeams = teams.where((t) => t.players.isNotEmpty).toList();
+    final gameSessionId = context.read<GameStateService>().activeGameSession?.id ?? 0;
 
     if (activeTeams.length != 2) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -200,10 +202,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         content: BombOperationTeamRoleSelector(
           teams: activeTeams,
           onRolesAssigned: (roles) {
-            bombOperationService.setPendingRoles(roles);
-            Navigator.of(context).pop();
-            _startGameInternal(); // 👈 Lance enfin la partie
-          }, gameSessionId: context.read<GameStateService>().activeGameSession?.id ?? 0,
+            Navigator.of(context).pop(roles);
+          }, gameSessionId: gameSessionId,
         ),
         actions: [
           TextButton(
@@ -213,6 +213,31 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         ],
       ),
     );
+
+    if (activeTeams == null) {
+      // L'utilisateur a annulé
+      return;
+    }
+
+    // 3. Sauvegarder les rôles assignés
+    await bombOperationService.saveTeamRoles(gameSessionId, activeTeams);
+
+    // 4. Sélectionner automatiquement les sites de bombe actifs
+    await bombOperationService.selectRandomBombSites(gameSessionId);
+
+    // 5. Lancer la partie
+    _startGameInternal();
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors du lancement de la partie: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+
   }
   void _startGameInternal() {
     final gameStateService = context.read<GameStateService>();
