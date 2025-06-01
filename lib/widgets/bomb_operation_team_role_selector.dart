@@ -21,13 +21,11 @@ class BombOperationTeamRoleSelector extends StatefulWidget {
 }
 
 class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSelector> {
-  // Map des rôles assignés (teamId -> rôle)
   final Map<int, BombOperationTeam> _assignedRoles = {};
 
   @override
   void initState() {
     super.initState();
-    // Initialiser avec des valeurs par défaut
     if (widget.teams.length >= 2) {
       _assignedRoles[widget.teams[0].id] = BombOperationTeam.attack;
       _assignedRoles[widget.teams[1].id] = BombOperationTeam.defense;
@@ -81,53 +79,73 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
             ),
             const SizedBox(width: 8),
             Expanded(
+              flex: 1, // 1/3 de l'espace
               child: Text(
                 team.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            DropdownButton<BombOperationTeam>(
-              value: _assignedRoles[team.id] ?? BombOperationTeam.attack,
-              items: [
-                DropdownMenuItem(
-                  value: BombOperationTeam.attack,
-                  child: Row(
-                    children: [
-                      Icon(Icons.dangerous, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Terroriste (Attaque)'),
-                    ],
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 2, // 2/3 de l'espace
+              child: DropdownButton<BombOperationTeam>(
+                isExpanded: true,
+                value: _assignedRoles[team.id] ?? BombOperationTeam.attack,
+                selectedItemBuilder: (context) {
+                  return [
+                    const Text('Terroriste (Attaque)'),
+                    const Text('Anti-terroriste'),
+                  ];
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: BombOperationTeam.attack,
+                    child: Row(
+                      children: const [
+                        Icon(Icons.dangerous, color: Colors.red),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Terroriste (Attaque)',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                DropdownMenuItem(
-                  value: BombOperationTeam.defense,
-                  child: Row(
-                    children: [
-                      Icon(Icons.shield, color: Colors.blue),
-                      SizedBox(width: 8),
-                      Text('Anti-terroriste (Défense)'),
-                    ],
+                  DropdownMenuItem(
+                    value: BombOperationTeam.defense,
+                    child: Row(
+                      children: const [
+                        Icon(Icons.shield, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Anti-terroriste (Defense)',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _assignedRoles[team.id] = value;
-
-                    // Si on assigne un rôle à cette équipe, s'assurer que l'autre équipe a le rôle opposé
-                    for (final otherTeam in widget.teams) {
-                      if (otherTeam.id != team.id) {
-                        _assignedRoles[otherTeam.id] = value == BombOperationTeam.attack
-                            ? BombOperationTeam.defense
-                            : BombOperationTeam.attack;
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _assignedRoles[team.id] = value;
+                      for (final otherTeam in widget.teams) {
+                        if (otherTeam.id != team.id) {
+                          _assignedRoles[otherTeam.id] =
+                          value == BombOperationTeam.attack
+                              ? BombOperationTeam.defense
+                              : BombOperationTeam.attack;
+                        }
                       }
-                    }
-                  });
-                }
-              },
+                    });
+                  }
+                },
+              ),
             ),
           ],
         ),
@@ -136,7 +154,6 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
   }
 
   void _validateAndSave() {
-    // Vérifier que toutes les équipes ont un rôle assigné
     if (_assignedRoles.length != widget.teams.length) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -147,7 +164,6 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
       return;
     }
 
-    // Vérifier qu'il y a au moins une équipe d'attaque et une équipe de défense
     final hasAttack = _assignedRoles.values.contains(BombOperationTeam.attack);
     final hasDefense = _assignedRoles.values.contains(BombOperationTeam.defense);
 
@@ -161,7 +177,6 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
       return;
     }
 
-    // Appeler le callback avec les rôles assignés
     widget.onRolesAssigned(_assignedRoles);
   }
 

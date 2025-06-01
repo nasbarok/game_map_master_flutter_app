@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import '../../models/field.dart';
 import '../../models/game_map.dart';
+import '../../models/scenario/bomb_operation/bomb_operation_team.dart';
 import '../../models/scenario/scenario_dto.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
@@ -177,56 +178,59 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   Future<void> _startGameWithBombOperation() async {
     try {
-    final teamService = context.read<TeamService>();
-    final bombOperationService = context.read<BombOperationService>();
-    final teams = teamService.teams;
+      final teamService = context.read<TeamService>();
+      final bombOperationService = context.read<BombOperationService>();
+      final teams = teamService.teams;
 
-    final activeTeams = teams.where((t) => t.players.isNotEmpty).toList();
-    final gameSessionId = context.read<GameStateService>().activeGameSession?.id ?? 0;
+      final activeTeams = teams.where((t) => t.players.isNotEmpty).toList();
+      final gameSessionId = context.read<GameStateService>().activeGameSession?.id ?? 0;
 
-    if (activeTeams.length != 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Le scénario "Opération Bombe" nécessite exactement 2 équipes avec au moins un joueur chacune.'),
-          backgroundColor: Colors.red,
+      if (activeTeams.length != 2) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Le scénario "Opération Bombe" nécessite exactement 2 équipes avec au moins un joueur chacune.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Utiliser await pour attendre le résultat du dialogue
+      final Map<int, BombOperationTeam>? assignedRoles = await showDialog<Map<int, BombOperationTeam>>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Configuration de l\'Opération Bombe'),
+          content: BombOperationTeamRoleSelector(
+            teams: activeTeams,
+            onRolesAssigned: (roles) {
+              // Retourner les rôles via Navigator.pop
+              Navigator.of(context).pop(roles);
+            },
+            gameSessionId: gameSessionId,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null), // Retourner null si annulé
+              child: const Text('Annuler'),
+            ),
+          ],
         ),
       );
-      return;
-    }
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Configuration de l\'Opération Bombe'),
-        content: BombOperationTeamRoleSelector(
-          teams: activeTeams,
-          onRolesAssigned: (roles) {
-            Navigator.of(context).pop(roles);
-          }, gameSessionId: gameSessionId,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annuler'),
-          ),
-        ],
-      ),
-    );
+      // Vérifier si l'utilisateur a annulé
+      if (assignedRoles == null) {
+        return;
+      }
 
-    if (activeTeams == null) {
-      // L'utilisateur a annulé
-      return;
-    }
+      // 3. Sauvegarder les rôles assignés
+      await bombOperationService.saveTeamRoles(gameSessionId, assignedRoles);
 
-    // 3. Sauvegarder les rôles assignés
-    await bombOperationService.saveTeamRoles(gameSessionId, activeTeams);
+      // 4. Sélectionner automatiquement les sites de bombe actifs
+      await bombOperationService.selectRandomBombSites(gameSessionId);
 
-    // 4. Sélectionner automatiquement les sites de bombe actifs
-    await bombOperationService.selectRandomBombSites(gameSessionId);
-
-    // 5. Lancer la partie
-    _startGameInternal();
+      // 5. Lancer la partie
+      _startGameInternal();
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -236,9 +240,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         ),
       );
     }
-
-
   }
+
   void _startGameInternal() {
     final gameStateService = context.read<GameStateService>();
     final gameSessionService = context.read<GameSessionService>();

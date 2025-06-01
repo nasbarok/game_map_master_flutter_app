@@ -145,21 +145,23 @@ class GameSessionService {
   bool canStartBombOperationScenario(int gameSessionId) {
     // Récupérer les équipes actives pour cette session
     final teamService = GetIt.I<TeamService>();
-    final List<Team> activeTeams = teamService.getTeamsForGameSession(gameSessionId);
+    final List<Team> teams = teamService.teams;
 
-    // Vérifier qu'il y a exactement 2 équipes
-    if (activeTeams.length != 2) {
-      return false;
-    }
-
-    // Vérifier que chaque équipe a au moins un joueur
+    // Récupérer les joueurs connectés
     final gameStateService = GetIt.I<GameStateService>();
     final connectedPlayers = gameStateService.connectedPlayersList;
 
-    final team1Players = connectedPlayers.where((player) => player['teamId'] == activeTeams[0].id).toList();
-    final team2Players = connectedPlayers.where((player) => player['teamId'] == activeTeams[1].id).toList();
+    // Compter les équipes qui ont au moins un joueur
+    final Set<int> teamsWithPlayers = {};
 
-    if (team1Players.isEmpty || team2Players.isEmpty) {
+    for (final player in connectedPlayers) {
+      if (player['teamId'] != null) {
+        teamsWithPlayers.add(player['teamId']);
+      }
+    }
+
+    // Vérifier qu'il y a exactement 2 équipes avec des joueurs
+    if (teamsWithPlayers.length != 2) {
       return false;
     }
 
