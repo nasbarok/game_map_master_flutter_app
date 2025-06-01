@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:airsoft_game_map/models/game_session.dart';
 import 'package:airsoft_game_map/services/api_service.dart';
 import 'package:airsoft_game_map/services/auth_service.dart';
+import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:get_it/get_it.dart';
 
 import '../models/field.dart';
 import '../models/game_session_participant.dart';
 import '../models/game_session_scenario.dart';
+import '../models/team.dart';
+import 'game_state_service.dart';
 
 class GameSessionService {
   final ApiService _apiService;
@@ -136,5 +139,30 @@ class GameSessionService {
       print('⚠️ Aucune session active trouvée pour le terrain $fieldId : $e');
       return null;
     }
+  }
+
+  /// Vérifie si les conditions pour lancer un scénario Bombe sont remplies
+  bool canStartBombOperationScenario(int gameSessionId) {
+    // Récupérer les équipes actives pour cette session
+    final teamService = GetIt.I<TeamService>();
+    final List<Team> activeTeams = teamService.getTeamsForGameSession(gameSessionId);
+
+    // Vérifier qu'il y a exactement 2 équipes
+    if (activeTeams.length != 2) {
+      return false;
+    }
+
+    // Vérifier que chaque équipe a au moins un joueur
+    final gameStateService = GetIt.I<GameStateService>();
+    final connectedPlayers = gameStateService.connectedPlayersList;
+
+    final team1Players = connectedPlayers.where((player) => player['teamId'] == activeTeams[0].id).toList();
+    final team2Players = connectedPlayers.where((player) => player['teamId'] == activeTeams[1].id).toList();
+
+    if (team1Players.isEmpty || team2Players.isEmpty) {
+      return false;
+    }
+
+    return true;
   }
 }

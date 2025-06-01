@@ -10,9 +10,11 @@ import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_session_service.dart';
 import '../../services/player_connection_service.dart';
+import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
+import '../../widgets/bomb_operation_team_role_selector.dart';
 import '../gamesession/game_session_screen.dart';
 import 'scenario_selection_dialog.dart';
 
@@ -136,21 +138,10 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   void _startGame() {
     final gameStateService = context.read<GameStateService>();
-    final gameSessionService = context.read<GameSessionService>();
     final teamService = context.read<TeamService>();
-    final teamId = teamService.myTeamId;
 
-    final user = context.read<AuthService>().currentUser!;
-    final field = gameStateService.selectedMap!.field;
-    final isHost =user.hasRole('HOST') && field!.owner!.id! == user.id;
-
-    print('🧩 [START] Lancement du jeu demandé');
-    print('📋 Terrain ouvert ? ${gameStateService.isTerrainOpen}');
-    print('📋 Scénarios sélectionnés : ${gameStateService.selectedScenarios?.length}');
-    print('📋 User ID: ${user.id}, Host? $isHost, Team ID: $teamId');
-
+    // Vérif : terrain ouvert ?
     if (!gameStateService.isTerrainOpen) {
-      print('❌ Terrain fermé, annulation');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez d\'abord ouvrir une carte'),
@@ -160,9 +151,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       return;
     }
 
-    if (gameStateService.selectedScenarios == null ||
-        gameStateService.selectedScenarios!.isEmpty) {
-      print('❌ Aucun scénario sélectionné, annulation');
+    // Vérif : scénarios ?
+    final selectedScenarios = gameStateService.selectedScenarios ?? [];
+    if (selectedScenarios.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner au moins un scénario'),
@@ -172,20 +163,82 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       return;
     }
 
-    int fieldId = gameStateService.selectedMap!.field?.id ?? 0;
-    int gameMapId = gameStateService.selectedMap!.id!;
-    int duration = gameStateService.gameDuration ?? 0;
+    // Vérif : scénario bombe ?
+    final hasBombScenario = selectedScenarios.any(
+          (scenario) => scenario.scenario.type == 'bomb_operation',
+    );
+
+    if (hasBombScenario) {
+      _startGameWithBombOption(); // avec configuration
+    } else {
+      _startGameInternal(); // direct
+    }
+  }
+
+  void _startGameWithBombOption() {
+    final teamService = context.read<TeamService>();
+    final bombOperationService = context.read<BombOperationService>();
+    final teams = teamService.teams;
+
+    final activeTeams = teams.where((t) => t.players.isNotEmpty).toList();
+
+    if (activeTeams.length != 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Le scénario "Opération Bombe" nécessite exactement 2 équipes avec au moins un joueur chacune.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Configuration de l\'Opération Bombe'),
+        content: BombOperationTeamRoleSelector(
+          teams: activeTeams,
+          onRolesAssigned: (roles) {
+            bombOperationService.setPendingRoles(roles);
+            Navigator.of(context).pop();
+            _startGameInternal(); // 👈 Lance enfin la partie
+          }, gameSessionId: context.read<GameStateService>().activeGameSession?.id ?? 0,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuler'),
+          ),
+        ],
+      ),
+    );
+  }
+  void _startGameInternal() {
+    final gameStateService = context.read<GameStateService>();
+    final gameSessionService = context.read<GameSessionService>();
+    final teamService = context.read<TeamService>();
+    final authService = context.read<AuthService>();
+    final user = authService.currentUser!;
+
+    final field = gameStateService.selectedMap!.field!;
+    final isHost = user.hasRole('HOST') && field.owner!.id == user.id;
+    final teamId = teamService.myTeamId;
+
+    final gameMapId = gameStateService.selectedMap!.id!;
+    final duration = gameStateService.gameDuration ?? 0;
+    final fieldId = field.id!;
 
     print('🚀 Création de la GameSession (Field: $fieldId, Map: $gameMapId, Duration: $duration min)');
 
-    gameSessionService.createGameSession( gameMapId, field!, duration).then((gameSession) {
-      print('✅ GameSession créée avec succès : ID = ${gameSession.id}');
+    gameSessionService.createGameSession(gameMapId, field, duration).then((gameSession) {
+      print('✅ GameSession créée : ID = ${gameSession.id}');
 
       gameSessionService.startGameSession(gameSession.id!).then((startedSession) {
         print('✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
-        print('🎮 Navigation vers GameSessionScreen...');
         gameStateService.setGameRunning(true);
         gameStateService.setActiveGameSession(startedSession);
+
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -206,25 +259,18 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           ),
         );
       }).catchError((e) {
-        print('❌ Erreur lors du démarrage de la session : $e');
+        print('❌ Erreur démarrage session : $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors du démarrage de la session : $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erreur lors du démarrage : $e'), backgroundColor: Colors.red),
         );
       });
     }).catchError((error) {
-      print('❌ Erreur lors de la création de la GameSession : $error');
+      print('❌ Erreur création session : $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur lors du lancement de la partie : $error'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Erreur de création : $error'), backgroundColor: Colors.red),
       );
     });
   }
-
 
   void _stopGame() {
     final gameStateService = GetIt.I<GameStateService>();
