@@ -252,7 +252,7 @@ class WebSocketService with ChangeNotifier {
       teamId: teamId,
     );
 
-    final destination = '/app/field/$fieldId';
+    final destination = '/app/field/$fieldId/position';
 
     try {
       const encoder = JsonEncoder.withIndent('  ');
@@ -277,7 +277,7 @@ class WebSocketService with ChangeNotifier {
     if (!isConnected) return;
 
     _stompClient?.subscribe(
-      destination: '/topic/field/{fieldId}//$gameSessionId/positions',
+      destination: '/topic/field/{fieldId}/$gameSessionId/positions',
       callback: (StompFrame frame) {
         if (frame.body != null) {
           try {
@@ -317,4 +317,5 @@ class WebSocketService with ChangeNotifier {
     _messageController.close();
     _connectionStatusController.close();
   }
+
 }

@@ -10,6 +10,12 @@ import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../models/coordinate.dart';
+import '../models/team.dart';
+import '../services/game_state_service.dart';
+import '../services/scenario/bomb_operation/bomb_operation_service.dart';
+import 'package:airsoft_game_map/widgets/bomb_operation_map_widget_extension.dart';
+
+import '../services/team_service.dart';
 
 /// Widget pour afficher une carte miniature dans l'écran de session de jeu
 class GameMapWidget extends StatefulWidget {
@@ -17,6 +23,8 @@ class GameMapWidget extends StatefulWidget {
   final GameMap gameMap;
   final int userId;
   final int? teamId;
+  final bool hasBombOperationScenario;
+  final BombOperationService? bombOperationService;
 
   const GameMapWidget({
     Key? key,
@@ -24,6 +32,8 @@ class GameMapWidget extends StatefulWidget {
     required this.gameMap,
     required this.userId,
     this.teamId,
+    this.hasBombOperationScenario = false,
+    this.bombOperationService,
   }) : super(key: key);
 
   @override
@@ -158,8 +168,8 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                             points: zone.zoneShape
                                 .map((coord) => LatLng(coord.latitude, coord.longitude))
                                 .toList(),
-                            color: _parseColor(zone.color).withOpacity(0.3),
-                            borderColor: _parseColor(zone.color),
+                            color: _parseColor(zone.color)?.withOpacity(0.3) ?? Colors.blue.withOpacity(0.3),
+                            borderColor: _parseColor(zone.color) ?? Colors.blue,
                             borderStrokeWidth: 2.0,
                           ))
                               .toList(),
@@ -171,28 +181,33 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                           final userId = entry.key;
                           final position = entry.value;
 
-                          Color color;
-                          IconData icon;
-
-                          if (userId == widget.userId) {
-                            color = Colors.blue;
-                            icon = Icons.person_pin_circle;
-                          } else if (userId == -1) {
-                            color = Colors.green;
-                            icon = Icons.adjust; // expected center
-                          } else if (userId == -2) {
-                            color = Colors.orange;
-                            icon = Icons.center_focus_strong; // bounds center
-                          } else {
-                            color = Colors.black;
-                            icon = Icons.person_pin;
+                          // 🔹 Cas spéciaux (-1 et -2 utilisés pour des marqueurs techniques)
+                          if (userId == -1) {
+                            return Marker(
+                              point: LatLng(position.latitude, position.longitude),
+                              width: 30,
+                              height: 30,
+                              child: const Icon(Icons.adjust, color: Colors.green, size: 20),
+                            );
                           }
+                          if (userId == -2) {
+                            return Marker(
+                              point: LatLng(position.latitude, position.longitude),
+                              width: 30,
+                              height: 30,
+                              child: const Icon(Icons.center_focus_strong, color: Colors.orange, size: 20),
+                            );
+                          }
+
+                          // ✅ Ici on appelle _buildPlayerMarker(...)
+                          final isCurrentUser = userId == widget.userId;
+                          final markerWidget = _buildPlayerMarker(userId, isCurrentUser);
 
                           return Marker(
                             point: LatLng(position.latitude, position.longitude),
-                            width: 40,
-                            height: 40,
-                            child: Icon(icon, color: color, size: 30),
+                            width: 30,
+                            height: 30,
+                            child: markerWidget,
                           );
                         }).toList(),
                       ),
@@ -209,6 +224,24 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                       onPressed: () => _openFullMapScreen(context),
                     ),
                   ),
+                  // Sites de bombe (si le scénario Bombe est actif)
+                  if (widget.hasBombOperationScenario && widget.bombOperationService != null)
+                    StreamBuilder<void>(
+                      stream: widget.bombOperationService!.bombSitesStream,
+                      builder: (context, snapshot) {
+                        return MarkerLayer(
+                          markers: generateBombSiteMarkers(
+                            context: context,
+                            bombScenario: widget.bombOperationService!.activeScenario!,
+                            gameState: widget.bombOperationService!.currentState,
+                            teamRoles: widget.bombOperationService!.teamRoles,
+                            userTeamId: widget.teamId,
+                            activeBombSites: widget.bombOperationService!.activeBombSites,
+                            plantedBombSites: widget.bombOperationService!.plantedBombSites,
+                          ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),
@@ -244,20 +277,88 @@ class _GameMapWidgetState extends State<GameMapWidget> {
           gameMap: widget.gameMap,
           userId: widget.userId,
           teamId: widget.teamId,
+          hasBombOperationScenario: widget.hasBombOperationScenario,
         ),
       ),
     );
   }
 
-  Color _parseColor(String colorString) {
-    // Méthode pour parser une couleur depuis une chaîne
+  Color? _parseColor(String? colorString) {
+    if (colorString == null) return null;
     try {
       if (colorString.startsWith('#')) {
         return Color(int.parse('0xFF${colorString.substring(1)}'));
       }
       return Colors.blue;
-    } catch (e) {
-      return Colors.blue;
+    } catch (_) {
+      return null;
     }
   }
+  Widget _buildPlayerMarker(int userId, bool isCurrentUser) {
+    Color markerColor = isCurrentUser ? Colors.blue : Colors.green;
+    final teamService = GetIt.I<TeamService>();
+    final int? teamId = teamService.getTeamIdForPlayer(userId);
+    if (!isCurrentUser && teamId != null) {
+      final team = teamService.teams.firstWhere(
+            (t) => t.id == teamId,
+        orElse: () => Team(id: -1, name: 'Inconnue'),
+      );
+      markerColor = _parseColor(team.color) ?? Colors.green;
+    }
+
+    // Récupérer le nom du joueur (à adapter selon votre structure de données)
+    final String playerName = _getPlayerName(userId);
+
+    return Stack(
+      children: [
+        // Point rond pour le joueur
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: markerColor,
+            border: Border.all(
+              color: Colors.white,
+              width: 2,
+            ),
+          ),
+        ),
+
+        // Nom du joueur
+        Positioned(
+          bottom: -5,
+          left: 8,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              playerName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+// Méthode pour récupérer le nom du joueur
+  String _getPlayerName(int userId) {
+    final gameStateService = GetIt.I<GameStateService>();
+    final player = gameStateService.connectedPlayersList.firstWhere(
+          (p) => p['id'] == userId,
+      orElse: () => {},
+    );
+    return player['username'] ?? 'Joueur $userId';
+  }
+
+
+
 }

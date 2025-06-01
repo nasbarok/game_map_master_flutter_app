@@ -10,6 +10,7 @@ import '../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
 import '../../services/game_session_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/player_location_service.dart';
+import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
 import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket/web_socket_game_session_handler.dart';
@@ -77,6 +78,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   // Notifications de trésors trouvés
   List<Map<String, dynamic>> _treasureFoundNotifications = [];
+  bool _hasBombOperationScenario = false;
 
   @override
   void initState() {
@@ -107,6 +109,23 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     locationService.startLocationSharing(widget.gameSession.id!);
     print('🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
     locationService.loadInitialPositions(widget.fieldId!);
+
+    // Vérifier si le scénario Bombe est actif
+    _checkForBombOperationScenario();
+  }
+
+  /// Vérifie si le scénario Opération Bombe est actif pour cette session
+  void _checkForBombOperationScenario() {
+    if (_scenarios != null) {
+      for (final scenario in _scenarios!) {
+        if (scenario.scenarioType == 'bomb_operation') {
+          setState(() {
+            _hasBombOperationScenario = true;
+          });
+          break;
+        }
+      }
+    }
   }
 
   Future<void> _loadInitialData() async {
@@ -407,6 +426,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                     gameMap: _gameSession!.gameMap!,
                     userId: widget.userId,
                     teamId: widget.teamId,
+                    hasBombOperationScenario: _hasBombOperationScenario,
+                    bombOperationService: _hasBombOperationScenario ? GetIt.I<BombOperationService>() : null,
                   ),
                 SizedBox(height: 16),
                 // Tableau des scores (uniquement si un scénario de chasse au trésor est actif)

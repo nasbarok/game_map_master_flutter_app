@@ -16,10 +16,12 @@ import '../services/history_service.dart';
 import '../services/invitation_service.dart';
 import '../services/navigation_service.dart';
 import '../services/player_connection_service.dart';
+import '../services/scenario/bomb_operation/bomb_operation_service.dart';
 import '../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 import '../services/scenario_service.dart';
 import '../services/team_service.dart';
+import '../services/websocket/bomb_operation_web_socket_handler.dart';
 import '../services/websocket/field_websocket_handler.dart';
 import '../services/websocket/player_websocket_handler.dart';
 import '../services/websocket/team_websocket_handler.dart';
@@ -70,9 +72,10 @@ void setupServiceLocator() {
 
 // TreasureHuntWebSocketHandler
   final treasureHuntWebSocketHandler = TreasureHuntWebSocketHandler(webSocketService);
+  final bombOperationWebSocketHandler = BombOperationWebSocketHandler(webSocketService, authService, navigatorKey);
+  final bombOperationService = BombOperationService(apiService,bombOperationWebSocketHandler);
 
   final playerLocationService = PlayerLocationService(apiService,webSocketService);
-
   // 5. WebSocketManager
   final webSocketManager = WebSocketManager(
     webSocketService,
@@ -101,6 +104,8 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<GeocodingService>(geocodingService);
   GetIt.I.registerSingleton<BombOperationScenarioService>(bombOperationScenarioService);
   GetIt.I.registerSingleton<PlayerLocationService>(playerLocationService);
+  GetIt.I.registerSingleton<BombOperationService>(bombOperationService);
+  GetIt.I.registerSingleton<BombOperationWebSocketHandler>(bombOperationWebSocketHandler);
 
   // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
   final invitationService = InvitationService(
