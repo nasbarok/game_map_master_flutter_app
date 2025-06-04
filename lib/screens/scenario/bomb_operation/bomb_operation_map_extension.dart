@@ -29,10 +29,11 @@ extension BombOperationMapExtension on GameMapScreen {
     required BombOperationState gameState,
     required Map<int, BombOperationTeam> teamRoles,
     required int? userTeamId,
-    required Set<int> activeBombSites,
-    required Set<int> plantedBombSites,
+    required List<BombSite> toActivateBombSites,
+    required List<BombSite> disableBombSites,
+    required List<BombSite> activeBombSites,
   }) {
-    if (bombScenario.bombSites == null || bombScenario.bombSites!.isEmpty) {
+    if (disableBombSites == null || disableBombSites.isEmpty) {
       return [];
     }
 
@@ -43,12 +44,12 @@ extension BombOperationMapExtension on GameMapScreen {
     final bool isDefender = isDefenseTeam(userTeamId, teamRoles);
 
     // Parcourir tous les sites de bombe
-    for (final site in bombScenario.bombSites!) {
+    for (final site in disableBombSites) {
       // Déterminer si ce site est actif pour ce round
       final bool isActive = activeBombSites.contains(site.id);
 
       // Déterminer si une bombe est plantée sur ce site
-      final bool isPlanted = plantedBombSites.contains(site.id);
+      final bool isPlanted = activeBombSites.contains(site.id);
 
       // Déterminer si ce site doit être visible pour l'utilisateur
       bool isVisible = false;

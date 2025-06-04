@@ -16,32 +16,36 @@ extension BombOperationMapWidgetExtension on Object {
     required BombOperationState gameState,
     required Map<int, BombOperationTeam> teamRoles,
     required int? userTeamId,
-    required Set<int> activeBombSites,
-    required Set<int> plantedBombSites,
+    required List<BombSite> toActivateBombSites,
+    required List<BombSite> disableBombSites,
+    required List<BombSite> activeBombSites,
   }) {
     if (bombScenario.bombSites == null || bombScenario.bombSites!.isEmpty) {
       return [];
     }
-    logger.d('userTeamId=$userTeamId, teamRole=${teamRoles[userTeamId]}, '
-        'active=$activeBombSites, planted=$plantedBombSites, '
-        'totalSites=${bombScenario.bombSites!.length}');
+
     final List<Marker> markers = [];
 
-    final bool isAttacker = teamRoles[userTeamId] == BombOperationTeam.attack;
-    final bool isDefender = teamRoles[userTeamId] == BombOperationTeam.defense;
+    // Déterminer le rôle de l’équipe
+    final bool isAttacker = isAttackTeam(userTeamId, teamRoles);
+    final bool isDefender = isDefenseTeam(userTeamId, teamRoles);
 
     for (final site in bombScenario.bombSites!) {
-      final bool isActive = activeBombSites.contains(site.id);
-      final bool isPlanted = plantedBombSites.contains(site.id);
+      final bool isPlantedOrActivated = activeBombSites.contains(site.id);
+      final bool isInToActivate = toActivateBombSites.any((s) => s.id == site.id);
+      final bool isInDisabled = disableBombSites.any((s) => s.id == site.id);
 
       bool isVisible = false;
       bool isGreyed = false;
 
       if (isAttacker) {
-        isVisible = isActive;
+        // Les attaquants voient uniquement les bombes "à activer"
+        isVisible = isInToActivate;
+        isGreyed = false;
       } else if (isDefender) {
-        isVisible = true;
-        isGreyed = !isPlanted && !isActive;
+        // Les défenseurs voient toutes les bombes désactivées + celles activées
+        isVisible = isInDisabled || isPlantedOrActivated;
+        isGreyed = !isPlantedOrActivated;
       }
 
       if (isVisible) {
@@ -53,7 +57,7 @@ extension BombOperationMapWidgetExtension on Object {
             child: _buildBombSiteMarker(
               context: context,
               site: site,
-              isPlanted: isPlanted,
+              isPlanted: isPlantedOrActivated,
               isAttacker: isAttacker,
               isGreyed: isGreyed,
             ),
@@ -63,6 +67,16 @@ extension BombOperationMapWidgetExtension on Object {
     }
 
     return markers;
+  }
+
+  bool isAttackTeam(int? teamId, Map<int, BombOperationTeam> teamRoles) {
+    if (teamId == null) return false;
+    return teamRoles[teamId] == BombOperationTeam.attack;
+  }
+
+  bool isDefenseTeam(int? teamId, Map<int, BombOperationTeam> teamRoles) {
+    if (teamId == null) return false;
+    return teamRoles[teamId] == BombOperationTeam.defense;
   }
 
   /// Construit le widget représentant un site de bombe

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'bomb_operation_scenario.dart';
 import 'bomb_operation_state.dart';
-
+import 'bomb_site.dart';
+import 'bomb_operation_team.dart';
 /// Modèle représentant une session de jeu Opération Bombe en cours
 class BombOperationSession {
   /// Identifiant unique de la session
@@ -35,7 +36,7 @@ class BombOperationSession {
   final DateTime? defuseStartTime;
   
   /// Liste des identifiants des sites de bombe actifs pour ce round
-  final List<int> activeBombSiteIds;
+  final List<BombSite> activeBombSites;
   
   /// Date de création de la session
   final DateTime createdAt;
@@ -43,6 +44,14 @@ class BombOperationSession {
   /// Date de dernière mise à jour de la session
   final DateTime lastUpdated;
 
+  /// Rôles des équipes (teamId => BombOperationTeam)
+  final Map<int, BombOperationTeam> teamRoles;
+
+  /// Liste des sites de bombe activés pour ce round
+  final List<BombSite> toActiveBombSites;
+
+  /// Liste des sites de bombe désactivés pour ce round
+  final List<BombSite> disableBombSites;
   /// Constructeur
   BombOperationSession({
     this.id,
@@ -55,9 +64,12 @@ class BombOperationSession {
     this.roundStartTime,
     this.bombPlantedTime,
     this.defuseStartTime,
-    this.activeBombSiteIds = const [],
+    this.activeBombSites = const [],
     required this.createdAt,
     required this.lastUpdated,
+    this.teamRoles = const {},
+    this.toActiveBombSites = const [],
+    this.disableBombSites = const [],
   });
 
   /// Crée une instance de BombOperationSession à partir d'un objet JSON
@@ -83,17 +95,27 @@ class BombOperationSession {
       defuseStartTime: json['defuseStartTime'] != null
           ? DateTime.parse(json['defuseStartTime'])
           : null,
-      activeBombSiteIds: json['activeBombSiteIds'] != null
-          ? List<int>.from(json['activeBombSiteIds'])
-          : [],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
       lastUpdated: json['lastUpdated'] != null
           ? DateTime.parse(json['lastUpdated'])
           : DateTime.now(),
+
+      // 🧠 Parsing des rôles d'équipe
+      teamRoles: (json['teamRoles'] as Map?)?.map((key, value) => MapEntry(
+        int.parse(key.toString()),
+        BombOperationTeamExtension.fromString(value.toString()),
+      )) ?? {},
+
+      // 🔁 Sites à activer
+      toActiveBombSites: (json['toActiveBombSites'] as List?)?.map((e) => BombSite.fromJson(e)).toList() ?? [],
+      activeBombSites: (json['activeBombSites'] as List?)?.map((e) => BombSite.fromJson(e)).toList() ?? [],
+      // 🔁 Sites désactivés
+      disableBombSites: (json['disableBombSites'] as List?)?.map((e) => BombSite.fromJson(e)).toList() ?? [],
     );
   }
+
 
   /// Convertit cette instance en objet JSON
   Map<String, dynamic> toJson() {
@@ -104,7 +126,6 @@ class BombOperationSession {
       'attackTeamScore': attackTeamScore,
       'defenseTeamScore': defenseTeamScore,
       'gameState': gameState.toString().split('.').last,
-      'activeBombSiteIds': activeBombSiteIds,
     };
     
     if (bombOperationScenario != null) {
@@ -125,7 +146,10 @@ class BombOperationSession {
     
     data['createdAt'] = createdAt.toIso8601String();
     data['lastUpdated'] = lastUpdated.toIso8601String();
-    
+    data['teamRoles'] = teamRoles.map((key, value) => MapEntry(key.toString(), value.name));
+    data['toActiveBombSites'] = toActiveBombSites.map((e) => e.toJson()).toList();
+    data['disableBombSites'] = disableBombSites.map((e) => e.toJson()).toList();
+    data['activeBombSites'] = activeBombSites.map((e) => e.toJson()).toList();
     return data;
   }
   
@@ -141,7 +165,6 @@ class BombOperationSession {
     DateTime? roundStartTime,
     DateTime? bombPlantedTime,
     DateTime? defuseStartTime,
-    List<int>? activeBombSiteIds,
     DateTime? createdAt,
     DateTime? lastUpdated,
   }) {
@@ -156,7 +179,6 @@ class BombOperationSession {
       roundStartTime: roundStartTime ?? this.roundStartTime,
       bombPlantedTime: bombPlantedTime ?? this.bombPlantedTime,
       defuseStartTime: defuseStartTime ?? this.defuseStartTime,
-      activeBombSiteIds: activeBombSiteIds ?? this.activeBombSiteIds,
       createdAt: createdAt ?? this.createdAt,
       lastUpdated: lastUpdated ?? this.lastUpdated,
     );

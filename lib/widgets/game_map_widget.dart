@@ -196,8 +196,9 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                             gameState: gameState,
                             teamRoles: roles,
                             userTeamId: widget.teamId,
+                            toActivateBombSites: bombOperationService.toActivateBombSites,
+                            disableBombSites: bombOperationService.disableBombSites,
                             activeBombSites: bombOperationService.activeBombSites,
-                            plantedBombSites: bombOperationService.plantedBombSites,
                           ),
                         );
                       },

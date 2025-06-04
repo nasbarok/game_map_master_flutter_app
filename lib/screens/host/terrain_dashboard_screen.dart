@@ -168,10 +168,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       final gameSession = await _initGameSession(); // Création GameSession
       await _launchGameScreen(gameSession); // Démarrage + navigation
 
-      Navigator.of(context, rootNavigator: true).pop();
       _showSuccess('La partie a été lancée !');
     } catch (e) {
-      Navigator.of(context, rootNavigator: true).pop();
       logger.e('❌ Erreur globale _startGame: $e');
       _showError('Erreur lors du lancement de la partie : $e');
     }
@@ -233,11 +231,11 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final bombConfig = gameStateService.bombOperationConfig;
     if (bombConfig != null) {
       await bombOperationService.saveTeamRoles(gameSession.id!, bombConfig.roles);
-      await bombOperationService.createBombOperationSession(
+      final bombOperationSession = await bombOperationService.createBombOperationSession(
         gameSessionId: gameSession.id!,
         scenarioId: bombConfig.scenarioId,
       );
-      await bombOperationService.selectRandomBombSites(gameSession.id!);
+      await bombOperationService.initialize(bombOperationSession);
       logger.d('🎯 Scénario Bombe initialisé pour session ${gameSession.id}');
     }
 

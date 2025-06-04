@@ -261,11 +261,11 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
 
     // Vérifier si le scénario Bombe est actif
-    _checkForBombOperationScenario();
-    if (_hasBombOperationScenario) {
+   _checkForBombOperationScenario();
+    /*  if (_hasBombOperationScenario) {
       logger.d('🧨 [GameSessionScreen] [_loadInitialData] Initialisation du BombOperationService...');
       await GetIt.I<BombOperationService>().initialize(widget.gameSession.id!);
-    }
+    }*/
   }
 
   void _navigateToQRCodeScanner() {

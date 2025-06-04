@@ -139,16 +139,6 @@ class GameMap {
   }
 
   Map<String, dynamic> toJson() {
-
-    logger.d("🧩 GameMap.toJson called:");
-    logger.d("- backgroundBoundsJson: $backgroundBoundsJson");
-    logger.d("- satelliteBoundsJson: $satelliteBoundsJson");
-    logger.d("- backgroundImageBase64 length: ${backgroundImageBase64?.length ?? 0}");
-    logger.d("- satelliteImageBase64 length: ${satelliteImageBase64?.length ?? 0}");
-    logger.d("- fieldBoundaryJson: $fieldBoundaryJson");
-    logger.d("- mapZonesJson: $mapZonesJson");
-    logger.d("- mapPointsOfInterestJson: $mapPointsOfInterestJson");
-
     return {
       'id': id,
       'name': name,

@@ -200,9 +200,9 @@ class _GameMapScreenState extends State<GameMapScreen> {
                         gameState: _bombOperationService.currentState,
                         teamRoles: _bombOperationService.teamRoles,
                         userTeamId: widget.teamId,
-                        activeBombSites: _bombOperationService.activeBombSites,
-                        plantedBombSites:
-                            _bombOperationService.plantedBombSites,
+                        toActivateBombSites: _bombOperationService.toActivateBombSites,
+                        disableBombSites: _bombOperationService.disableBombSites,
+                        activeBombSites:_bombOperationService.activeBombSites,
                       ),
                     );
                   },
