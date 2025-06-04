@@ -13,7 +13,7 @@ import '../../models/websocket/team_update_message.dart';
 import '../../models/websocket/websocket_message.dart';
 import '../websocket_service.dart';
 import 'field_websocket_handler.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class WebSocketManager {
   final WebSocketService _webSocketService;
   final PlayerWebSocketHandler _playerHandler;
@@ -33,7 +33,7 @@ class WebSocketManager {
 
   void _handleMessage(dynamic message) {
     if (message is Map<String, dynamic>) {
-      print(
+      logger.d(
           '[websocket_manager] [_handleMessage] non utilisé Received message: $message');
     }
   }

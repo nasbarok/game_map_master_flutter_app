@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_notification.dart';
 import '../websocket_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class TreasureHuntWebSocketHandler {
   final WebSocketService _webSocketService;
 
@@ -32,7 +32,7 @@ class TreasureHuntWebSocketHandler {
           _gameEventController.add(notification);
         }
       } catch (e) {
-        debugPrint('[treasure_hunt_websocket_handler] Error processing WebSocket message: $e');
+        logger.e('[treasure_hunt_websocket_handler] Error processing WebSocket message: $e');
       }
     });
   }

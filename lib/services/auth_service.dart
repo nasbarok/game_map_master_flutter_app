@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import 'package:provider/provider.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class AuthService extends ChangeNotifier {
   static const String baseUrl = 'http://10.0.2.2:8080/api/auth'; // URL pour l'émulateur Android
   
@@ -74,10 +74,10 @@ class AuthService extends ChangeNotifier {
   Future<bool> login(String username, String password) async {
     _isLoading = true;
     notifyListeners();
-    print('🔐 Démarrage du login...');
+    logger.d('🔐 Démarrage du login...');
 
     try {
-      print('📡 Envoi de la requête à $baseUrl/login...');
+      logger.d('📡 Envoi de la requête à $baseUrl/login...');
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
@@ -86,32 +86,32 @@ class AuthService extends ChangeNotifier {
           'password': password,
         }),
       );
-      print('📬 Reçu réponse HTTP ${response.statusCode}');
+      logger.d('📬 Reçu réponse HTTP ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ Token reçu : ${data['accessToken']}');
+        logger.d('✅ Token reçu : ${data['accessToken']}');
 
         _token = data['accessToken'];
 
-        print('👤 Récupération des infos utilisateur...');
+        logger.d('👤 Récupération des infos utilisateur...');
         await _fetchUserInfo();
-        print('📥 Infos utilisateur récupérées.');
+        logger.d('📥 Infos utilisateur récupérées.');
 
         _saveUserToPrefs();
-        print('💾 Utilisateur sauvegardé dans les prefs.');
+        logger.d('💾 Utilisateur sauvegardé dans les prefs.');
 
         _isLoading = false;
         notifyListeners();
         return true;
       } else {
-        print('❌ Erreur HTTP ${response.statusCode} : ${response.body}');
+        logger.d('❌ Erreur HTTP ${response.statusCode} : ${response.body}');
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      print('💥 Exception lors du login : $e');
+      logger.d('💥 Exception lors du login : $e');
       _isLoading = false;
       notifyListeners();
       return false;
@@ -169,7 +169,7 @@ class AuthService extends ChangeNotifier {
       }
     } catch (e) {
       // Gérer l'erreur
-      print('❌ Erreur lors de la récupération des informations utilisateur: $e');
+      logger.d('❌ Erreur lors de la récupération des informations utilisateur: $e');
     }
   }
 
@@ -209,17 +209,17 @@ class AuthService extends ChangeNotifier {
         final isConnected = gameStateService.isPlayerConnected(userId);
 
         if (isConnected) {
-          print('🚪 Déconnexion du terrain avant logout...');
+          logger.d('🚪 Déconnexion du terrain avant logout...');
           try {
             await playerConnectionService.leaveField(fieldId);
             webSocketService.unsubscribeFromField(fieldId);
           } catch (e) {
-            print('⚠️ [leaveAndLogout] Erreur non bloquante pendant leaveField : $e');
+            logger.d('⚠️ [leaveAndLogout] Erreur non bloquante pendant leaveField : $e');
           }
         }
       }
     } catch (e) {
-      print('⚠️ [leaveAndLogout] Erreur inattendue : $e');
+      logger.d('⚠️ [leaveAndLogout] Erreur inattendue : $e');
     } finally {
       await logout();
     }

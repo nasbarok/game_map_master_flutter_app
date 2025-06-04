@@ -15,7 +15,7 @@ import 'scenario_form_screen.dart';
 import 'game_map_form_screen.dart';
 import 'terrain_dashboard_screen.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class HostDashboardScreen extends StatefulWidget {
   const HostDashboardScreen({Key? key}) : super(key: key);
 
@@ -516,7 +516,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
       await gameMapService
           .loadGameMaps(); // Charger les cartes via GameMapService
     } catch (e) {
-      print('Erreur lors du chargement des cartes: $e');
+      logger.d('Erreur lors du chargement des cartes: $e');
     }
   }
 
@@ -526,7 +526,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
       final scenarioService = context.read<ScenarioService>();
       await scenarioService.loadScenarios(); // Charger les scénarios via ScenarioService
     } catch (e) {
-      print('Erreur lors du chargement des scénarios: $e');
+      logger.d('Erreur lors du chargement des scénarios: $e');
     }
   }
 

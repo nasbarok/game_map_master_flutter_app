@@ -7,6 +7,7 @@ import '../services/team_service.dart';
 import '../services/websocket/web_socket_game_session_handler.dart';
 import '../services/websocket_service.dart';
 import 'websocket_message_handler.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class WebSocketInitializer extends StatefulWidget {
   final Widget child;
@@ -42,7 +43,7 @@ class _WebSocketInitializerState extends State<WebSocketInitializer> {
       webSocketService.setMessageHandler(handler);
 
       _initialized = true;
-      print('✅ WebSocketHandler initialisé via GetIt');
+      logger.d('✅ WebSocketHandler initialisé via GetIt');
     }
   }
 

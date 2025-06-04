@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class ApiService {
   static const String baseUrl = 'http://10.0.2.2:8080/api'; // URL pour l'émulateur Android
   // static const String baseUrl = 'http://localhost:8080/api'; // URL pour iOS simulator
@@ -33,7 +33,7 @@ class ApiService {
 
   Future<dynamic> get(String endpoint) async {
     if (!isAuthenticated) {
-      print('⚠️ [API] Token nul. Annulation requête GET sur $endpoint');
+      logger.d('⚠️ [API] Token nul. Annulation requête GET sur $endpoint');
       return null;
     }
 
@@ -48,7 +48,7 @@ class ApiService {
 
   Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
     if (!isAuthenticated) {
-      print('⚠️ [API] Token nul. Annulation requête GET sur $endpoint');
+      logger.d('⚠️ [API] Token nul. Annulation requête GET sur $endpoint');
       return null;
     }
     final headers = await _getHeaders();
@@ -63,7 +63,7 @@ class ApiService {
 
   Future<dynamic> postList(String endpoint, List<dynamic> data) async {
     if (!isAuthenticated) {
-      print('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
+      logger.d('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
       return null;
     }
 
@@ -79,7 +79,7 @@ class ApiService {
 
   Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
     if (!isAuthenticated) {
-      print('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
+      logger.d('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
       return null;
     }
 
@@ -95,7 +95,7 @@ class ApiService {
 
   Future<dynamic> delete(String endpoint) async {
     if (!isAuthenticated) {
-      print('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
+      logger.d('⚠️ [API] Token nul. Annulation requête POST sur $endpoint');
       return null;
     }
 
@@ -110,7 +110,7 @@ class ApiService {
 
   dynamic _processResponse(http.Response response) {
     if (response.statusCode == 401) {
-      print('❌ [API] Non autorisé - utilisateur non connecté');
+      logger.d('❌ [API] Non autorisé - utilisateur non connecté');
       throw Exception('Non autorisé - utilisateur non connecté');
     }
 

@@ -16,7 +16,7 @@ import '../../models/team.dart';
 import '../../widgets/gamer_history_button.dart';
 import '../gamesession/game_session_screen.dart';
 import '../history/field_sessions_screen.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class GameLobbyScreen extends StatefulWidget {
   const GameLobbyScreen({Key? key}) : super(key: key);
 
@@ -49,14 +49,14 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       final fieldId = _gameStateService.selectedMap?.field?.id;
 
       if (fieldId != null) {
-        print('📡 Abonnement au topic du terrain depuis GameLobbyScreen');
+        logger.d('📡 Abonnement au topic du terrain depuis GameLobbyScreen');
         _webSocketService.subscribeToField(fieldId);
         if (mapId != null) {
           _gameStateService.loadConnectedPlayers();
           teamService.loadTeams(mapId);
         }
       } else {
-        print('❌ Pas de terrain ouvert en cours');
+        logger.d('❌ Pas de terrain ouvert en cours');
       }
     });
   }
@@ -68,14 +68,14 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     final selectedMap = gameState.selectedMap;
     final terrainOuvert = gameState.isTerrainOpen;
 
-    print('🧭 [GameLobbyScreen] build() déclenché');
-    print('🔍 Carte sélectionnée : ${selectedMap?.name ?? "Aucune"}');
-    print('🔓 Terrain ouvert : $terrainOuvert');
+    logger.d('🧭 [GameLobbyScreen] build() déclenché');
+    logger.d('🔍 Carte sélectionnée : ${selectedMap?.name ?? "Aucune"}');
+    logger.d('🔓 Terrain ouvert : $terrainOuvert');
 
     final bool isConnectedToField = gameState.isTerrainOpen;
 
     // ✅ Rendu normal
-    print('✅ Affichage de l’interface GameLobbyScreen');
+    logger.d('✅ Affichage de l’interface GameLobbyScreen');
 
     return Scaffold(
       appBar: AppBar(
@@ -432,7 +432,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       // 🔥 NOUVEAU : pour chaque terrain actif, tenter de s'abonner
       for (final field in fields) {
         if (field.active == true && field.id != null) {
-          print(
+          logger.d(
               '📡 Tentative d\'abonnement WebSocket au terrain ${field.name} (ID: ${field.id})');
           _webSocketService.subscribeToField(field.id!);
         }
@@ -440,7 +440,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
       return fields;
     } catch (e) {
-      print('❌ Erreur lors du chargement des terrains: $e');
+      logger.d('❌ Erreur lors du chargement des terrains: $e');
       return [];
     }
   }
@@ -475,7 +475,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         );
       }
     } catch (e) {
-      print('❌ Erreur lors de la connexion au terrain: $e');
+      logger.d('❌ Erreur lors de la connexion au terrain: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur: $e'),
@@ -515,7 +515,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         ),
       );
     } catch (e) {
-      print('❌ Erreur lors de la déconnexion du terrain: $e');
+      logger.d('❌ Erreur lors de la déconnexion du terrain: $e');
     }
   }
 
@@ -806,7 +806,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         const SnackBar(content: Text('Terrain supprimé de l’historique')),
       );
     } catch (e) {
-      print('❌ Erreur suppression terrain : $e');
+      logger.d('❌ Erreur suppression terrain : $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erreur lors de la suppression')),
       );
@@ -842,7 +842,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         ),
       );
     } else {
-      print(
+      logger.d(
           '❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Impossible de rejoindre la partie')),
@@ -854,7 +854,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   void dispose() {
     final fieldId = _gameStateService.selectedMap?.field?.id;
     if (fieldId != null) {
-      print('📡 Désabonnement du topic du terrain depuis GameLobbyScreen');
+      logger.d('📡 Désabonnement du topic du terrain depuis GameLobbyScreen');
       _webSocketService.unsubscribeFromField(fieldId);
     }
 

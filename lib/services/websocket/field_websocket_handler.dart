@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/websocket/field_closed_message.dart';
 import '../auth_service.dart';
 import '../game_state_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class FieldWebSocketHandler {
   final GameStateService _gameStateService;
   final AuthService _authService;
@@ -17,7 +17,7 @@ class FieldWebSocketHandler {
     final ownerId = content['ownerId'];
     final ownerUsername = content['ownerUsername'];
 
-    print('🏟️ Terrain ouvert : ID=$fieldId par $ownerUsername');
+    logger.d('🏟️ Terrain ouvert : ID=$fieldId par $ownerUsername');
 
     // Si l'utilisateur est le propriétaire, pas besoin de faire quoi que ce soit
     // car il a déjà mis à jour son état local
@@ -32,7 +32,7 @@ class FieldWebSocketHandler {
     final fieldId = message.fieldId;
     final ownerId = message.ownerId;
     final ownerUsername = message.ownerUsername;
-    print('🚪 Terrain fermé : ID=$fieldId');
+    logger.d('🚪 Terrain fermé : ID=$fieldId');
 
     // Si l'utilisateur est le propriétaire, pas besoin de faire quoi que ce soit
     // car il a déjà mis à jour son état local

@@ -8,7 +8,7 @@ import '../../models/game_map.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class GameMapFormScreen extends StatefulWidget {
   final GameMap? gameMap;
 
@@ -154,12 +154,12 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
         final gameMapService = context.read<GameMapService>();
 
         if (widget.gameMap == null) {
-          print('📤 [GameMapFormScreen] Données envoyées pour création :');
-          print(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
+          logger.d('📤 [GameMapFormScreen] Données envoyées pour création :');
+          logger.d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
           await gameMapService.addGameMap(gameMap);
         } else {
-          print('📤 [GameMapFormScreen] Données envoyées pour update :');
-          print(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
+          logger.d('📤 [GameMapFormScreen] Données envoyées pour update :');
+          logger.d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
           await gameMapService.updateGameMap(gameMap);
         }
 

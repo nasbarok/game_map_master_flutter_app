@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'dart:math';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 /// Écran d'édition d'un site de bombe
 class BombSiteEditScreen extends StatefulWidget {
   /// Identifiant du scénario
@@ -105,15 +105,15 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
     
     try {
       final colorHex = '#${_siteColor.value.toRadixString(16).substring(2)}';
-      print('📌 Valeurs avant instanciation du BombSite:');
-      print('- id: ${widget.site?.id}');
-      print('- scenarioId: ${widget.scenarioId}');
-      print('- bombOperationScenarioId: ${widget.bombOperationScenarioId}');
-      print('- name: ${_nameController.text}');
-      print('- latitude: ${_position.latitude}');
-      print('- longitude: ${_position.longitude}');
-      print('- radius: ${_radiusController.text}');
-      print('- color: $_siteColor');
+      logger.d('📌 Valeurs avant instanciation du BombSite:');
+      logger.d('- id: ${widget.site?.id}');
+      logger.d('- scenarioId: ${widget.scenarioId}');
+      logger.d('- bombOperationScenarioId: ${widget.bombOperationScenarioId}');
+      logger.d('- name: ${_nameController.text}');
+      logger.d('- latitude: ${_position.latitude}');
+      logger.d('- longitude: ${_position.longitude}');
+      logger.d('- radius: ${_radiusController.text}');
+      logger.d('- color: $_siteColor');
 
       final site = BombSite(
         id: widget.site?.id,
@@ -127,10 +127,10 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
       );
       
       if (widget.site == null) {
-        print('[BombSiteEditScreen] Création d\'un nouveau site: ${site.toJson()}');
+        logger.d('[BombSiteEditScreen] Création d\'un nouveau site: ${site.toJson()}');
         await _bombOperationService.createBombSite(site);
       } else {
-        print('[BombSiteEditScreen] Mise à jour du site existant: ${site.toJson()}');
+        logger.d('[BombSiteEditScreen] Mise à jour du site existant: ${site.toJson()}');
         await _bombOperationService.updateBombSite(site);
       }
       
@@ -145,7 +145,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        print('[BombSiteEditScreen] Erreur lors de la sauvegarde du site: $e');
+        logger.d('[BombSiteEditScreen] Erreur lors de la sauvegarde du site: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),

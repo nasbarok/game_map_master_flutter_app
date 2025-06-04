@@ -18,6 +18,7 @@ import '../models/websocket/team_update_message.dart';
 import '../models/websocket/websocket_message.dart';
 import 'auth_service.dart';
 import 'game_state_service.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class WebSocketService with ChangeNotifier {
   static const String wsUrl = 'ws://10.0.2.2:8080/ws';
@@ -60,7 +61,7 @@ class WebSocketService with ChangeNotifier {
         _isConnected ||
         _authService?.token == null ||
         _authService?.currentUser?.id == null) {
-      print('⚠️ Connexion déjà en cours ou établie, on ne relance pas.');
+      logger.d('⚠️ Connexion déjà en cours ou établie, on ne relance pas.');
       return;
     }
     _connecting = true;
@@ -73,7 +74,7 @@ class WebSocketService with ChangeNotifier {
     _stompClient = StompClient(
       config: StompConfig(
         url: uri,
-        beforeConnect: () async => print('🔄 Connexion STOMP en cours...'),
+        beforeConnect: () async => logger.d('🔄 Connexion STOMP en cours...'),
         onConnect: (frame) => _onConnect(frame, userId, fieldId),
         onDisconnect: (frame) => _onDisconnect(),
         onWebSocketError: (error) => _onError(error),
@@ -97,14 +98,14 @@ class WebSocketService with ChangeNotifier {
     if (fieldId != null) {
       subscribeToField(fieldId);
     } else {
-      print('⚠️ Pas de terrain sélectionné pour l\'abonnement');
+      logger.d('⚠️ Pas de terrain sélectionné pour l\'abonnement');
     }
 
-    print('✅ STOMP connecté et abonné au canal utilisateur.');
+    logger.d('✅ STOMP connecté et abonné au canal utilisateur.');
   }
 
   void _onDisconnect() {
-    print('🔌 Déconnecté de STOMP');
+    logger.d('🔌 Déconnecté de STOMP');
     _isConnected = false;
     _connecting = false;
     _connectionStatusController.add(false);
@@ -112,7 +113,7 @@ class WebSocketService with ChangeNotifier {
   }
 
   void _onError(dynamic error) {
-    print('🛑 Erreur WebSocket : $error');
+    logger.d('🛑 Erreur WebSocket : $error');
     _isConnected = false;
     _connecting = false;
     _connectionStatusController.add(false);
@@ -168,7 +169,7 @@ class WebSocketService with ChangeNotifier {
       _subscriptions.add(topic);
       return true;
     } catch (e) {
-      print('❌ Erreur abonnement field : $e');
+      logger.d('❌ Erreur abonnement field : $e');
       return false;
     }
   }
@@ -180,7 +181,7 @@ class WebSocketService with ChangeNotifier {
   void _onMessageReceived(StompFrame frame) {
     try {
       if (frame.body == null) return;
-      print('📩 Message reçu : ${frame.body}');
+      logger.d('📩 Message reçu : ${frame.body}');
       final Map<String, dynamic> json = jsonDecode(frame.body!);
       final message = WebSocketMessage.fromJson(json);
       _messageController.add(message);
@@ -189,10 +190,10 @@ class WebSocketService with ChangeNotifier {
       if (context != null) {
         _webSocketMessageHandler?.handleWebSocketMessage(message, context);
       } else {
-        print('⚠️ Aucun contexte pour traiter le message WebSocket');
+        logger.d('⚠️ Aucun contexte pour traiter le message WebSocket');
       }
     } catch (e) {
-      print('❌ Erreur traitement WebSocket : $e');
+      logger.d('❌ Erreur traitement WebSocket : $e');
     }
   }
 
@@ -200,7 +201,7 @@ class WebSocketService with ChangeNotifier {
     if (!_isConnected || _stompClient == null) {
       await connect();
       if (!_isConnected) {
-        print('❌ Impossible d\'envoyer le message, WebSocket non connecté');
+        logger.d('❌ Impossible d\'envoyer le message, WebSocket non connecté');
         return;
       }
     }
@@ -210,7 +211,7 @@ class WebSocketService with ChangeNotifier {
         body: jsonEncode(message.toJson()),
       );
     } catch (e) {
-      print('❌ Erreur envoi STOMP : $e');
+      logger.d('❌ Erreur envoi STOMP : $e');
     }
   }
 
@@ -235,10 +236,10 @@ class WebSocketService with ChangeNotifier {
   /// @param teamId Identifiant de l'équipe (optionnel)
   /// Envoie une position via WebSocket en utilisant le topic field centralisé
   void sendPlayerPosition(int fieldId, int gameSessionId, double latitude, double longitude, int? teamId) {
-    print('📡 [sendPlayerPosition] isConnected=$isConnected, currentUser=${_authService?.currentUser}');
+    logger.d('📡 [sendPlayerPosition] isConnected=$isConnected, currentUser=${_authService?.currentUser}');
 
     if (!isConnected || _authService?.currentUser?.id == null) {
-      print('❌ Impossible d\'envoyer la position, WebSocket non connecté ou utilisateur non authentifié');
+      logger.d('❌ Impossible d\'envoyer la position, WebSocket non connecté ou utilisateur non authentifié');
       return;
     }
 
@@ -256,16 +257,16 @@ class WebSocketService with ChangeNotifier {
 
     try {
       const encoder = JsonEncoder.withIndent('  ');
-      print('🧾 [WebSocketService] [sendPlayerPosition] Message envoyé (PlayerPositionMessage) :');
-      print(encoder.convert(message.toJson()));
+      logger.d('🧾 [WebSocketService] [sendPlayerPosition] Message envoyé (PlayerPositionMessage) :');
+      logger.d(encoder.convert(message.toJson()));
 
       sendMessage(destination, message);
 
       // 🔍 Ajout des logs complets sans toucher au comportement existant
-      print('📡 [WebSocketService] [sendPlayerPosition] Envoi WebSocket vers $destination');
-      print('🧾 [WebSocketService] [sendPlayerPosition] Message PlayerPositionMessage:\n${jsonEncode(message.toJson())}');
+      logger.d('📡 [WebSocketService] [sendPlayerPosition] Envoi WebSocket vers $destination');
+      logger.d('🧾 [WebSocketService] [sendPlayerPosition] Message PlayerPositionMessage:\n${jsonEncode(message.toJson())}');
     } catch (e) {
-      print('❌ [WebSocketService] [sendPlayerPosition] Erreur lors de l\'envoi de la position: $e');
+      logger.d('❌ [WebSocketService] [sendPlayerPosition] Erreur lors de l\'envoi de la position: $e');
     }
   }
 
@@ -288,7 +289,7 @@ class WebSocketService with ChangeNotifier {
               callback(data);
             }
           } catch (e) {
-            print('Erreur lors du traitement de la mise à jour de position: $e');
+            logger.d('Erreur lors du traitement de la mise à jour de position: $e');
           }
         }
       },

@@ -6,7 +6,7 @@ import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'bomb_site_edit_screen.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 /// Écran de gestion des sites de bombe pour un scénario Opération Bombe
 class BombSiteListScreen extends StatefulWidget {
   /// Identifiant du scénario
@@ -90,7 +90,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
     );
 
     if (result == true) {
-      print(
+      logger.d(
           '[BombSiteListScreen] Un site a été ajouté ou modifié, on recharge la liste...');
       _hasChanged = true;
       _loadSites();

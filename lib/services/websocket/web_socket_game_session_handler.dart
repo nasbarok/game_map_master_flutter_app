@@ -23,7 +23,7 @@ import '../game_state_service.dart';
 import '../player_location_service.dart';
 import '../scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../team_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class WebSocketGameSessionHandler {
   final GameSessionService _gameSessionService;
   final TreasureHuntScoreService _treasureHuntScoreService;
@@ -58,10 +58,10 @@ class WebSocketGameSessionHandler {
     GameSessionStartedMessage? msg;
     try {
       msg = GameSessionStartedMessage.fromJson(message);
-      print("🧾 Contenu parsé avec succès : ${msg.gameSessionId}");
+      logger.d("🧾 Contenu parsé avec succès : ${msg.gameSessionId}");
     } catch (e, stack) {
-      print("❌ Erreur parsing GameSessionStartedMessage : $e");
-      print("📌 Stacktrace : $stack");
+      logger.d("❌ Erreur parsing GameSessionStartedMessage : $e");
+      logger.d("📌 Stacktrace : $stack");
     }
 
     final gameStateService = context.read<GameStateService>();
@@ -102,7 +102,7 @@ class WebSocketGameSessionHandler {
         ),
       );
     } else {
-      print('❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
+      logger.d('❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Impossible de rejoindre la partie'),
@@ -125,7 +125,7 @@ class WebSocketGameSessionHandler {
     final currentSession = gameStateService.activeGameSession;
 
     if (currentSession != null && currentSession.id == endedSessionId) {
-      print("✅ Session en cours marquée comme terminée (ID: $endedSessionId)");
+      logger.d("✅ Session en cours marquée comme terminée (ID: $endedSessionId)");
 
       // Marquer la session comme terminée
       final updatedSession = currentSession.copyWith(
@@ -150,7 +150,7 @@ class WebSocketGameSessionHandler {
         }
       });
     } else {
-      print("ℹ️ Session terminée mais différente de la session active (ID: $endedSessionId)");
+      logger.d("ℹ️ Session terminée mais différente de la session active (ID: $endedSessionId)");
     }
   }
 
@@ -226,7 +226,7 @@ class WebSocketGameSessionHandler {
     );
 
     _treasureHuntScoreService.getScoreboard(scenarioId!, gameSessionId!).then((scoreboard) {
-      print('🎯 Scoreboard mis à jour : ${scoreboard.individualScores.length} scores');
+      logger.d('🎯 Scoreboard mis à jour : ${scoreboard.individualScores.length} scores');
 
       if (onScoreboardUpdate != null) {
         onScoreboardUpdate(scoreboard);
@@ -250,20 +250,20 @@ class WebSocketGameSessionHandler {
 
   void handlePlayerPosition(Map<String, dynamic> message, BuildContext context) {
     try {
-      print("📥 [handlePlayerPosition] Message brut reçu : $message");
+      logger.d("📥 [handlePlayerPosition] Message brut reçu : $message");
 
       final type = message['type'];
-      print("🔍 Type détecté : $type");
+      logger.d("🔍 Type détecté : $type");
       if (type != 'PLAYER_POSITION') {
-        print("⏩ Ignoré : type différent de PLAYER_POSITION");
+        logger.d("⏩ Ignoré : type différent de PLAYER_POSITION");
         return;
       }
 
       final payload = message['payload'];
-      print("📦 Payload extrait : $payload");
+      logger.d("📦 Payload extrait : $payload");
 
       if (payload == null) {
-        print("❌ Payload nul, arrêt du traitement");
+        logger.d("❌ Payload nul, arrêt du traitement");
         return;
       }
 
@@ -273,31 +273,31 @@ class WebSocketGameSessionHandler {
       final gameSessionId = payload['gameSessionId'];
       final teamId = payload['teamId'];
 
-      print("👤 userId=$userId | lat=$lat | lon=$lon | teamId=$teamId | session=$gameSessionId");
+      logger.d("👤 userId=$userId | lat=$lat | lon=$lon | teamId=$teamId | session=$gameSessionId");
 
       if (userId == null || lat == null || lon == null) {
-        print("❌ Champs manquants dans le payload (userId, lat ou lon)");
+        logger.d("❌ Champs manquants dans le payload (userId, lat ou lon)");
         return;
       }
 
       final currentUserId = GetIt.I<AuthService>().currentUser?.id;
       if (userId == currentUserId) {
-        print("⏩ Ignoré : c'est moi-même (userId=$userId)");
+        logger.d("⏩ Ignoré : c'est moi-même (userId=$userId)");
         return;
       }
 
-      print("📡 Mise à jour position du joueur $userId");
+      logger.d("📡 Mise à jour position du joueur $userId");
 
       GetIt.I<PlayerLocationService>().updatePlayerPosition(
         userId,
         Coordinate(latitude: lat, longitude: lon),
       );
 
-      print("✅ Position du joueur $userId mise à jour : $lat, $lon");
+      logger.d("✅ Position du joueur $userId mise à jour : $lat, $lon");
 
     } catch (e, stack) {
-      print('❌ Erreur lors du traitement de la position: $e');
-      print('📄 Stacktrace : $stack');
+      logger.d('❌ Erreur lors du traitement de la position: $e');
+      logger.d('📄 Stacktrace : $stack');
     }
   }
 

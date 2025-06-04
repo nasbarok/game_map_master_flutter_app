@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:airsoft_game_map/models/geocoding_result.dart'; // To be created
 import 'package:airsoft_game_map/services/api_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class GeocodingService {
   final ApiService _apiService;
@@ -25,7 +26,7 @@ class GeocodingService {
       return decodedResponse.map((item) => GeocodingResult.fromJson(item as Map<String, dynamic>)).toList();
     } catch (e) {
       if (kDebugMode) {
-        print('Error during geocoding search: $e');
+        logger.d('Error during geocoding search: $e');
       }
       // Depending on how you want to handle errors, you might rethrow, return empty, or a custom error object.
       throw Exception('Failed to search address: $e');

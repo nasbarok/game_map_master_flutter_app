@@ -8,7 +8,7 @@ import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
@@ -48,13 +48,13 @@ class _SplashScreenState extends State<SplashScreen> {
       if (gameState.isReady) {
         await gameState.restoreSessionIfNeeded(apiService);
       } else {
-        print('⏳ WebSocketService pas encore prêt, attente...');
+        logger.d('⏳ WebSocketService pas encore prêt, attente...');
         await Future.delayed(const Duration(milliseconds: 100));
         gameState.setWebSocketService(GetIt.I<WebSocketService>());
         await gameState.restoreSessionIfNeeded(apiService);
       }
     } catch (e) {
-      print('❌ Erreur pendant restoreSessionIfNeeded: $e');
+      logger.d('❌ Erreur pendant restoreSessionIfNeeded: $e');
     }
 
     final user = authService.currentUser!;
@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final isGameRunning = gameState.isGameRunning;
 
     if (!mounted) {
-      print(
+      logger.d(
           '❌ [splash_screen ] Le widget n’est plus monté, arrêt de la navigation');
       return;
     }

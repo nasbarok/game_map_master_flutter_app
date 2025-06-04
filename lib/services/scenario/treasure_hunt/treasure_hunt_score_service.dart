@@ -1,7 +1,7 @@
 import 'package:airsoft_game_map/services/api_service.dart';
 
 import '../../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class TreasureHuntScoreService {
   final ApiService _apiService;
 
@@ -9,7 +9,7 @@ class TreasureHuntScoreService {
 
   Future<TreasureHuntScoreboard> getScoreboard(int scenarioId,int gameSessionId) async {
     final json = await _apiService.get('scenarios/treasure-hunt/$scenarioId/scores?gameSessionId=$gameSessionId');
-    print('🧾 Scoreboard JSON reçu: $json');
+    logger.d('🧾 Scoreboard JSON reçu: $json');
     return TreasureHuntScoreboard.fromJson(json);
   }
 

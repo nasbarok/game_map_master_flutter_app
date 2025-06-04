@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/websocket/bomb_operation_message.dart';
 import '../auth_service.dart';
 import '../websocket_service.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class BombOperationWebSocketHandler {
   final WebSocketService _webSocketService;
@@ -22,7 +23,7 @@ class BombOperationWebSocketHandler {
     required Map<String, dynamic> payload,
   }) {
     if (!_webSocketService.isConnected || _authService.currentUser?.id == null) {
-      print('❌ Impossible d\'envoyer l\'action, WebSocket non connecté ou utilisateur non authentifié');
+      logger.d('❌ Impossible d\'envoyer l\'action, WebSocket non connecté ou utilisateur non authentifié');
       return;
     }
 
@@ -38,9 +39,9 @@ class BombOperationWebSocketHandler {
 
     try {
       _webSocketService.sendMessage(destination, message);
-      print('🧨 Action Bombe envoyée: $action → fieldId=$fieldId');
+      logger.d('🧨 Action Bombe envoyée: $action → fieldId=$fieldId');
     } catch (e) {
-      print('❌ Erreur d\'envoi action Bombe: $e');
+      logger.d('❌ Erreur d\'envoi action Bombe: $e');
     }
   }
 

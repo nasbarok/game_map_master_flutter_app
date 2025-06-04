@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../services/team_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/auth_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class TeamManagementScreen extends StatefulWidget {
   const TeamManagementScreen({Key? key}) : super(key: key);
 
@@ -45,7 +45,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> with Single
         await teamService.loadTeams(selectedMap.id!);
       }
     } catch (e) {
-      print('❌ Erreur lors du chargement des équipes: $e');
+      logger.d('❌ Erreur lors du chargement des équipes: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -74,7 +74,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> with Single
         );
       }
     } catch (e) {
-      print('❌ Erreur lors du changement d\'équipe: $e');
+      logger.d('❌ Erreur lors du changement d\'équipe: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur lors du changement d\'équipe: $e'),

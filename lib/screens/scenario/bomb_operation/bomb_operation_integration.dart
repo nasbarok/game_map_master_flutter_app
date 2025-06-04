@@ -8,7 +8,7 @@ import '../../../services/game_map_service.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../../../services/scenario_service.dart';
 import 'bomb_operation_config_screen.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 /// Extension du ScenarioFormScreen pour intégrer le scénario Opération Bombe
 class BombOperationIntegration {
   /// Ajoute le type "Opération Bombe" à la liste des types de scénarios
@@ -30,7 +30,7 @@ class BombOperationIntegration {
     try {
       // Vérifier si la carte sélectionnée a une configuration interactive
       if (gameMapId != null) {
-        print('[BombOperationIntegration] [handleBombOperationTypeSelected] GameMapId: $gameMapId');
+        logger.d('[BombOperationIntegration] [handleBombOperationTypeSelected] GameMapId: $gameMapId');
         final gameMapService = GetIt.I<GameMapService>();
         final gameMap = await gameMapService.getGameMapById(gameMapId);
 
@@ -75,7 +75,7 @@ class BombOperationIntegration {
           }
         }
       } else {
-        print('[BombOperationIntegration] [handleBombOperationTypeSelected] GameMapId null');
+        logger.d('[BombOperationIntegration] [handleBombOperationTypeSelected] GameMapId null');
         // Aucune carte sélectionnée
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -105,18 +105,18 @@ class BombOperationIntegration {
         active: existingScenario?.active ?? false,
       );
 
-      print('[BombOperationIntegration] [handleBombOperationTypeSelected] Scénario créé: ${newScenario.toJson()}');
+      logger.d('[BombOperationIntegration] [handleBombOperationTypeSelected] Scénario créé: ${newScenario.toJson()}');
 
       Scenario savedScenario;
 
       if (existingScenario == null) {
         // Création directe
         savedScenario = await scenarioService.addScenario(newScenario);
-        print('[BombOperationIntegration] [handleBombOperationTypeSelected] Scénario créé: ${savedScenario.toJson()}');
+        logger.d('[BombOperationIntegration] [handleBombOperationTypeSelected] Scénario créé: ${savedScenario.toJson()}');
       } else {
         // Mise à jour directe
         savedScenario = await scenarioService.updateScenario(newScenario);
-        print('[BombOperationIntegration] [handleBombOperationTypeSelected] Scénario mis à jour: ${savedScenario.toJson()}');
+        logger.d('[BombOperationIntegration] [handleBombOperationTypeSelected] Scénario mis à jour: ${savedScenario.toJson()}');
       }
 
       if (context.mounted) {

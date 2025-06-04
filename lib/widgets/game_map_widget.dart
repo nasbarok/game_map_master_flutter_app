@@ -16,6 +16,7 @@ import '../services/scenario/bomb_operation/bomb_operation_service.dart';
 import 'package:airsoft_game_map/widgets/bomb_operation_map_widget_extension.dart';
 
 import '../services/team_service.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 /// Widget pour afficher une carte miniature dans l'écran de session de jeu
 class GameMapWidget extends StatefulWidget {
@@ -24,7 +25,7 @@ class GameMapWidget extends StatefulWidget {
   final int userId;
   final int? teamId;
   final bool hasBombOperationScenario;
-  final BombOperationService? bombOperationService;
+
 
   const GameMapWidget({
     Key? key,
@@ -33,7 +34,6 @@ class GameMapWidget extends StatefulWidget {
     required this.userId,
     this.teamId,
     this.hasBombOperationScenario = false,
-    this.bombOperationService,
   }) : super(key: key);
 
   @override
@@ -46,14 +46,14 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   Map<int, Coordinate> _positions = {};
 
   bool _hasCenteredOnce = false;
-
+  final BombOperationService bombOperationService = GetIt.I<BombOperationService>();
 
   @override
   void initState() {
     super.initState();
 
     GetIt.I<PlayerLocationService>().positionStream.listen((posMap) {
-      print('📡 [GameMapWidget] Received positions: $posMap');
+      logger.d('📡 [GameMapWidget] Received positions: $posMap');
 
       setState(() {
         _positions = posMap;
@@ -67,7 +67,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
           widget.gameMap.initialZoom ?? 16.0,
         );
         _hasCenteredOnce = true;
-        print('📍 Carte recentrée sur la position du joueur : $pos');
+        logger.d('📍 Carte recentrée sur la position du joueur : $pos');
       }
     });
 
@@ -75,17 +75,21 @@ class _GameMapWidgetState extends State<GameMapWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Vérifier si la carte a une configuration interactive
     if (!widget.gameMap.hasInteractiveMapConfig) {
-      return const SizedBox.shrink(); // Ne rien afficher si pas de carte interactive
+      return const SizedBox.shrink();
     }
+
+    final bombScenario = bombOperationService.activeSessionScenarioBomb;
+    final gameState = bombOperationService.currentState;
+    final roles = bombOperationService.teamRoles;
+
+    logger.d('[GameMapWidget] [build] hasBombOperationScenario=${widget.hasBombOperationScenario}, bombScenario=$bombScenario, gameState=$gameState, roles=$roles');
 
     return Card(
       margin: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Titre de la section
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -93,10 +97,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
               children: [
                 const Text(
                   'Carte de jeu',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.fullscreen),
@@ -107,137 +108,96 @@ class _GameMapWidgetState extends State<GameMapWidget> {
             ),
           ),
 
-          // Aperçu de la carte (version réduite avec FlutterMap)
           Container(
             height: 200,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Stack(
+              child: FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  center: LatLng(widget.gameMap.centerLatitude!, widget.gameMap.centerLongitude!),
+                  zoom: widget.gameMap.initialZoom ?? 13.0,
+                  minZoom: 3.0,
+                  maxZoom: 18.0,
+                  interactiveFlags: InteractiveFlag.none,
+                  onMapReady: () => logger.d('📍 [GameMapWidget] onMapReady triggered'),
+                ),
                 children: [
-                  // Carte interactive miniature
-                  FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      center: LatLng(
-                          widget.gameMap.centerLatitude!,
-                          widget.gameMap.centerLongitude!
-                      ),
-                      zoom: widget.gameMap.initialZoom ?? 13.0,
-                      minZoom: 3.0,
-                      maxZoom: 18.0,
-                      interactiveFlags: InteractiveFlag.none, // Désactiver les interactions
-                      onMapReady: () {
-                        print('📍 [GameMapWidget] onMapReady triggered');
-
-                        // Afficher les coordonnées du centre pour le débogage
-                        final center = LatLng(
-                            widget.gameMap.centerLatitude!,
-                            widget.gameMap.centerLongitude!
-                        );
-                      },
-                    ),
-                    children: [
-                      // Couche de tuiles (fond de carte)
-                      TileLayer(
-                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.airsoft.gamemapmaster',
-                      ),
-
-                      // Limites du terrain
-                      if (widget.gameMap.fieldBoundary != null)
-                        PolygonLayer(
-                          polygons: [
-                            Polygon(
-                              points: widget.gameMap.fieldBoundary!
-                                  .map((coord) => LatLng(coord.latitude, coord.longitude))
-                                  .toList(),
-                              color: Colors.blue.withOpacity(0.2),
-                              borderColor: Colors.blue,
-                              borderStrokeWidth: 2.0,
-                            ),
-                          ],
-                        ),
-
-                      // Zones
-                      if (widget.gameMap.mapZones != null)
-                        PolygonLayer(
-                          polygons: widget.gameMap.mapZones!
-                              .where((zone) => zone.visible)
-                              .map((zone) => Polygon(
-                            points: zone.zoneShape
-                                .map((coord) => LatLng(coord.latitude, coord.longitude))
-                                .toList(),
-                            color: _parseColor(zone.color)?.withOpacity(0.3) ?? Colors.blue.withOpacity(0.3),
-                            borderColor: _parseColor(zone.color) ?? Colors.blue,
-                            borderStrokeWidth: 2.0,
-                          ))
+                  TileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.airsoft.gamemapmaster',
+                  ),
+                  if (widget.gameMap.fieldBoundary != null)
+                    PolygonLayer(
+                      polygons: [
+                        Polygon(
+                          points: widget.gameMap.fieldBoundary!
+                              .map((coord) => LatLng(coord.latitude, coord.longitude))
                               .toList(),
+                          color: Colors.blue.withOpacity(0.2),
+                          borderColor: Colors.blue,
+                          borderStrokeWidth: 2.0,
                         ),
-
-                      // Marqueur pour la position actuelle (centré)
-                      MarkerLayer(
-                        markers: _positions.entries.map((entry) {
-                          final userId = entry.key;
-                          final position = entry.value;
-
-                          // 🔹 Cas spéciaux (-1 et -2 utilisés pour des marqueurs techniques)
-                          if (userId == -1) {
-                            return Marker(
-                              point: LatLng(position.latitude, position.longitude),
-                              width: 30,
-                              height: 30,
-                              child: const Icon(Icons.adjust, color: Colors.green, size: 20),
-                            );
-                          }
-                          if (userId == -2) {
-                            return Marker(
-                              point: LatLng(position.latitude, position.longitude),
-                              width: 30,
-                              height: 30,
-                              child: const Icon(Icons.center_focus_strong, color: Colors.orange, size: 20),
-                            );
-                          }
-
-                          // ✅ Ici on appelle _buildPlayerMarker(...)
-                          final isCurrentUser = userId == widget.userId;
-                          final markerWidget = _buildPlayerMarker(userId, isCurrentUser);
-
-                          return Marker(
-                            point: LatLng(position.latitude, position.longitude),
-                            width: 30,
-                            height: 30,
-                            child: markerWidget,
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-
-                  // Bouton pour ouvrir la carte en plein écran
-                  Positioned(
-                    right: 10,
-                    bottom: 10,
-                    child: FloatingActionButton(
-                      mini: true,
-                      child: const Icon(Icons.fullscreen),
-                      onPressed: () => _openFullMapScreen(context),
+                      ],
                     ),
+                  if (widget.gameMap.mapZones != null)
+                    PolygonLayer(
+                      polygons: widget.gameMap.mapZones!
+                          .where((zone) => zone.visible)
+                          .map((zone) => Polygon(
+                        points: zone.zoneShape
+                            .map((coord) => LatLng(coord.latitude, coord.longitude))
+                            .toList(),
+                        color: _parseColor(zone.color)?.withOpacity(0.3) ?? Colors.blue.withOpacity(0.3),
+                        borderColor: _parseColor(zone.color) ?? Colors.blue,
+                        borderStrokeWidth: 2.0,
+                      ))
+                          .toList(),
+                    ),
+                  MarkerLayer(
+                    markers: _positions.entries.map((entry) {
+                      final userId = entry.key;
+                      final position = entry.value;
+                      if (userId == -1) {
+                        return Marker(
+                          point: LatLng(position.latitude, position.longitude),
+                          width: 30,
+                          height: 30,
+                          child: const Icon(Icons.adjust, color: Colors.green, size: 20),
+                        );
+                      }
+                      if (userId == -2) {
+                        return Marker(
+                          point: LatLng(position.latitude, position.longitude),
+                          width: 30,
+                          height: 30,
+                          child: const Icon(Icons.center_focus_strong, color: Colors.orange, size: 20),
+                        );
+                      }
+                      final isCurrentUser = userId == widget.userId;
+                      final markerWidget = _buildPlayerMarker(userId, isCurrentUser);
+                      return Marker(
+                        point: LatLng(position.latitude, position.longitude),
+                        width: 30,
+                        height: 30,
+                        child: markerWidget,
+                      );
+                    }).toList(),
                   ),
-                  // Sites de bombe (si le scénario Bombe est actif)
-                  if (widget.hasBombOperationScenario && widget.bombOperationService != null)
+                  if (widget.hasBombOperationScenario && bombScenario != null)
                     StreamBuilder<void>(
-                      stream: widget.bombOperationService!.bombSitesStream,
+                      stream: bombOperationService.bombSitesStream,
                       builder: (context, snapshot) {
                         return MarkerLayer(
                           markers: generateBombSiteMarkers(
                             context: context,
-                            bombScenario: widget.bombOperationService!.activeScenario!,
-                            gameState: widget.bombOperationService!.currentState,
-                            teamRoles: widget.bombOperationService!.teamRoles,
+                            bombScenario: bombScenario.bombOperationScenario!,
+                            gameState: gameState,
+                            teamRoles: roles,
                             userTeamId: widget.teamId,
-                            activeBombSites: widget.bombOperationService!.activeBombSites,
-                            plantedBombSites: widget.bombOperationService!.plantedBombSites,
+                            activeBombSites: bombOperationService.activeBombSites,
+                            plantedBombSites: bombOperationService.plantedBombSites,
                           ),
                         );
                       },
@@ -247,15 +207,11 @@ class _GameMapWidgetState extends State<GameMapWidget> {
             ),
           ),
 
-          // Informations sur la géolocalisation
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
               'Positions partagées toutes les 30 secondes',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
           ),
@@ -263,6 +219,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
       ),
     );
   }
+
 
   void _openFullMapScreen(BuildContext context) {
     // S'assurer que le service de localisation est initialisé

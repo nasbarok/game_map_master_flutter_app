@@ -5,7 +5,7 @@ import '../../../models/scenario/bomb_operation/bomb_operation_scenario.dart';
 import '../../../models/scenario/bomb_operation/bomb_operation_score.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../api_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 /// Service dédié à la gestion des scénarios Opération Bombe
 class BombOperationScenarioService {
   final ApiService _apiService;
@@ -54,12 +54,12 @@ class BombOperationScenarioService {
   /// Crée un nouveau site de bombe
   Future<BombSite> createBombSite(BombSite site) async {
     final json = site.toJson();
-    print('[BombOperationScenarioService] [createBombSite] Payload envoyé: $json');
+    logger.d('[BombOperationScenarioService] [createBombSite] Payload envoyé: $json');
     final response = await _apiService.post(
       'scenarios/bomb-operation/${site.scenarioId}/bomb-sites',
       json,
     );
-    print('[BombOperationScenarioService] [createBombSite] Réponse du serveur: $response');
+    logger.d('[BombOperationScenarioService] [createBombSite] Réponse du serveur: $response');
     return BombSite.fromJson(response);
   }
 
@@ -69,7 +69,7 @@ class BombOperationScenarioService {
       'scenarios/bomb-operation/bomb-sites/${site.id}',
       site.toJson()
     );
-    print('[BombOperationScenarioService] [updateBombSite] Réponse du serveur: $response');
+    logger.d('[BombOperationScenarioService] [updateBombSite] Réponse du serveur: $response');
     return BombSite.fromJson(response);
   }
 
@@ -84,13 +84,13 @@ class BombOperationScenarioService {
     final response = await _apiService.post('scenarios/bomb-operation/$scenarioId/ensure', {});
 
     // Loguer la réponse brute pour vérifier la structure des données
-    print("[BombOperationScenarioService] [ensureBombOperationScenario] Réponse brute du serveur : $response");
+    logger.d("[BombOperationScenarioService] [ensureBombOperationScenario] Réponse brute du serveur : $response");
 
     // Assurer que la réponse est valide et conforme au format attendu
     try {
       return BombOperationScenario.fromJson(response);
     } catch (e) {
-      print("[BombOperationScenarioService] [ensureBombOperationScenario] Erreur lors du parsing de la réponse : $e");
+      logger.d("[BombOperationScenarioService] [ensureBombOperationScenario] Erreur lors du parsing de la réponse : $e");
       rethrow; // Relancer l'exception pour un traitement ultérieur
     }
   }

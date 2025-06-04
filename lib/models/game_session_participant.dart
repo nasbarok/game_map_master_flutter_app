@@ -1,3 +1,5 @@
+import 'package:airsoft_game_map/utils/logger.dart';
+
 class GameSessionParticipant {
   final int id;
   final int gameSessionId;
@@ -66,7 +68,7 @@ DateTime _safeParseDateTime(String? raw) {
 
     return DateTime.parse(raw);
   } catch (e) {
-    print('⚠️ Erreur de parsing DateTime: $e pour "$raw"');
+    logger.d('⚠️ Erreur de parsing DateTime: $e pour "$raw"');
     return DateTime.now();
   }
 }

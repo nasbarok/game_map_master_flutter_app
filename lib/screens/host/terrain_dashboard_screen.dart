@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import '../../models/field.dart';
 import '../../models/game_map.dart';
+import '../../models/game_session.dart';
 import '../../models/scenario/bomb_operation/bomb_operation_team.dart';
 import '../../models/scenario/scenario_dto.dart';
 import '../../services/api_service.dart';
@@ -17,7 +18,9 @@ import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/bomb_operation_team_role_selector.dart';
 import '../gamesession/game_session_screen.dart';
+import '../scenario/bomb_operation/bomb_operation_config.dart';
 import 'scenario_selection_dialog.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class TerrainDashboardScreen extends StatefulWidget {
   const TerrainDashboardScreen({Key? key}) : super(key: key);
@@ -137,167 +140,137 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     );
   }
 
-  void _startGame() {
+  void _startGame() async {
     final gameStateService = context.read<GameStateService>();
-    final teamService = context.read<TeamService>();
 
     // Vérif : terrain ouvert ?
     if (!gameStateService.isTerrainOpen) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez d\'abord ouvrir une carte'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showError('Veuillez d\'abord ouvrir une carte');
       return;
     }
 
     // Vérif : scénarios ?
     final selectedScenarios = gameStateService.selectedScenarios ?? [];
     if (selectedScenarios.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner au moins un scénario'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showError('Veuillez sélectionner au moins un scénario');
       return;
     }
 
     // Vérif : scénario bombe ?
-    final hasBombScenario = selectedScenarios.any(
-          (scenario) => scenario.scenario.type == 'bomb_operation',
+    final hasBombScenario = selectedScenarios.any((s) => s.scenario.type == 'bomb_operation');
+    // 👉 On affiche un loader pour toute la phase d'initialisation + navigation
+    //await _showLoadingDialog('Lancement de la partie...');
+    try {
+      if (hasBombScenario) {
+        await _initBombOperationScenario(); // Config + valid
+      }
+
+      final gameSession = await _initGameSession(); // Création GameSession
+      await _launchGameScreen(gameSession); // Démarrage + navigation
+
+      Navigator.of(context, rootNavigator: true).pop();
+      _showSuccess('La partie a été lancée !');
+    } catch (e) {
+      Navigator.of(context, rootNavigator: true).pop();
+      logger.e('❌ Erreur globale _startGame: $e');
+      _showError('Erreur lors du lancement de la partie : $e');
+    }
+  }
+
+  Future<void> _initBombOperationScenario() async {
+    final teamService = context.read<TeamService>();
+    final bombOperationService = context.read<BombOperationService>();
+    final gameStateService = context.read<GameStateService>();
+    final scenarios = gameStateService.selectedScenarios!;
+    final teams = teamService.teams;
+
+    final activeTeams = teams.where((t) => t.players.isNotEmpty).toList();
+    final bombScenario = scenarios.firstWhere((s) => s.scenario.type == 'bomb_operation');
+
+    if (activeTeams.length != 2) {
+      throw Exception('Le scénario "Opération Bombe" nécessite exactement 2 équipes avec joueurs.');
+    }
+
+    final Map<int, BombOperationTeam>? assignedRoles = await showDialog<Map<int, BombOperationTeam>>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Configuration de l\'Opération Bombe'),
+        content: BombOperationTeamRoleSelector(
+          teams: activeTeams,
+          onRolesAssigned: (roles) => Navigator.of(context).pop(roles),
+          gameSessionId: 0, // pas encore créée
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: const Text('Annuler'),
+          ),
+        ],
+      ),
     );
 
-    if (hasBombScenario) {
-      _startGameWithBombOperation(); // avec configuration
-    } else {
-      _startGameInternal(); // direct
-    }
+    if (assignedRoles == null) throw Exception('Configuration annulée.');
+
+    // 👉 On stocke pour usage après création session
+    gameStateService.setBombOperationConfig(BombOperationScenarioConfig(
+      roles: assignedRoles,
+      scenarioId: bombScenario.scenario.id!,
+    ));
   }
 
-  Future<void> _startGameWithBombOperation() async {
-    try {
-      final teamService = context.read<TeamService>();
-      final bombOperationService = context.read<BombOperationService>();
-      final teams = teamService.teams;
-
-      final activeTeams = teams.where((t) => t.players.isNotEmpty).toList();
-      final gameSessionId = context.read<GameStateService>().activeGameSession?.id ?? 0;
-
-      if (activeTeams.length != 2) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Le scénario "Opération Bombe" nécessite exactement 2 équipes avec au moins un joueur chacune.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      // Utiliser await pour attendre le résultat du dialogue
-      final Map<int, BombOperationTeam>? assignedRoles = await showDialog<Map<int, BombOperationTeam>>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Configuration de l\'Opération Bombe'),
-          content: BombOperationTeamRoleSelector(
-            teams: activeTeams,
-            onRolesAssigned: (roles) {
-              // Retourner les rôles via Navigator.pop
-              Navigator.of(context).pop(roles);
-            },
-            gameSessionId: gameSessionId,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(null), // Retourner null si annulé
-              child: const Text('Annuler'),
-            ),
-          ],
-        ),
-      );
-
-      // Vérifier si l'utilisateur a annulé
-      if (assignedRoles == null) {
-        return;
-      }
-
-      // 3. Sauvegarder les rôles assignés
-      await bombOperationService.saveTeamRoles(gameSessionId, assignedRoles);
-
-      // 4. Sélectionner automatiquement les sites de bombe actifs
-      await bombOperationService.selectRandomBombSites(gameSessionId);
-
-      // 5. Lancer la partie
-      _startGameInternal();
-
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur lors du lancement de la partie: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  void _startGameInternal() {
+  Future<GameSession> _initGameSession() async {
     final gameStateService = context.read<GameStateService>();
     final gameSessionService = context.read<GameSessionService>();
-    final teamService = context.read<TeamService>();
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser!;
+    final bombOperationService = context.read<BombOperationService>();
 
-    final field = gameStateService.selectedMap!.field!;
-    final isHost = user.hasRole('HOST') && field.owner!.id == user.id;
-    final teamId = teamService.myTeamId;
-
-    final gameMapId = gameStateService.selectedMap!.id!;
+    final gameMap = gameStateService.selectedMap!;
+    final field = gameMap.field!;
     final duration = gameStateService.gameDuration ?? 0;
-    final fieldId = field.id!;
 
-    print('🚀 Création de la GameSession (Field: $fieldId, Map: $gameMapId, Duration: $duration min)');
+    final gameSession = await gameSessionService.createGameSession(gameMap.id!, field, duration);
+    logger.d('✅ GameSession créée : ID = ${gameSession.id}');
 
-    gameSessionService.createGameSession(gameMapId, field, duration).then((gameSession) {
-      print('✅ GameSession créée : ID = ${gameSession.id}');
-
-      gameSessionService.startGameSession(gameSession.id!).then((startedSession) {
-        print('✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
-        gameStateService.setGameRunning(true);
-        gameStateService.setActiveGameSession(startedSession);
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GameSessionScreen(
-              userId: user.id!,
-              teamId: teamId,
-              isHost: isHost,
-              gameSession: startedSession,
-              fieldId: fieldId,
-            ),
-          ),
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('La partie a été lancée !'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }).catchError((e) {
-        print('❌ Erreur démarrage session : $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors du démarrage : $e'), backgroundColor: Colors.red),
-        );
-      });
-    }).catchError((error) {
-      print('❌ Erreur création session : $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de création : $error'), backgroundColor: Colors.red),
+    final bombConfig = gameStateService.bombOperationConfig;
+    if (bombConfig != null) {
+      await bombOperationService.saveTeamRoles(gameSession.id!, bombConfig.roles);
+      await bombOperationService.createBombOperationSession(
+        gameSessionId: gameSession.id!,
+        scenarioId: bombConfig.scenarioId,
       );
-    });
+      await bombOperationService.selectRandomBombSites(gameSession.id!);
+      logger.d('🎯 Scénario Bombe initialisé pour session ${gameSession.id}');
+    }
+
+    return gameSession;
+  }
+  Future<void> _launchGameScreen(GameSession session) async {
+    final gameSessionService = context.read<GameSessionService>();
+    final gameStateService = context.read<GameStateService>();
+    final authService = context.read<AuthService>();
+    final teamService = context.read<TeamService>();
+
+    final startedSession = await gameSessionService.startGameSession(session.id!);
+    logger.d('✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
+
+    final user = authService.currentUser!;
+    final teamId = teamService.myTeamId;
+    final fieldId = session.gameMap?.field?.id ?? 0;
+
+    gameStateService.setGameRunning(true);
+    gameStateService.setActiveGameSession(startedSession);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GameSessionScreen(
+          userId: user.id!,
+          teamId: teamId,
+          isHost: user.hasRole('HOST'),
+          gameSession: startedSession,
+          fieldId: fieldId,
+        ),
+      ),
+    );
   }
 
   void _stopGame() {
@@ -404,7 +377,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     GameMap selectedMap = gameStateService.selectedMap!;
 
     if (selectedMap == null) {
-      print('❌ Aucune carte sélectionnée.');
+      logger.d('❌ Aucune carte sélectionnée.');
       return;
     }
 
@@ -415,13 +388,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       if (!gameStateService.isTerrainOpen) {
         // 🧠 S’il n’y a pas encore de terrain, on en crée un
         if (field == null || field.closedAt != null) {
-          print('🛠 Création d’un terrain via POST /fields...');
+          logger.d('🛠 Création d’un terrain via POST /fields...');
           final fieldResponse = await apiService.post('fields', {
             'name': 'Terrain de ${selectedMap.name}',
             'description': selectedMap.description ?? '',
           });
           field = Field.fromJson(fieldResponse);
-          print('✅ Terrain créé avec ID: ${field.id}');
+          logger.d('✅ Terrain créé avec ID: ${field.id}');
 
           // 🔁 Mise à jour de la GameMap pour lier le terrain
           final updatedMap = selectedMap.copyWith(field: field);
@@ -432,9 +405,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         }
 
         final fieldId = field.id!;
-        print('📡 Requête POST /fields/$fieldId/open');
+        logger.d('📡 Requête POST /fields/$fieldId/open');
         final response = await apiService.post('fields/$fieldId/open', {});
-        print('✅ Terrain ouvert côté serveur : $response');
+        logger.d('✅ Terrain ouvert côté serveur : $response');
         gameStateService.setTerrainOpen(true);
 
         try {
@@ -456,9 +429,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             gameStateService.addConnectedPlayer(player);
           }
 
-          print('✅ Joueurs connectés récupérés : ${playersList.length}');
+          logger.d('✅ Joueurs connectés récupérés : ${playersList.length}');
         } catch (e) {
-          print(
+          logger.d(
               'ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
         }
 
@@ -467,26 +440,26 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         // 🔒 Fermeture du terrain
         final fieldId = field?.id;
         if (fieldId == null) {
-          print('❌ Impossible de fermer : aucun terrain associé à la carte');
+          logger.d('❌ Impossible de fermer : aucun terrain associé à la carte');
           return;
         }
 
-        print('📡 Requête POST /fields/$fieldId/close');
+        logger.d('📡 Requête POST /fields/$fieldId/close');
         final response = await apiService.post('fields/$fieldId/close', {});
-        print('✅ Terrain fermé côté serveur : $response');
+        logger.d('✅ Terrain fermé côté serveur : $response');
         gameStateService.setTerrainOpen(false);
 
         // 🔄 Dissocier le terrain de la carte
         final updatedMap = selectedMap.copyWith(field: null);
         final mapResponse =
         await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
-        print('🧹 Terrain dissocié de la carte');
+        logger.d('🧹 Terrain dissocié de la carte');
 
         // 🧼 Réinitialisation de la carte sélectionnée
         gameStateService.selectMap(null);
       }
     } catch (e) {
-      print('❌ Erreur lors de l’ouverture/fermeture du terrain : $e');
+      logger.d('❌ Erreur lors de l’ouverture/fermeture du terrain : $e');
     }
   }
 
@@ -921,6 +894,52 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     );
   }
 
+  Future<void> _showLoadingDialog(String message) async {
+    await Future.microtask(() {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        useRootNavigator: true,
+        builder: (_) => Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(width: 24),
+                Expanded(child: Text(message)),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+
+    // Attendre un mini délai pour s'assurer du rendu
+    await Future.delayed(const Duration(milliseconds: 100));
+  }
+
+
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

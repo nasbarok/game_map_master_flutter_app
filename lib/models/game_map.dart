@@ -6,6 +6,7 @@ import 'coordinate.dart';
 import 'field.dart';
 import 'map_point_of_interest.dart';
 import 'map_zone.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class GameMap {
   final int? id;
@@ -68,7 +69,7 @@ class GameMap {
       final List<dynamic> decodedJson = jsonDecode(fieldBoundaryJson!);
       return decodedJson.map((item) => Coordinate.fromJson(item as Map<String, dynamic>)).toList();
     } catch (e) {
-      print('Error decoding fieldBoundaryJson: $e');
+      logger.d('Error decoding fieldBoundaryJson: $e');
       return null;
     }
   }
@@ -79,7 +80,7 @@ class GameMap {
       final List<dynamic> decodedJson = jsonDecode(mapZonesJson!);
       return decodedJson.map((item) => MapZone.fromJson(item as Map<String, dynamic>)).toList();
     } catch (e) {
-      print('Error decoding mapZonesJson: $e');
+      logger.d('Error decoding mapZonesJson: $e');
       return null;
     }
   }
@@ -90,7 +91,7 @@ class GameMap {
       final List<dynamic> decodedJson = jsonDecode(mapPointsOfInterestJson!);
       return decodedJson.map((item) => MapPointOfInterest.fromJson(item as Map<String, dynamic>)).toList();
     } catch (e) {
-      print('Error decoding mapPointsOfInterestJson: $e');
+      logger.d('Error decoding mapPointsOfInterestJson: $e');
       return null;
     }
   }
@@ -139,14 +140,14 @@ class GameMap {
 
   Map<String, dynamic> toJson() {
 
-    print("🧩 GameMap.toJson called:");
-    print("- backgroundBoundsJson: $backgroundBoundsJson");
-    print("- satelliteBoundsJson: $satelliteBoundsJson");
-    print("- backgroundImageBase64 length: ${backgroundImageBase64?.length ?? 0}");
-    print("- satelliteImageBase64 length: ${satelliteImageBase64?.length ?? 0}");
-    print("- fieldBoundaryJson: $fieldBoundaryJson");
-    print("- mapZonesJson: $mapZonesJson");
-    print("- mapPointsOfInterestJson: $mapPointsOfInterestJson");
+    logger.d("🧩 GameMap.toJson called:");
+    logger.d("- backgroundBoundsJson: $backgroundBoundsJson");
+    logger.d("- satelliteBoundsJson: $satelliteBoundsJson");
+    logger.d("- backgroundImageBase64 length: ${backgroundImageBase64?.length ?? 0}");
+    logger.d("- satelliteImageBase64 length: ${satelliteImageBase64?.length ?? 0}");
+    logger.d("- fieldBoundaryJson: $fieldBoundaryJson");
+    logger.d("- mapZonesJson: $mapZonesJson");
+    logger.d("- mapPointsOfInterestJson: $mapPointsOfInterestJson");
 
     return {
       'id': id,

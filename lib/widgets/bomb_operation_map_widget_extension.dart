@@ -5,6 +5,7 @@ import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 /// Extension d'affichage pour GameMapWidget (ou tout widget similaire) avec gestion des sites de bombe
 extension BombOperationMapWidgetExtension on Object {
@@ -21,7 +22,9 @@ extension BombOperationMapWidgetExtension on Object {
     if (bombScenario.bombSites == null || bombScenario.bombSites!.isEmpty) {
       return [];
     }
-
+    logger.d('userTeamId=$userTeamId, teamRole=${teamRoles[userTeamId]}, '
+        'active=$activeBombSites, planted=$plantedBombSites, '
+        'totalSites=${bombScenario.bombSites!.length}');
     final List<Marker> markers = [];
 
     final bool isAttacker = teamRoles[userTeamId] == BombOperationTeam.attack;

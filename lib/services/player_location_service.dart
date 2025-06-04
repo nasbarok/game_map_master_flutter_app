@@ -7,6 +7,7 @@ import 'package:airsoft_game_map/services/team_service.dart';
 import 'package:airsoft_game_map/services/websocket_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 /// Service pour gérer la géolocalisation des joueurs
 class PlayerLocationService {
@@ -51,12 +52,12 @@ class PlayerLocationService {
 
   /// Démarre le partage de position
   void startLocationSharing(int gameSessionId) async {
-    print('🚀 [PlayerLocationService] [startLocationSharing] Démarrage du partage de position pour gameSessionId=$gameSessionId');
+    logger.d('🚀 [PlayerLocationService] [startLocationSharing] Démarrage du partage de position pour gameSessionId=$gameSessionId');
 
     // ✅ Vérifier si le service de localisation est activé
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      print('📍 Service de localisation désactivé.');
+      logger.e('📍 Service de localisation désactivé.');
       return;
     }
 
@@ -65,22 +66,21 @@ class PlayerLocationService {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        print('❌ Permission de localisation refusée');
+        logger.e('❌ Permission de localisation refusée');
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      print('❌ Permission refusée définitivement');
+      logger.e('❌ Permission refusée définitivement');
       return;
     }
 
     // ✅ Continuer si les permissions sont OK
     _locationUpdateTimer?.cancel();
 
-    print('📍 Partage de position activé pour gameSessionId=$gameSessionId');
     _locationUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      print('📡 [PlayerLocationService] Partage de position toutes les 30 secondes pour gameSessionId=$gameSessionId');
+      //logger.d('📡 [PlayerLocationService] Partage de position toutes les 30 secondes pour gameSessionId=$gameSessionId');
       _shareCurrentLocation(gameSessionId);
     });
 
@@ -97,7 +97,6 @@ class PlayerLocationService {
   /// Partage la position actuelle
   Future<void> _shareCurrentLocation(int gameSessionId) async {
     try {
-      print('📍 [_shareCurrentLocation] Démarrage du partage de position pour gameSessionId=$gameSessionId');
       // Obtenir la position actuelle
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high
@@ -106,17 +105,15 @@ class PlayerLocationService {
       // Vérifier si la position a changé significativement
       if (_lastLatitude == null || _lastLongitude == null ||
           (_lastLatitude != position.latitude || _lastLongitude != position.longitude)) {
-        print('📍 [_shareCurrentLocation] Nouvelle position détectée : lat=${position.latitude}, lon=${position.longitude}');
-        
+
         _lastLatitude = position.latitude;
         _lastLongitude = position.longitude;
         
         // Envoyer la position au serveur via WebSocket
         if (_currentFieldId == null) {
-          print('❌ [_shareCurrentLocation] _currentFieldId est null, impossible d\'envoyer la position.');
+          logger.e('❌ [_shareCurrentLocation] _currentFieldId est null, impossible d\'envoyer la position.');
           return;
         }
-        print('📡 [_shareCurrentLocation] Envoi position vers WebSocket : lat=${position.latitude}, lon=${position.longitude}, fieldId=$_currentFieldId, gameSessionId=$gameSessionId, teamId=$_currentUserTeamId');
         _webSocketService.sendPlayerPosition(
           _currentFieldId!,
           gameSessionId,
@@ -135,11 +132,11 @@ class PlayerLocationService {
           // Notifier les écouteurs
           _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
         }
-      }else{
-        print('📍 [_shareCurrentLocation] Position inchangée, pas d\'envoi nécessaire.');
       }
+
+      //'📍 [_shareCurrentLocation] Position inchangée, pas d\'envoi nécessaire.');
     } catch (e) {
-      print('Erreur lors du partage de la position: $e');
+      logger.d('Erreur lors du partage de la position: $e');
     }
   }
   
@@ -185,7 +182,7 @@ class PlayerLocationService {
       final response = await _apiService.get('game-sessions/$gameSessionId/position-history');
       return GameSessionPositionHistory.fromJson(response);
     } catch (e) {
-      print('Erreur lors de la récupération de l\'historique des positions: $e');
+      logger.d('Erreur lors de la récupération de l\'historique des positions: $e');
       // Retourner un historique vide en cas d'erreur
       return GameSessionPositionHistory(
         gameSessionId: gameSessionId,
@@ -195,7 +192,7 @@ class PlayerLocationService {
   }
 
   Future<void> loadInitialPositions(int fieldId) async {
-    print('🔄 [PlayerLocationService] Chargement des positions initiales pour fieldId=$fieldId');
+    logger.d('🔄 [PlayerLocationService] Chargement des positions initiales pour fieldId=$fieldId');
     try {
       final response = await _apiService.get('field/$fieldId/positions');
 
@@ -216,10 +213,10 @@ class PlayerLocationService {
         ..addAll(loadedPositions);
 
       _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
-      print('📡 [PlayerLocationService] Positions initiales chargées : ${_currentPlayerPositions.length} joueurs');
+      logger.d('📡 [PlayerLocationService] Positions initiales chargées : ${_currentPlayerPositions.length} joueurs');
 
     } catch (e) {
-      print('❌ [PlayerLocationService] Erreur lors du chargement des positions initiales : $e');
+      logger.d('❌ [PlayerLocationService] Erreur lors du chargement des positions initiales : $e');
     }
   }
 

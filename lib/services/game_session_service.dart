@@ -11,7 +11,7 @@ import '../models/game_session_participant.dart';
 import '../models/game_session_scenario.dart';
 import '../models/team.dart';
 import 'game_state_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class GameSessionService {
   final ApiService _apiService;
 
@@ -39,20 +39,20 @@ class GameSessionService {
   }
 
   Future<GameSession> getGameSession(int gameSessionId) async {
-    print('[GameSessionService] 📡 GET /game-sessions/$gameSessionId');
+    logger.d('[GameSessionService] 📡 GET /game-sessions/$gameSessionId');
 
     final json = await _apiService.get('game-sessions/$gameSessionId');
     final session = GameSession.fromJson(json);
 
     if (session.gameMap != null) {
       final map = session.gameMap!;
-      print('[GameSessionService] 🗺️ GameMap ID=${map.id}, name=${map.name}');
-      print('[GameSessionService] 📐 backgroundBoundsJson présent : ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
-      print('[GameSessionService] 📡 satelliteBoundsJson présent : ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
-      print('[GameSessionService] 🖼️ backgroundImageBase64 longueur : ${map.backgroundImageBase64?.length ?? 0}');
-      print('[GameSessionService] 🛰️ satelliteImageBase64 longueur : ${map.satelliteImageBase64?.length ?? 0}');
+      logger.d('[GameSessionService] 🗺️ GameMap ID=${map.id}, name=${map.name}');
+      logger.d('[GameSessionService] 📐 backgroundBoundsJson présent : ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
+      logger.d('[GameSessionService] 📡 satelliteBoundsJson présent : ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
+      logger.d('[GameSessionService] 🖼️ backgroundImageBase64 longueur : ${map.backgroundImageBase64?.length ?? 0}');
+      logger.d('[GameSessionService] 🛰️ satelliteImageBase64 longueur : ${map.satelliteImageBase64?.length ?? 0}');
     } else {
-      print('[GameSessionService] ⚠️ Aucune GameMap reçue dans la session');
+      logger.d('[GameSessionService] ⚠️ Aucune GameMap reçue dans la session');
     }
 
     return session;
@@ -132,11 +132,11 @@ class GameSessionService {
   Future<GameSession?> getCurrentSessionByFieldId(int fieldId) async {
     try {
       final json = await _apiService.get('game-sessions/current-session/$fieldId');
-      print('🗺️ Session active trouvée pour le terrain $fieldId : $json');
+      logger.d('🗺️ Session active trouvée pour le terrain $fieldId : $json');
       return GameSession.fromJson(json);
     } catch (e) {
       // Log optionnel ou gestion d’erreur douce si 404
-      print('⚠️ Aucune session active trouvée pour le terrain $fieldId : $e');
+      logger.d('⚠️ Aucune session active trouvée pour le terrain $fieldId : $e');
       return null;
     }
   }

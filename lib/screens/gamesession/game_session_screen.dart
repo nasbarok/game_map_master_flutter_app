@@ -20,6 +20,7 @@ import '../../widgets/qr_code_scanner_widgets.dart';
 import '../../widgets/time_remaining_card.dart';
 import '../../widgets/treasure_hunt_scoreboard_card.dart';
 import '../scenario/treasure_hunt/treasure_hunt_scanner_screen.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class GameSessionScreen extends StatefulWidget {
   GameSession gameSession;
@@ -83,7 +84,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   @override
   void initState() {
     super.initState();
-    print('🟢 [GameSessionScreen] initState: Chargement initial des données');
+    logger.d('🟢 [GameSessionScreen] initState: Chargement initial des données');
     _loadInitialData();
 
     // ✅ Abonnement registerOnScoreboardUpdate
@@ -100,94 +101,104 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     final teamService = GetIt.I<TeamService>();
     int? teamId = widget.teamId;
         if (teamId == null) {
-      print('🔍 [GameSessionScreen] teamId non fourni, recherche de l\'équipe active');
+      logger.d('🔍 [GameSessionScreen] teamId non fourni, recherche de l\'équipe active');
       teamId = teamService.getTeamIdForPlayer(widget.userId);
     } else {
-      print('🔍 [GameSessionScreen] teamId fourni, utilisé directement');
+      logger.d('🔍 [GameSessionScreen] teamId fourni, utilisé directement');
     }
     locationService.initialize(widget.userId, teamId,widget.fieldId!);
     locationService.startLocationSharing(widget.gameSession.id!);
-    print('🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
+    logger.d('🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
     locationService.loadInitialPositions(widget.fieldId!);
 
-    // Vérifier si le scénario Bombe est actif
-    _checkForBombOperationScenario();
+
   }
 
   /// Vérifie si le scénario Opération Bombe est actif pour cette session
   void _checkForBombOperationScenario() {
-    if (_scenarios != null) {
-      for (final scenario in _scenarios!) {
-        if (scenario.scenarioType == 'bomb_operation') {
-          setState(() {
-            _hasBombOperationScenario = true;
-          });
-          break;
-        }
+    if (_scenarios == null) {
+      logger.d('🔍 [GameSessionScreen] [checkForBombOperationScenario] _scenarios est null. Aucun scénario à analyser.');
+      return;
+    }
+
+    if (_scenarios!.isEmpty) {
+      logger.d('🔍 [GameSessionScreen] [checkForBombOperationScenario] _scenarios est vide. Aucun scénario actif.');
+      return;
+    }
+
+    for (final scenario in _scenarios!) {
+      logger.d('🔍 [GameSessionScreen] [checkForBombOperationScenario] Scénario analysé: ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
+      if (scenario.scenarioType == 'bomb_operation') {
+        logger.d('💣 [GameSessionScreen] [checkForBombOperationScenario] Scénario Opération Bombe détecté !');
+        setState(() {
+          _hasBombOperationScenario = true;
+        });
+        return;
       }
     }
-  }
 
+    logger.d('🚫 [GameSessionScreen] [checkForBombOperationScenario] Aucun scénario de type "bomb_operation" trouvé.');
+  }
   Future<void> _loadInitialData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    print('🔄 [GameSessionScreen] _loadInitialData: Start');
+    logger.d('🔄 [GameSessionScreen] _loadInitialData: Start');
 
     try {
       // ✅ 1. Utiliser directement les données si déjà présentes
       final gameSession = widget.gameSession;
-      print('✅ GameSession reçue via constructeur: ID=${gameSession.id}');
+      logger.d('✅ GameSession reçue via constructeur: ID=${gameSession.id}');
 
       // 🔍 Inspecter les détails de la GameMap
       final map = gameSession.gameMap;
       if (map != null) {
-        print('[GameSessionScreen] 🗺️ GameMap ID=${map.id}, name=${map.name}');
-        print('[GameSessionScreen] 🖼️ backgroundImageBase64 length: ${map.backgroundImageBase64?.length ?? 0}');
-        print('[GameSessionScreen] 🛰️ satelliteImageBase64 length: ${map.satelliteImageBase64?.length ?? 0}');
-        print('[GameSessionScreen] 📐 backgroundBoundsJson present: ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
-        print('[GameSessionScreen] 📡 satelliteBoundsJson present: ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
+        logger.d('[GameSessionScreen] 🗺️ GameMap ID=${map.id}, name=${map.name}');
+        logger.d('[GameSessionScreen] 🖼️ backgroundImageBase64 length: ${map.backgroundImageBase64?.length ?? 0}');
+        logger.d('[GameSessionScreen] 🛰️ satelliteImageBase64 length: ${map.satelliteImageBase64?.length ?? 0}');
+        logger.d('[GameSessionScreen] 📐 backgroundBoundsJson present: ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
+        logger.d('[GameSessionScreen] 📡 satelliteBoundsJson present: ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
       } else {
-        print('[GameSessionScreen] ⚠️ Aucune GameMap liée à la session');
+        logger.d('[GameSessionScreen] ⚠️ Aucune GameMap liée à la session');
       }
 
       List<GameSessionParticipant> participants = _participants;
       if (_participants.isEmpty) {
         participants = await _gameSessionService.getActiveParticipants(gameSession.id!);
-        print('👥 Participants chargés: ${participants.length}');
+        logger.d('👥 Participants chargés: ${participants.length}');
       }
 
       List<GameSessionScenario> scenarios = _scenarios;
       if (_scenarios.isEmpty) {
         scenarios = await _gameSessionService.getScenarios(gameSession.id!);
-        print('🎯 Scénarios chargés: ${scenarios.length}');
+        logger.d('🎯 Scénarios chargés: ${scenarios.length}');
       }
 
       final remainingTimeResponse =
       await _gameSessionService.getRemainingTime(gameSession.id!);
-      print('⏱️ Temps restant récupéré: ${remainingTimeResponse['remainingTimeInSeconds']} secondes');
+      logger.d('⏱️ Temps restant récupéré: ${remainingTimeResponse['remainingTimeInSeconds']} secondes');
 
       TreasureHuntScoreboard? scoreboard;
       final scenarioService = context.read<ScenarioService>();
       for (final scenario in scenarios) {
-        print('🔍 Traitement du scénario ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
+        logger.d('🔍 Traitement du scénario ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
 
         if (scenario.active != true) {
-          print('⏭️ Scénario inactif, ignoré');
+          logger.d('⏭️ Scénario inactif, ignoré');
           continue;
         }
 
         switch (scenario.scenarioType) {
           case 'treasure_hunt':
-            print('🗺️ Scénario treasure_hunt actif trouvé, chargement du scoreboard...');
+            logger.d('🗺️ Scénario treasure_hunt actif trouvé, chargement du scoreboard...');
             _isTreasureHuntActive = true;
             try {
               scoreboard = await _treasureHuntScoreService.getScoreboard(
                   scenario.scenarioId, gameSession.id!);
-              print('📊 Scoreboard chargé pour TREASURE_HUNT');
+              logger.d('📊 Scoreboard chargé pour TREASURE_HUNT');
             } catch (e) {
-              print('❌ Erreur lors du chargement du scoreboard: $e');
+              logger.d('❌ Erreur lors du chargement du scoreboard: $e');
             }
             scenarioService.getScenarioDTOById(scenario.scenarioId).then((dto) {
               setState(() {
@@ -196,7 +207,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             });
             break;
           default:
-            print('⚠️ Type de scénario inconnu ou non géré: ${scenario.scenarioType}');
+            logger.d('⚠️ Type de scénario inconnu ou non géré: ${scenario.scenarioType}');
         }
       }
 
@@ -208,7 +219,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         _remainingTimeInSeconds = remainingTimeResponse['remainingTimeInSeconds'];
         _isLoading = false;
       });
-      print('✅ [GameSessionScreen] Données initiales chargées avec succès');
+      logger.d('✅ [GameSessionScreen] Données initiales chargées avec succès');
 
       // Gestion du timer
       _timeTimer?.cancel();
@@ -242,19 +253,26 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         });
       }
     } catch (e) {
-      print('❌ [GameSessionScreen] _loadInitialData Erreur lors du chargement initial: $e');
+      logger.d('❌ [GameSessionScreen] _loadInitialData Erreur lors du chargement initial: $e');
       setState(() {
         _errorMessage = 'Erreur lors du chargement des données: $e';
         _isLoading = false;
       });
     }
+
+    // Vérifier si le scénario Bombe est actif
+    _checkForBombOperationScenario();
+    if (_hasBombOperationScenario) {
+      logger.d('🧨 [GameSessionScreen] [_loadInitialData] Initialisation du BombOperationService...');
+      await GetIt.I<BombOperationService>().initialize(widget.gameSession.id!);
+    }
   }
 
   void _navigateToQRCodeScanner() {
-    print('📷 [GameSessionScreen] Ouverture scanner QR code');
+    logger.d('📷 [GameSessionScreen] Ouverture scanner QR code');
 
     if (treasureHuntScenarioDTO?.treasureHuntScenario == null) {
-      print('⚠️ Aucun scénario de chasse au trésor actif trouvé dans le DTO');
+      logger.d('⚠️ Aucun scénario de chasse au trésor actif trouvé dans le DTO');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Aucun scénario de chasse au trésor actif'),
@@ -265,7 +283,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
 
     final scenarioId = treasureHuntScenarioDTO!.scenario.id!;
-    print(
+    logger.d(
         '✅ Scénario de chasse au trésor trouvé, ouverture scanner avec ID: $scenarioId');
 
     Navigator.push(
@@ -282,11 +300,11 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   }
 
   void _endGameSession() async {
-    print('⏹️ [GameSessionScreen] Fin de la partie demandée');
+    logger.d('⏹️ [GameSessionScreen] Fin de la partie demandée');
     try {
       final updatedSession =
           await _gameSessionService.endGameSession(_gameSession!.id!);
-      print('✅ Partie terminée avec succès');
+      logger.d('✅ Partie terminée avec succès');
       final gameStateService = context.read<GameStateService>();
 
       // 🔴 AJOUT ICI : arrêt du timer
@@ -304,7 +322,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         ),
       );
     } catch (e) {
-      print('❌ Erreur lors de la fin de la partie: $e');
+      logger.d('❌ Erreur lors de la fin de la partie: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur lors de la fin de la partie: $e'),
@@ -318,9 +336,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     if (_scoreboard != null &&
         (_scoreboard!.individualScores.isNotEmpty ||
             _scoreboard!.teamScores.isNotEmpty)) {
-      print('🧩 Affichage du Scoreboard : '
+      /*logger.d('🧩 Affichage du Scoreboard : '
           '${_scoreboard!.individualScores.length} scores individuels, '
-          '${_scoreboard!.teamScores.length} scores équipes');
+          '${_scoreboard!.teamScores.length} scores équipes');*/
       return TreasureHuntScoreboardCard(
         scoreboard: _scoreboard!,
         currentUserId: widget.userId,
@@ -329,7 +347,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         scenarioDTO: treasureHuntScenarioDTO,
       );
     } else {
-      print('🕳️ Aucun score à afficher pour le moment');
+      logger.d('🕳️ Aucun score à afficher pour le moment');
       return SizedBox.shrink();
     }
   }
@@ -375,7 +393,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
 
     final bool isActive = _gameSession?.active == true;
-
+    final bool bombActive = _scenarios.any((s) => s.scenarioType == 'bomb_operation');
     return Scaffold(
       appBar: AppBar(
         title: Text('Session de jeu'),
@@ -427,7 +445,6 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                     userId: widget.userId,
                     teamId: widget.teamId,
                     hasBombOperationScenario: _hasBombOperationScenario,
-                    bombOperationService: _hasBombOperationScenario ? GetIt.I<BombOperationService>() : null,
                   ),
                 SizedBox(height: 16),
                 // Tableau des scores (uniquement si un scénario de chasse au trésor est actif)
@@ -520,7 +537,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   @override
   void dispose() {
-    print('🧹 [GameSessionScreen] Dispose: nettoyage des contrôleurs');
+    logger.d('🧹 [GameSessionScreen] Dispose: nettoyage des contrôleurs');
     _scrollController.dispose();
     _timeTimer?.cancel();
     super.dispose();

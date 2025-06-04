@@ -6,7 +6,7 @@ import '../../models/scenario/scenario_dto.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_scenario.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class ScenarioSelectionDialog extends StatefulWidget {
   final int mapId;
 
@@ -129,7 +129,7 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
         );
       }
     } catch (e) {
-      print('❌ Erreur lors de la mise à jour des scénarios: $e');
+      logger.d('❌ Erreur lors de la mise à jour des scénarios: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Erreur lors de la mise à jour des scénarios'),

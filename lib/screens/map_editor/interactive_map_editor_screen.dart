@@ -19,7 +19,7 @@ import "package:screenshot/screenshot.dart";
 import "dart:convert";
 import "dart:typed_data";
 import "package:uuid/uuid.dart";
-
+import 'package:airsoft_game_map/utils/logger.dart';
 // Enum to manage editor modes
 enum MapEditorMode { view, drawBoundary, drawZone, placePoi }
 
@@ -223,7 +223,7 @@ class _InteractiveMapEditorScreenState
                 Coordinate.fromJson(p).longitude))
             .toList();
       } catch (e) {
-        print("Error decoding fieldBoundaryJson: $e");
+        logger.d("Error decoding fieldBoundaryJson: $e");
         _currentBoundaryPoints = [];
       }
     }
@@ -235,7 +235,7 @@ class _InteractiveMapEditorScreenState
             .map((z) => MapZone.fromJson(z as Map<String, dynamic>))
             .toList();
       } catch (e) {
-        print("Error decoding mapZonesJson: $e");
+        logger.d("Error decoding mapZonesJson: $e");
         _mapZones = [];
       }
     }
@@ -248,7 +248,7 @@ class _InteractiveMapEditorScreenState
             .map((p) => MapPointOfInterest.fromJson(p as Map<String, dynamic>))
             .toList();
       } catch (e) {
-        print("Error decoding mapPointsOfInterestJson: $e");
+        logger.d("Error decoding mapPointsOfInterestJson: $e");
         _mapPois = [];
       }
     }
@@ -499,9 +499,9 @@ class _InteractiveMapEditorScreenState
   }
 
   Color _parseColor(String? colorString) {
-    print("Parsing color string: '$colorString'");
+    logger.d("Parsing color string: '$colorString'");
     if (colorString == null || colorString.isEmpty) {
-      print("Color string is null or empty, returning default grey.");
+      logger.d("Color string is null or empty, returning default grey.");
       return Colors.grey.withOpacity(0.5);
     }
 
@@ -534,11 +534,11 @@ class _InteractiveMapEditorScreenState
         case 'blue':
           return Colors.blue;
         default:
-          print("Couleur non reconnue '$cs', utilisation du gris par défaut.");
+          logger.d("Couleur non reconnue '$cs', utilisation du gris par défaut.");
           return Colors.grey.withOpacity(0.5);
       }
     } catch (e) {
-      print("Erreur lors du parsing de la couleur '$cs': $e");
+      logger.d("Erreur lors du parsing de la couleur '$cs': $e");
       return Colors.grey.withOpacity(0.5);
     }
   }
@@ -632,7 +632,7 @@ class _InteractiveMapEditorScreenState
         delay: Duration(seconds: 1),
       );
     } catch (e) {
-      print("Error capturing map background: $e");
+      logger.d("Error capturing map background: $e");
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Erreur technique lors de la capture: $e")));
       return;
@@ -648,7 +648,7 @@ class _InteractiveMapEditorScreenState
         _currentMap.backgroundImageBase64 = base64Image;
         _currentMap.backgroundBoundsJson = _latLngBoundsToJson(currentBounds);
       }
-      print(
+      logger.d(
           "🟡 [InteractiveMapEditorScreen] [_captureAndStoreMapBackground] Captured ${isSatelliteViewForStorage ? 'satellite' : 'standard'} bounds: ${_latLngBoundsToJson(currentBounds)}");
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -738,9 +738,9 @@ class _InteractiveMapEditorScreenState
         jsonEncode(_mapPois.map((p) => p.toJson()).toList());
 
     try {
-      print(
+      logger.d(
           "🟢 Saving map with backgroundBoundsJson: ${_currentMap.backgroundBoundsJson}");
-      print(
+      logger.d(
           "🟢 Saving map with satelliteBoundsJson: ${_currentMap.satelliteBoundsJson}");
       if (_currentMap.id == null) {
         await _gameMapService.addGameMap(_currentMap);

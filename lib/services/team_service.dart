@@ -6,6 +6,7 @@ import '../../models/team.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class TeamService extends ChangeNotifier {
   final ApiService _apiService;
@@ -65,7 +66,7 @@ class TeamService extends ChangeNotifier {
           .get('teams/map/${_gameStateService.selectedMap!.id}');
       _teams = (teamsData as List).map((team) => Team.fromJson(team)).toList();
 
-      print('🔄 [team_service] [loadTeams] Chargement des équipes pour la carte $mapId: ${_teams.length} équipes');
+      logger.d('🔄 [team_service] [loadTeams] Chargement des équipes pour la carte $mapId: ${_teams.length} équipes');
       // Synchroniser les joueurs connectés avec les équipes
       synchronizePlayersWithTeams();
 
@@ -76,7 +77,7 @@ class TeamService extends ChangeNotifier {
 
       safeNotifyListeners();
     } catch (e) {
-      print('[team_service] Erreur lors du chargement des équipes: $e');
+      logger.d('[team_service] Erreur lors du chargement des équipes: $e');
     }
   }
 
@@ -85,7 +86,7 @@ class TeamService extends ChangeNotifier {
     // Récupérer la liste des joueurs connectés depuis GameStateService
     final connectedPlayers = _gameStateService.connectedPlayersList;
 
-    //print('📋 Début de synchronisation - Joueurs connectés: ${connectedPlayers.length}, Équipes: ${_teams.length}');
+    //logger.d('📋 Début de synchronisation - Joueurs connectés: ${connectedPlayers.length}, Équipes: ${_teams.length}');
 
     // Pour chaque équipe, vider sa liste de joueurs
     for (var team in _teams) {
@@ -97,7 +98,7 @@ class TeamService extends ChangeNotifier {
       final playerId = player['id'];
       final teamId = player['teamId'];
 
-      //print('🔄 Traitement du joueur ${player['username']} (ID: $playerId) - TeamId: $teamId');
+      //logger.d('🔄 Traitement du joueur ${player['username']} (ID: $playerId) - TeamId: $teamId');
 
       if (teamId != null) {
         // Trouver l'équipe correspondante
@@ -110,9 +111,9 @@ class TeamService extends ChangeNotifier {
           // Ajouter le joueur à cette équipe
           _teams[teamIndex].players.add(playerCopy);
 
-          //print('✅ Joueur ${player['username']} (ID: $playerId) ajouté à l\'équipe ${_teams[teamIndex].name} (ID: ${_teams[teamIndex].id})');
+          //logger.d('✅ Joueur ${player['username']} (ID: $playerId) ajouté à l\'équipe ${_teams[teamIndex].name} (ID: ${_teams[teamIndex].id})');
         } else {
-          //   print(
+          //   logger.d(
           //      '⚠️ Équipe avec ID ${player['teamId']} non trouvée pour le joueur ${player['username']}');
 
           // Si l'équipe n'existe pas, mettre à jour le joueur pour enlever le teamId
@@ -124,12 +125,12 @@ class TeamService extends ChangeNotifier {
     final currentUserId = _apiService.authService.currentUser?.id;
     if (currentUserId != null) {
       updateMyTeamId(currentUserId);
-      // print('🔄 MyTeamId mis à jour: $_myTeamId');
+      // logger.d('🔄 MyTeamId mis à jour: $_myTeamId');
     }
 
-    //  print('📋 Fin de synchronisation - Équipes avec leurs joueurs:');
+    //  logger.d('📋 Fin de synchronisation - Équipes avec leurs joueurs:');
     //for (var team in _teams) {
-    //print('   - ${team.name} (ID: ${team.id}): ${team.players.length} joueurs');
+    //logger.d('   - ${team.name} (ID: ${team.id}): ${team.players.length} joueurs');
     //}
     notifyListeners();
   }
@@ -146,11 +147,11 @@ class TeamService extends ChangeNotifier {
       if (teamId == null) {
         updatedPlayer.remove('teamId');
         updatedPlayer.remove('teamName');
-        print('🔄 TeamId supprimé pour le joueur ${player['username']}');
+        logger.d('🔄 TeamId supprimé pour le joueur ${player['username']}');
       } else {
         updatedPlayer['teamId'] = teamId;
         updatedPlayer['teamName'] = teamName;
-        print(
+        logger.d(
             '🔄 TeamId mis à jour pour le joueur ${player['username']}: $teamId ($teamName)');
       }
 
@@ -176,7 +177,7 @@ class TeamService extends ChangeNotifier {
       _teams.add(newTeam);
       safeNotifyListeners();
     } catch (e) {
-      print('❌ Erreur lors de la création de l\'équipe : $e');
+      logger.d('❌ Erreur lors de la création de l\'équipe : $e');
       _lastError = 'Erreur lors de la création de l\'équipe : $e';
       safeNotifyListeners();
     }
@@ -194,7 +195,7 @@ class TeamService extends ChangeNotifier {
       _teams[index].name = newName;
       safeNotifyListeners();
     } catch (e) {
-      print('Erreur lors du renommage de l\'équipe: $e');
+      logger.d('Erreur lors du renommage de l\'équipe: $e');
     }
   }
 
@@ -202,10 +203,10 @@ class TeamService extends ChangeNotifier {
     final url = 'fields/$mapId/players/$playerId/team/$teamId';
 
     try {
-      print(
+      logger.d(
           '🔄 Tentative d\'assignation du joueur $playerId à l\'équipe $teamId');
       final result = await _apiService.post(url, {});
-      print('✅ Réponse du serveur pour l\'assignation : $result');
+      logger.d('✅ Réponse du serveur pour l\'assignation : $result');
 
       await loadTeams(mapId);
       await _gameStateService.loadConnectedPlayers();
@@ -213,8 +214,8 @@ class TeamService extends ChangeNotifier {
       synchronizePlayersWithTeams();
       safeNotifyListeners();
     } catch (e, stacktrace) {
-      print('❌ Erreur lors de l\'assignation du joueur à l\'équipe: $e');
-      print('📌 Stacktrace: $stacktrace');
+      logger.d('❌ Erreur lors de l\'assignation du joueur à l\'équipe: $e');
+      logger.d('📌 Stacktrace: $stacktrace');
     }
   }
 
@@ -238,7 +239,7 @@ class TeamService extends ChangeNotifier {
       _previousPlayers = previousPlayersData as List;
       safeNotifyListeners();
     } catch (e) {
-      print('Erreur lors du chargement des joueurs précédents: $e');
+      logger.d('Erreur lors du chargement des joueurs précédents: $e');
     }
   }
 
@@ -251,7 +252,7 @@ class TeamService extends ChangeNotifier {
           .toList();
       safeNotifyListeners();
     } catch (e) {
-      print(
+      logger.d(
           'Erreur lors du chargement des configurations d\'équipes précédentes: $e');
     }
   }
@@ -263,14 +264,14 @@ class TeamService extends ChangeNotifier {
         'teams': _teams.map((team) => team.toJson()).toList(),
       });
     } catch (e) {
-      print('Erreur lors de la sauvegarde de la configuration d\'équipes: $e');
+      logger.d('Erreur lors de la sauvegarde de la configuration d\'équipes: $e');
     }
   }
 
   Future<void> applyTeamConfiguration(int configId) async {
     final mapId = _gameStateService.selectedMap?.id;
     if (mapId == null) {
-      print('❌ Aucune carte sélectionnée pour appliquer la configuration.');
+      logger.d('❌ Aucune carte sélectionnée pour appliquer la configuration.');
       return;
     }
 
@@ -279,7 +280,7 @@ class TeamService extends ChangeNotifier {
         'configId': configId,
       });
 
-      print('✅ Configuration $configId appliquée à la carte $mapId');
+      logger.d('✅ Configuration $configId appliquée à la carte $mapId');
 
       // 🔄 Recharger équipes et joueurs connectés
       await loadTeams(mapId);
@@ -287,7 +288,7 @@ class TeamService extends ChangeNotifier {
 
       safeNotifyListeners();
     } catch (e) {
-      print(
+      logger.d(
           '❌ Erreur lors de l\'application de la configuration d\'équipes: $e');
     }
   }
@@ -297,7 +298,7 @@ class TeamService extends ChangeNotifier {
     if (_gameStateService.selectedMap == null) return;
 
     if (_isUpdating) {
-      print('⚠️ Mise à jour déjà en cours, ignorée');
+      logger.d('⚠️ Mise à jour déjà en cours, ignorée');
       return;
     }
     _isUpdating = true;
@@ -319,7 +320,7 @@ class TeamService extends ChangeNotifier {
     safeNotifyListeners();
     } catch (e) {
 
-    print('Erreur lors du rafraîchissement des données d\'équipe: $e');
+    logger.d('Erreur lors du rafraîchissement des données d\'équipe: $e');
     // Propager l'erreur à l'UI
     _lastError = e.toString();
     safeNotifyListeners();
@@ -341,7 +342,7 @@ class TeamService extends ChangeNotifier {
         safeNotifyListeners();
       }
     } catch (e) {
-      print('❌ Erreur lors de la suppression de l\'équipe: $e');
+      logger.d('❌ Erreur lors de la suppression de l\'équipe: $e');
     }
   }
 
@@ -350,7 +351,7 @@ class TeamService extends ChangeNotifier {
       // Appel à un endpoint spécifique pour retirer un joueur d'une équipe
       final url = 'teams/$mapId/players/$playerId/remove-from-team';
       final result = await _apiService.post(url, {});
-      print('✅ Joueur retiré de l\'équipe : $result');
+      logger.d('✅ Joueur retiré de l\'équipe : $result');
 
       // Mettre à jour les données locales
       await loadTeams(mapId);
@@ -358,8 +359,8 @@ class TeamService extends ChangeNotifier {
       synchronizePlayersWithTeams();
       safeNotifyListeners();
     } catch (e, stacktrace) {
-      print('❌ Erreur lors du retrait du joueur de l\'équipe: $e');
-      print('📌 Stacktrace: $stacktrace');
+      logger.d('❌ Erreur lors du retrait du joueur de l\'équipe: $e');
+      logger.d('📌 Stacktrace: $stacktrace');
     }
   }
 
@@ -387,7 +388,7 @@ class TeamService extends ChangeNotifier {
       final newCount = team.players.length;
 
       if (initialCount != newCount) {
-        print('🗑️ Joueur $playerId retiré localement de l\'équipe ${team.id}');
+        logger.d('🗑️ Joueur $playerId retiré localement de l\'équipe ${team.id}');
         break;
       }
     }
@@ -397,9 +398,9 @@ class TeamService extends ChangeNotifier {
       final connectedPlayer = _gameStateService.connectedPlayersList
           .firstWhere((p) => p['id'] == playerId);
       connectedPlayer['teamId'] = null;
-      print('🔄 teamId du joueur $playerId mis à jour à null');
+      logger.d('🔄 teamId du joueur $playerId mis à jour à null');
     } catch (e) {
-      print('⚠️ Joueur $playerId non trouvé dans connectedPlayersList');
+      logger.d('⚠️ Joueur $playerId non trouvé dans connectedPlayersList');
     }
 
     synchronizePlayersWithTeams();
@@ -413,23 +414,23 @@ class TeamService extends ChangeNotifier {
 
     // Vérifie que l'équipe n'existe pas déjà
     if (_teams.any((t) => t.id == teamId)) {
-      print('ℹ️ Équipe déjà existante : $teamId');
+      logger.d('ℹ️ Équipe déjà existante : $teamId');
       return;
     }
 
     _teams.add(
       Team(id: teamId, name: teamName, players: []),
     );
-    print('✅ Équipe ajoutée localement : $teamName (ID: $teamId)');
+    logger.d('✅ Équipe ajoutée localement : $teamName (ID: $teamId)');
     safeNotifyListeners();
   }
 
   void deleteTeamLocally(int teamId, int mapId) {
-    print('🗑️ Suppression locale de l\'équipe ID=$teamId');
+    logger.d('🗑️ Suppression locale de l\'équipe ID=$teamId');
 
     final index = _teams.indexWhere((team) => team.id == teamId);
     if (index == -1) {
-      print('⚠️ Équipe $teamId non trouvée');
+      logger.d('⚠️ Équipe $teamId non trouvée');
       return;
     }
 

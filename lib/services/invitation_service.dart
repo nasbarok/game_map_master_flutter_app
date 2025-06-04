@@ -15,6 +15,7 @@ import '../models/game_map.dart';
 import '../models/invitation.dart';
 import '../models/websocket/game_invitation_message.dart';
 import '../models/websocket/invitation_response_message.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class InvitationService extends ChangeNotifier {
   final WebSocketService _webSocketService;
@@ -75,10 +76,10 @@ class InvitationService extends ChangeNotifier {
     final type = messageJson['type'];
     final payload = messageJson['payload'];
     if (type == 'GAME_INVITATION') {
-      print('📬 Invitation de jeu reçue');
+      logger.d('📬 Invitation de jeu reçue');
 
 
-      print('🧾 Payload invitation : $payload');
+      logger.d('🧾 Payload invitation : $payload');
       // Vérifier que toUserId existe et correspond à l'utilisateur actuel
       final toUserId = payload['toUserId'];
       final currentUserId = _authService.currentUser?.id;
@@ -96,11 +97,11 @@ class InvitationService extends ChangeNotifier {
           }
         }
       } else if (messageJson['type'] == 'INVITATION_RESPONSE') {
-        print('📬 Réponse à une invitation reçue');
+        logger.d('📬 Réponse à une invitation reçue');
 
         final response = messageJson['payload'];
 
-        print('🧾 Payload réponse : $response');
+        logger.d('🧾 Payload réponse : $response');
 
         final fromUserId = response['fromUserId'];
         final currentUserId = _authService.currentUser?.id;
@@ -130,7 +131,7 @@ class InvitationService extends ChangeNotifier {
         } else if (messageJson['type'] == 'PLAYER_JOINED') {
           // Nouveau joueur a rejoint la partie
           final payload = messageJson['payload'];
-          print('👤 Joueur rejoint : ${payload['username']}');
+          logger.d('👤 Joueur rejoint : ${payload['username']}');
 
           // Ajouter le joueur à la liste des joueurs connectés
           final player = {
@@ -143,13 +144,13 @@ class InvitationService extends ChangeNotifier {
         } else if (messageJson['type'] == 'PLAYER_LEFT') {
           // Un joueur a quitté la partie
           final payload = messageJson['payload'];
-          print('👋 Joueur parti : ${payload['username']}');
+          logger.d('👋 Joueur parti : ${payload['username']}');
 
           // Supprimer le joueur de la liste des joueurs connectés
           _gameStateService.removeConnectedPlayer(payload['playerId']);
         } else if (messageJson['type'] == 'FIELD_CLOSED') {
           // Le terrain a été fermé
-          print('🚪 Terrain fermé');
+          logger.d('🚪 Terrain fermé');
 
           // Si l'utilisateur n'est pas l'hôte, il doit être déconnecté
           if (!_authService.currentUser!.hasRole('HOST')) {
@@ -176,7 +177,7 @@ class InvitationService extends ChangeNotifier {
       final currentUserId = _authService.currentUser?.id;
 
       if (senderId == null || targetUserId == null || fieldId == null || currentUserId == null) {
-        print('❌ [invitation_service] [respondToInvitation] Invitation invalide ou utilisateur non connecté');
+        logger.d('❌ [invitation_service] [respondToInvitation] Invitation invalide ou utilisateur non connecté');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Erreur: Invitation invalide.'),
@@ -196,7 +197,7 @@ class InvitationService extends ChangeNotifier {
         mapName: mapName,
       );
 
-      print('📤 Envoi de la réponse à l’invitation : accept=$accept');
+      logger.d('📤 Envoi de la réponse à l’invitation : accept=$accept');
       await _webSocketService.sendMessage('/app/invitation-response', response);
 
       // Si l'invitation est acceptée, connecter le joueur au terrain
@@ -213,7 +214,7 @@ class InvitationService extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('❌ Erreur respondToInvitation : $e');
+      logger.d('❌ Erreur respondToInvitation : $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Erreur lors du traitement de l’invitation"), backgroundColor: Colors.red),
       );

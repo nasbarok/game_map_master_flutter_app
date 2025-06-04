@@ -16,6 +16,7 @@ import '../services/websocket_service.dart';
 import '../services/notifications.dart' as notifications;
 import '../services/invitation_service.dart';
 import '../../services/game_state_service.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 class WebSocketMessageHandler {
   final AuthService authService;
@@ -32,7 +33,7 @@ class WebSocketMessageHandler {
 
   void handleWebSocketMessage(WebSocketMessage message, BuildContext context) {
     // Traiter les différents types de messages WebSocket
-    print('🔄 Traitement par WebSocketMessageHandler : ${message.type}');
+    logger.d('🔄 Traitement par WebSocketMessageHandler : ${message.type}');
     final type = message.type;
     final messageToJson = message.toJson();
     final currentUserId = authService.currentUser?.id;
@@ -42,12 +43,12 @@ class WebSocketMessageHandler {
         type != 'PLAYER_KICKED' &&
         type != 'INVITATION_RESPONSE' &&
         type != 'TREASURE_FOUND') {
-      print('⏩ Ignoré : message envoyé par moi-même');
+      logger.d('⏩ Ignoré : message envoyé par moi-même');
       return;
     }
 
-    print('📥 Message WebSocket reçu: type=$type');
-    print('🧾 Contenu: $message');
+    logger.d('📥 Message WebSocket reçu: type=$type');
+    logger.d('🧾 Contenu: $message');
     switch (type) {
       case 'INVITATION_RECEIVED':
         _showInvitationDialog(messageToJson, context);
@@ -116,7 +117,7 @@ class WebSocketMessageHandler {
         webSocketGameSessionHandler.handlePlayerPosition(messageToJson, context);
         break;
       default:
-        print('Message WebSocket non géré: $messageToJson');
+        logger.d('Message WebSocket non géré: $messageToJson');
     }
   }
 
@@ -131,12 +132,12 @@ class WebSocketMessageHandler {
     final currentUserId = authService.currentUser?.id;
 
     if (senderId == currentUserId) {
-      print(
+      logger.d(
           '⏩ [websocket_message_handler] [_handleInvitationResponse] Ignoré : message envoyé par moi-même');
       return;
     }
 
-    print(
+    logger.d(
         '📥 [websocket_message_handler] [_handleInvitationResponse] Invitation response reçue : $payload');
 
     if (!accepted) {
@@ -148,7 +149,7 @@ class WebSocketMessageHandler {
         ),
       );
     } else {
-      print(
+      logger.d(
           '✅ [websocket_message_handler] [_handleInvitationResponse] Invitation acceptée par ${payload['fromUsername']} (ID: ${payload['fromUserId']})');
 
       // ✅ Ne rien faire si le joueur est déjà dans la liste
@@ -156,7 +157,7 @@ class WebSocketMessageHandler {
         (player) => player['id'] == userId,
       );
       // ✅ Accepté → ajout du joueur dans GameStateService
-      print(
+      logger.d(
           '👀 [websocket_message_handler] [_handleInvitationResponse] Est déjà dans la liste ? $alreadyInList');
 
       if (!alreadyInList) {
@@ -180,7 +181,7 @@ class WebSocketMessageHandler {
 
     if (gameStateService.selectedField?.id == fieldId &&
         gameStateService.isTerrainOpen) {
-      print('⏩ Invitation ignorée car déjà connecté au terrain $fieldId');
+      logger.d('⏩ Invitation ignorée car déjà connecté au terrain $fieldId');
       return;
     }
 
@@ -188,11 +189,11 @@ class WebSocketMessageHandler {
     try {
       notifications.showInvitationNotification(invitation);
     } catch (e) {
-      print('Erreur lors de l\'affichage de la notification: $e');
+      logger.d('Erreur lors de l\'affichage de la notification: $e');
     }
 
     // Afficher également un dialogue
-    print(
+    logger.d(
         '🔔 Ouverture du dialogue pour invitation de ${payload['fromUsername']} sur carte "${payload['mapName']}"');
 
     showDialog(
@@ -205,7 +206,7 @@ class WebSocketMessageHandler {
           TextButton(
             onPressed: () {
               // Refuser l'invitation
-              print('❌ Invitation refusée par l\'utilisateur');
+              logger.d('❌ Invitation refusée par l\'utilisateur');
               final invitationService = context.read<InvitationService>();
               invitationService.respondToInvitation(context, invitation, false);
               Navigator.of(context).pop();
@@ -300,7 +301,7 @@ class WebSocketMessageHandler {
     final senderId = message['senderId'];
     final currentUserId = authService.currentUser?.id;
 
-    print('🟢 FIELD_OPENED reçu : terrain ID=$fieldId, par $ownerUsername');
+    logger.d('🟢 FIELD_OPENED reçu : terrain ID=$fieldId, par $ownerUsername');
 
     // Si c’est le host lui-même (senderId == current user)
     if (senderId == currentUserId) {
@@ -334,7 +335,7 @@ class WebSocketMessageHandler {
     final currentUserId = authService.currentUser?.id;
     final isHost = authService.currentUser?.hasRole('HOST') ?? false;
 
-    print('🧹 Terrain fermé par $ownerUsername (ID terrain: $fieldId)');
+    logger.d('🧹 Terrain fermé par $ownerUsername (ID terrain: $fieldId)');
 
     if (senderId == currentUserId) {
       // ✅ Terrain fermé par moi-même
@@ -377,48 +378,48 @@ class WebSocketMessageHandler {
   }
 
   void _handleTeamUpdate(Map<String, dynamic> message, BuildContext context) {
-    print('🟦 TEAM_UPDATE reçu : $message');
+    logger.d('🟦 TEAM_UPDATE reçu : $message');
     final payload = message['payload'];
     final int mapId = payload['mapId'];
     final int userId = payload['userId'];
     final dynamic teamId = payload['teamId'];
     final String action = payload['action'];
     if (message['senderId'] == authService.currentUser?.id) {
-      print('⏩ Message WebSocket émis par moi-même (senderId), on ignore');
+      logger.d('⏩ Message WebSocket émis par moi-même (senderId), on ignore');
       return;
     }
 
     if (action == 'ASSIGN_PLAYER') {
       if (teamId == null) {
-        print('➖ Retrait du joueur $userId de son équipe');
+        logger.d('➖ Retrait du joueur $userId de son équipe');
         teamService.removePlayerFromTeam(userId, mapId);
       } else {
-        print('➕ Assignation du joueur $userId à l\'équipe $teamId');
+        logger.d('➕ Assignation du joueur $userId à l\'équipe $teamId');
         final currentTeamId = teamService.getTeamIdForPlayer(userId);
 
         if (currentTeamId != teamId) {
-          print(
+          logger.d(
               '🔄 Tentative d\'assignation du joueur $userId à l\'équipe $teamId');
           teamService.assignPlayerToTeam(userId, teamId, mapId);
         } else {
-          print('⏸️ Assignation ignorée : joueur déjà dans l’équipe $teamId');
+          logger.d('⏸️ Assignation ignorée : joueur déjà dans l’équipe $teamId');
         }
       }
     } else if (action == 'REMOVE_FROM_TEAM') {
-      print('➖ Retrait du joueur $userId de son équipe (REMOVE_FROM_TEAM)');
+      logger.d('➖ Retrait du joueur $userId de son équipe (REMOVE_FROM_TEAM)');
       teamService.removePlayerLocally(userId, mapId);
     } else {
-      print('❓ Action non supportée ou inconnue : $action');
+      logger.d('❓ Action non supportée ou inconnue : $action');
     }
 
-    print('✅ TEAM_UPDATE traité');
+    logger.d('✅ TEAM_UPDATE traité');
   }
 
   void _handleScenarioUpdate(
       Map<String, dynamic> message, BuildContext context) {
     final payload = message['payload'] as Map<String, dynamic>?;
     if (payload == null) {
-      print('❌ [WebSocketHandler] Payload manquant dans SCENARIO_UPDATE');
+      logger.d('❌ [WebSocketHandler] Payload manquant dans SCENARIO_UPDATE');
       return;
     }
 
@@ -426,16 +427,16 @@ class WebSocketMessageHandler {
     final List<Map<String, dynamic>>? scenarioDtosMapList =
         payload['scenarioDtos'];
     if (scenarioDtosMapList == null) {
-      print('❌ [WebSocketHandler] SCENARIO_UPDATE sans scénarioDtos');
+      logger.d('❌ [WebSocketHandler] SCENARIO_UPDATE sans scénarioDtos');
       return;
     }
     final List<ScenarioDTO> scenarioDtos =
         scenarioDtosMapList.map((dto) => ScenarioDTO.fromJson(dto)).toList();
 
-    print('📥 [WebSocketHandler] SCENARIO_UPDATE reçu pour fieldId=$fieldId');
+    logger.d('📥 [WebSocketHandler] SCENARIO_UPDATE reçu pour fieldId=$fieldId');
 
     if (scenarioDtos == null || scenarioDtos.isEmpty) {
-      print('⚠️ Aucun scénario reçu dans SCENARIO_UPDATE');
+      logger.d('⚠️ Aucun scénario reçu dans SCENARIO_UPDATE');
       return;
     }
 
@@ -513,7 +514,7 @@ class WebSocketMessageHandler {
 
       if (playerKicked.userId == currentUserId) {
         // 🟥 Si c'est moi qui ai été kické
-        print('⛔ Vous avez été kické du terrain ${playerKicked.fieldId}');
+        logger.d('⛔ Vous avez été kické du terrain ${playerKicked.fieldId}');
 
         // Déconnexion et reset
         gameStateService.reset();
@@ -522,10 +523,10 @@ class WebSocketMessageHandler {
         try {
           await apiService
               .delete('fields-history/history/${playerKicked.fieldId}');
-          print(
+          logger.d(
               '🧹 Historique supprimé pour le terrain ${playerKicked.fieldId}');
         } catch (e) {
-          print('❌ Erreur lors de la suppression de l’historique : $e');
+          logger.d('❌ Erreur lors de la suppression de l’historique : $e');
         }
 
         // Désabonnement WebSocket
@@ -549,7 +550,7 @@ class WebSocketMessageHandler {
         }
       } else {
         // ➖ Sinon, c'est un autre joueur qui a été kické
-        print(
+        logger.d(
             '➖ Joueur ${playerKicked.username} (ID ${playerKicked.userId}) a été kické');
 
         // Supprimer de la liste
@@ -564,18 +565,18 @@ class WebSocketMessageHandler {
         );
       }
     } catch (e) {
-      print('❌ Erreur dans _handlePlayerKicked : $e');
+      logger.d('❌ Erreur dans _handlePlayerKicked : $e');
     }
   }
 
   void _handleTeamCreated(Map<String, dynamic> message, BuildContext context) {
-    print('🟩 TEAM_CREATED reçu : $message');
+    logger.d('🟩 TEAM_CREATED reçu : $message');
     final payload = message['payload'];
     final team = payload['team'];
     final mapId = payload['mapId'];
 
     if (team == null || mapId == null) {
-      print('⚠️ Données TEAM_CREATED invalides');
+      logger.d('⚠️ Données TEAM_CREATED invalides');
       return;
     }
 
@@ -588,12 +589,12 @@ class WebSocketMessageHandler {
         ),
       );
     } catch (e) {
-      print('❌ Erreur lors du traitement de TEAM_CREATED : $e');
+      logger.d('❌ Erreur lors du traitement de TEAM_CREATED : $e');
     }
   }
 
   void _handleTeamDeleted(Map<String, dynamic> message, BuildContext context) {
-    print('🟥 TEAM_DELETED reçu : $message');
+    logger.d('🟥 TEAM_DELETED reçu : $message');
 
     final payload = message['payload'];
     final int teamId = payload['teamId'];
@@ -601,7 +602,7 @@ class WebSocketMessageHandler {
 
     // Ne fais rien si c'est moi qui ai supprimé
     if (message['senderId'] == authService.currentUser?.id) {
-      print('⏩ Message WebSocket TEAM_DELETED émis par moi-même, ignoré');
+      logger.d('⏩ Message WebSocket TEAM_DELETED émis par moi-même, ignoré');
       return;
     }
 

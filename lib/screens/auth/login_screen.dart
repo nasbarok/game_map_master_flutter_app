@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../services/game_state_service.dart';
 import '../../services/player_connection_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -53,20 +53,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 gameStateService.isPlayerConnected(userId);
 
             if (!isAlreadyConnected) {
-              print(
+              logger.d(
                   '🚀 Reconnexion automatique de l’utilisateur au terrain...');
               await GetIt.I<PlayerConnectionService>().joinMap(fieldId);
 
               // On recharge la session pour bien rafraîchir les joueurs
               await gameStateService.restoreSessionIfNeeded(apiService);
             } else {
-              print('ℹ️ Utilisateur déjà connecté au terrain');
+              logger.d('ℹ️ Utilisateur déjà connecté au terrain');
             }
           } else {
-            print('ℹ️ Aucun terrain ouvert ou utilisateur non connecté.');
+            logger.d('ℹ️ Aucun terrain ouvert ou utilisateur non connecté.');
           }
         } catch (e) {
-          print(
+          logger.d(
               '⚠️ Erreur lors de la tentative de reconnexion automatique : $e');
         }
 

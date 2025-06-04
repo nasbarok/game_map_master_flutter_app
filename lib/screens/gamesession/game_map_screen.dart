@@ -13,6 +13,7 @@ import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
 import 'package:airsoft_game_map/screens/scenario/bomb_operation/bomb_operation_map_extension.dart';
 
 import '../../services/team_service.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 /// Écran affichant la carte en temps réel avec les positions des joueurs
 class GameMapScreen extends StatefulWidget {
@@ -61,12 +62,6 @@ class _GameMapScreenState extends State<GameMapScreen> {
     _locationService.initialize(
         widget.userId, widget.teamId, widget.gameMap.fieldId!);
     _locationService.startLocationSharing(widget.gameSessionId);
-
-    // Initialiser le service Bombe si le scénario est actif
-    if (widget.hasBombOperationScenario) {
-      _bombOperationService = GetIt.I<BombOperationService>();
-      _bombOperationService.initialize(widget.gameSessionId);
-    }
   }
 
   @override
@@ -201,7 +196,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
                     return MarkerLayer(
                       markers: widget.generateBombSiteMarkers(
                         context: context,
-                        bombScenario: _bombOperationService.activeScenario!,
+                        bombScenario: _bombOperationService.activeSessionScenarioBomb!.bombOperationScenario!,
                         gameState: _bombOperationService.currentState,
                         teamRoles: _bombOperationService.teamRoles,
                         userTeamId: widget.teamId,
@@ -291,7 +286,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
             _mapController.zoom);
       }
     } catch (e) {
-      print('Erreur lors du centrage sur la position actuelle: $e');
+      logger.d('Erreur lors du centrage sur la position actuelle: $e');
     }
   }
 

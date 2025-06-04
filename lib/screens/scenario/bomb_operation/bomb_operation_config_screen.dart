@@ -13,7 +13,7 @@ import '../../../services/game_map_service.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../../../services/scenario_service.dart';
 import 'bomb_site_list_screen.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 /// Écran de configuration d'un scénario Opération Bombe
 class BombOperationConfigScreen extends StatefulWidget {
   /// Identifiant du scénario
@@ -104,7 +104,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         _nameController.text = scenario.scenario.name;
         _descriptionController.text = scenario.scenario.description ?? '';
       } else {
-        print(
+        logger.d(
             '❌ [BombOperationConfigScreen] scenarioId null dans scenarioBombOperation');
       }
       // Initialise les contrôleurs avec les valeurs du scénario
@@ -122,9 +122,9 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       // Récupère les sites de bombe
       final sites =
           await _bombOperationService.getBombSites(scenarioBombOperation.id!);
-      print('📦 [_loadScenario] Sites récupérés depuis backend :');
+      logger.d('📦 [_loadScenario] Sites récupérés depuis backend :');
       for (var site in sites) {
-        print('   🔸 ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
+        logger.d('   🔸 ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
       }
       // Récupère le scénario principal pour obtenir l'ID de la carte
       final scenarioService = context.read<ScenarioService>();
@@ -135,7 +135,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         // Charge la carte associée au scénario
         await _loadGameMap(widget.gameMapId!);
       } else {
-        print(
+        logger.d(
             '❌ [BombOperationConfigScreen] [_loadScenario] Aucune carte associée au scénario principal');
       }
 
@@ -148,7 +148,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     } catch (e) {
       if (mounted) {
         // Affiche un message d'erreur si le chargement échoue
-        print(
+        logger.d(
             '[BombOperationConfigScreen] Erreur lors du chargement du scénario: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -165,7 +165,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
   /// Charge la carte associée au scénario
   Future<void> _loadGameMap(int gameMapId) async {
-    print(
+    logger.d(
         '📡 [BombOperationConfigScreen] [_loadGameMap] Chargement gameMapId=$gameMapId');
     setState(() {
       _isLoadingMap = true;
@@ -174,14 +174,14 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
     try {
       final gameMap = await _gameMapService.getGameMapById(gameMapId);
-      print(
+      logger.d(
           '✅ [BombOperationConfigScreen] [_loadGameMap] Reçu: ${gameMap.name}, interactive: ${gameMap.hasInteractiveMapConfig}');
-      print(
+      logger.d(
           '🎯 [BombOperationConfigScreen] [_loadGameMap] gameMap JSON brut: ${gameMap.toJson()}');
 
       // Vérifier si la carte a une configuration interactive valide
       if (!gameMap.hasInteractiveMapConfig) {
-        print(
+        logger.d(
             '⚠️ [BombOperationConfigScreen] [_loadGameMap] Carte non interactive, affichage bloqué');
 
         if (mounted) {
@@ -206,13 +206,13 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         _gameMap = gameMap;
         _isLoadingMap = false;
       });
-      print(
+      logger.d(
           '🗺️ [BombOperationConfigScreen] [_loadGameMap] Affichage carte préparé');
 
       // Centre la carte sur les coordonnées de la carte
       if (_gameMap?.centerLatitude != null &&
           _gameMap?.centerLongitude != null) {
-        print(
+        logger.d(
             '📍 [BombOperationConfigScreen] [_loadGameMap] Centre: ${_gameMap!.centerLatitude}, ${_gameMap!.centerLongitude}');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _mapController.move(
@@ -223,7 +223,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       }
     } catch (e) {
       if (mounted) {
-        print(
+        logger.d(
             '❌ [BombOperationConfigScreen] [_loadGameMap] Erreur lors du chargement de la carte: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -296,7 +296,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       }
     } catch (e) {
       if (mounted) {
-        print('Erreur lors de la sauvegarde du scénario: $e');
+        logger.d('Erreur lors de la sauvegarde du scénario: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),
@@ -333,9 +333,9 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       final sites =
           await _bombOperationService.getBombSites(_scenarioBombOperation!.id!);
 
-      print('🔄 [BombOperationConfigScreen] Mise à jour des sites après retour depuis BombSiteListScreen :');
+      logger.d('🔄 [BombOperationConfigScreen] Mise à jour des sites après retour depuis BombSiteListScreen :');
       for (var site in sites) {
-        print('   ✅ ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
+        logger.d('   ✅ ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
       }
 
       setState(() {
@@ -366,7 +366,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     if (_gameMap == null) {
       return const Center(child: Text('Aucune carte disponible'));
     }
-    print('🗺️ [BombOperationConfigScreen] [_buildMap] Affichage de la carte avec ${_bombSites?.length ?? 0} sites.');
+    logger.d('🗺️ [BombOperationConfigScreen] [_buildMap] Affichage de la carte avec ${_bombSites?.length ?? 0} sites.');
 
     return fm.FlutterMap(
       mapController: _mapController,

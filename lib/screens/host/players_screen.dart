@@ -8,7 +8,7 @@ import '../../services/invitation_service.dart';
 import '../../services/team_service.dart';
 import '../../services/api_service.dart';
 import '../../services/websocket_service.dart';
-
+import 'package:airsoft_game_map/utils/logger.dart';
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({Key? key}) : super(key: key);
 
@@ -40,7 +40,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
       if (gameStateService.isTerrainOpen &&
           gameStateService.selectedMap != null) {
         teamService.loadTeams(gameStateService.selectedMap!.id!);
-        print(
+        logger.d(
             '🌀 [players_screen] [initState] Chargement des équipes et des joueurs connectés');
         gameStateService.loadConnectedPlayers();
       }
@@ -154,7 +154,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
         ),
       );
     } catch (e) {
-      print('❌ Erreur lors de la déconnexion du joueur: $e');
+      logger.d('❌ Erreur lors de la déconnexion du joueur: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur lors de la déconnexion du joueur: $e'),
@@ -484,7 +484,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     final connectedPlayers = gameStateService.connectedPlayersList;
     final mapId = getCurrentMapId(context);
     final teams = teamService.teams;
-    print('🌀 Rebuild TeamsTab : ${teams.length} équipe(s)');
+    logger.d('🌀 Rebuild TeamsTab : ${teams.length} équipe(s)');
 
     final unassignedPlayers = connectedPlayers.where((player) {
       if (player['teamId'] == null) return true;
