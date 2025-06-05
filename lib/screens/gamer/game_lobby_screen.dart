@@ -17,6 +17,7 @@ import '../../widgets/gamer_history_button.dart';
 import '../gamesession/game_session_screen.dart';
 import '../history/field_sessions_screen.dart';
 import 'package:airsoft_game_map/utils/logger.dart';
+
 class GameLobbyScreen extends StatefulWidget {
   const GameLobbyScreen({Key? key}) : super(key: key);
 
@@ -122,78 +123,10 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Carte : ${gameState.selectedMap?.name ?? "Inconnue"}',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      IconButton(
-                        tooltip: 'Historique des sessions',
-                        icon: const Icon(Icons.history),
-                        onPressed: () {
-                          final fieldId = gameState.selectedMap?.field?.id;
-                          if (fieldId != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    FieldSessionsScreen(fieldId: fieldId),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text('Aucun terrain associé trouvé')),
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _buildSelectedScenarios(),
-                  const SizedBox(height: 24),
-                  if (gameState.isGameRunning)
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.timer, color: Colors.blue),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Temps restant : ${gameState.timeLeftDisplay}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (gameState.isGameRunning)
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Card(
               elevation: 4,
               child: Padding(
@@ -201,71 +134,141 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Partie en cours',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Suivez les instructions de l\'hôte et collaborez avec votre équipe pour atteindre les objectifs du scénario.',
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Carte : ${gameState.selectedMap?.name ?? "Inconnue"}',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        IconButton(
+                          tooltip: 'Historique des sessions',
+                          icon: const Icon(Icons.history),
+                          onPressed: () {
+                            final fieldId = gameState.selectedMap?.field?.id;
+                            if (fieldId != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      FieldSessionsScreen(fieldId: fieldId),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Aucun terrain associé trouvé')),
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _navigateToGameSession(context),
-                        icon: const Icon(Icons.play_arrow),
-                        label: const Text('Rejoindre la partie'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
+                    _buildSelectedScenarios(),
+                    const SizedBox(height: 24),
+                    if (gameState.isGameRunning)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.timer, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Temps restant : ${gameState.timeLeftDisplay}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
-            )
-          else
-            const Card(
-              elevation: 4,
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'En attente de démarrage',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+            ),
+            const SizedBox(height: 24),
+            if (gameState.isGameRunning)
+              Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Partie en cours',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'L\'hôte n\'a pas encore lancé la partie. Préparez votre équipement et rejoignez une équipe en attendant.',
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Suivez les instructions de l\'hôte et collaborez avec votre équipe pour atteindre les objectifs du scénario.',
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _navigateToGameSession(context),
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Rejoindre la partie'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              const Card(
+                elevation: 4,
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'En attente de démarrage',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'L\'hôte n\'a pas encore lancé la partie. Préparez votre équipement et rejoignez une équipe en attendant.',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            const SizedBox(height: 24), // ou ajustable
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  _showLeaveConfirmationDialog(gameState.selectedMap!.field!);
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Quitter le terrain'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
                 ),
               ),
             ),
-          const Spacer(),
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                _showLeaveConfirmationDialog(gameState.selectedMap!.field!);
-              },
-              icon: const Icon(Icons.logout),
-              label: const Text('Quitter le terrain'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

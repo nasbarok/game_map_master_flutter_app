@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:airsoft_game_map/services/api_service.dart';
 import 'package:airsoft_game_map/services/scenario_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -6,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../models/game_session.dart';
 import '../../models/game_session_participant.dart';
 import '../../models/game_session_scenario.dart';
+import '../../models/scenario/bomb_operation/bomb_operation_session.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
 import '../../services/game_session_service.dart';
 import '../../services/game_state_service.dart';
@@ -14,6 +16,7 @@ import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
 import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket/web_socket_game_session_handler.dart';
+import '../../widgets/bomb_operation_info_card.dart';
 import '../../widgets/game_map_widget.dart';
 import '../../widgets/participants_card.dart';
 import '../../widgets/qr_code_scanner_widgets.dart';
@@ -44,6 +47,7 @@ class GameSessionScreen extends StatefulWidget {
 
 class _GameSessionScreenState extends State<GameSessionScreen> {
   final GameSessionService _gameSessionService = GetIt.I<GameSessionService>();
+  final ApiService _apiService = GetIt.I<ApiService>();
   final TreasureHuntScoreService _treasureHuntScoreService =
       GetIt.I<TreasureHuntScoreService>();
 
@@ -106,39 +110,57 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     } else {
       logger.d('🔍 [GameSessionScreen] teamId fourni, utilisé directement');
     }
-    locationService.initialize(widget.userId, teamId,widget.fieldId!);
+    final fieldId = widget.fieldId ?? widget.gameSession.field?.id;
+    locationService.initialize(widget.userId, teamId,fieldId!);
     locationService.startLocationSharing(widget.gameSession.id!);
     logger.d('🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
-    locationService.loadInitialPositions(widget.fieldId!);
+    locationService.loadInitialPositions(fieldId);
 
 
   }
 
   /// Vérifie si le scénario Opération Bombe est actif pour cette session
-  void _checkForBombOperationScenario() {
-    if (_scenarios == null) {
-      logger.d('🔍 [GameSessionScreen] [checkForBombOperationScenario] _scenarios est null. Aucun scénario à analyser.');
+  void _checkForBombOperationScenario() async {
+    if (_scenarios.isEmpty) {
+      logger.d('🔍 [GameSessionScreen] [checkForBombOperationScenario] Aucun scénario actif à vérifier.');
       return;
     }
 
-    if (_scenarios!.isEmpty) {
-      logger.d('🔍 [GameSessionScreen] [checkForBombOperationScenario] _scenarios est vide. Aucun scénario actif.');
-      return;
-    }
-
-    for (final scenario in _scenarios!) {
+    for (final scenario in _scenarios) {
       logger.d('🔍 [GameSessionScreen] [checkForBombOperationScenario] Scénario analysé: ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
-      if (scenario.scenarioType == 'bomb_operation') {
+      if (scenario.scenarioType == 'bomb_operation' && scenario.active == true) {
         logger.d('💣 [GameSessionScreen] [checkForBombOperationScenario] Scénario Opération Bombe détecté !');
+
         setState(() {
           _hasBombOperationScenario = true;
         });
+
+        final bombOperationService = GetIt.I<BombOperationService>();
+
+        if (bombOperationService.activeSessionScenarioBomb == null) {
+          logger.d('🧨 [GameSessionScreen] Initialisation du BombOperationService en cours...');
+          try {
+            final bombSession = await _apiService.get(
+              'game-sessions/bomb-operation/by-game-session/${widget.gameSession.id}',
+            );
+            final parsedSession = BombOperationSession.fromJson(bombSession);
+            await bombOperationService.initialize(parsedSession);
+            logger.d('✅ [GameSessionScreen] BombOperationService initialisé avec succès');
+          } catch (e) {
+            logger.d('❌ [GameSessionScreen] Erreur lors de l\'initialisation de BombOperationService : $e');
+          }
+        } else {
+          logger.d('ℹ️ [GameSessionScreen] BombOperationService déjà initialisé');
+        }
+
         return;
       }
     }
 
-    logger.d('🚫 [GameSessionScreen] [checkForBombOperationScenario] Aucun scénario de type "bomb_operation" trouvé.');
+    logger.d('🚫 [GameSessionScreen] Aucun scénario Opération Bombe actif trouvé.');
   }
+
+
   Future<void> _loadInitialData() async {
     setState(() {
       _isLoading = true;
@@ -232,7 +254,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         } else {
           if (_gameSession?.startTime != null) {
             _displayedTimeInSeconds =
-                DateTime.now().difference(_gameSession!.startTime!).inSeconds;
+                DateTime.now().difference(_gameSession!.startTime).inSeconds;
           }
         }
 
@@ -427,7 +449,14 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                   isCountdown: _isCountdownMode,
                 ),
                 SizedBox(height: 16),
-
+// Widget d'information Bombe Operation (uniquement si le scénario est actif)
+                if (_hasBombOperationScenario)
+                  BombOperationInfoCard(
+                    teamId: widget.teamId,
+                    userId: widget.userId,
+                    gameSessionId: _gameSession!.id!,
+                  ),
+                SizedBox(height: 16),
                 // Bouton de scan QR code (uniquement si la partie est active)
                 if (isActive && _isTreasureHuntActive)
                   QRCodeScannerButton(
