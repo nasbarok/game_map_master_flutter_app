@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_state.dart';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_team.dart';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
 import 'package:airsoft_game_map/screens/gamesession/game_map_screen.dart';
+import 'package:airsoft_game_map/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -32,6 +35,7 @@ extension BombOperationMapExtension on GameMapScreen {
     required List<BombSite> toActivateBombSites,
     required List<BombSite> disableBombSites,
     required List<BombSite> activeBombSites,
+    required double currentZoom,
   }) {
     if (disableBombSites == null || disableBombSites.isEmpty) {
       return [];
@@ -66,20 +70,22 @@ extension BombOperationMapExtension on GameMapScreen {
         // Mais les bombes non actives ou non plantées sont grisées
         isGreyed = !isPlanted && !isActive;
       }
+      final radiusInPixels = AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
 
       // Si le site doit être visible, ajouter un marqueur
       if (isVisible) {
         markers.add(
           Marker(
             point: LatLng(site.latitude, site.longitude),
-            width: 50,
-            height: 50,
+            width: radiusInPixels * 2, // Diamètre = 2 * rayon
+            height: radiusInPixels * 2,
             child: _buildBombSiteMarker(
               context: context,
               site: site,
               isPlanted: isPlanted,
               isAttacker: isAttacker,
               isGreyed: isGreyed,
+              radiusInPixels: radiusInPixels,
             ),
           ),
         );
@@ -96,6 +102,7 @@ extension BombOperationMapExtension on GameMapScreen {
     required bool isPlanted,
     required bool isAttacker,
     required bool isGreyed,
+    required double radiusInPixels,
   }) {
     // Couleur du marqueur selon l'état de la bombe
     Color markerColor;
@@ -120,8 +127,8 @@ extension BombOperationMapExtension on GameMapScreen {
       children: [
         // Cercle représentant le rayon d'action
         Container(
-          width: 50,
-          height: 50,
+          width: radiusInPixels * 2,
+          height: radiusInPixels * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: markerColor.withOpacity(0.2),
@@ -137,7 +144,7 @@ extension BombOperationMapExtension on GameMapScreen {
           child: Icon(
             iconData,
             color: markerColor,
-            size: 30,
+            size: math.min(30, radiusInPixels * 0.6),
           ),
         ),
 

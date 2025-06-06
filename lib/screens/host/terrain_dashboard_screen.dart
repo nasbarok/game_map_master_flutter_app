@@ -83,10 +83,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     final selectedScenarios = await showDialog<List<Map<String, dynamic>>>(
       context: context,
-      builder: (context) =>
-          ScenarioSelectionDialog(
-            mapId: gameStateService.selectedMap!.id!,
-          ),
+      builder: (context) => ScenarioSelectionDialog(
+        mapId: gameStateService.selectedMap!.id!,
+      ),
     );
 
     if (selectedScenarios != null && selectedScenarios.isNotEmpty) {
@@ -157,18 +156,30 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     }
 
     // Vérif : scénario bombe ?
-    final hasBombScenario = selectedScenarios.any((s) => s.scenario.type == 'bomb_operation');
+    final hasBombScenario =
+        selectedScenarios.any((s) => s.scenario.type == 'bomb_operation');
     // 👉 On affiche un loader pour toute la phase d'initialisation + navigation
     //await _showLoadingDialog('Lancement de la partie...');
     try {
       if (hasBombScenario) {
-        await _initBombOperationScenario(); // Config + valid
+        await _initBombOperationScenario(); // Config + valid // Cette méthode affiche son propre dialog pour la sélection des rôles
       }
+      // Afficher le dialog de chargement APRÈS la configuration des rôles
+      _showLoadingDialog('Lancement de la partie...');
+      try {
+        logger.d(
+            '🚀 [TerrainDashboardScreen] [_startGame] Début de création de la session de jeu');
+        final gameSession = await _initGameSession(); // Création GameSession
 
-      final gameSession = await _initGameSession(); // Création GameSession
-      await _launchGameScreen(gameSession); // Démarrage + navigation
-
-      _showSuccess('La partie a été lancée !');
+        logger.d(
+            '✅ [TerrainDashboardScreen] [_startGame] Session créée, lancement de l\'écran de jeu');
+        await _launchGameScreen(gameSession); // Démarrage + navigation
+        _showSuccess('La partie a été lancée !');
+      } catch (e) {
+        // Fermer le dialog de chargement en cas d'erreur
+        Navigator.of(context).pop();
+        throw e; // Propager l'erreur pour le bloc catch externe
+      }
     } catch (e) {
       logger.e('❌ Erreur globale _startGame: $e');
       _showError('Erreur lors du lancement de la partie : $e');
@@ -183,13 +194,16 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final teams = teamService.teams;
 
     final activeTeams = teams.where((t) => t.players.isNotEmpty).toList();
-    final bombScenario = scenarios.firstWhere((s) => s.scenario.type == 'bomb_operation');
+    final bombScenario =
+        scenarios.firstWhere((s) => s.scenario.type == 'bomb_operation');
 
     if (activeTeams.length != 2) {
-      throw Exception('Le scénario "Opération Bombe" nécessite exactement 2 équipes avec joueurs.');
+      throw Exception(
+          'Le scénario "Opération Bombe" nécessite exactement 2 équipes avec joueurs.');
     }
 
-    final Map<int, BombOperationTeam>? assignedRoles = await showDialog<Map<int, BombOperationTeam>>(
+    final Map<int, BombOperationTeam>? assignedRoles =
+        await showDialog<Map<int, BombOperationTeam>>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Configuration de l\'Opération Bombe'),
@@ -225,13 +239,16 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final field = gameMap.field!;
     final duration = gameStateService.gameDuration ?? 0;
 
-    final gameSession = await gameSessionService.createGameSession(gameMap.id!, field, duration);
+    final gameSession = await gameSessionService.createGameSession(
+        gameMap.id!, field, duration);
     logger.d('✅ GameSession créée : ID = ${gameSession.id}');
 
     final bombConfig = gameStateService.bombOperationConfig;
     if (bombConfig != null) {
-      await bombOperationService.saveTeamRoles(gameSession.id!, bombConfig.roles);
-      final bombOperationSession = await bombOperationService.createBombOperationSession(
+      await bombOperationService.saveTeamRoles(
+          gameSession.id!, bombConfig.roles);
+      final bombOperationSession =
+          await bombOperationService.createBombOperationSession(
         gameSessionId: gameSession.id!,
         scenarioId: bombConfig.scenarioId,
       );
@@ -241,14 +258,17 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     return gameSession;
   }
+
   Future<void> _launchGameScreen(GameSession session) async {
     final gameSessionService = context.read<GameSessionService>();
     final gameStateService = context.read<GameStateService>();
     final authService = context.read<AuthService>();
     final teamService = context.read<TeamService>();
 
-    final startedSession = await gameSessionService.startGameSession(session.id!);
-    logger.d('✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
+    final startedSession =
+        await gameSessionService.startGameSession(session.id!);
+    logger.d(
+        '✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
 
     final user = authService.currentUser!;
     final teamId = teamService.myTeamId;
@@ -257,18 +277,25 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     gameStateService.setGameRunning(true);
     gameStateService.setActiveGameSession(startedSession);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GameSessionScreen(
-          userId: user.id!,
-          teamId: teamId,
-          isHost: user.hasRole('HOST'),
-          gameSession: startedSession,
-          fieldId: fieldId,
+    // ✅ Laisser la frame se terminer avant de fermer le dialog
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // ❗Ferme le dialog sans conflit visuel
+      }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GameSessionScreen(
+            userId: user.id!,
+            teamId: teamId,
+            isHost: user.hasRole('HOST'),
+            gameSession: startedSession,
+            fieldId: fieldId,
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   void _stopGame() {
@@ -295,7 +322,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     try {
       final List<dynamic> mapData = await apiService.get('maps/owner/self');
       final List<GameMap> maps =
-      mapData.map((json) => GameMap.fromJson(json)).toList();
+          mapData.map((json) => GameMap.fromJson(json)).toList();
 
       if (maps.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -412,15 +439,14 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           await gameStateService.connectHostToField();
 
           final players =
-          await playerConnectionService.getConnectedPlayers(fieldId);
+              await playerConnectionService.getConnectedPlayers(fieldId);
           final playersList = players
-              .map((player) =>
-          {
-            'id': player.user.id,
-            'username': player.user.username,
-            'teamId': player.team?.id,
-            'teamName': player.team?.name,
-          })
+              .map((player) => {
+                    'id': player.user.id,
+                    'username': player.user.username,
+                    'teamId': player.team?.id,
+                    'teamName': player.team?.name,
+                  })
               .toList();
 
           for (var player in playersList) {
@@ -450,7 +476,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         // 🔄 Dissocier le terrain de la carte
         final updatedMap = selectedMap.copyWith(field: null);
         final mapResponse =
-        await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
+            await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
         logger.d('🧹 Terrain dissocié de la carte');
 
         // 🧼 Réinitialisation de la carte sélectionnée
@@ -518,12 +544,14 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          if (selectedMap.description != null && selectedMap.description!.isNotEmpty)
+          if (selectedMap.description != null &&
+              selectedMap.description!.isNotEmpty)
             Text(
               selectedMap.description!,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-          if (selectedMap.sourceAddress != null && selectedMap.sourceAddress!.isNotEmpty)
+          if (selectedMap.sourceAddress != null &&
+              selectedMap.sourceAddress!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Row(
@@ -547,7 +575,6 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       ),
     );
   }
-
 
   Widget _buildInfoCards(GameStateService gameStateService) {
     return Wrap(
@@ -607,9 +634,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                   ? 'Fermer le terrain'
                   : 'Ouvrir le terrain'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: gameStateService.isTerrainOpen
-                    ? Colors.red
-                    : Colors.green,
+                backgroundColor:
+                    gameStateService.isTerrainOpen ? Colors.red : Colors.green,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -641,7 +667,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: gameStateService.isTerrainOpen ? _selectScenarios : null,
+                onPressed:
+                    gameStateService.isTerrainOpen ? _selectScenarios : null,
                 icon: const Icon(Icons.videogame_asset),
                 label: const Text('Choisir scénarios'),
               ),
@@ -649,7 +676,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: gameStateService.isTerrainOpen ? _setGameDuration : null,
+                onPressed:
+                    gameStateService.isTerrainOpen ? _setGameDuration : null,
                 icon: const Icon(Icons.timer),
                 label: const Text('Définir durée'),
               ),
@@ -667,7 +695,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 ),
               ),
               Switch(
-                value: gameStateService.isPlayerConnected(context.read<AuthService>().currentUser!.id!),
+                value: gameStateService.isPlayerConnected(
+                    context.read<AuthService>().currentUser!.id!),
                 onChanged: gameStateService.isTerrainOpen
                     ? (value) => _toggleHostAsPlayer()
                     : null,
@@ -678,73 +707,76 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         const SizedBox(height: 24),
         gameStateService.isGameRunning
             ? Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  final user = context.read<AuthService>().currentUser!;
-                  final teamId = context.read<TeamService>().myTeamId;
-                  final field = gameStateService.selectedMap!.field;
-                  final isHost = user.hasRole('HOST') && field!.owner!.id! == user.id;
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        final user = context.read<AuthService>().currentUser!;
+                        final teamId = context.read<TeamService>().myTeamId;
+                        final field = gameStateService.selectedMap!.field;
+                        final isHost = user.hasRole('HOST') &&
+                            field!.owner!.id! == user.id;
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GameSessionScreen(
-                        gameSession: gameStateService.activeGameSession!,
-                        userId: user.id!,
-                        teamId: teamId,
-                        isHost: isHost,
-                        fieldId: field?.id!,
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GameSessionScreen(
+                              gameSession: gameStateService.activeGameSession!,
+                              userId: user.id!,
+                              teamId: teamId,
+                              isHost: isHost,
+                              fieldId: field?.id!,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.login),
+                      label: const Text('Rejoindre'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.login),
-                label: const Text('Rejoindre'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _stopGame,
-                icon: const Icon(Icons.stop_circle_outlined),
-                label: const Text('Arrêter'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-          ],
-        )
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _stopGame,
+                      icon: const Icon(Icons.stop_circle_outlined),
+                      label: const Text('Arrêter'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             : SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: gameStateService.isTerrainOpen &&
-                (gameStateService.selectedScenarios?.isNotEmpty ?? false)
-                ? _startGame
-                : null,
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Lancer la partie'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-        ),
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: gameStateService.isTerrainOpen &&
+                          (gameStateService.selectedScenarios?.isNotEmpty ??
+                              false)
+                      ? _startGame
+                      : null,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Lancer la partie'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
       ],
     );
   }
 
-  Widget _buildConnectedPlayersList(GameStateService gameStateService, AuthService authService) {
+  Widget _buildConnectedPlayersList(
+      GameStateService gameStateService, AuthService authService) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -755,46 +787,48 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         const SizedBox(height: 8),
         gameStateService.connectedPlayersList.isNotEmpty
             ? ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: gameStateService.connectedPlayersList.length,
-          itemBuilder: (context, index) {
-            final player = gameStateService.connectedPlayersList[index];
-            final isHost = player['id'] == authService.currentUser!.id;
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: isHost
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey.shade400,
-                child: const Icon(Icons.person, color: Colors.white),
-              ),
-              title: Text(
-                player['username'] ?? 'Joueur',
-                style: TextStyle(
-                  fontWeight: isHost ? FontWeight.bold : FontWeight.normal,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: gameStateService.connectedPlayersList.length,
+                itemBuilder: (context, index) {
+                  final player = gameStateService.connectedPlayersList[index];
+                  final isHost = player['id'] == authService.currentUser!.id;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isHost
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.shade400,
+                      child: const Icon(Icons.person, color: Colors.white),
+                    ),
+                    title: Text(
+                      player['username'] ?? 'Joueur',
+                      style: TextStyle(
+                        fontWeight:
+                            isHost ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    subtitle: Text(
+                      player['teamName'] != null
+                          ? 'Équipe: ${player['teamName']}'
+                          : 'Sans équipe',
+                    ),
+                    trailing: isHost ? const Text('Vous (Hôte)') : null,
+                  );
+                },
+              )
+            : const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'Aucun joueur connecté',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
               ),
-              subtitle: Text(
-                player['teamName'] != null
-                    ? 'Équipe: ${player['teamName']}'
-                    : 'Sans équipe',
-              ),
-              trailing: isHost ? const Text('Vous (Hôte)') : null,
-            );
-          },
-        )
-            : const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Text(
-              'Aucun joueur connecté',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-        ),
       ],
     );
   }
+
   Widget _buildInfoCard({
     required IconData icon,
     required String title,
@@ -827,8 +861,10 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       return const SizedBox(); // Aucun scénario sélectionné
     }
 
-    final bigScenarios = scenarios.where((s) => s.treasureHuntScenario?.size == 'BIG').toList();
-    final smallScenarios = scenarios.where((s) => s.treasureHuntScenario?.size != 'BIG').toList();
+    final bigScenarios =
+        scenarios.where((s) => s.treasureHuntScenario?.size == 'BIG').toList();
+    final smallScenarios =
+        scenarios.where((s) => s.treasureHuntScenario?.size != 'BIG').toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -842,7 +878,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           _buildScenarioCard(bigScenarios.first, isBig: true),
         ],
         const SizedBox(height: 8),
-        ...smallScenarios.map((scenario) => _buildScenarioCard(scenario)).toList(),
+        ...smallScenarios
+            .map((scenario) => _buildScenarioCard(scenario))
+            .toList(),
       ],
     );
   }
@@ -856,7 +894,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     if (treasureHuntData != null) {
       final totalTreasures = treasureHuntData.totalTreasures;
       final symbol = treasureHuntData.defaultSymbol;
-      subtitle = 'Chasse au trésor : $totalTreasures trésors à collecter ($symbol)';
+      subtitle =
+          'Chasse au trésor : $totalTreasures trésors à collecter ($symbol)';
     } else if (description != null && description.isNotEmpty) {
       subtitle = description;
     }
@@ -892,34 +931,28 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     );
   }
 
-  Future<void> _showLoadingDialog(String message) async {
-    await Future.microtask(() {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        useRootNavigator: true,
-        builder: (_) => Dialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
+  void _showLoadingDialog(String message) async {
+    final currentContext = context;
+    return showDialog(
+      context: currentContext,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const CircularProgressIndicator(),
-                const SizedBox(width: 24),
-                Expanded(child: Text(message)),
+                const SizedBox(height: 16),
+                Text('Lancement de la partie...'),
               ],
             ),
           ),
-        ),
-      );
-    });
-
-    // Attendre un mini délai pour s'assurer du rendu
-    await Future.delayed(const Duration(milliseconds: 100));
+        );
+      },
+    );
   }
-
-
 
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -966,7 +999,4 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       ),
     );
   }
-
-
-
 }

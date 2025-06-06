@@ -203,6 +203,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
                         toActivateBombSites: _bombOperationService.toActivateBombSites,
                         disableBombSites: _bombOperationService.disableBombSites,
                         activeBombSites:_bombOperationService.activeBombSites,
+                        currentZoom: widget.gameMap.initialZoom!,
                       ),
                     );
                   },
