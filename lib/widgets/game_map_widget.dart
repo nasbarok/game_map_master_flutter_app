@@ -256,23 +256,32 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   }
 
   void _openFullMapScreen(BuildContext context) {
-    // S'assurer que le service de localisation est initialisé
-    final locationService = GetIt.I<PlayerLocationService>();
-    locationService.initialize(
-        widget.userId, widget.teamId, widget.gameMap.fieldId!);
+    try {
+      // Pas besoin de réinitialiser le service de localisation, il est déjà initialisé dans le widget
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GameMapScreen(
-          gameSessionId: widget.gameSessionId,
-          gameMap: widget.gameMap,
-          userId: widget.userId,
-          teamId: widget.teamId,
-          hasBombOperationScenario: widget.hasBombOperationScenario,
+      // Ouvrir l'écran de carte en plein écran
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GameMapScreen(
+            gameSessionId: widget.gameSessionId,
+            gameMap: widget.gameMap,
+            userId: widget.userId,
+            teamId: widget.teamId,
+            hasBombOperationScenario: widget.hasBombOperationScenario,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      logger.e('❌ [_openFullMapScreen] Erreur lors de l\'ouverture de la carte en plein écran : $e');
+      // Afficher un message d'erreur à l'utilisateur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de l\'ouverture de la carte : $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Color? _parseColor(String? colorString) {

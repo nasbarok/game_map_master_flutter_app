@@ -59,9 +59,11 @@ class _GameMapScreenState extends State<GameMapScreen> {
   void initState() {
     super.initState();
     _locationService = GetIt.I<PlayerLocationService>();
-    _locationService.initialize(
-        widget.userId, widget.teamId, widget.gameMap.fieldId!);
     _locationService.startLocationSharing(widget.gameSessionId);
+
+    if (widget.hasBombOperationScenario) {
+      _bombOperationService = GetIt.I<BombOperationService>();
+    }
   }
 
   @override
