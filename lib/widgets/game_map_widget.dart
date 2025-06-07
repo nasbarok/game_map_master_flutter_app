@@ -69,6 +69,13 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         _hasCenteredOnce = true;
         logger.d('📍 Carte recentrée sur la position du joueur : $pos');
       }
+      _mapController.mapEventStream.listen((event) {
+        if (event is MapEventMove) {
+          // Forcer une mise à jour pour recalculer les cercles avec le nouveau zoom
+          setState(() {});
+        }
+      });
+
     });
 
   }
