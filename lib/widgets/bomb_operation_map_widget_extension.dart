@@ -139,4 +139,5 @@ extension BombOperationMapWidgetExtension on Object {
       ],
     );
   }
+
 }

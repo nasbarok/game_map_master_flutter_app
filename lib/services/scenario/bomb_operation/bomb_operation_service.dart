@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_state.dart';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_team.dart';
@@ -7,8 +8,10 @@ import 'package:airsoft_game_map/services/api_service.dart';
 import 'package:airsoft_game_map/services/websocket/bomb_operation_web_socket_handler.dart';
 import 'package:airsoft_game_map/services/websocket/web_socket_game_session_handler.dart';
 import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:flutter/material.dart';
 
 import '../../../models/scenario/bomb_operation/bomb_operation_session.dart';
+import '../../../models/scenario/bomb_operation/bomb_site_state.dart';
 
 /// Service pour gérer l'état du scénario Opération Bombe
 class BombOperationService {
@@ -249,12 +252,12 @@ class BombOperationService {
     _sessionScenarioBomb = BombOperationSession.fromJson(response);
     return _sessionScenarioBomb!;
   }
-
   void dispose() {
     _stopBombTimer();
     _stateStreamController.close();
     _bombSitesStreamController.close();
     logger.d('🧨 BombOperationService dispose');
   }
+
 
 }
