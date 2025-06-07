@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:airsoft_game_map/models/game_map.dart';
@@ -10,9 +11,6 @@ import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../models/coordinate.dart';
-import '../models/scenario/bomb_operation/bomb_operation_team.dart';
-import '../models/scenario/bomb_operation/bomb_site.dart';
-import '../models/scenario/bomb_operation/bomb_site_state.dart';
 import '../models/team.dart';
 import '../services/game_state_service.dart';
 import '../services/scenario/bomb_operation/bomb_operation_service.dart';
@@ -67,10 +65,30 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         final pos = posMap[widget.userId]!;
         _mapController.move(
           LatLng(pos.latitude, pos.longitude),
-          _mapController.zoom,
+          widget.gameMap.initialZoom ?? 16.0,
         );
         _hasCenteredOnce = true;
         logger.d('📍 Carte recentrée sur la position du joueur : $pos');
+      }
+
+      // Forcer un redessin après le move pour recalculer les cercles
+      Future.delayed(Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {
+            // Ce setState force un rebuild du widget après le move
+          });
+        }
+      });
+    });
+    // Ajouter un écouteur pour les changements de zoom
+    _mapController.mapEventStream.listen((event) {
+      if (event is MapEventMove) {
+        // Forcer un redessin à chaque changement de zoom
+        if (mounted) {
+          setState(() {
+            // Ce setState force un rebuild du widget après un changement de zoom
+          });
+        }
       }
     });
   }
@@ -165,6 +183,28 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                               ))
                           .toList(),
                     ),
+                  if (widget.hasBombOperationScenario && bombScenario != null)
+                    StreamBuilder<void>(
+                      stream: bombOperationService.bombSitesStream,
+                      builder: (context, snapshot) {
+                        return MarkerLayer(
+                          markers: generateBombSiteMarkers(
+                            context: context,
+                            bombScenario: bombScenario.bombOperationScenario!,
+                            gameState: gameState,
+                            teamRoles: roles,
+                            userTeamId: widget.teamId,
+                            toActivateBombSites:
+                                bombOperationService.toActivateBombSites,
+                            disableBombSites:
+                                bombOperationService.disableBombSites,
+                            activeBombSites:
+                                bombOperationService.activeBombSites,
+                            currentZoom: _mapController.zoom,
+                          ),
+                        );
+                      },
+                    ),
                   MarkerLayer(
                     markers: _positions.entries.map((entry) {
                       final userId = entry.key;
@@ -198,43 +238,6 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                       );
                     }).toList(),
                   ),
-                  // Cercles des sites de bombe
-                  if (widget.hasBombOperationScenario && bombScenario != null)
-                    CircleLayer(
-                      circles: _generateBombSiteCircles(
-                        context: context,
-                        bombSites: bombOperationService
-                                .activeSessionScenarioBomb
-                                ?.bombOperationScenario
-                                ?.bombSites ??
-                            [],
-                        teamRoles: bombOperationService.teamRoles,
-                        userTeamId: widget.teamId,
-                        toActivateBombSites:
-                            bombOperationService.toActivateBombSites,
-                        disableBombSites: bombOperationService.disableBombSites,
-                        activeBombSites: bombOperationService.activeBombSites,
-                      ),
-                    ),
-
-                  // Icônes et noms des sites de bombe
-                  if (widget.hasBombOperationScenario && bombScenario != null)
-                    MarkerLayer(
-                      markers: _generateBombSiteMarkers(
-                        context: context,
-                        bombSites: bombOperationService
-                                .activeSessionScenarioBomb
-                                ?.bombOperationScenario
-                                ?.bombSites ??
-                            [],
-                        teamRoles: bombOperationService.teamRoles,
-                        userTeamId: widget.teamId,
-                        toActivateBombSites:
-                            bombOperationService.toActivateBombSites,
-                        disableBombSites: bombOperationService.disableBombSites,
-                        activeBombSites: bombOperationService.activeBombSites,
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -288,6 +291,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
     Color markerColor = isCurrentUser ? Colors.blue : Colors.green;
     final teamService = GetIt.I<TeamService>();
     final int? teamId = teamService.getTeamIdForPlayer(userId);
+
     if (!isCurrentUser && teamId != null) {
       final team = teamService.teams.firstWhere(
         (t) => t.id == teamId,
@@ -296,15 +300,18 @@ class _GameMapWidgetState extends State<GameMapWidget> {
       markerColor = _parseColor(team.color) ?? Colors.green;
     }
 
-    // Récupérer le nom du joueur (à adapter selon votre structure de données)
     final String playerName = _getPlayerName(userId);
+    final double radius = 8;
+    final double fontSize = math.max(8, radius);
 
     return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
       children: [
-        // Point rond pour le joueur
+        // Cercle du joueur
         Container(
-          width: 16,
-          height: 16,
+          width: radius * 2,
+          height: radius * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: markerColor,
@@ -314,253 +321,23 @@ class _GameMapWidgetState extends State<GameMapWidget> {
             ),
           ),
         ),
-
-        // Nom du joueur
+        // Nom du joueur sous le point (proche)
         Positioned(
-          bottom: -5,
-          left: 8,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              playerName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Méthode pour générer les cercles des sites de bombes
-  List<CircleMarker> _generateBombSiteCircles({
-    required BuildContext context,
-    required List<BombSite> bombSites,
-    required Map<int, BombOperationTeam> teamRoles,
-    required int? userTeamId,
-    required List<BombSite> toActivateBombSites,
-    required List<BombSite> disableBombSites,
-    required List<BombSite> activeBombSites,
-  }) {
-    if (bombSites.isEmpty) {
-      return [];
-    }
-
-    final List<CircleMarker> circles = [];
-
-    // Filtrer les sites visibles
-    final visibleSites = _getVisibleBombSites(
-      bombSites: bombSites,
-      teamRoles: teamRoles,
-      userTeamId: userTeamId,
-      toActivateBombSites: toActivateBombSites,
-      disableBombSites: disableBombSites,
-      activeBombSites: activeBombSites,
-    );
-
-    // Créer un cercle pour chaque site visible
-    for (final site in visibleSites) {
-      // Déterminer l'état du site
-      final siteState = _getBombSiteState(
-        site: site,
-        teamRoles: teamRoles,
-        userTeamId: userTeamId,
-        toActivateBombSites: toActivateBombSites,
-        disableBombSites: disableBombSites,
-        activeBombSites: activeBombSites,
-      );
-
-      // Ajouter le cercle
-      circles.add(
-        CircleMarker(
-          point: LatLng(site.latitude, site.longitude),
-          color: siteState.color.withOpacity(0.2),
-          borderColor: siteState.color,
-          borderStrokeWidth: 2.0,
-          radius:
-              site.radius, // Rayon en mètres (CircleLayer gère la conversion)
-        ),
-      );
-    }
-
-    return circles;
-  }
-
-// Méthode pour générer les marqueurs des icônes et noms des sites de bombes
-  List<Marker> _generateBombSiteMarkers({
-    required BuildContext context,
-    required List<BombSite> bombSites,
-    required Map<int, BombOperationTeam> teamRoles,
-    required int? userTeamId,
-    required List<BombSite> toActivateBombSites,
-    required List<BombSite> disableBombSites,
-    required List<BombSite> activeBombSites,
-  }) {
-    if (bombSites.isEmpty) {
-      return [];
-    }
-
-    final List<Marker> markers = [];
-
-    // Filtrer les sites visibles
-    final visibleSites = _getVisibleBombSites(
-      bombSites: bombSites,
-      teamRoles: teamRoles,
-      userTeamId: userTeamId,
-      toActivateBombSites: toActivateBombSites,
-      disableBombSites: disableBombSites,
-      activeBombSites: activeBombSites,
-    );
-
-    // Créer un marqueur pour chaque site visible
-    for (final site in visibleSites) {
-      // Déterminer l'état du site
-      final siteState = _getBombSiteState(
-        site: site,
-        teamRoles: teamRoles,
-        userTeamId: userTeamId,
-        toActivateBombSites: toActivateBombSites,
-        disableBombSites: disableBombSites,
-        activeBombSites: activeBombSites,
-      );
-
-      // Ajouter le marqueur
-      markers.add(
-        Marker(
-          point: LatLng(site.latitude, site.longitude),
-          width: 40,
-          height: 40,
-          child: _buildBombSiteMarkerContent(
-            context: context,
-            site: site,
-            color: siteState.color,
-            isPlanted: siteState.isPlanted,
-          ),
-        ),
-      );
-    }
-
-    return markers;
-  }
-
-// Méthode pour filtrer les sites de bombes visibles selon le rôle de l'utilisateur
-  List<BombSite> _getVisibleBombSites({
-    required List<BombSite> bombSites,
-    required Map<int, BombOperationTeam> teamRoles,
-    required int? userTeamId,
-    required List<BombSite> toActivateBombSites,
-    required List<BombSite> disableBombSites,
-    required List<BombSite> activeBombSites,
-  }) {
-    if (bombSites.isEmpty) {
-      return [];
-    }
-
-    final bool isAttacker = isAttackTeam(userTeamId, teamRoles);
-    final bool isDefender = isDefenseTeam(userTeamId, teamRoles);
-
-    return bombSites.where((site) {
-      final bool isActive = activeBombSites.any((s) => s.id == site.id);
-      final bool isInToActivate =
-          toActivateBombSites.any((s) => s.id == site.id);
-      final bool isInDisabled = disableBombSites.any((s) => s.id == site.id);
-
-      if (isAttacker) {
-        // Les attaquants voient uniquement les bombes "à activer"
-        return isInToActivate || isActive;
-      } else if (isDefender) {
-        // Les défenseurs voient toutes les bombes désactivées + celles activées
-        return isInDisabled || isActive;
-      }
-
-      return false;
-    }).toList();
-  }
-
-  // Méthode pour déterminer l'état d'un site de bombe
-  BombSiteState _getBombSiteState({
-    required BombSite site,
-    required Map<int, BombOperationTeam> teamRoles,
-    required int? userTeamId,
-    required List<BombSite> toActivateBombSites,
-    required List<BombSite> disableBombSites,
-    required List<BombSite> activeBombSites,
-  }) {
-    // Déterminer si ce site est actif/planté
-    final bool isActive = activeBombSites.any((s) => s.id == site.id);
-    final bool isPlanted = activeBombSites.any((s) => s.id == site.id);
-
-    // Déterminer si ce site doit être grisé
-    final bool isAttacker = isAttackTeam(userTeamId, teamRoles);
-    final bool isDefender = isDefenseTeam(userTeamId, teamRoles);
-    final bool isGreyed = isDefender && !isPlanted && !isActive;
-
-    // Couleur du site selon l'état
-    Color color;
-    if (isGreyed) {
-      color = Colors.grey;
-    } else if (isPlanted) {
-      color = Colors.red;
-    } else {
-      color = site.getColor(context);
-    }
-
-    return BombSiteState(
-      color: color,
-      isPlanted: isPlanted,
-      isGreyed: isGreyed,
-    );
-  }
-
-// Méthode pour construire le contenu du marqueur (icône + nom)
-  Widget _buildBombSiteMarkerContent({
-    required BuildContext context,
-    required BombSite site,
-    required Color color,
-    required bool isPlanted,
-  }) {
-    // Icône selon l'état
-    final IconData iconData = isPlanted
-        ? Icons.warning_amber_rounded // Bombe active
-        : Icons.dangerous; // Site de bombe normal
-
-    return Stack(
-      children: [
-        // Icône centrale
-        Center(
-          child: Icon(
-            iconData,
-            color: color,
-            size: 30,
-          ),
-        ),
-
-        // Nom du site
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              site.name,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
+          top: radius * 2 + 2, // juste en dessous du cercle
+          child: Text(
+            playerName,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.deepPurple[800], // couleur bien distincte
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              shadows: const [
+                Shadow(
+                  offset: Offset(0, 0),
+                  blurRadius: 2,
+                  color: Colors.white,
+                ),
+              ],
             ),
           ),
         ),
