@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math show max;
+
 import 'package:airsoft_game_map/models/coordinate.dart';
 import 'package:airsoft_game_map/models/game_map.dart';
 import 'package:airsoft_game_map/services/player_location_service.dart';
@@ -6,6 +9,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../models/game_session_participant.dart';
 import '../../models/scenario/bomb_operation/bomb_operation_state.dart';
 import '../../models/team.dart';
 import '../../services/game_state_service.dart';
@@ -15,21 +19,30 @@ import 'package:airsoft_game_map/screens/scenario/bomb_operation/bomb_operation_
 import '../../services/team_service.dart';
 import 'package:airsoft_game_map/utils/logger.dart';
 
+enum TileLayerType {
+  osm,
+  satellite,
+}
+
 /// Écran affichant la carte en temps réel avec les positions des joueurs
 class GameMapScreen extends StatefulWidget {
   final int gameSessionId;
   final GameMap gameMap;
   final int userId;
   final int? teamId;
+  final int? fieldId;
   final bool hasBombOperationScenario;
+  final List<GameSessionParticipant> participants;
 
   const GameMapScreen({
     Key? key,
     required this.gameSessionId,
     required this.gameMap,
+    required this.fieldId,
     required this.userId,
     this.teamId,
     this.hasBombOperationScenario = false,
+    required this.participants,
   }) : super(key: key);
 
   @override
@@ -40,6 +53,14 @@ class _GameMapScreenState extends State<GameMapScreen> {
   final MapController _mapController = MapController();
   late PlayerLocationService _locationService;
   late BombOperationService _bombOperationService;
+
+  StreamSubscription<Map<int, Coordinate>>? _positionSub;
+  StreamSubscription<MapEvent>? _mapEventSub;
+
+  late final Stream<Map<int, Coordinate>> _positionStream;
+
+  Map<int, Coordinate> _positions = {};
+  bool _hasCenteredOnce = false;
 
   bool _isFullScreen = false;
 
@@ -54,24 +75,50 @@ class _GameMapScreenState extends State<GameMapScreen> {
     7: Colors.pink,
     8: Colors.indigo,
   };
+  TileLayerType _tileLayerType = TileLayerType.osm;
+
+  final String _osmTileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+  final String _satelliteTileUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+
 
   @override
   void initState() {
     super.initState();
-    _locationService = GetIt.I<PlayerLocationService>();
-    _locationService.startLocationSharing(widget.gameSessionId);
+    logger.d('[GameMapScreen] [initState] ✅  initState sessionId=${widget.gameSessionId}');
+    final locationService = GetIt.I<PlayerLocationService>();
+    locationService.initialize(widget.userId, widget.teamId, widget.fieldId!);
+    logger.d(
+        '🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
+    locationService.loadInitialPositions(widget.fieldId!);
+    locationService.startLocationSharing(widget.gameSessionId);
+    _positionSub = locationService.positionStream.listen(_handlePositionStream);
+
+    logger.d('[GameMapScreen] ✅ _positionSub initialisé depuis widget.positionStream');
 
     if (widget.hasBombOperationScenario) {
       _bombOperationService = GetIt.I<BombOperationService>();
     }
+
+    //_positionSub = _positionStream.listen(_handlePositionStream);
+
+/*    _positionStream.listen((data) {
+      logger.d('[GameMapScreen] 📡 Test direct → data reçu : ${data.length}');
+    });*/
+
+    _mapEventSub = _mapController.mapEventStream.listen((event) {
+      if (event is MapEventMove && mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
-    _locationService.stopLocationSharing();
     if (widget.hasBombOperationScenario) {
       _bombOperationService.dispose();
     }
+  /*  _positionSub?.cancel();
+    _mapEventSub?.cancel();*/
     super.dispose();
   }
 
@@ -91,6 +138,23 @@ class _GameMapScreenState extends State<GameMapScreen> {
                     });
                   },
                 ),
+                IconButton(
+                  icon: Icon(
+                    _tileLayerType == TileLayerType.osm
+                        ? Icons.satellite_alt
+                        : Icons.map,
+                  ),
+                  tooltip: _tileLayerType == TileLayerType.osm
+                      ? 'Vue satellite'
+                      : 'Vue standard',
+                  onPressed: () {
+                    setState(() {
+                      _tileLayerType = _tileLayerType == TileLayerType.osm
+                          ? TileLayerType.satellite
+                          : TileLayerType.osm;
+                    });
+                  },
+                ),
               ],
             ),
       body: Stack(
@@ -99,16 +163,16 @@ class _GameMapScreenState extends State<GameMapScreen> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              center: LatLng(widget.gameMap.centerLatitude ?? 48.8566,
-                  widget.gameMap.centerLongitude ?? 2.3522),
+              center: LatLng(widget.gameMap.centerLatitude!,
+                  widget.gameMap.centerLongitude!),
               zoom: widget.gameMap.initialZoom ?? 13.0,
               minZoom: 3.0,
-              maxZoom: 18.0,
+              maxZoom: 22.0,
             ),
             children: [
               // Couche de tuiles (fond de carte)
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: _activeTileUrl,
                 userAgentPackageName: 'com.airsoft.gamemapmaster',
               ),
 
@@ -166,30 +230,6 @@ class _GameMapScreenState extends State<GameMapScreen> {
                           ))
                       .toList(),
                 ),
-
-              // Positions des joueurs
-              StreamBuilder<Map<int, Coordinate>>(
-                stream: _locationService.positionStream,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return MarkerLayer(markers: []);
-
-                  final positions = snapshot.data!;
-                  return MarkerLayer(
-                    markers: positions.entries.map((entry) {
-                      final userId = entry.key;
-                      final position = entry.value;
-                      final isCurrentUser = userId == widget.userId;
-
-                      return Marker(
-                        point: LatLng(position.latitude, position.longitude),
-                        width: 40,
-                        height: 40,
-                        child: _buildPlayerMarker(userId, isCurrentUser),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
               // Sites de bombe (si le scénario Bombe est actif)
               if (widget.hasBombOperationScenario)
                 StreamBuilder<void>(
@@ -198,18 +238,63 @@ class _GameMapScreenState extends State<GameMapScreen> {
                     return MarkerLayer(
                       markers: widget.generateBombSiteMarkers(
                         context: context,
-                        bombScenario: _bombOperationService.activeSessionScenarioBomb!.bombOperationScenario!,
+                        bombScenario: _bombOperationService
+                            .activeSessionScenarioBomb!.bombOperationScenario!,
                         gameState: _bombOperationService.currentState,
                         teamRoles: _bombOperationService.teamRoles,
                         userTeamId: widget.teamId,
-                        toActivateBombSites: _bombOperationService.toActivateBombSites,
-                        disableBombSites: _bombOperationService.disableBombSites,
-                        activeBombSites:_bombOperationService.activeBombSites,
+                        toActivateBombSites:
+                            _bombOperationService.toActivateBombSites,
+                        disableBombSites:
+                            _bombOperationService.disableBombSites,
+                        activeBombSites: _bombOperationService.activeBombSites,
                         currentZoom: _mapController.zoom,
                       ),
                     );
                   },
                 ),
+              // Positions des joueurs
+              MarkerLayer(
+                markers: _positions.entries
+                    .map((entry) {
+                      final userId = entry.key;
+                      final position = entry.value;
+                      logger.d(
+                          '[GameMapScreen] 🔄 Traitement position userId=$userId : $position');
+
+                      final participant = _findParticipantByUserId(userId);
+                      if (participant == null) {
+                        logger.w(
+                            '[GameMapScreen] ⚠️ Aucun participant trouvé pour userId=$userId');
+                        return null;
+                      }
+
+                      final isCurrentUser = userId == widget.userId;
+                      logger.d(
+                          '[GameMapScreen] 👤 ${participant.username} (ID: $userId, teamId=${participant.teamId}, isMe=$isCurrentUser)');
+
+                      if (!isCurrentUser &&
+                          participant.teamId != widget.teamId) {
+                        logger.d(
+                            '[GameMapScreen] ❌ Marqueur ignoré pour ${participant.username} '
+                            '(équipe différente) → participant.teamId=${participant.teamId} != widget.teamId=${widget.teamId}');
+                        return null;
+                      }
+
+                      logger.d(
+                          '[GameMapScreen] ✅ Marqueur créé pour ${participant.username}');
+                      final markerWidget =
+                          _buildPlayerMarker(userId, isCurrentUser);
+                      return Marker(
+                        point: LatLng(position.latitude, position.longitude),
+                        width: 30,
+                        height: 30,
+                        child: markerWidget,
+                      );
+                    })
+                    .whereType<Marker>()
+                    .toList(),
+              ),
             ],
           ),
 
@@ -281,12 +366,13 @@ class _GameMapScreenState extends State<GameMapScreen> {
 
   void _centerOnCurrentPosition() async {
     try {
-      // Récupérer la position actuelle
-      final positions = _locationService.currentPlayerPositions;
+      final positions = GetIt.I<PlayerLocationService>().currentPlayerPositions;
       if (positions.containsKey(widget.userId)) {
         final myPosition = positions[widget.userId]!;
-        _mapController.move(LatLng(myPosition.latitude, myPosition.longitude),
-            _mapController.zoom);
+        _mapController.move(
+          LatLng(myPosition.latitude, myPosition.longitude),
+          _mapController.zoom,
+        );
       }
     } catch (e) {
       logger.d('Erreur lors du centrage sur la position actuelle: $e');
@@ -294,29 +380,30 @@ class _GameMapScreenState extends State<GameMapScreen> {
   }
 
   Widget _buildPlayerMarker(int userId, bool isCurrentUser) {
-    final teamService = GetIt.I<TeamService>();
-    final int? teamId = teamService.getTeamIdForPlayer(userId);
+    final participant = _findParticipantByUserId(userId);
+    final String teamName = participant?.teamName ?? 'Aucune';
+    final int? teamId = participant?.teamId;
+    // Définir la couleur selon équipe
+    Color markerColor = Colors.blue;
 
-    Color markerColor = Colors.green; // défaut si aucune équipe trouvée
-
-    if (teamId != null) {
-      final team = teamService.teams.firstWhere(
-        (t) => t.id == teamId,
-        orElse: () => Team(id: -1, name: 'Aucune', color: null),
-      );
-
-      markerColor = _parseColor(team.color) ?? Colors.green;
-    }
-
-    // Récupérer le nom du joueur (à adapter selon votre structure de données)
     final String playerName = _getPlayerName(userId);
+    final double radius = 8;
+    final double fontSize = math.max(8, radius);
+
+    /*logger.d(
+      '🎯 [GameMapScreen] [_buildPlayerMarker] '
+      '${isCurrentUser ? "Moi" : playerName} '
+      '(ID: $userId, équipe: $teamName, teamId: ${teamId ?? "N/A"}) '
+      '→ couleur: $markerColor',
+    );*/
 
     return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
       children: [
-        // Point rond pour le joueur
         Container(
-          width: 16,
-          height: 16,
+          width: radius * 2,
+          height: radius * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: markerColor,
@@ -326,24 +413,22 @@ class _GameMapScreenState extends State<GameMapScreen> {
             ),
           ),
         ),
-
-        // Nom du joueur
         Positioned(
-          bottom: -5,
-          left: 8,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              playerName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+          top: radius * 2 + 2,
+          child: Text(
+            playerName,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.deepPurple[800],
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              shadows: const [
+                Shadow(
+                  offset: Offset(0, 0),
+                  blurRadius: 2,
+                  color: Colors.white,
+                ),
+              ],
             ),
           ),
         ),
@@ -353,12 +438,19 @@ class _GameMapScreenState extends State<GameMapScreen> {
 
 // Méthode pour récupérer le nom du joueur
   String _getPlayerName(int userId) {
-    final gameStateService = GetIt.I<GameStateService>();
-    final player = gameStateService.connectedPlayersList.firstWhere(
-      (p) => p['id'] == userId,
-      orElse: () => {},
-    );
-    return player['username'] ?? 'Joueur $userId';
+    final participant = widget.participants
+        .where((p) => p.userId == userId)
+        .cast<GameSessionParticipant?>()
+        .firstOrNull;
+
+    return participant?.username ?? 'Joueur $userId';
+  }
+
+  GameSessionParticipant? _findParticipantByUserId(int userId) {
+    for (final p in widget.participants) {
+      if (p.userId == userId) return p;
+    }
+    return null;
   }
 
   Color? _parseColor(String? colorString) {
@@ -402,4 +494,66 @@ class _GameMapScreenState extends State<GameMapScreen> {
     final remainingSeconds = seconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
+  void _handlePositionStream(Map<int, Coordinate> posMap) {
+    logger.d('[GameMapScreen] [handlePositionStream] 🔔 Stream position reçu : ${posMap.length} positions');
+
+    if (!mounted) return;
+
+    logger.d('📡 [GameMapScreen] Positions reçues (${posMap.length}) :');
+    final List<int> receivedIds = posMap.keys.toList();
+    final List<int> participantIds =
+    widget.participants.map((p) => p.userId).toList();
+
+    for (final entry in posMap.entries) {
+      final userId = entry.key;
+      final coord = entry.value;
+      final participant = _findParticipantByUserId(userId);
+      final username = participant?.username ?? 'Inconnu';
+      final team = participant?.teamName ?? 'Sans équipe';
+      final role = participant?.participantType ?? 'PLAYER';
+      final isCurrentUser = userId == widget.userId ? ' 👈 (moi)' : '';
+      logger.d(
+          '🧭 $username (ID: $userId, équipe: $team, rôle: $role)$isCurrentUser → '
+              'lat=${coord.latitude}, lng=${coord.longitude}');
+    }
+
+    final missingUsers =
+    participantIds.where((id) => !receivedIds.contains(id));
+    if (missingUsers.isNotEmpty) {
+      logger.w('⚠️ Participants sans position reçue :');
+      for (final userId in missingUsers) {
+        final participant = _findParticipantByUserId(userId);
+        final name = participant?.username ?? 'Inconnu';
+        logger.w(
+            '⛔ $name (ID: $userId, équipe: ${participant?.teamName ?? "N/A"})');
+      }
+    }
+
+    setState(() {
+      _positions = posMap;
+    });
+
+    if (!_hasCenteredOnce && posMap.containsKey(widget.userId)) {
+      final pos = posMap[widget.userId]!;
+      _mapController.move(
+        LatLng(pos.latitude, pos.longitude),
+        widget.gameMap.initialZoom ?? 16.0,
+      );
+      _hasCenteredOnce = true;
+      logger.d('📍 Carte recentrée sur la position du joueur : $pos');
+    }
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {}); // Forcer le redessin
+      }
+    });
+  }
+
+  String get _activeTileUrl {
+    return _tileLayerType == TileLayerType.osm
+        ? _osmTileUrl
+        : _satelliteTileUrl;
+  }
+
 }

@@ -9,6 +9,7 @@ import 'package:airsoft_game_map/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
 /// Extension du GameMapScreen pour le scénario Opération Bombe
 extension BombOperationMapExtension on GameMapScreen {
@@ -37,59 +38,50 @@ extension BombOperationMapExtension on GameMapScreen {
     required List<BombSite> activeBombSites,
     required double currentZoom,
   }) {
-    if (disableBombSites == null || disableBombSites.isEmpty) {
-      return [];
-    }
-
     final List<Marker> markers = [];
 
-    // Déterminer le rôle de l'équipe de l'utilisateur
     final bool isAttacker = isAttackTeam(userTeamId, teamRoles);
     final bool isDefender = isDefenseTeam(userTeamId, teamRoles);
 
-    // Parcourir tous les sites de bombe
-    for (final site in disableBombSites) {
-      // Déterminer si ce site est actif pour ce round
-      final bool isActive = activeBombSites.contains(site.id);
+  /*  logger.d('🎯 [BombOperationMapExtension] Rôle détecté : ${isAttacker ? "Attacker" : isDefender ? "Defender" : "Spectator/Unknown"}');
+    logger.d('🧩 [BombOperationMapExtension] toActivateBombSites: ${toActivateBombSites.map((b) => b.name).join(", ")}');
+    logger.d('🛑 [BombOperationMapExtension] disableBombSites: ${disableBombSites.map((b) => b.name).join(", ")}');
+    logger.d('🔥 [BombOperationMapExtension] activeBombSites: ${activeBombSites.map((b) => b.name).join(", ")}');*/
 
-      // Déterminer si une bombe est plantée sur ce site
-      final bool isPlanted = activeBombSites.contains(site.id);
+    final Set<int> activeIds = activeBombSites.map((e) => e.id!).toSet();
 
-      // Déterminer si ce site doit être visible pour l'utilisateur
-      bool isVisible = false;
-      bool isGreyed = false;
+    // Sélection explicite des sites visibles
+    Iterable<BombSite> visibleSites = [];
 
-      if (isAttacker) {
-        // Les attaquants (terroristes) voient uniquement les bombes sélectionnées pour la partie
-        isVisible = isActive;
-        isGreyed = false; // Les terroristes voient toujours les bombes actives en couleur normale
-      } else if (isDefender) {
-        // Les défenseurs (anti-terroristes) voient toutes les bombes
-        isVisible = true; // Toujours visible
+    if (isAttacker) {
+      visibleSites = toActivateBombSites;
+    } else if (isDefender) {
+      visibleSites = disableBombSites;
+    }
 
-        // Mais les bombes non actives ou non plantées sont grisées
-        isGreyed = !isPlanted && !isActive;
-      }
-      final radiusInPixels = AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
+    for (final site in visibleSites) {
+      final int siteId = site.id!;
+      final bool isPlanted = activeIds.contains(siteId);
+      final bool isGreyed = isDefender && !isPlanted;
 
-      // Si le site doit être visible, ajouter un marqueur
-      if (isVisible) {
-        markers.add(
-          Marker(
-            point: LatLng(site.latitude, site.longitude),
-            width: radiusInPixels * 2, // Diamètre = 2 * rayon
-            height: radiusInPixels * 2,
-            child: _buildBombSiteMarker(
-              context: context,
-              site: site,
-              isPlanted: isPlanted,
-              isAttacker: isAttacker,
-              isGreyed: isGreyed,
-              radiusInPixels: radiusInPixels,
-            ),
+      final radiusInPixels =
+      AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
+
+      markers.add(
+        Marker(
+          point: LatLng(site.latitude, site.longitude),
+          width: radiusInPixels * 2,
+          height: radiusInPixels * 2,
+          child: _buildBombSiteMarker(
+            context: context,
+            site: site,
+            isPlanted: isPlanted,
+            isAttacker: isAttacker,
+            isGreyed: isGreyed,
+            radiusInPixels: radiusInPixels,
           ),
-        );
-      }
+        ),
+      );
     }
 
     return markers;
@@ -104,70 +96,58 @@ extension BombOperationMapExtension on GameMapScreen {
     required bool isGreyed,
     required double radiusInPixels,
   }) {
-    // Couleur du marqueur selon l'état de la bombe
+    // Couleur du marqueur
     Color markerColor;
-
     if (isGreyed) {
-      // Bombe grisée (pour les anti-terroristes, bombes inactives)
       markerColor = Colors.grey;
     } else if (isPlanted) {
-      // Bombe plantée (compte à rebours actif)
-      markerColor = Colors.red;
+      markerColor = Colors.red.shade800;
+    } else if (isAttacker) {
+      markerColor = Colors.red.shade200;
     } else {
-      // Couleur normale du site
       markerColor = site.getColor(context);
     }
 
-    // Icône selon le rôle et l'état
-    final IconData iconData = isPlanted
-        ? Icons.warning_amber_rounded  // Bombe active
-        : Icons.dangerous;  // Site de bombe normal
+    // Taille du texte en fonction du rayon
+    final double dynamicFontSize = math.max(8, radiusInPixels / 3);
 
     return Stack(
+      alignment: Alignment.center,
       children: [
-        // Cercle représentant le rayon d'action
+        // Cercle de rayon
         Container(
           width: radiusInPixels * 2,
           height: radiusInPixels * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: markerColor.withOpacity(0.2),
-            border: Border.all(
-              color: markerColor,
-              width: 2,
-            ),
+            border: Border.all(color: markerColor, width: 2),
           ),
         ),
 
-        // Icône centrale
-        Center(
-          child: Icon(
-            iconData,
+        // Icône bombe au centre si plantée
+        if (isPlanted)
+          Icon(
+            Icons.local_fire_department,
             color: markerColor,
-            size: math.min(30, radiusInPixels * 0.6),
+            size: dynamicFontSize * 1.2,
           ),
-        ),
 
-        // Nom du site
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              site.name,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
+        // Nom du site (toujours affiché)
+        Text(
+          site.name,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: dynamicFontSize,
+            fontWeight: FontWeight.bold,
+            shadows: const [
+              Shadow(
+                offset: Offset(0, 0),
+                blurRadius: 2,
                 color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
               ),
-            ),
+            ],
           ),
         ),
       ],

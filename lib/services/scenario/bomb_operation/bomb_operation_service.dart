@@ -103,7 +103,7 @@ class BombOperationService {
 
       _activeBombSites.clear();
       if (_sessionScenarioBomb?.activeBombSites != null) {
-        for (final site in _sessionScenarioBomb!.bombOperationScenario!.bombSites!) {
+        for (final site in _sessionScenarioBomb!.activeBombSites) {
             _activeBombSites.add(site);
         }
         logger.d('✅ [BombOperationService] [initialize] Sites actifs: '
@@ -246,10 +246,16 @@ class BombOperationService {
       'game-sessions/bomb-operation?scenarioId=$scenarioId&gameSessionId=$gameSessionId',
       {},
     );
-    logger.d('[BombOperationService] 🔁 Réponse DTO reçue: $response');
+    logger.d('[BombOperationService] 🔁 Réponse DTO reçue (découpée) :');
+    response.forEach((key, value) {
+      logger.d('   🔹 $key: $value');
+    });
 
-    // ⚠️ Tu remplaces ici l'ancien appel à get(...)
     _sessionScenarioBomb = BombOperationSession.fromJson(response);
+
+    _sessionScenarioBomb!.bombOperationScenario?.bombSites?.forEach((site) {
+      logger.d('📍 Site → ${site.name} (isActive: ${site.active})');
+    });
     return _sessionScenarioBomb!;
   }
   void dispose() {

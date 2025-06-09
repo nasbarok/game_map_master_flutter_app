@@ -25,59 +25,50 @@ extension BombOperationMapWidgetExtension on Object {
     required List<BombSite> activeBombSites,
     required double currentZoom,
   }) {
-    if (disableBombSites == null || disableBombSites.isEmpty) {
-      return [];
-    }
-
     final List<Marker> markers = [];
 
-    // Déterminer le rôle de l'équipe de l'utilisateur
     final bool isAttacker = isAttackTeam(userTeamId, teamRoles);
     final bool isDefender = isDefenseTeam(userTeamId, teamRoles);
 
-    // Parcourir tous les sites de bombe
-    for (final site in disableBombSites) {
-      // Déterminer si ce site est actif pour ce round
-      final bool isActive = activeBombSites.contains(site.id);
+/*    logger.d('🎯 [BombOperationMapWidgetExtension] Rôle détecté : ${isAttacker ? "Attacker" : isDefender ? "Defender" : "Spectator/Unknown"}');
+    logger.d('🧩 [BombOperationMapWidgetExtension] toActivateBombSites: ${toActivateBombSites.map((b) => b.name).join(", ")}');
+    logger.d('🛑 [BombOperationMapWidgetExtension] disableBombSites: ${disableBombSites.map((b) => b.name).join(", ")}');
+    logger.d('🔥 [BombOperationMapWidgetExtension] activeBombSites: ${activeBombSites.map((b) => b.name).join(", ")}');*/
 
-      // Déterminer si une bombe est plantée sur ce site
-      final bool isPlanted = activeBombSites.contains(site.id);
+    final Set<int> activeIds = activeBombSites.map((e) => e.id!).toSet();
 
-      // Déterminer si ce site doit être visible pour l'utilisateur
-      bool isVisible = false;
-      bool isGreyed = false;
+    // Sélection explicite des sites visibles
+    Iterable<BombSite> visibleSites = [];
 
-      if (isAttacker) {
-        // Les attaquants (terroristes) voient uniquement les bombes sélectionnées pour la partie
-        isVisible = isActive;
-        isGreyed = false; // Les terroristes voient toujours les bombes actives en couleur normale
-      } else if (isDefender) {
-        // Les défenseurs (anti-terroristes) voient toutes les bombes
-        isVisible = true; // Toujours visible
+    if (isAttacker) {
+      visibleSites = toActivateBombSites;
+    } else if (isDefender) {
+      visibleSites = disableBombSites;
+    }
 
-        // Mais les bombes non actives ou non plantées sont grisées
-        isGreyed = !isPlanted && !isActive;
-      }
-      final radiusInPixels = AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
+    for (final site in visibleSites) {
+      final int siteId = site.id!;
+      final bool isPlanted = activeIds.contains(siteId);
+      final bool isGreyed = isDefender && !isPlanted;
 
-      // Si le site doit être visible, ajouter un marqueur
-      if (isVisible) {
-        markers.add(
-          Marker(
-            point: LatLng(site.latitude, site.longitude),
-            width: radiusInPixels * 2, // Diamètre = 2 * rayon
-            height: radiusInPixels * 2,
-            child: _buildBombSiteMarker(
-              context: context,
-              site: site,
-              isPlanted: isPlanted,
-              isAttacker: isAttacker,
-              isGreyed: isGreyed,
-              radiusInPixels: radiusInPixels,
-            ),
+      final radiusInPixels =
+          AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
+
+      markers.add(
+        Marker(
+          point: LatLng(site.latitude, site.longitude),
+          width: radiusInPixels * 2,
+          height: radiusInPixels * 2,
+          child: _buildBombSiteMarker(
+            context: context,
+            site: site,
+            isPlanted: isPlanted,
+            isAttacker: isAttacker,
+            isGreyed: isGreyed,
+            radiusInPixels: radiusInPixels,
           ),
-        );
-      }
+        ),
+      );
     }
 
     return markers;
@@ -107,15 +98,12 @@ extension BombOperationMapWidgetExtension on Object {
     if (isGreyed) {
       markerColor = Colors.grey;
     } else if (isPlanted) {
-      markerColor = Colors.red;
+      markerColor = Colors.red.shade800;
+    } else if (isAttacker) {
+      markerColor = Colors.red.shade200;
     } else {
       markerColor = site.getColor(context);
     }
-
-    // Déterminer l'icône
-    final IconData iconData = isPlanted
-        ? Icons.warning_amber_rounded
-        : Icons.dangerous;
 
     // Taille du texte en fonction du rayon
     final double dynamicFontSize = math.max(8, radiusInPixels / 3);
@@ -133,7 +121,16 @@ extension BombOperationMapWidgetExtension on Object {
             border: Border.all(color: markerColor, width: 2),
           ),
         ),
-        // Texte du nom centré, noir avec ombre blanche
+
+        // Icône bombe au centre si plantée
+        if (isPlanted)
+          Icon(
+            Icons.local_fire_department,
+            color: markerColor,
+            size: dynamicFontSize * 1.2,
+          ),
+
+        // Nom du site (toujours affiché)
         Text(
           site.name,
           textAlign: TextAlign.center,

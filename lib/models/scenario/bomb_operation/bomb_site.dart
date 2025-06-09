@@ -24,7 +24,7 @@ class BombSite {
   /// Couleur du marqueur sur la carte (format hexadécimal)
   final String? color;
 
-  final bool isActive;
+  final bool active;
   /// Constructeur
   BombSite({
     this.id,
@@ -35,7 +35,7 @@ class BombSite {
     required this.longitude,
     required this.radius,
     this.color,
-    this.isActive = false,
+    this.active = false,
   });
 
   /// Crée une instance de BombSite à partir d'un objet JSON
@@ -49,7 +49,7 @@ class BombSite {
       longitude: json['longitude'],
       radius: json['radius'].toDouble(),
       color: json['color'],
-      isActive: json['isActive'] ?? false, // gestion de null-safe
+      active: json['active'] ?? false, // gestion de null-safe
     );
   }
 
@@ -64,7 +64,7 @@ class BombSite {
       'longitude': longitude,
       'radius': radius,
       'color': color,
-      'isActive': isActive,
+      'active': active,
     };
   }
 
@@ -78,7 +78,7 @@ class BombSite {
     double? longitude,
     double? radius,
     String? color,
-    bool? isActive,
+    bool? active,
   }) {
     return BombSite(
       id: id ?? this.id,
@@ -89,7 +89,7 @@ class BombSite {
       longitude: longitude ?? this.longitude,
       radius: radius ?? this.radius,
       color: color ?? this.color,
-      isActive: isActive ?? this.isActive,
+      active: active ?? this.active,
     );
   }
 
