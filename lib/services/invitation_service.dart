@@ -203,7 +203,7 @@ class InvitationService extends ChangeNotifier {
       // Si l'invitation est acceptée, connecter le joueur au terrain
       if (accept) {
         final apiService = GetIt.I<ApiService>();
-        _gameStateService.restoreSessionIfNeeded(apiService);
+        _gameStateService.restoreSessionIfNeeded(apiService,fieldId);
       }
 
       // Supprimer des invitations en attente

@@ -4,22 +4,25 @@ import 'bomb_site.dart';
 class BombOperationScenario {
   /// Identifiant unique du scénario
   final int? id;
-  
+
   /// scénario
   final int? scenarioId;
 
   /// Durée du timer de la bombe en secondes
   final int bombTimer;
-  
+
   /// Durée nécessaire pour désamorcer la bombe en secondes
   final int defuseTime;
+
+  /// Durée nécessaire pour amorcer la bombe en secondes (géré côté Flutter)
+  final int armingTime;
 
   /// Nombre de sites de bombe à activer aléatoirement par round
   final int? activeSites;
 
   final String? attackTeamName;
   final String? defenseTeamName;
-  
+
   /// Liste des sites de bombe associés à ce scénario
   final List<BombSite>? bombSites;
 
@@ -35,6 +38,7 @@ class BombOperationScenario {
     this.scenarioId,
     required this.bombTimer,
     required this.defuseTime,
+    required this.armingTime,
     this.activeSites,
     this.attackTeamName,
     this.defenseTeamName,
@@ -57,6 +61,7 @@ class BombOperationScenario {
       scenarioId: json['scenarioId'],
       bombTimer: json['bombTimer'],
       defuseTime: json['defuseTime'],
+      armingTime: json['armingTime'] ?? 15,
       activeSites: json['activeSites'],
       attackTeamName: json['attackTeamName'],
       defenseTeamName: json['defenseTeamName'],
@@ -73,20 +78,21 @@ class BombOperationScenario {
       'scenarioId': scenarioId,
       'bombTimer': bombTimer,
       'defuseTime': defuseTime,
+      'armingTime': armingTime,
       'activeSites': activeSites,
       'attackTeamName': attackTeamName,
       'defenseTeamName': defenseTeamName,
       'showZones': showZones,
       'showPointsOfInterest': showPointsOfInterest,
     };
-    
+
     if (bombSites != null) {
       data['bombSites'] = bombSites!.map((site) => site.toJson()).toList();
     }
-    
+
     return data;
   }
-  
+
   /// Crée une copie de cette instance avec les valeurs spécifiées remplacées
   BombOperationScenario copyWith({
     int? id,
@@ -94,6 +100,7 @@ class BombOperationScenario {
     String? description,
     int? bombTimer,
     int? defuseTime,
+    int? armingTime,
     int? activeSitesPerRound,
     bool? active,
     List<BombSite>? bombSites,
@@ -106,6 +113,7 @@ class BombOperationScenario {
       bombTimer: bombTimer ?? this.bombTimer,
       defuseTime: defuseTime ?? this.defuseTime,
       activeSites: activeSites ?? this.activeSites,
+      armingTime: armingTime ?? this.armingTime,
       attackTeamName: attackTeamName ?? this.attackTeamName,
       defenseTeamName: defenseTeamName ?? this.defenseTeamName,
       bombSites: bombSites ?? this.bombSites,

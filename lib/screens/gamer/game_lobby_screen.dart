@@ -468,7 +468,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
       if (response != null) {
         // Mettre à jour l'état du jeu
-        await gameStateService.restoreSessionIfNeeded(apiService);
+        await gameStateService.restoreSessionIfNeeded(apiService,fieldId);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -524,7 +524,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
   Widget _buildPlayersTab() {
     final gameStateService = context.read<GameStateService>();
-    final teamService = context.read<TeamService>();
+    final teamService = context.watch<TeamService>();
     final authService = context.read<AuthService>();
     final connectedPlayers = gameStateService.connectedPlayersList;
     final teams = teamService.teams;
@@ -625,7 +625,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   // Dans GameLobbyScreen
 
   Widget _buildTeamInfo() {
-    final teamService = context.read<TeamService>();
+    final teamService = GetIt.I<TeamService>();
     final myTeamId = teamService.myTeamId;
 
     // Trouver l'équipe du joueur
@@ -710,7 +710,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             itemCount: teams.length,
             itemBuilder: (context, index) {
               final team = teams[index];
-              final teamService = context.read<TeamService>();
+              final teamService = context.watch<TeamService>();
               final isCurrentTeam = team.id == teamService.myTeamId;
 
               return ListTile(

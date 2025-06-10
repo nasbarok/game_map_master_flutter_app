@@ -15,6 +15,9 @@ import 'package:airsoft_game_map/models/websocket/team_deleted_message.dart';
 import 'package:airsoft_game_map/models/websocket/team_update_message.dart';
 import 'package:airsoft_game_map/models/websocket/treasure_found_message.dart';
 
+import 'bomb_defused_message.dart';
+import 'bomb_exploded_message.dart';
+import 'bomb_planted_message.dart';
 import 'field_closed_message.dart';
 import 'field_opened_message.dart';
 import 'game_ended_message.dart';
@@ -79,6 +82,12 @@ abstract class WebSocketMessage {
         return TreasureFoundMessage.fromJson(json);
       case 'PLAYER_POSITION':
         return PlayerPositionMessage.fromJson(json);
+      case 'BOMB_PLANTED':
+        return BombPlantedMessage.fromJson(json);
+      case 'BOMB_DEFUSED':
+        return BombDefusedMessage.fromJson(json);
+      case 'BOMB_EXPLODED':
+        return BombExplodedMessage.fromJson(json);
       default:
         throw Exception('Unknown message type: $type');
     }

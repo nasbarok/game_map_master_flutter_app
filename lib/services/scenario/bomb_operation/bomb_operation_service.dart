@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_state.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/scenario/bomb_operation/bomb_operation_session.dart';
 import '../../../models/scenario/bomb_operation/bomb_site_state.dart';
+import '../../../utils/app_utils.dart';
 
 /// Service pour gérer l'état du scénario Opération Bombe
 class BombOperationService {
@@ -35,12 +37,16 @@ class BombOperationService {
 
   // Sites de bombe actifs pour le round actuel
   final List<BombSite> _toActivateBombSites = [];
-  List<BombSite> get toActivateBombSites => List.unmodifiable(_toActivateBombSites);
+
+  List<BombSite> get toActivateBombSites =>
+      List.unmodifiable(_toActivateBombSites);
 
   final List<BombSite> _disableBombSites = [];
+
   List<BombSite> get disableBombSites => List.unmodifiable(_disableBombSites);
 
   final List<BombSite> _activeBombSites = [];
+
   List<BombSite> get activeBombSites => List.unmodifiable(_activeBombSites);
 
   // Temps restant pour la bombe active (en secondes)
@@ -67,16 +73,19 @@ class BombOperationService {
   /// Initialise le service avec le scénario actif
   Future<void> initialize(BombOperationSession bombOperationSession) async {
     try {
-      logger.d('📡 [BombOperationService] [initialize] Récupération du scénario Bombe ');
+      logger.d(
+          '📡 [BombOperationService] [initialize] Récupération du scénario Bombe ');
 
       _sessionScenarioBomb = bombOperationSession;
-      logger.d('✅ [BombOperationService] [initialize] Scénario initialisé: ${_sessionScenarioBomb?.id}');
+      logger.d(
+          '✅ [BombOperationService] [initialize] Scénario initialisé: ${_sessionScenarioBomb?.id}');
 
       // Synchroniser les rôles dans la map locale
       _teamRoles
         ..clear()
         ..addAll(_sessionScenarioBomb?.teamRoles ?? {});
-      logger.d('✅ [BombOperationService] [initialize] Rôles des équipes: $_teamRoles');
+      logger.d(
+          '✅ [BombOperationService] [initialize] Rôles des équipes: $_teamRoles');
 
       // Synchroniser les sites a activer dans la liste locale
       _toActivateBombSites.clear();
@@ -87,7 +96,8 @@ class BombOperationService {
         logger.d('✅ [BombOperationService] [initialize] Sites à activer: '
             '${_toActivateBombSites.map((s) => '${s.name} (ID=${s.id})').join(', ')}');
       } else {
-        logger.d('ℹ️ [BombOperationService] [initialize] Aucun site à activer trouvé.');
+        logger.d(
+            'ℹ️ [BombOperationService] [initialize] Aucun site à activer trouvé.');
       }
 
       _disableBombSites.clear();
@@ -98,36 +108,40 @@ class BombOperationService {
         logger.d('✅ [BombOperationService] [initialize] Sites désactivés: '
             '${_disableBombSites.map((s) => '${s.name} (ID=${s.id})').join(', ')}');
       } else {
-        logger.d('ℹ️ [BombOperationService] [initialize] Aucun site désactivé trouvé.');
+        logger.d(
+            'ℹ️ [BombOperationService] [initialize] Aucun site désactivé trouvé.');
       }
 
       _activeBombSites.clear();
       if (_sessionScenarioBomb?.activeBombSites != null) {
         for (final site in _sessionScenarioBomb!.activeBombSites) {
-            _activeBombSites.add(site);
+          _activeBombSites.add(site);
         }
         logger.d('✅ [BombOperationService] [initialize] Sites actifs: '
             '${_activeBombSites.map((s) => '${s.name} (ID=${s.id})').join(', ')}');
       } else {
-        logger.d('ℹ️ [BombOperationService] [initialize] Aucun site actif détecté dans le scénario.');
+        logger.d(
+            'ℹ️ [BombOperationService] [initialize] Aucun site actif détecté dans le scénario.');
       }
 
       // Initialiser l'état
       final stateStr = bombOperationSession.gameState;
-      logger.d('✅ [BombOperationService] [initialize] État actuel: $_currentState');
-
+      logger.d(
+          '✅ [BombOperationService] [initialize] État actuel: $_currentState');
 
       // Démarrer le timer si une bombe est plantée @todo: a changer pour plusieurs timer 1 par bombe
       if (_currentState == BombOperationState.bombPlanted &&
           _bombTimeRemaining > 0) {
-        logger.d('⏲️ [BombOperationService] [initialize] Démarrage du timer de bombe...');
+        logger.d(
+            '⏲️ [BombOperationService] [initialize] Démarrage du timer de bombe...');
         _startBombTimer();
       }
 
       // Notifier les écouteurs
       _stateStreamController.add(_currentState);
       _bombSitesStreamController.add(null);
-      logger.d('🧨 [BombOperationService] [initialize] BombOperationService initialisé - gameSessionId: $bombOperationSession.gameSessionId');
+      logger.d(
+          '🧨 [BombOperationService] [initialize] BombOperationService initialisé - gameSessionId: $bombOperationSession.gameSessionId');
     } catch (e, stack) {
       logger.d('❌ [BombOperationService] [initialize] Erreur: $e');
       logger.t(stack);
@@ -196,7 +210,8 @@ class BombOperationService {
 
   /// Obtient tous les sites de bombe du scénario
   List<BombSite>? getAllBombSites() {
-    if (_sessionScenarioBomb == null || _sessionScenarioBomb!.bombOperationScenario?.bombSites == null) {
+    if (_sessionScenarioBomb == null ||
+        _sessionScenarioBomb!.bombOperationScenario?.bombSites == null) {
       return [];
     }
     return _sessionScenarioBomb!.bombOperationScenario?.bombSites;
@@ -222,16 +237,18 @@ class BombOperationService {
         // Si l'API n'est pas disponible, stocker localement uniquement
         logger.d(
             '⚠️ [BombOperationService] [saveTeamRoles] API non disponible pour sauvegarder les rôles des équipes: $e');
-        logger.d('⚠️ [BombOperationService] [saveTeamRoles] Les rôles seront stockés uniquement localement');
+        logger.d(
+            '⚠️ [BombOperationService] [saveTeamRoles] Les rôles seront stockés uniquement localement');
       }
       // Mettre à jour l'état local
       _teamRoles.clear();
       _teamRoles.addAll(teamRoles);
 
-      logger
-          .d('🧨 [BombOperationService] [saveTeamRoles] Rôles des équipes sauvegardés pour la session $gameSessionId');
+      logger.d(
+          '🧨 [BombOperationService] [saveTeamRoles] Rôles des équipes sauvegardés pour la session $gameSessionId');
     } catch (e) {
-      logger.d('❌ [BombOperationService] [saveTeamRoles] Erreur lors de la sauvegarde des rôles des équipes: $e');
+      logger.d(
+          '❌ [BombOperationService] [saveTeamRoles] Erreur lors de la sauvegarde des rôles des équipes: $e');
       rethrow;
     }
   }
@@ -240,7 +257,8 @@ class BombOperationService {
     required int scenarioId,
     required int gameSessionId,
   }) async {
-    logger.d('[BombOperationService] ➕ Création session Bombe pour gameSessionId=$gameSessionId');
+    logger.d(
+        '[BombOperationService] ➕ Création session Bombe pour gameSessionId=$gameSessionId');
 
     final response = await _apiService.post(
       'game-sessions/bomb-operation?scenarioId=$scenarioId&gameSessionId=$gameSessionId',
@@ -258,12 +276,39 @@ class BombOperationService {
     });
     return _sessionScenarioBomb!;
   }
+
+  /// Vérifie si le joueur est dans un rayon actif autour d’un site de bombe
+  Future<BombSite?> checkPlayerInActiveBombSite({
+    required int gameSessionId,
+    required double latitude,
+    required double longitude,
+  }) async {
+    for (final site in _activeBombSites) {
+      final distance = AppUtils.computeDistanceMeters(
+        latitude,
+        longitude,
+        site.latitude,
+        site.longitude,
+      );
+
+      if (distance <= site.radius) {
+        logger.d(
+            '📍 [checkPlayerInActiveBombSite] Joueur dans le rayon du site ${site.name} (distance $distance m)');
+        return site;
+      }
+    }
+
+    logger
+        .d('🚫 [checkPlayerInActiveBombSite] Aucun site de bombe à proximité');
+    return null;
+  }
+
+
+
   void dispose() {
     _stopBombTimer();
     _stateStreamController.close();
     _bombSitesStreamController.close();
     logger.d('🧨 BombOperationService dispose');
   }
-
-
 }

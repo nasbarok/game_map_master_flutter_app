@@ -12,9 +12,12 @@ import '../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
 import '../../services/game_session_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/player_location_service.dart';
+import '../../services/scenario/bomb_operation/bomb_operation_auto_manager.dart';
 import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
+import '../../services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
 import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../../services/team_service.dart';
+import '../../services/websocket/bomb_operation_web_socket_handler.dart';
 import '../../services/websocket/web_socket_game_session_handler.dart';
 import '../../widgets/bomb_operation_info_card.dart';
 import '../../widgets/game_map_widget.dart';
@@ -64,6 +67,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   late var treasureHuntScenarioDTO = null;
+  BombOperationAutoManager? _bombAutoManager;
 
   // Couleurs pour les équipes
   final Map<int, Color> _teamColors = {
@@ -83,6 +87,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   // Notifications de trésors trouvés
   List<Map<String, dynamic>> _treasureFoundNotifications = [];
   bool _hasBombOperationScenario = false;
+  bool _isBombManagerReady = false;
 
   @override
   void initState() {
@@ -156,6 +161,50 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             logger.d(
                 '❌ [GameSessionScreen] Erreur lors de l\'initialisation de BombOperationService : $e');
           }
+
+          final bombHandler = GetIt.I<BombOperationWebSocketHandler>();
+
+          final proximity = BombProximityDetectionService(
+            bombOperationService: bombOperationService,
+            bombOperationScenario: bombOperationService.activeSessionScenarioBomb!.bombOperationScenario!,
+            gameSessionId: widget.gameSession.id!,
+            userId: widget.userId,
+          );
+          bombHandler.setProximityService(proximity);
+          logger.d('✅ ProximityService injecté');
+
+
+          // Démarrer l'auto-manager pour gérer les actions de la bombe
+          _bombAutoManager = BombOperationAutoManager(
+            bombOperationScenario: bombOperationService.activeSessionScenarioBomb!.bombOperationScenario!,
+            bombOperationService: bombOperationService,
+            gameSessionId: widget.gameSession.id!,
+            fieldId: widget.fieldId!,
+            userId: widget.userId,
+            context: context,
+          );
+
+          _bombAutoManager?.onStatusUpdate = (message, {bool isSuccess = true}) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                backgroundColor: isSuccess ? Colors.green : Colors.orange,
+              ),
+            );
+          };
+
+          _bombAutoManager?.onBombEvent = (site, action, playerName) {
+            logger.d('📢 [GameSessionScreen] Bombe $action sur ${site.name} par $playerName');
+            // Optionnel : ajouter un widget visuel ici
+          };
+
+          await _bombAutoManager?.start(
+            activeBombSites: bombOperationService.activeSessionScenarioBomb!.activeBombSites,
+          );
+
+          setState(() {
+            _isBombManagerReady = true;
+          });
         } else {
           logger
               .d('ℹ️ [GameSessionScreen] BombOperationService déjà initialisé');
@@ -473,11 +522,31 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                 SizedBox(height: 16),
 // Widget d'information Bombe Operation (uniquement si le scénario est actif)
                 if (_hasBombOperationScenario)
-                  BombOperationInfoCard(
+                  _isBombManagerReady && _bombAutoManager != null
+                      ? BombOperationInfoCard(
                     teamId: widget.teamId,
                     userId: widget.userId,
                     gameSessionId: _gameSession!.id!,
+                    autoManager: _bombAutoManager!,
+                  )
+                      : Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          SizedBox(width: 12),
+                          Text("Chargement du scénario Bombe..."),
+                        ],
+                      ),
+                    ),
                   ),
+
                 SizedBox(height: 16),
                 // Bouton de scan QR code (uniquement si la partie est active)
                 if (isActive && _isTreasureHuntActive)
@@ -593,6 +662,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     logger.d('🧹 [GameSessionScreen] Dispose: nettoyage des contrôleurs');
     _scrollController.dispose();
     _timeTimer?.cancel();
+    _bombAutoManager?.dispose();
+
     super.dispose();
   }
 }

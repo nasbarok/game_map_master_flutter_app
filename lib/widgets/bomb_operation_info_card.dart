@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../models/scenario/bomb_operation/bomb_operation_team.dart';
+import '../services/scenario/bomb_operation/bomb_operation_auto_manager.dart';
 import '../services/scenario/bomb_operation/bomb_operation_service.dart';
 import '../utils/logger.dart';
 
@@ -9,12 +10,14 @@ class BombOperationInfoCard extends StatelessWidget {
   final int? teamId;
   final int userId;
   final int gameSessionId;
+  final BombOperationAutoManager? autoManager;
 
   const BombOperationInfoCard({
     Key? key,
     required this.teamId,
     required this.userId,
     required this.gameSessionId,
+    this.autoManager,
   }) : super(key: key);
 
   static final Color neutralCardColor = Colors.grey.shade200;
@@ -114,8 +117,45 @@ class BombOperationInfoCard extends StatelessWidget {
               'Objectif : $objectiveText',
               style: const TextStyle(fontSize: 16),
             ),
-            // Espace pour des informations supplémentaires futures
-            // comme le temps de désactivation, l'état des bombes, etc.
+            //  informations supplémentaires
+            if (autoManager != null)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.wifi, color: Colors.green, size: 16),
+                    SizedBox(width: 4),
+                    Text('Connecté en temps réel', style: TextStyle(fontSize: 14)),
+                  ],
+                ),
+              )
+            else if (autoManager != null)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.wifi_off, color: Colors.orange, size: 16),
+                    SizedBox(width: 4),
+                    Text('Hors ligne - WebSocket déconnecté', style: TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+
+            if (autoManager != null && autoManager!.isInActiveZone && autoManager!.currentSite != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on, color: Colors.red.shade700, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Dans la zone : ${autoManager!.currentSite!.name}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+
           ],
         ),
       ),

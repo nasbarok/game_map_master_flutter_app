@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (success && mounted) {
         try {
           // 🌟 1. Restaurer la session du terrain ouvert
-          await gameStateService.restoreSessionIfNeeded(apiService);
+          await gameStateService.restoreSessionIfNeeded(apiService,null);
 
           // 🌟 2. Si un terrain est actif, vérifier si l'utilisateur est connecté
           final fieldId = gameStateService.selectedMap?.field?.id;
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
               await GetIt.I<PlayerConnectionService>().joinMap(fieldId);
 
               // On recharge la session pour bien rafraîchir les joueurs
-              await gameStateService.restoreSessionIfNeeded(apiService);
+              await gameStateService.restoreSessionIfNeeded(apiService,fieldId);
             } else {
               logger.d('ℹ️ Utilisateur déjà connecté au terrain');
             }

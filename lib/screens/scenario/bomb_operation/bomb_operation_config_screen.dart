@@ -14,6 +14,7 @@ import '../../../services/scenario/bomb_operation/bomb_operation_scenario_servic
 import '../../../services/scenario_service.dart';
 import 'bomb_site_list_screen.dart';
 import 'package:airsoft_game_map/utils/logger.dart';
+
 /// Écran de configuration d'un scénario Opération Bombe
 class BombOperationConfigScreen extends StatefulWidget {
   /// Identifiant du scénario
@@ -59,6 +60,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   final _descriptionController = TextEditingController();
   final _bombTimerController = TextEditingController();
   final _defuseTimeController = TextEditingController();
+  final _armingTimeController = TextEditingController();
   final _activeSitesPerRoundController = TextEditingController();
 
   // Options d'affichage de la carte
@@ -81,6 +83,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     _descriptionController.dispose();
     _bombTimerController.dispose();
     _defuseTimeController.dispose();
+    _armingTimeController.dispose();
     _activeSitesPerRoundController.dispose();
     _mapController.dispose();
     super.dispose();
@@ -112,6 +115,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       _descriptionController.text = scenario.scenario.description ?? '';
       _bombTimerController.text = scenarioBombOperation.bombTimer.toString();
       _defuseTimeController.text = scenarioBombOperation.defuseTime.toString();
+      _armingTimeController.text = scenarioBombOperation.armingTime.toString();
+
       _activeSitesPerRoundController.text =
           scenarioBombOperation.activeSites.toString();
 
@@ -124,7 +129,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
           await _bombOperationService.getBombSites(scenarioBombOperation.id!);
       logger.d('📦 [_loadScenario] Sites récupérés depuis backend :');
       for (var site in sites) {
-        logger.d('   🔸 ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
+        logger.d(
+            '   🔸 ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
       }
       // Récupère le scénario principal pour obtenir l'ID de la carte
       final scenarioService = context.read<ScenarioService>();
@@ -251,6 +257,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         id: _scenarioBombOperation!.id,
         bombTimer: int.parse(_bombTimerController.text),
         defuseTime: int.parse(_defuseTimeController.text),
+        armingTime: int.parse(_armingTimeController.text),
         activeSites: int.parse(_activeSitesPerRoundController.text),
         attackTeamName: _scenarioBombOperation!.attackTeamName,
         defenseTeamName: _scenarioBombOperation!.defenseTeamName,
@@ -333,9 +340,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       final sites =
           await _bombOperationService.getBombSites(_scenarioBombOperation!.id!);
 
-      logger.d('🔄 [BombOperationConfigScreen] Mise à jour des sites après retour depuis BombSiteListScreen :');
+      logger.d(
+          '🔄 [BombOperationConfigScreen] Mise à jour des sites après retour depuis BombSiteListScreen :');
       for (var site in sites) {
-        logger.d('   ✅ ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
+        logger.d(
+            '   ✅ ${site.name} - (${site.latitude}, ${site.longitude}) - Rayon: ${site.radius}m');
       }
 
       setState(() {
@@ -366,7 +375,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     if (_gameMap == null) {
       return const Center(child: Text('Aucune carte disponible'));
     }
-    logger.d('🗺️ [BombOperationConfigScreen] [_buildMap] Affichage de la carte avec ${_bombSites?.length ?? 0} sites.');
+    logger.d(
+        '🗺️ [BombOperationConfigScreen] [_buildMap] Affichage de la carte avec ${_bombSites?.length ?? 0} sites.');
 
     return fm.FlutterMap(
       mapController: _mapController,
@@ -646,58 +656,76 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _bombTimerController,
-                            decoration: const InputDecoration(
-                              labelText: 'Timer de la bombe (secondes) *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.alarm),
-                            ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Requis';
-                              }
-                              final timer = int.tryParse(value);
-                              if (timer == null || timer < 10) {
-                                return 'Min 10s';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _defuseTimeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Temps de désamorçage (secondes) *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.security),
-                            ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Requis';
-                              }
-                              final defuseTime = int.tryParse(value);
-                              if (defuseTime == null || defuseTime < 3) {
-                                return 'Min 3s';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
+
+                    TextFormField(
+                      controller: _bombTimerController,
+                      decoration: const InputDecoration(
+                        labelText: 'Timer de la bombe (secondes) *',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.alarm),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
                       ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Requis';
+                        }
+                        final timer = int.tryParse(value);
+                        if (timer == null || timer < 10) {
+                          return 'Min 10s';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _defuseTimeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Temps de désamorçage (secondes) *',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.security),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Requis';
+                        }
+                        final defuseTime = int.tryParse(value);
+                        if (defuseTime == null || defuseTime < 3) {
+                          return 'Min 3s';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _armingTimeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Temps d\'armement (secondes) *',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.timer),
+                        helperText: 'Temps requis pour poser une bombe',
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Requis';
+                        }
+                        final time = int.tryParse(value);
+                        if (time == null || time < 3) {
+                          return 'Min 3s';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(

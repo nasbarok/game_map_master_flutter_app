@@ -14,5 +14,23 @@ class AppUtils {
     // Conversion des mètres en pixels
     return meters / metersPerPixel;
   }
+  static double computeDistanceMeters(
+      double lat1,
+      double lon1,
+      double lat2,
+      double lon2,
+      ) {
+    const R = 6371000; // Rayon de la Terre en mètres
+    final dLat = degToRad(lat2 - lat1);
+    final dLon = degToRad(lon2 - lon1);
+    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(degToRad(lat1)) *
+            math.cos(degToRad(lat2)) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    return R * c;
+  }
 
+  static double degToRad(double deg) => deg * math.pi / 180;
 }

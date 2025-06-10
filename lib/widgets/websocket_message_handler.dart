@@ -12,6 +12,7 @@ import '../models/websocket/websocket_message.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/scenario/treasure_hunt/treasure_hunt_service.dart';
+import '../services/websocket/bomb_operation_web_socket_handler.dart';
 import '../services/websocket_service.dart';
 import '../services/notifications.dart' as notifications;
 import '../services/invitation_service.dart';
@@ -23,12 +24,14 @@ class WebSocketMessageHandler {
   final GameStateService gameStateService;
   final TeamService teamService;
   final WebSocketGameSessionHandler webSocketGameSessionHandler;
+  final BombOperationWebSocketHandler bombOperationWebSocketHandler;
 
   WebSocketMessageHandler({
     required this.authService,
     required this.gameStateService,
     required this.teamService,
     required this.webSocketGameSessionHandler,
+    required this.bombOperationWebSocketHandler,
   });
 
   void handleWebSocketMessage(WebSocketMessage message, BuildContext context) {
@@ -114,7 +117,18 @@ class WebSocketMessageHandler {
         webSocketGameSessionHandler.handleTreasureFound(messageToJson, context);
         break;
       case 'PLAYER_POSITION':
-        webSocketGameSessionHandler.handlePlayerPosition(messageToJson, context);
+        webSocketGameSessionHandler.handlePlayerPosition(
+            messageToJson, context);
+        break;
+      case 'BOMB_PLANTED':
+        bombOperationWebSocketHandler.handleBombPlanted(messageToJson, context);
+        break;
+      case 'BOMB_DEFUSED':
+        bombOperationWebSocketHandler.handleBombDefused(messageToJson, context);
+        break;
+      case 'BOMB_EXPLODED':
+        bombOperationWebSocketHandler.handleBombExploded(
+            messageToJson, context);
         break;
       default:
         logger.d('Message WebSocket non géré: $messageToJson');
@@ -224,7 +238,8 @@ class WebSocketMessageHandler {
                   context, invitation, true);
 
               // 3. Restore session complète
-              await gameStateService.restoreSessionIfNeeded(apiService);
+              await gameStateService.restoreSessionIfNeeded(
+                  apiService, invitation['payload']['fieldId']);
 
               // 4. Fermer dialogue
               if (context.mounted) {
@@ -233,7 +248,8 @@ class WebSocketMessageHandler {
                   if (currentUser.hasRole('HOST')) {
                     context.go('/host');
                   } else {
-                    context.go('/gamer/lobby');
+                    final timestamp = DateTime.now().millisecondsSinceEpoch;
+                    context.go('/gamer/lobby?refresh=$timestamp');
                   }
                 }
               }
@@ -378,31 +394,42 @@ class WebSocketMessageHandler {
   }
 
   void _handleTeamUpdate(Map<String, dynamic> message, BuildContext context) {
-    logger.d('🟦 TEAM_UPDATE reçu : $message');
+    logger.d(
+        '🟦 [WebSocketMessageHandler] [_handleTeamUpdate] TEAM_UPDATE reçu : $message');
+
     final payload = message['payload'];
     final int mapId = payload['mapId'];
     final int userId = payload['userId'];
     final dynamic teamId = payload['teamId'];
     final String action = payload['action'];
+    logger.d(
+        '🟦 [WebSocketMessageHandler] [_handleTeamUpdate] Action: $action, userId: $userId, teamId: $teamId, mapId: $mapId');
+
     if (message['senderId'] == authService.currentUser?.id) {
-      logger.d('⏩ Message WebSocket émis par moi-même (senderId), on ignore');
+      logger.d(
+          '⏩ [WebSocketMessageHandler] [_handleTeamUpdate] Message WebSocket émis par moi-même (senderId), on ignore');
       return;
     }
 
     if (action == 'ASSIGN_PLAYER') {
       if (teamId == null) {
-        logger.d('➖ Retrait du joueur $userId de son équipe');
+        logger.d(
+            '➖ [WebSocketMessageHandler] [_handleTeamUpdate] Retrait du joueur $userId de son équipe');
         teamService.removePlayerFromTeam(userId, mapId);
       } else {
-        logger.d('➕ Assignation du joueur $userId à l\'équipe $teamId');
+        logger.d(
+            '➕ [WebSocketMessageHandler] [_handleTeamUpdate] Assignation du joueur $userId à l\'équipe $teamId');
         final currentTeamId = teamService.getTeamIdForPlayer(userId);
+        logger.d('🔎 ID équipe actuelle du joueur $userId : $currentTeamId');
+        logger.d('🎯 ID équipe cible : $teamId');
 
         if (currentTeamId != teamId) {
           logger.d(
-              '🔄 Tentative d\'assignation du joueur $userId à l\'équipe $teamId');
-          teamService.assignPlayerToTeam(userId, teamId, mapId);
+              '🔄 [WebSocketMessageHandler] [_handleTeamUpdate] Tentative d\'assignation du joueur $userId à l\'équipe $teamId');
+          teamService.assignPlayerLocally(userId, teamId, mapId);
         } else {
-          logger.d('⏸️ Assignation ignorée : joueur déjà dans l’équipe $teamId');
+          logger.d(
+              '⏸️ [WebSocketMessageHandler] [_handleTeamUpdate] Assignation ignorée : joueur déjà dans l’équipe $teamId');
         }
       }
     } else if (action == 'REMOVE_FROM_TEAM') {
@@ -433,7 +460,8 @@ class WebSocketMessageHandler {
     final List<ScenarioDTO> scenarioDtos =
         scenarioDtosMapList.map((dto) => ScenarioDTO.fromJson(dto)).toList();
 
-    logger.d('📥 [WebSocketHandler] SCENARIO_UPDATE reçu pour fieldId=$fieldId');
+    logger
+        .d('📥 [WebSocketHandler] SCENARIO_UPDATE reçu pour fieldId=$fieldId');
 
     if (scenarioDtos == null || scenarioDtos.isEmpty) {
       logger.d('⚠️ Aucun scénario reçu dans SCENARIO_UPDATE');

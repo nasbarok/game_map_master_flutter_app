@@ -47,7 +47,10 @@ class App extends StatelessWidget {
         ),
         GoRoute(
           path: '/gamer/lobby',
-          builder: (context, state) => const GameLobbyScreen(),
+          builder: (context, state) {
+            final refresh = state.queryParameters['refresh'];
+            return GameLobbyScreen(key: ValueKey(refresh));
+          },
         ),
       ],
       redirect: (context, state) {
