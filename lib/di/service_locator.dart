@@ -73,7 +73,7 @@ void setupServiceLocator() {
 
 // TreasureHuntWebSocketHandler
   final treasureHuntWebSocketHandler = TreasureHuntWebSocketHandler(webSocketService);
-  final bombOperationWebSocketHandler = BombOperationWebSocketHandler(authService,webSocketService, navigatorKey);
+  final bombOperationWebSocketHandler = BombOperationWebSocketHandler(authService,webSocketService, navigatorKey,apiService);
   final bombOperationService = BombOperationService(apiService,bombOperationWebSocketHandler);
 
   final playerLocationService = PlayerLocationService(apiService,webSocketService);

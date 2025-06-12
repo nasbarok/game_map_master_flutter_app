@@ -52,6 +52,9 @@ class BombOperationSession {
 
   /// Liste des sites de bombe désactivés pour ce round
   final List<BombSite> disableBombSites;
+
+  /// Liste des sites de bombe explosés pour ce round
+  final List<BombSite> explodedBombSites;
   /// Constructeur
   BombOperationSession({
     this.id,
@@ -70,6 +73,7 @@ class BombOperationSession {
     this.teamRoles = const {},
     this.toActiveBombSites = const [],
     this.disableBombSites = const [],
+    this.explodedBombSites = const [],
   });
 
   /// Crée une instance de BombOperationSession à partir d'un objet JSON
@@ -113,6 +117,9 @@ class BombOperationSession {
       activeBombSites: (json['activeBombSites'] as List?)?.map((e) => BombSite.fromJson(e)).toList() ?? [],
       // 🔁 Sites désactivés
       disableBombSites: (json['disableBombSites'] as List?)?.map((e) => BombSite.fromJson(e)).toList() ?? [],
+
+      // 🔥 Sites explosés
+      explodedBombSites: (json['explodedBombSites'] as List?)?.map((e) => BombSite.fromJson(e)).toList() ?? [],
     );
   }
 
@@ -150,6 +157,7 @@ class BombOperationSession {
     data['toActiveBombSites'] = toActiveBombSites.map((e) => e.toJson()).toList();
     data['disableBombSites'] = disableBombSites.map((e) => e.toJson()).toList();
     data['activeBombSites'] = activeBombSites.map((e) => e.toJson()).toList();
+    data['explodedBombSites'] = explodedBombSites.map((e) => e.toJson()).toList();
     return data;
   }
   

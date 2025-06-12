@@ -6,14 +6,18 @@ import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_s
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_team.dart';
 import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
 import 'package:airsoft_game_map/services/api_service.dart';
+import 'package:airsoft_game_map/services/game_session_service.dart';
 import 'package:airsoft_game_map/services/websocket/bomb_operation_web_socket_handler.dart';
 import 'package:airsoft_game_map/services/websocket/web_socket_game_session_handler.dart';
 import 'package:airsoft_game_map/utils/logger.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
+import '../../../models/game_session_participant.dart';
 import '../../../models/scenario/bomb_operation/bomb_operation_session.dart';
 import '../../../models/scenario/bomb_operation/bomb_site_state.dart';
 import '../../../utils/app_utils.dart';
+import '../../game_state_service.dart';
 
 /// Service pour gérer l'état du scénario Opération Bombe
 class BombOperationService {
@@ -48,6 +52,11 @@ class BombOperationService {
   final List<BombSite> _activeBombSites = [];
 
   List<BombSite> get activeBombSites => List.unmodifiable(_activeBombSites);
+
+  // Sites de bombe explosés pour le round actuel
+  final List<BombSite> _explodedBombSites = [];
+
+  List<BombSite> get explodedBombSites => List.unmodifiable(_explodedBombSites);
 
   // Temps restant pour la bombe active (en secondes)
   int _bombTimeRemaining = 0;
@@ -124,6 +133,18 @@ class BombOperationService {
             'ℹ️ [BombOperationService] [initialize] Aucun site actif détecté dans le scénario.');
       }
 
+      _explodedBombSites.clear();
+      if (_sessionScenarioBomb?.explodedBombSites != null) {
+        for (final site in _sessionScenarioBomb!.explodedBombSites) {
+          _explodedBombSites.add(site);
+        }
+        logger.d('✅ [BombOperationService] [initialize] Sites explosés: '
+            '${_explodedBombSites.map((s) => '${s.name} (ID=${s.id})').join(', ')}');
+      } else {
+        logger.d(
+            'ℹ️ [BombOperationService] [initialize] Aucun site explosé détecté dans le scénario.');
+      }
+
       // Initialiser l'état
       final stateStr = bombOperationSession.gameState;
       logger.d(
@@ -179,7 +200,7 @@ class BombOperationService {
         fieldId: fieldId,
         gameSessionId: gameSessionId,
         action: 'PLANT_BOMB',
-        payload: {'bombSiteId': bombSiteId},
+        bombSiteId: bombSiteId,
       );
 
       logger.d('🧨 Action envoyée: planter une bombe sur le site $bombSiteId');
@@ -197,7 +218,7 @@ class BombOperationService {
         fieldId: fieldId,
         gameSessionId: gameSessionId,
         action: 'DEFUSE_BOMB',
-        payload: {'bombSiteId': bombSiteId},
+        bombSiteId: bombSiteId,
       );
 
       logger
@@ -278,11 +299,48 @@ class BombOperationService {
   }
 
   /// Vérifie si le joueur est dans un rayon actif autour d’un site de bombe
+  Future<BombSite?> checkPlayerInToActiveBombSite({
+    required int gameSessionId,
+    required double latitude,
+    required double longitude,
+  }) async {
+    /* logger.d(
+        '📡 [checkPlayerInToActiveBombSite] Position joueur : ($latitude, $longitude)');*/
+
+    for (final site in _toActivateBombSites) {
+      final distance = AppUtils.computeDistanceMeters(
+        latitude,
+        longitude,
+        site.latitude,
+        site.longitude,
+      );
+
+      /*  logger.d(
+          '📏 [checkPlayerInToActiveBombSite] Vérification site "${site.name}" → '
+              'Coordonnées=(${site.latitude}, ${site.longitude}), '
+              'Distance=$distance m / Rayon autorisé=${site.radius} m');*/
+
+      if (distance <= site.radius) {
+        logger.d(
+            '📍 [BombOperationService] [checkPlayerInToActiveBombSite] Joueur dans le rayon du site à armer ${site.name} (distance $distance m)');
+        return site;
+      }
+    }
+
+    logger.d(
+        '🚫 [BombOperationService] [checkPlayerInToActiveBombSite] Aucun site de bombe ToActive à proximité sur ${_toActivateBombSites.length} site');
+    return null;
+  }
+
+  /// Vérifie si le joueur est dans un rayon actif autour d’un site de bombe
   Future<BombSite?> checkPlayerInActiveBombSite({
     required int gameSessionId,
     required double latitude,
     required double longitude,
   }) async {
+    /* logger.d(
+        '📡 [checkPlayerInToActiveBombSite] Position joueur : ($latitude, $longitude)');*/
+
     for (final site in _activeBombSites) {
       final distance = AppUtils.computeDistanceMeters(
         latitude,
@@ -291,18 +349,58 @@ class BombOperationService {
         site.longitude,
       );
 
+      /*  logger.d(
+          '📏 [checkPlayerInToActiveBombSite] Vérification site "${site.name}" → '
+              'Coordonnées=(${site.latitude}, ${site.longitude}), '
+              'Distance=$distance m / Rayon autorisé=${site.radius} m');*/
+
       if (distance <= site.radius) {
         logger.d(
-            '📍 [checkPlayerInActiveBombSite] Joueur dans le rayon du site ${site.name} (distance $distance m)');
+            '📍 [BombOperationService] [checkPlayerInActiveBombSite] Joueur dans le rayon du site à desamorcer ${site.name} (distance $distance m)');
         return site;
       }
     }
 
-    logger
-        .d('🚫 [checkPlayerInActiveBombSite] Aucun site de bombe à proximité');
+    logger.d(
+        '🚫 [BombOperationService] [checkPlayerInActiveBombSite] Aucun site de bombe active à proximité sur ${_toActivateBombSites.length} site');
     return null;
   }
 
+  void activateSite(int siteId) {
+    try {
+      final siteIndex = _toActivateBombSites.indexWhere((s) => s.id == siteId);
+      if (siteIndex == -1) {
+        logger.d(
+            '⚠️ [BombOperationService] Aucun site trouvé avec l’ID $siteId dans _toActivateBombSites');
+        return;
+      }
+
+      final site = _toActivateBombSites.removeAt(siteIndex);
+      _activeBombSites.add(site);
+
+      logger
+          .d('✅ [BombOperationService] Site activé: ${site.name} (ID=$siteId)');
+      _bombSitesStreamController.add(null); // notification UI
+    } catch (e) {
+      logger.d('❌ [BombOperationService] [activateSite] Erreur : $e');
+    }
+  }
+
+  BombOperationTeam? getPlayerRoleBombOperation(int userId) {
+    final gameStateService = GetIt.I<GameStateService>();
+
+    final match = gameStateService.connectedPlayersList
+        .where((p) => p['id'] == userId);
+
+    if (match.isNotEmpty) {
+      final teamId = match.first['teamId'];
+      if (teamId != null) {
+        return _teamRoles[teamId];
+      }
+    }
+
+    return null;
+  }
 
 
   void dispose() {

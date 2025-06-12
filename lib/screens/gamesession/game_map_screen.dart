@@ -248,6 +248,8 @@ class _GameMapScreenState extends State<GameMapScreen> {
                         disableBombSites:
                             _bombOperationService.disableBombSites,
                         activeBombSites: _bombOperationService.activeBombSites,
+                        explodedBombSites:
+                            _bombOperationService.explodedBombSites,
                         currentZoom: _mapController.zoom,
                       ),
                     );

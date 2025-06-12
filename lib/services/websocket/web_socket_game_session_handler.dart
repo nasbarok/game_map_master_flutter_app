@@ -97,7 +97,7 @@ class WebSocketGameSessionHandler {
             teamId: teamId,
             isHost: isHost,
             gameSession: gameSession,
-            fieldId: gameSession.gameMap?.fieldId
+            fieldId: gameSession.field?.id,
           ),
         ),
       );

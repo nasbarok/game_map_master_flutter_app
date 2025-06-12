@@ -1,10 +1,13 @@
 import 'package:airsoft_game_map/models/websocket/bomb_defused_message.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import '../../models/websocket/bomb_exploded_message.dart';
 import '../../models/websocket/bomb_operation_message.dart';
 import '../../models/websocket/bomb_planted_message.dart';
 import '../../models/websocket/websocket_message.dart';
+import '../api_service.dart';
 import '../auth_service.dart';
+import '../scenario/bomb_operation/bomb_operation_service.dart';
 import '../scenario/bomb_operation/bomb_proximity_detection_service.dart';
 import '../websocket_service.dart';
 import 'package:airsoft_game_map/utils/logger.dart';
@@ -13,11 +16,13 @@ class BombOperationWebSocketHandler {
   final WebSocketService _webSocketService;
   final AuthService _authService;
   final GlobalKey<NavigatorState> _navigatorKey;
+  final ApiService _apiService;
 
   BombOperationWebSocketHandler(
     this._authService,
     this._webSocketService,
     this._navigatorKey,
+    this._apiService,
   );
 
   late BombProximityDetectionService _proximityService;
@@ -30,32 +35,54 @@ class BombOperationWebSocketHandler {
     required int fieldId,
     required int gameSessionId,
     required String action,
-    required Map<String, dynamic> payload,
-  }) {
-    if (!_webSocketService.isConnected ||
-        _authService.currentUser?.id == null) {
-      logger.d(
-          '❌ Impossible d\'envoyer l\'action, WebSocket non connecté ou utilisateur non authentifié');
+    required int bombSiteId,
+  }) async {
+    if (_authService.currentUser?.id == null) {
+      logger.d('❌ Utilisateur non authentifié');
       return;
     }
-
+    final bombOperationService = GetIt.I<BombOperationService>();
     final userId = _authService.currentUser!.id!;
-    final message = BombOperationMessage(
-      senderId: userId,
-      gameSessionId: gameSessionId,
-      action: action,
-      payload: payload,
-    );
-
-    final destination = '/app/field/$fieldId';
+    final requestBody = {
+      'userId': userId,
+      'bombSiteId': bombSiteId,
+    };
 
     try {
-      _webSocketService.sendMessage(destination, message);
-      logger.d('🧨 Action Bombe envoyée: $action → fieldId=$fieldId');
+      switch (action) {
+        case 'PLANT_BOMB':
+          await _apiService.post(
+            'game-sessions/bomb-operation/$fieldId/$gameSessionId/bomb-armed',
+            requestBody,
+          );
+          logger.d('✅ [BombOperationWebSocketHandler] [sendBombOperationAction] [PLANT_BOMB] Notification envoyée via HTTP → siteId=$bombSiteId');
+
+          bombOperationService.activateSite(bombSiteId);
+          break;
+
+        case 'DEFUSE_BOMB':
+          await _apiService.post(
+            'game-sessions/bomb-operation/$fieldId/$gameSessionId/bomb-disarmed',
+            requestBody,
+          );
+          logger.d('✅ [BombOperationWebSocketHandler] [sendBombOperationAction] [BOMB_DISARMED] Notification envoyée via HTTP → siteId=$bombSiteId');
+          break;
+
+        default:
+        // fallback → WebSocket
+          logger.d('❌Erreur Envoi de l\'action Bombe ($action) pour le site $bombSiteId via POST');
+          final message = BombOperationMessage(
+            senderId: userId,
+            gameSessionId: gameSessionId,
+            action: action,
+            bombSiteId: bombSiteId,
+          );
+      }
     } catch (e) {
-      logger.d('❌ Erreur d\'envoi action Bombe: $e');
+      logger.e('❌ Erreur lors de l\'envoi de l\'action Bombe ($action) : $e');
     }
   }
+
 
   /// gestion d'affichage de notifications ou navigation
   void showNotification(String message) {
@@ -72,13 +99,17 @@ class BombOperationWebSocketHandler {
   /// Gère les notifications de bombe plantée
   void handleBombPlanted(Map<String, dynamic> message, BuildContext context) {
     final msg = BombPlantedMessage.fromJson(message);
-    logger.d('🧨 [BombOperationWebSocket] Bombe plantée: ${msg.siteName} par ${msg.playerName}');
+    logger.d('🧨 [BombOperationWebSocket] Bombe plantée: ${msg.siteName} par userId ${msg.senderId}');
 
     final siteName = msg.siteName;
     final player = msg.playerName;
+    final bombSiteId = msg.siteId;
 
     // Met à jour l'état local du site comme armé
     _proximityService.updateSiteState(msg.siteId, BombSiteState.armed);
+
+    final _bombOperationService = GetIt.I<BombOperationService>();
+    _bombOperationService.activateSite(msg.siteId);
 
     // Affiche une notification snack + dialog court
     showNotification('💣 Bombe plantée sur $siteName par $player');
@@ -103,6 +134,9 @@ class BombOperationWebSocketHandler {
 
     // Mettre à jour l'état dans le service de proximité
     _proximityService.updateSiteState(msg.siteId, BombSiteState.exploded);
+
+    // ✨ Mettre à jour la liste des sites explosés dans le service principal
+    _proximityService.moveSiteToExploded(msg.siteId);
 
     // Optionnel : message visuel
     showNotification('💥 Explosion sur ${msg.siteName} !');

@@ -4,6 +4,7 @@ import 'package:airsoft_game_map/services/scenario_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../models/coordinate.dart';
 import '../../models/game_session.dart';
 import '../../models/game_session_participant.dart';
 import '../../models/game_session_scenario.dart';
@@ -68,6 +69,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   String? _errorMessage;
   late var treasureHuntScenarioDTO = null;
   BombOperationAutoManager? _bombAutoManager;
+  late StreamSubscription<Map<int, Coordinate>> _locationSub;
 
   // Couleurs pour les équipes
   final Map<int, Color> _teamColors = {
@@ -88,7 +90,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   List<Map<String, dynamic>> _treasureFoundNotifications = [];
   bool _hasBombOperationScenario = false;
   bool _isBombManagerReady = false;
-
+  int effectiveFieldId =-1;
   @override
   void initState() {
     super.initState();
@@ -105,7 +107,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         });
       }
     });
-
+    effectiveFieldId =  (widget.fieldId ?? widget.gameSession.field?.id)!;
     final locationService = GetIt.I<PlayerLocationService>();
     final teamService = GetIt.I<TeamService>();
     int? teamId = widget.teamId;
@@ -116,107 +118,125 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     } else {
       logger.d('🔍 [GameSessionScreen] teamId fourni, utilisé directement');
     }
-    final fieldId = widget.fieldId ?? widget.gameSession.field?.id;
-    locationService.initialize(widget.userId, teamId, fieldId!);
+    locationService.initialize(widget.userId, teamId, effectiveFieldId);
     logger.d(
         '🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
-    locationService.loadInitialPositions(fieldId);
+    locationService.loadInitialPositions(effectiveFieldId);
     locationService.startLocationSharing(widget.gameSession.id!);
+    // 🔁 Abonnement aux positions pour mise à jour de l’auto-manager
+    _locationSub = locationService.positionStream.listen((positions) {
+      final myPos = positions[widget.userId];
+      if (myPos != null && _bombAutoManager != null) {
+        _bombAutoManager!.updatePlayerPosition(myPos.latitude, myPos.longitude);
+      }
+    });
   }
 
   /// Vérifie si le scénario Opération Bombe est actif pour cette session
   void _checkForBombOperationScenario() async {
     if (_scenarios.isEmpty) {
-      logger.d(
-          '🔍 [GameSessionScreen] [checkForBombOperationScenario] Aucun scénario actif à vérifier.');
+      logger.d('🔍 [GameSessionScreen] Aucun scénario à analyser.');
       return;
     }
 
+    logger.d('🔍 [GameSessionScreen] Analyse des scénarios actifs...');
+    GameSessionScenario? bombScenario;
+
     for (final scenario in _scenarios) {
-      logger.d(
-          '🔍 [GameSessionScreen] [checkForBombOperationScenario] Scénario analysé: ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
-      if (scenario.scenarioType == 'bomb_operation' &&
-          scenario.active == true) {
-        logger.d(
-            '💣 [GameSessionScreen] [checkForBombOperationScenario] Scénario Opération Bombe détecté !');
-
-        setState(() {
-          _hasBombOperationScenario = true;
-        });
-
-        final bombOperationService = GetIt.I<BombOperationService>();
-
-        if (bombOperationService.activeSessionScenarioBomb == null) {
-          logger.d(
-              '🧨 [GameSessionScreen] Initialisation du BombOperationService en cours...');
-          try {
-            final bombSession = await _apiService.get(
-              'game-sessions/bomb-operation/by-game-session/${widget.gameSession.id}',
-            );
-            final parsedSession = BombOperationSession.fromJson(bombSession);
-            await bombOperationService.initialize(parsedSession);
-            logger.d(
-                '✅ [GameSessionScreen] BombOperationService initialisé avec succès');
-          } catch (e) {
-            logger.d(
-                '❌ [GameSessionScreen] Erreur lors de l\'initialisation de BombOperationService : $e');
-          }
-
-          final bombHandler = GetIt.I<BombOperationWebSocketHandler>();
-
-          final proximity = BombProximityDetectionService(
-            bombOperationService: bombOperationService,
-            bombOperationScenario: bombOperationService.activeSessionScenarioBomb!.bombOperationScenario!,
-            gameSessionId: widget.gameSession.id!,
-            userId: widget.userId,
-          );
-          bombHandler.setProximityService(proximity);
-          logger.d('✅ ProximityService injecté');
-
-
-          // Démarrer l'auto-manager pour gérer les actions de la bombe
-          _bombAutoManager = BombOperationAutoManager(
-            bombOperationScenario: bombOperationService.activeSessionScenarioBomb!.bombOperationScenario!,
-            bombOperationService: bombOperationService,
-            gameSessionId: widget.gameSession.id!,
-            fieldId: widget.fieldId!,
-            userId: widget.userId,
-            context: context,
-          );
-
-          _bombAutoManager?.onStatusUpdate = (message, {bool isSuccess = true}) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: isSuccess ? Colors.green : Colors.orange,
-              ),
-            );
-          };
-
-          _bombAutoManager?.onBombEvent = (site, action, playerName) {
-            logger.d('📢 [GameSessionScreen] Bombe $action sur ${site.name} par $playerName');
-            // Optionnel : ajouter un widget visuel ici
-          };
-
-          await _bombAutoManager?.start(
-            activeBombSites: bombOperationService.activeSessionScenarioBomb!.activeBombSites,
-          );
-
-          setState(() {
-            _isBombManagerReady = true;
-          });
-        } else {
-          logger
-              .d('ℹ️ [GameSessionScreen] BombOperationService déjà initialisé');
-        }
-
-        return;
+      logger.d('➡️ Scénario ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
+      if (scenario.scenarioType == 'bomb_operation' && scenario.active == true) {
+        logger.d('💣 Scénario Opération Bombe détecté (ID=${scenario.scenarioId})');
+        bombScenario = scenario;
+        break;
       }
     }
 
-    logger.d(
-        '🚫 [GameSessionScreen] Aucun scénario Opération Bombe actif trouvé.');
+    if (bombScenario == null) {
+      logger.d('🚫 Aucun scénario de type bombe actif trouvé.');
+      return;
+    }
+
+    setState(() {
+      _hasBombOperationScenario = true;
+    });
+
+    final bombOperationService = GetIt.I<BombOperationService>();
+
+    if (bombOperationService.activeSessionScenarioBomb == null) {
+      logger.d('🧨 BombOperationService non encore initialisé, appel API en cours...');
+      try {
+        final bombSession = await _apiService.get(
+          'game-sessions/bomb-operation/by-game-session/${widget.gameSession.id}',
+        );
+        logger.d('📦 Réponse API reçue, parsing JSON...');
+        final parsedSession = BombOperationSession.fromJson(bombSession);
+        await bombOperationService.initialize(parsedSession);
+        logger.d('✅ BombOperationService initialisé avec succès');
+      } catch (e, stack) {
+        logger.e('❌ Erreur durant l\'initialisation du BombOperationService : $e\n$stack');
+        return;
+      }
+    } else {
+      logger.d('ℹ️ BombOperationService déjà initialisé → réutilisation de la session existante.');
+    }
+
+    final session = bombOperationService.activeSessionScenarioBomb;
+    if (session == null || session.bombOperationScenario == null) {
+      logger.e('❌ Session ou scénario BombOperation absent après initialisation !');
+      return;
+    }
+
+    final scenarioData = session.bombOperationScenario!;
+    logger.d('🧠 Scénario opération bombe chargé : ID=${scenarioData.id}, nom=${scenarioData.activeSites}');
+    logger.d('🔌 Configuration du ProximityService...');
+    final bombHandler = GetIt.I<BombOperationWebSocketHandler>();
+    final proximity = BombProximityDetectionService(
+      bombOperationService: bombOperationService,
+      bombOperationScenario: scenarioData,
+      gameSessionId: widget.gameSession.id!,
+      userId: widget.userId,
+    );
+    bombHandler.setProximityService(proximity);
+    logger.d('✅ ProximityService injecté');
+
+    logger.d('⚙️ Instanciation de l’auto-manager...');
+    _bombAutoManager = BombOperationAutoManager(
+      bombOperationScenario: scenarioData,
+      bombOperationService: bombOperationService,
+      gameSessionId: widget.gameSession.id!,
+      fieldId: widget.fieldId!,
+      userId: widget.userId,
+      context: context,
+    );
+
+    _bombAutoManager?.onStatusUpdate = (message, {bool isSuccess = true}) {
+      logger.d('🟢 Mise à jour status auto-manager : $message');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isSuccess ? Colors.green : Colors.orange,
+        ),
+      );
+    };
+
+    _bombAutoManager?.onBombEvent = (site, action, playerName) {
+      logger.d('📢 Événement bombe : $action sur ${site.name} par $playerName');
+    };
+
+    try {
+      logger.d('🚀 Lancement de l’auto-manager avec ${session.toActiveBombSites.length} site(s) a activer...');
+      await _bombAutoManager!.start(
+        activeBombSites: session.toActiveBombSites,
+      );
+      setState(() {
+        _isBombManagerReady = true;
+      });
+      logger.d('✅ Auto-manager démarré avec succès.');
+    } catch (e, stack) {
+      logger.e('❌ Échec du démarrage de l’auto-manager : $e\n$stack');
+    }
   }
+
 
   Future<void> _loadInitialData() async {
     setState(() {
@@ -663,6 +683,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     _scrollController.dispose();
     _timeTimer?.cancel();
     _bombAutoManager?.dispose();
+    _locationSub.cancel();
 
     super.dispose();
   }

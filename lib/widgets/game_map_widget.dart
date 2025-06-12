@@ -238,6 +238,8 @@ class _GameMapWidgetState extends State<GameMapWidget> {
                                 bombOperationService.disableBombSites,
                             activeBombSites:
                                 bombOperationService.activeBombSites,
+                            explodedBombSites:
+                                bombOperationService.explodedBombSites,
                             currentZoom: _mapController.zoom,
                           ),
                         );

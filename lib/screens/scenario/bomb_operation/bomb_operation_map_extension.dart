@@ -36,6 +36,7 @@ extension BombOperationMapExtension on GameMapScreen {
     required List<BombSite> toActivateBombSites,
     required List<BombSite> disableBombSites,
     required List<BombSite> activeBombSites,
+    required List<BombSite> explodedBombSites, // ✨ NOUVEAU PARAMÈTRE
     required double currentZoom,
   }) {
     final List<Marker> markers = [];
@@ -49,6 +50,7 @@ extension BombOperationMapExtension on GameMapScreen {
     logger.d('🔥 [BombOperationMapExtension] activeBombSites: ${activeBombSites.map((b) => b.name).join(", ")}');*/
 
     final Set<int> activeIds = activeBombSites.map((e) => e.id!).toSet();
+    final Set<int> explodedIds = explodedBombSites.map((e) => e.id!).toSet(); // ✨ NOUVEAU
 
     // Sélection explicite des sites visibles
     Iterable<BombSite> visibleSites = [];
@@ -62,7 +64,8 @@ extension BombOperationMapExtension on GameMapScreen {
     for (final site in visibleSites) {
       final int siteId = site.id!;
       final bool isPlanted = activeIds.contains(siteId);
-      final bool isGreyed = isDefender && !isPlanted;
+      final bool isExploded = explodedIds.contains(siteId); // ✨ NOUVEAU
+      final bool isGreyed = isDefender && !isPlanted && !isExploded;
 
       final radiusInPixels =
       AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
@@ -76,6 +79,7 @@ extension BombOperationMapExtension on GameMapScreen {
             context: context,
             site: site,
             isPlanted: isPlanted,
+            isExploded: isExploded,
             isAttacker: isAttacker,
             isGreyed: isGreyed,
             radiusInPixels: radiusInPixels,
@@ -92,20 +96,31 @@ extension BombOperationMapExtension on GameMapScreen {
     required BuildContext context,
     required BombSite site,
     required bool isPlanted,
+    required bool isExploded,
     required bool isAttacker,
     required bool isGreyed,
     required double radiusInPixels,
   }) {
     // Couleur du marqueur
     Color markerColor;
-    if (isGreyed) {
+    IconData markerIcon;
+
+    if (isExploded) {
+      //Sites explosés en orange/rouge foncé
+      markerColor = Colors.deepOrange.shade800;
+      markerIcon = Icons.whatshot; // Icône de flamme/explosion
+    } else if (isGreyed) {
       markerColor = Colors.grey;
+      markerIcon = Icons.location_on;
     } else if (isPlanted) {
       markerColor = Colors.red.shade800;
+      markerIcon = Icons.local_fire_department;
     } else if (isAttacker) {
       markerColor = Colors.red.shade200;
+      markerIcon = Icons.location_on;
     } else {
       markerColor = site.getColor(context);
+      markerIcon = Icons.location_on;
     }
 
     // Taille du texte en fonction du rayon
@@ -120,34 +135,40 @@ extension BombOperationMapExtension on GameMapScreen {
           height: radiusInPixels * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: markerColor.withOpacity(0.2),
-            border: Border.all(color: markerColor, width: 2),
+            color: markerColor.withOpacity(isExploded ? 0.4 : 0.2), // ✨ Plus transparent si explosé
+            border: Border.all(
+              color: markerColor,
+              width: isExploded ? 3 : 2, // ✨ Bordure plus épaisse si explosé
+              style: isExploded ? BorderStyle.solid : BorderStyle.solid,
+            ),
           ),
         ),
 
-        // Icône bombe au centre si plantée
-        if (isPlanted)
-          Icon(
-            Icons.local_fire_department,
-            color: markerColor,
-            size: dynamicFontSize * 1.2,
-          ),
+        // Icône au centre
+        Icon(
+          markerIcon,
+          color: markerColor,
+          size: dynamicFontSize * 1.2,
+        ),
 
         // Nom du site (toujours affiché)
-        Text(
-          site.name,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: dynamicFontSize,
-            fontWeight: FontWeight.bold,
-            shadows: const [
-              Shadow(
-                offset: Offset(0, 0),
-                blurRadius: 2,
-                color: Colors.white,
-              ),
-            ],
+        Positioned(
+          bottom: radiusInPixels * 0.1,
+          child: Text(
+            site.name,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isExploded ? Colors.white : Colors.black, // ✨ Texte blanc si explosé
+              fontSize: dynamicFontSize,
+              fontWeight: isExploded ? FontWeight.w900 : FontWeight.bold, // ✨ Plus gras si explosé
+              shadows: [
+                Shadow(
+                  offset: const Offset(0, 0),
+                  blurRadius: 2,
+                  color: isExploded ? Colors.black : Colors.white, // ✨ Ombre inversée si explosé
+                ),
+              ],
+            ),
           ),
         ),
       ],

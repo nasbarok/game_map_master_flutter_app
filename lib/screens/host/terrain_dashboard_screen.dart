@@ -272,7 +272,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     final user = authService.currentUser!;
     final teamId = teamService.myTeamId;
-    final fieldId = session.gameMap?.field?.id ?? 0;
+    final fieldId = session.field?.id!;
 
     gameStateService.setGameRunning(true);
     gameStateService.setActiveGameSession(startedSession);

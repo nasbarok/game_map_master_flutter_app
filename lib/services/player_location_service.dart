@@ -40,6 +40,10 @@ class PlayerLocationService {
 
   /// Initialise le service avec les informations de l'utilisateur actuel
   void initialize(int userId, int? teamId, int fieldId) {
+    if (fieldId <= 0) {
+      logger.e('❌ [PlayerLocationService] [initialize] fieldId invalide ($fieldId), abandon');
+      return;
+    }
     _currentUserId = userId;
     _currentUserTeamId = teamId;
     _currentFieldId = fieldId;

@@ -3,13 +3,13 @@ import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
 class BombOperationMessage extends WebSocketMessage {
   final int gameSessionId;
   final String action;
-  final Map<String, dynamic> payload;
+  final int bombSiteId;
 
   BombOperationMessage({
     required int senderId,
     required this.gameSessionId,
     required this.action,
-    required this.payload,
+    required this.bombSiteId,
     DateTime? timestamp,
   }) : super('BOMB_OPERATION_ACTION', senderId);
 
@@ -19,7 +19,7 @@ class BombOperationMessage extends WebSocketMessage {
       senderId: json['senderId'],
       gameSessionId: payload['gameSessionId'] ?? 0,
       action: payload['action'] ?? '',
-      payload: payload['actionPayload'] ?? {}
+      bombSiteId: payload['bombSiteId'] ?? 0,
     );
   }
 
@@ -32,7 +32,7 @@ class BombOperationMessage extends WebSocketMessage {
       'payload': {
         'gameSessionId': gameSessionId,
         'action': action,
-        'actionPayload': payload,
+        'bombSiteId': bombSiteId,
       }
     };
   }

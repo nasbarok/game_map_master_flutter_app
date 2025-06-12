@@ -6,6 +6,8 @@ import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_s
 import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_service.dart';
 import 'package:airsoft_game_map/utils/logger.dart';
 
+import '../../../models/scenario/bomb_operation/bomb_operation_team.dart';
+
 /// Service de détection automatique de proximité avec feedback sonore
 class BombProximityDetectionService {
   final BombOperationService _bombOperationService;
@@ -80,28 +82,57 @@ class BombProximityDetectionService {
     }
   }
 
+  /// ✨ Déplace un site vers la liste des sites explosés
+  void moveSiteToExploded(int siteId) {
+    // Mettre à jour l'état local
+    updateSiteState(siteId, BombSiteState.exploded);
+
+    // Notifier le service principal pour qu'il mette à jour ses listes
+    // (Cette méthode sera appelée par le WebSocket handler)
+    logger.d('💥 [BombProximityDetection] Site $siteId déplacé vers explosés');
+  }
+
   /// Vérifie la proximité avec les sites de bombe
   Future<void> _checkProximity() async {
     try {
-      final nearSite = await _bombOperationService.checkPlayerInActiveBombSite(gameSessionId: _gameSessionId, latitude: _currentLatitude, longitude: _currentLongitude);
+      final roleBombOperation = _bombOperationService.getPlayerRoleBombOperation(_userId);
+      if (roleBombOperation == null) {
+        logger.d('⚠️ [BombProximityDetection] Rôle non défini pour userId=$_userId');
+        return;
+      }
+
+      BombSite? nearSite;
+
+      if (roleBombOperation == BombOperationTeam.attack) {
+        nearSite = await _bombOperationService.checkPlayerInToActiveBombSite(
+          gameSessionId: _gameSessionId,
+          latitude: _currentLatitude,
+          longitude: _currentLongitude,
+        );
+      } else if (roleBombOperation == BombOperationTeam.defense) {
+        nearSite = await _bombOperationService.checkPlayerInActiveBombSite(
+          gameSessionId: _gameSessionId,
+          latitude: _currentLatitude,
+          longitude: _currentLongitude,
+        );
+      }
 
       // Vérifier si on a changé de zone
       if (nearSite?.id != _currentNearSite?.id) {
-        // Sortie de l'ancienne zone
         if (_isInActiveZone && _currentNearSite != null) {
           _handleExitZone(_currentNearSite!);
         }
-        
-        // Entrée dans une nouvelle zone
+
         if (nearSite != null) {
           _handleEnterZone(nearSite);
         }
       }
-      
+
     } catch (e) {
       logger.d('❌ [BombProximityDetection] Erreur lors de la vérification: $e');
     }
   }
+
 
   /// Gère l'entrée dans une zone de bombe
   void _handleEnterZone(BombSite site) {
@@ -137,18 +168,29 @@ class BombProximityDetectionService {
 
   /// Vérifie les actions possibles sur le site actuel
   void _checkAvailableActions(BombSite site) {
-    if (site.id == null) return;
-    
-    final siteState = _siteStates[site.id!] ?? BombSiteState.idle;
-    
-    // Déterminer les actions possibles
-    final canArm = siteState == BombSiteState.idle;
-    final canDisarm = siteState == BombSiteState.armed;
-    
-    // Notifier les actions disponibles
+    final role = _bombOperationService.getPlayerRoleBombOperation(_userId);
+    final roleStr = role != null ? role.toString().split('.').last : 'inconnu';
+
+    logger.d('📥 [BombProximityDetection] Vérification actions possibles pour ${site.name}');
+    logger.d('🔹 → rôle joueur=$_userId → $roleStr');
+
+    bool canArm = false;
+    bool canDisarm = false;
+
+    if (role == BombOperationTeam.attack &&
+        _bombOperationService.toActivateBombSites.any((s) => s.id == site.id)) {
+      canArm = true;
+      logger.d('✅ [BombProximityDetection] Le site ${site.name} est dans toActivateBombSites → arm=true');
+    } else if (role == BombOperationTeam.defense &&
+        _bombOperationService.activeBombSites.any((s) => s.id == site.id)) {
+      canDisarm = true;
+      logger.d('✅ [BombProximityDetection] Le site ${site.name} est dans activeBombSites → disarm=true');
+    } else {
+      logger.d('🚫 [BombProximityDetection] Aucune action possible sur ${site.name} pour le rôle $roleStr');
+    }
+
     onZoneStatusChanged?.call(site, canArm, canDisarm);
-    
-    logger.d('⚙️ [BombProximityDetection] Actions sur ${site.name}: arm=$canArm, disarm=$canDisarm');
+    logger.d('✅ [BombProximityDetection] Actions possibles sur ${site.name} → arm=$canArm | disarm=$canDisarm');
   }
 
   /// Joue le son d'entrée dans une zone
