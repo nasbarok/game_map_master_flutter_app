@@ -7,6 +7,7 @@ import '../../models/websocket/bomb_planted_message.dart';
 import '../../models/websocket/websocket_message.dart';
 import '../api_service.dart';
 import '../auth_service.dart';
+import '../game_state_service.dart';
 import '../scenario/bomb_operation/bomb_operation_service.dart';
 import '../scenario/bomb_operation/bomb_proximity_detection_service.dart';
 import '../websocket_service.dart';
@@ -57,7 +58,6 @@ class BombOperationWebSocketHandler {
           );
           logger.d('✅ [BombOperationWebSocketHandler] [sendBombOperationAction] [PLANT_BOMB] Notification envoyée via HTTP → siteId=$bombSiteId');
 
-          bombOperationService.activateSite(bombSiteId);
           break;
 
         case 'DEFUSE_BOMB':
@@ -104,12 +104,15 @@ class BombOperationWebSocketHandler {
     final siteName = msg.siteName;
     final player = msg.playerName;
     final bombSiteId = msg.siteId;
-
+    final bombTimer = msg.bombTimer;
+    final plantedTimestamp = msg.plantedTimestamp;
+    final senderId = msg.senderId;
+    final playerName = getPlayerName(senderId);
     // Met à jour l'état local du site comme armé
     _proximityService.updateSiteState(msg.siteId, BombSiteState.armed);
 
     final _bombOperationService = GetIt.I<BombOperationService>();
-    _bombOperationService.activateSite(msg.siteId);
+    _bombOperationService.activateSite(msg.siteId, bombTimer, plantedTimestamp, playerName);
 
     // Affiche une notification snack + dialog court
     showNotification('💣 Bombe plantée sur $siteName par $player');
@@ -120,11 +123,19 @@ class BombOperationWebSocketHandler {
     final msg = BombDefusedMessage.fromJson(message);
     logger.d('✅ [BombOperationWebSocket] Bombe désarmée: ${msg.siteName} par ${msg.playerName}');
 
-    // Mettre à jour l'état dans le service de proximité
-    _proximityService.updateSiteState(msg.siteId, BombSiteState.disarmed);
+    final siteId = msg.siteId;
+    final siteName = msg.siteName;
+    final playerName = getPlayerName(msg.senderId);
 
-    // Optionnel : message visuel
-    showNotification('✅ Bombe désarmée sur ${msg.siteName} par ${msg.playerName}');
+    // 1. Mise à jour de l'état dans le service de proximité
+    _proximityService.updateSiteState(siteId, BombSiteState.disarmed);
+
+    // 2. Mise à jour dans le BombOperationService : désactivation du site
+    final bombOperationService = GetIt.I<BombOperationService>();
+    bombOperationService.deactivateSite(siteId);
+
+    // 3. Notification visuelle
+    showNotification('✅ Bombe désarmée sur $siteName par $playerName');
   }
 
   /// Gère les notifications de bombe explosée
@@ -140,6 +151,28 @@ class BombOperationWebSocketHandler {
 
     // Optionnel : message visuel
     showNotification('💥 Explosion sur ${msg.siteName} !');
+  }
+
+  String getPlayerName(int userId) {
+    final gameStateService = GetIt.I<GameStateService>();
+
+    final player = gameStateService.connectedPlayersList.firstWhere(
+          (p) => p['id'] == userId,
+      orElse: () {
+        logger.w('[getPlayerName] AUCUN joueur trouvé pour userId=$userId');
+        return {};
+      },
+    );
+    if (player.isEmpty) {
+      return 'Joueur #$userId';
+    }
+
+    final username = player['username'];
+    if (username == null) {
+      logger.w('[getPlayerName] Joueur trouvé mais "username" est null → player=$player');
+      return 'Joueur #$userId';
+    }
+    return username;
   }
 
 }

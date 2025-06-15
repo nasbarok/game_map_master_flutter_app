@@ -5,11 +5,13 @@ class BombPlantedMessage extends WebSocketMessage {
   final int bombTimer;
   final String? playerName;
   final String? siteName;
+  final DateTime plantedTimestamp;
 
   BombPlantedMessage({
     required int senderId,
     required this.siteId,
     required this.bombTimer,
+    required this.plantedTimestamp,
     this.playerName,
     this.siteName,
   }) : super('BOMB_PLANTED', senderId);
@@ -20,6 +22,7 @@ class BombPlantedMessage extends WebSocketMessage {
       senderId: json['senderId'],
       siteId: payload['siteId'] ?? 0,
       bombTimer: payload['bombTimer'] ?? 0,
+      plantedTimestamp: DateTime.fromMillisecondsSinceEpoch(payload['timestamp'] ?? DateTime.now().millisecondsSinceEpoch),
       playerName: payload['playerName'],
       siteName: payload['siteName'],
     );
@@ -34,6 +37,7 @@ class BombPlantedMessage extends WebSocketMessage {
       'payload': {
         'siteId': siteId,
         'bombTimer': bombTimer,
+        'timestamp': plantedTimestamp.millisecondsSinceEpoch,
         'playerName': playerName,
         'siteName': siteName,
       },

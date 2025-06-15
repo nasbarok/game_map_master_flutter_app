@@ -90,7 +90,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   List<Map<String, dynamic>> _treasureFoundNotifications = [];
   bool _hasBombOperationScenario = false;
   bool _isBombManagerReady = false;
-  int effectiveFieldId =-1;
+  int effectiveFieldId = -1;
+
   @override
   void initState() {
     super.initState();
@@ -107,7 +108,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         });
       }
     });
-    effectiveFieldId =  (widget.fieldId ?? widget.gameSession.field?.id)!;
+    effectiveFieldId = (widget.fieldId ?? widget.gameSession.field?.id)!;
     final locationService = GetIt.I<PlayerLocationService>();
     final teamService = GetIt.I<TeamService>();
     int? teamId = widget.teamId;
@@ -143,9 +144,12 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     GameSessionScenario? bombScenario;
 
     for (final scenario in _scenarios) {
-      logger.d('➡️ Scénario ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
-      if (scenario.scenarioType == 'bomb_operation' && scenario.active == true) {
-        logger.d('💣 Scénario Opération Bombe détecté (ID=${scenario.scenarioId})');
+      logger.d(
+          '➡️ Scénario ID=${scenario.scenarioId}, type=${scenario.scenarioType}, actif=${scenario.active}');
+      if (scenario.scenarioType == 'bomb_operation' &&
+          scenario.active == true) {
+        logger.d(
+            '💣 Scénario Opération Bombe détecté (ID=${scenario.scenarioId})');
         bombScenario = scenario;
         break;
       }
@@ -162,32 +166,32 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
     final bombOperationService = GetIt.I<BombOperationService>();
 
-    if (bombOperationService.activeSessionScenarioBomb == null) {
-      logger.d('🧨 BombOperationService non encore initialisé, appel API en cours...');
-      try {
-        final bombSession = await _apiService.get(
-          'game-sessions/bomb-operation/by-game-session/${widget.gameSession.id}',
-        );
-        logger.d('📦 Réponse API reçue, parsing JSON...');
-        final parsedSession = BombOperationSession.fromJson(bombSession);
-        await bombOperationService.initialize(parsedSession);
-        logger.d('✅ BombOperationService initialisé avec succès');
-      } catch (e, stack) {
-        logger.e('❌ Erreur durant l\'initialisation du BombOperationService : $e\n$stack');
-        return;
-      }
-    } else {
-      logger.d('ℹ️ BombOperationService déjà initialisé → réutilisation de la session existante.');
+    logger.d(
+        '🧨 BombOperationService non encore initialisé, appel API en cours...');
+    try {
+      final bombSession = await _apiService.get(
+        'game-sessions/bomb-operation/by-game-session/${widget.gameSession.id}',
+      );
+      logger.d('📦 Réponse API reçue, parsing JSON...');
+      final parsedSession = BombOperationSession.fromJson(bombSession);
+      await bombOperationService.initialize(parsedSession);
+      logger.d('✅ BombOperationService initialisé avec succès');
+    } catch (e, stack) {
+      logger.e(
+          '❌ Erreur durant l\'initialisation du BombOperationService : $e\n$stack');
+      return;
     }
 
     final session = bombOperationService.activeSessionScenarioBomb;
     if (session == null || session.bombOperationScenario == null) {
-      logger.e('❌ Session ou scénario BombOperation absent après initialisation !');
+      logger.e(
+          '❌ Session ou scénario BombOperation absent après initialisation !');
       return;
     }
 
     final scenarioData = session.bombOperationScenario!;
-    logger.d('🧠 Scénario opération bombe chargé : ID=${scenarioData.id}, nom=${scenarioData.activeSites}');
+    logger.d(
+        '🧠 Scénario opération bombe chargé : ID=${scenarioData.id}, nom=${scenarioData.activeSites}');
     logger.d('🔌 Configuration du ProximityService...');
     final bombHandler = GetIt.I<BombOperationWebSocketHandler>();
     final proximity = BombProximityDetectionService(
@@ -224,7 +228,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     };
 
     try {
-      logger.d('🚀 Lancement de l’auto-manager avec ${session.toActiveBombSites.length} site(s) a activer...');
+      logger.d(
+          '🚀 Lancement de l’auto-manager avec ${session.toActiveBombSites.length} site(s) a activer...');
       await _bombAutoManager!.start(
         activeBombSites: session.toActiveBombSites,
       );
@@ -236,7 +241,6 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       logger.e('❌ Échec du démarrage de l’auto-manager : $e\n$stack');
     }
   }
-
 
   Future<void> _loadInitialData() async {
     setState(() {
@@ -544,28 +548,29 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                 if (_hasBombOperationScenario)
                   _isBombManagerReady && _bombAutoManager != null
                       ? BombOperationInfoCard(
-                    teamId: widget.teamId,
-                    userId: widget.userId,
-                    gameSessionId: _gameSession!.id!,
-                    autoManager: _bombAutoManager!,
-                  )
+                          teamId: widget.teamId,
+                          userId: widget.userId,
+                          gameSessionId: _gameSession!.id!,
+                          autoManager: _bombAutoManager!,
+                        )
                       : Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                                SizedBox(width: 12),
+                                Text("Chargement du scénario Bombe..."),
+                              ],
+                            ),
                           ),
-                          SizedBox(width: 12),
-                          Text("Chargement du scénario Bombe..."),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
 
                 SizedBox(height: 16),
                 // Bouton de scan QR code (uniquement si la partie est active)
@@ -586,7 +591,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                     teamId: widget.teamId,
                     hasBombOperationScenario: _hasBombOperationScenario,
                     participants: _participants,
-                    fieldId: _gameSession?.gameMap?.field?.id! ?? widget.fieldId,
+                    fieldId:
+                        _gameSession?.gameMap?.field?.id! ?? widget.fieldId,
                   ),
                 SizedBox(height: 16),
                 // Tableau des scores (uniquement si un scénario de chasse au trésor est actif)

@@ -45,7 +45,10 @@ class WebSocketMessageHandler {
     if (message.senderId == currentUserId &&
         type != 'PLAYER_KICKED' &&
         type != 'INVITATION_RESPONSE' &&
-        type != 'TREASURE_FOUND') {
+        type != 'TREASURE_FOUND' &&
+        type != 'BOMB_PLANTED' &&
+        type != 'BOMB_DEFUSED' &&
+        type != 'BOMB_EXPLODED') {
       logger.d('⏩ Ignoré : message envoyé par moi-même');
       return;
     }

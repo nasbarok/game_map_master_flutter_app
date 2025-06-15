@@ -366,7 +366,12 @@ class BombOperationService {
     return null;
   }
 
-  void activateSite(int siteId) {
+  void activateSite(
+      int siteId,
+      int bombTimer,
+      DateTime plantedTimestamp,
+      String playerName,
+      ) {
     try {
       final siteIndex = _toActivateBombSites.indexWhere((s) => s.id == siteId);
       if (siteIndex == -1) {
@@ -375,11 +380,20 @@ class BombOperationService {
         return;
       }
 
-      final site = _toActivateBombSites.removeAt(siteIndex);
-      _activeBombSites.add(site);
+      final originalSite = _toActivateBombSites.removeAt(siteIndex);
 
-      logger
-          .d('✅ [BombOperationService] Site activé: ${site.name} (ID=$siteId)');
+      // 👇 enrichir le BombSite avec timestamp et joueur (non persistés)
+      final enrichedSite = originalSite.copyWith(
+        active: true,
+        plantedTimestamp: plantedTimestamp,
+        plantedBy: playerName,
+      );
+
+      _activeBombSites.add(enrichedSite);
+
+      logger.d(
+          '✅ [BombOperationService] Site activé: ${enrichedSite.name} (ID=$siteId), armé par $playerName à $plantedTimestamp');
+
       _bombSitesStreamController.add(null); // notification UI
     } catch (e) {
       logger.d('❌ [BombOperationService] [activateSite] Erreur : $e');
@@ -408,5 +422,32 @@ class BombOperationService {
     _stateStreamController.close();
     _bombSitesStreamController.close();
     logger.d('🧨 BombOperationService dispose');
+  }
+
+  void markAsExploded(int siteId) {
+    final index = _activeBombSites.indexWhere((s) => s.id == siteId);
+    if (index != -1) {
+      final site = _activeBombSites.removeAt(index);
+      _explodedBombSites.add(site);
+      _bombSitesStreamController.add(null);
+      logger.d('💥 [BombOperationService] Site $siteId déplacé vers exploded');
+    }
+  }
+
+  void deactivateSite(int siteId) {
+    final index = _activeBombSites.indexWhere((site) => site.id == siteId);
+    if (index != -1) {
+      _activeBombSites[index] = _activeBombSites[index].copyWith(active: false);
+      _bombSitesStreamController.add(_activeBombSites); // pour notifier les listeners
+      logger.d('🛑 [BombOperationService] Site $siteId désactivé (désamorcé)');
+    }
+  }
+  BombSite? getBombSiteById(int siteId) {
+    try {
+      return [...activeBombSites, ...explodedBombSites, ...toActivateBombSites]
+          .firstWhere((site) => site.id == siteId);
+    } catch (_) {
+      return null;
+    }
   }
 }

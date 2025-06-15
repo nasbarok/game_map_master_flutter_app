@@ -25,6 +25,8 @@ class BombSite {
   final String? color;
 
   final bool active;
+  final DateTime? plantedTimestamp;
+  final String? plantedBy;
   /// Constructeur
   BombSite({
     this.id,
@@ -36,6 +38,8 @@ class BombSite {
     required this.radius,
     this.color,
     this.active = false,
+    this.plantedTimestamp,
+    this.plantedBy,
   });
 
   /// Crée une instance de BombSite à partir d'un objet JSON
@@ -79,6 +83,8 @@ class BombSite {
     double? radius,
     String? color,
     bool? active,
+    DateTime? plantedTimestamp,
+    String? plantedBy,
   }) {
     return BombSite(
       id: id ?? this.id,
@@ -90,6 +96,8 @@ class BombSite {
       radius: radius ?? this.radius,
       color: color ?? this.color,
       active: active ?? this.active,
+      plantedTimestamp: plantedTimestamp ?? this.plantedTimestamp,
+      plantedBy: plantedBy ?? this.plantedBy,
     );
   }
 

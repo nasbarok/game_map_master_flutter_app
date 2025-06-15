@@ -31,32 +31,44 @@ extension BombOperationMapWidgetExtension on Object {
     final bool isAttacker = isAttackTeam(userTeamId, teamRoles);
     final bool isDefender = isDefenseTeam(userTeamId, teamRoles);
 
-    logger.d('🎯 [BombOperationMapWidgetExtension] Rôle détecté : ${isAttacker ? "Attacker" : isDefender ? "Defender" : "Spectator/Unknown"}');
+/*    logger.d('🎯 [BombOperationMapWidgetExtension] Rôle détecté : ${isAttacker ? "Attacker" : isDefender ? "Defender" : "Spectator/Unknown"}');
     logger.d('🧩 [BombOperationMapWidgetExtension] toActivateBombSites: ${toActivateBombSites.map((b) => b.name).join(", ")}');
     logger.d('🛑 [BombOperationMapWidgetExtension] disableBombSites: ${disableBombSites.map((b) => b.name).join(", ")}');
     logger.d('🔥 [BombOperationMapWidgetExtension] activeBombSites: ${activeBombSites.map((b) => b.name).join(", ")}');
-    logger.d('💥 [BombOperationMapWidgetExtension] explodedBombSites: ${explodedBombSites.map((b) => b.name).join(", ")}');
+    logger.d('💥 [BombOperationMapWidgetExtension] explodedBombSites: ${explodedBombSites.map((b) => b.name).join(", ")}');*/
 
     final Set<int> activeIds = activeBombSites.map((e) => e.id!).toSet();
     final Set<int> explodedIds = explodedBombSites.map((e) => e.id!).toSet();
+    final Set<int> toActivateIds = toActivateBombSites.map((e) => e.id!).toSet();
+    final Set<int> disableIds = disableBombSites.map((e) => e.id!).toSet();
 
     // Sélection explicite des sites visibles
     Iterable<BombSite> visibleSites = [];
 
     if (isAttacker) {
-      visibleSites = toActivateBombSites;
+      visibleSites = [
+        ...toActivateBombSites,
+        ...activeBombSites,
+        ...explodedBombSites,
+      ];
     } else if (isDefender) {
-      visibleSites = disableBombSites;
+      visibleSites = [
+        ...disableBombSites,
+        ...activeBombSites,
+        ...explodedBombSites,
+      ];
     }
 
     for (final site in visibleSites) {
       final int siteId = site.id!;
       final bool isPlanted = activeIds.contains(siteId);
       final bool isExploded = explodedIds.contains(siteId);
-      final bool isGreyed = isDefender && !isPlanted;
+      final bool isDisarmed = activeBombSites.any((b) => b.id == siteId && b.active == false);
+      final bool isToActivate = isAttacker && toActivateIds.contains(siteId);
+      final bool isGreyed = isDefender && !isPlanted && !isDisarmed && !isExploded;
 
       final radiusInPixels =
-          AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
+      AppUtils.metersToPixels(site.radius, site.latitude, currentZoom);
 
       markers.add(
         Marker(
@@ -68,14 +80,16 @@ extension BombOperationMapWidgetExtension on Object {
             site: site,
             isPlanted: isPlanted,
             isExploded: isExploded,
+            isDisarmed: isDisarmed,
+            isToActivate: isToActivate,
             isAttacker: isAttacker,
+            isDefender: isDefender,
             isGreyed: isGreyed,
             radiusInPixels: radiusInPixels,
           ),
         ),
       );
     }
-
     return markers;
   }
 
@@ -95,38 +109,41 @@ extension BombOperationMapWidgetExtension on Object {
     required BombSite site,
     required bool isPlanted,
     required bool isExploded,
+    required bool isDisarmed,
+    required bool isToActivate,
     required bool isAttacker,
+    required bool isDefender,
     required bool isGreyed,
     required double radiusInPixels,
   }) {
-    // Couleur du marqueur
     Color markerColor;
     IconData markerIcon;
+
     if (isExploded) {
-      // ✨ NOUVEAU : Sites explosés en orange/rouge foncé
-      markerColor = Colors.deepOrange.shade800;
-      markerIcon = Icons.whatshot; // Icône de flamme/explosion
-    } else if (isGreyed) {
-      markerColor = Colors.grey;
-      markerIcon = Icons.location_on;
+      markerColor = Colors.black;
+      markerIcon = Icons.whatshot;
+    } else if (isDisarmed) {
+      markerColor = Colors.blue;
+      markerIcon = Icons.shield;
     } else if (isPlanted) {
       markerColor = Colors.red.shade800;
       markerIcon = Icons.local_fire_department;
-    } else if (isAttacker) {
+    } else if (isToActivate) {
       markerColor = Colors.red.shade200;
+      markerIcon = Icons.location_on;
+    } else if (isGreyed) {
+      markerColor = Colors.grey;
       markerIcon = Icons.location_on;
     } else {
       markerColor = site.getColor(context);
       markerIcon = Icons.location_on;
     }
 
-    // Taille du texte en fonction du rayon
     final double dynamicFontSize = math.max(8, radiusInPixels / 3);
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Cercle de rayon
         Container(
           width: radiusInPixels * 2,
           height: radiusInPixels * 2,
@@ -135,20 +152,15 @@ extension BombOperationMapWidgetExtension on Object {
             color: markerColor.withOpacity(0.2),
             border: Border.all(
               color: markerColor,
-              width: isExploded ? 3 : 2, // ✨ Bordure plus épaisse si explosé
-              style: isExploded ? BorderStyle.solid : BorderStyle.solid,
+              width: isExploded ? 3 : 2,
             ),
           ),
         ),
-
-        // Icône au centre
         Icon(
           markerIcon,
           color: markerColor,
           size: dynamicFontSize * 1.2,
         ),
-
-        // Nom du site (toujours affiché)
         Positioned(
           bottom: radiusInPixels * 0.1,
           child: Text(
@@ -156,17 +168,13 @@ extension BombOperationMapWidgetExtension on Object {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: isExploded ? Colors.white : Colors.black,
-              // ✨ Texte blanc si explosé
               fontSize: dynamicFontSize,
               fontWeight: isExploded ? FontWeight.w900 : FontWeight.bold,
-              // ✨ Plus gras si explosé
               shadows: [
                 Shadow(
                   offset: const Offset(0, 0),
                   blurRadius: 2,
-                  color: isExploded
-                      ? Colors.black
-                      : Colors.white, // ✨ Ombre inversée si explosé
+                  color: isExploded ? Colors.black : Colors.white,
                 ),
               ],
             ),
@@ -175,4 +183,5 @@ extension BombOperationMapWidgetExtension on Object {
       ],
     );
   }
+
 }
