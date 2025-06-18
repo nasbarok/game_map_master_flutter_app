@@ -115,13 +115,13 @@ class BombOperationWebSocketHandler {
     _bombOperationService.activateSite(msg.siteId, bombTimer, plantedTimestamp, playerName);
 
     // Affiche une notification snack + dialog court
-    showNotification('💣 Bombe plantée sur $siteName par $player');
+    showNotification('💣 Bombe plantée sur $siteName par $playerName');
   }
 
   /// Gère les notifications de bombe désarmée
   void handleBombDefused(Map<String, dynamic> message, BuildContext context) {
     final msg = BombDefusedMessage.fromJson(message);
-    logger.d('✅ [BombOperationWebSocket] Bombe désarmée: ${msg.siteName} par ${msg.playerName}');
+    logger.d('✅ [BombOperationWebSocket] Bombe désarmée: ${msg.siteName} par ${msg.senderId}');
 
     final siteId = msg.siteId;
     final siteName = msg.siteName;

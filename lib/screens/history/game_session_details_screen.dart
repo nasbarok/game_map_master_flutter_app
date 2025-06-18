@@ -226,9 +226,16 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   SizedBox(height: 8),
+
+                  // Scénario Treasure Hunt
                   if (scenario['treasureHuntStats'] != null)
                     ..._buildTreasureHuntStatsSection(
                         scenario['treasureHuntStats']),
+
+                  // Scénario Bomb Operation
+                  if (scenario['bombOperationStats'] != null)
+                    ..._buildBombOperationStatsSection(
+                        scenario['bombOperationStats']),
                 ],
               ),
             ),
@@ -238,6 +245,206 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
     }
 
     return widgets;
+  }
+
+  List<Widget> _buildBombOperationStatsSection(Map<String, dynamic> bombOperationStats) {
+    List<Widget> widgets = [];
+
+    widgets.add(SizedBox(height: 16));
+
+    widgets.add(
+      Text(
+        'Résultats Bomb Operation',
+        style: Theme.of(context)
+            .textTheme
+            .titleMedium
+            ?.copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
+
+    widgets.add(SizedBox(height: 12));
+
+    // Résumé des équipes
+    widgets.add(
+      Row(
+        children: [
+          // Équipe Terroriste
+          Expanded(
+            child: _buildBombOperationTeamCard(
+              'Terroristes',
+              Colors.red,
+              bombOperationStats['armedSites'] ?? 0,
+              bombOperationStats['explodedSites'] ?? 0,
+              'Bombes armées',
+              'Bombes explosées',
+            ),
+          ),
+          SizedBox(width: 12),
+          // Équipe Anti-terroriste
+          Expanded(
+            child: _buildBombOperationTeamCard(
+              'Anti-terroristes',
+              Colors.blue,
+              bombOperationStats['activeSites'] ?? 0,
+              bombOperationStats['disarmedSites'] ?? 0,
+              'Sites actifs',
+              'Bombes désarmées',
+            ),
+          ),
+        ],
+      ),
+    );
+
+    widgets.add(SizedBox(height: 12));
+
+    // Résultat final
+    final result = bombOperationStats['result'] ?? 'DRAW';
+    final resultColor = _getBombOperationResultColor(result);
+    final resultText = _getBombOperationResultText(result);
+
+    widgets.add(
+      Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: resultColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          resultText,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+
+    widgets.add(SizedBox(height: 16));
+
+    // Statistiques détaillées
+    widgets.add(
+      Text(
+        'Statistiques détaillées',
+        style: Theme.of(context).textTheme.titleSmall,
+      ),
+    );
+
+    widgets.add(SizedBox(height: 8));
+
+    widgets.add(
+      _buildBombOperationStatsTable(bombOperationStats),
+    );
+
+    return widgets;
+  }
+
+  Widget _buildBombOperationTeamCard(String teamName, Color teamColor, int stat1, int stat2, String label1, String label2) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: teamColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: teamColor, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            teamName,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: teamColor,
+              fontSize: 14,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            '$label1: $stat1',
+            style: TextStyle(fontSize: 12),
+          ),
+          Text(
+            '$label2: $stat2',
+            style: TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBombOperationStatsTable(Map<String, dynamic> stats) {
+    return Table(
+      border: TableBorder.all(color: Colors.grey[300]!),
+      columnWidths: {
+        0: FlexColumnWidth(2),
+        1: FlexColumnWidth(1),
+      },
+      children: [
+        TableRow(
+          decoration: BoxDecoration(color: Colors.grey[200]),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Statistique', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Valeur', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+        _buildBombOperationStatsRow('Sites totaux', '${stats['totalSites'] ?? 0}'),
+        _buildBombOperationStatsRow('Sites actifs', '${stats['activeSites'] ?? 0}'),
+        _buildBombOperationStatsRow('Bombes armées', '${stats['armedSites'] ?? 0}'),
+        _buildBombOperationStatsRow('Bombes désarmées', '${stats['disarmedSites'] ?? 0}'),
+        _buildBombOperationStatsRow('Bombes explosées', '${stats['explodedSites'] ?? 0}'),
+        if (stats['bombTimer'] != null)
+          _buildBombOperationStatsRow('Timer bombe', '${stats['bombTimer']}s'),
+        if (stats['defuseTime'] != null)
+          _buildBombOperationStatsRow('Temps désarmement', '${stats['defuseTime']}s'),
+        if (stats['armingTime'] != null)
+          _buildBombOperationStatsRow('Temps armement', '${stats['armingTime']}s'),
+      ],
+    );
+  }
+
+  TableRow _buildBombOperationStatsRow(String label, String value) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(label),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(value, style: TextStyle(fontWeight: FontWeight.w500)),
+        ),
+      ],
+    );
+  }
+
+  Color _getBombOperationResultColor(String result) {
+    switch (result) {
+      case 'TERRORISTS_WIN':
+        return Colors.red;
+      case 'COUNTER_TERRORISTS_WIN':
+        return Colors.blue;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  String _getBombOperationResultText(String result) {
+    switch (result) {
+      case 'TERRORISTS_WIN':
+        return '🔥 Victoire des Terroristes';
+      case 'COUNTER_TERRORISTS_WIN':
+        return '🛡️ Victoire des Anti-terroristes';
+      default:
+        return '🤝 Match nul';
+    }
   }
 
   List<Widget> _buildTreasureHuntStatsSection(

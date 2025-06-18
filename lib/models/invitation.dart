@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../models/scenario.dart';
 import '../../models/team.dart';
 import '../../models/user.dart';

@@ -342,6 +342,11 @@ class BombOperationService {
         '📡 [checkPlayerInToActiveBombSite] Position joueur : ($latitude, $longitude)');*/
 
     for (final site in _activeBombSites) {
+
+      if (!site.active) {
+        logger.d('⛔ [checkPlayerInActiveBombSite] PSite ignoré (désactivé) : ${site.name}');
+        continue;
+      }
       final distance = AppUtils.computeDistanceMeters(
         latitude,
         longitude,

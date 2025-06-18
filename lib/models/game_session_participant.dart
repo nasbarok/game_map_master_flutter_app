@@ -61,7 +61,6 @@ DateTime _safeParseDateTime(String? raw) {
     // Troncature manuelle des microsecondes à 6 chiffres
     if (raw.contains('.') && raw.contains('T')) {
       final parts = raw.split('.');
-      final timePart = parts[1].split('T').last;
       final micro = parts[1].substring(0, 6);
       raw = '${parts[0]}.${micro}';
     }

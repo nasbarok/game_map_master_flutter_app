@@ -53,7 +53,7 @@ class BombSite {
       longitude: json['longitude'],
       radius: json['radius'].toDouble(),
       color: json['color'],
-      active: json['active'] ?? false, // gestion de null-safe
+      active: json['active'] == true, // gestion de null-safe
     );
   }
 

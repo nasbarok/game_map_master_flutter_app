@@ -3,13 +3,17 @@ import 'package:airsoft_game_map/models/coordinate.dart';
 import 'package:airsoft_game_map/models/game_map.dart';
 import 'package:airsoft_game_map/models/game_session_position_history.dart';
 import 'package:airsoft_game_map/models/player_position.dart';
+import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_history.dart';
+import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site_history.dart';
 import 'package:airsoft_game_map/services/player_location_service.dart';
+import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_history_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:airsoft_game_map/utils/logger.dart';
 
-/// Écran de replay des déplacements des joueurs
+/// Écran de replay des déplacements des joueurs et des événements Bomb Operation
 class GameReplayScreen extends StatefulWidget {
   final int gameSessionId;
   final GameMap gameMap;
@@ -27,8 +31,10 @@ class GameReplayScreen extends StatefulWidget {
 class _GameReplayScreenState extends State<GameReplayScreen> {
   final MapController _mapController = MapController();
   late PlayerLocationService _locationService;
-  
+  late BombOperationHistoryService _bombHistoryService;
+
   GameSessionPositionHistory? _positionHistory;
+  BombOperationHistory? _bombHistory;
   bool _isLoading = true;
   String? _errorMessage;
   
@@ -45,6 +51,12 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
   // Positions affichées actuellement
   Map<int, Coordinate> _displayedPositions = {};
   
+  // État des sites de bombe au temps actuel
+  Map<int, BombSiteHistory> _currentBombSitesState = {};
+
+  // Événements visibles jusqu'au temps actuel
+  List<BombEvent> _visibleEvents = [];
+
   // Couleurs pour les équipes
   final Map<int, Color> _teamColors = {
     1: Colors.blue,
@@ -64,7 +76,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
   void initState() {
     super.initState();
     _locationService = GetIt.I<PlayerLocationService>();
-    _loadPositionHistory();
+    _bombHistoryService = BombOperationHistoryService();
+    _loadReplayData();
   }
 
   @override
@@ -74,21 +87,31 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     super.dispose();
   }
   
-  Future<void> _loadPositionHistory() async {
+  Future<void> _loadReplayData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     
     try {
-      final history = await _locationService.getPositionHistory(widget.gameSessionId);
+      // Charger l'historique des positions
+      final positionHistory = await _locationService.getPositionHistory(widget.gameSessionId);
+
+      // Charger l'historique Bomb Operation (si disponible)
+      BombOperationHistory? bombHistory;
+      try {
+        bombHistory = await _bombHistoryService.getSessionHistory(widget.gameSessionId);
+      } catch (e) {
+        // Pas d'historique Bomb Operation disponible, continuer sans
+        logger.d('Aucun historique Bomb Operation trouvé: $e');
+      }
       
       // Déterminer les timestamps de début et de fin
       DateTime? earliest;
       DateTime? latest;
       
       // Extraire les informations d'équipe des joueurs
-      history.playerPositions.forEach((userId, positions) {
+      positionHistory.playerPositions.forEach((userId, positions) {
         for (final position in positions) {
           if (earliest == null || position.timestamp.isBefore(earliest!)) {
             earliest = position.timestamp;
@@ -104,15 +127,28 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         }
       });
       
+      // Étendre la plage de temps avec les événements Bomb Operation
+      if (bombHistory != null) {
+        for (final event in bombHistory.timeline) {
+          if (earliest == null || event.timestamp.isBefore(earliest!)) {
+            earliest = event.timestamp;
+          }
+          if (latest == null || event.timestamp.isAfter(latest!)) {
+            latest = event.timestamp;
+          }
+        }
+      }
+
       setState(() {
-        _positionHistory = history;
+        _positionHistory = positionHistory;
+        _bombHistory = bombHistory;
         _startTime = earliest;
         _endTime = latest;
         _currentTime = earliest;
         _isLoading = false;
         
-        // Initialiser les positions affichées au début
-        _updateDisplayedPositions();
+        // Initialiser les positions et états affichés au début
+        _updateDisplayedData();
       });
     } catch (e) {
       setState(() {
@@ -122,6 +158,14 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     }
   }
   
+  void _updateDisplayedData() {
+    if (_currentTime == null) return;
+
+    _updateDisplayedPositions();
+    _updateBombSitesState();
+    _updateVisibleEvents();
+  }
+
   void _updateDisplayedPositions() {
     if (_currentTime == null || _positionHistory == null) return;
     
@@ -153,6 +197,86 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     });
   }
   
+  void _updateBombSitesState() {
+    if (_currentTime == null || _bombHistory == null) return;
+
+    final newSitesState = <int, BombSiteHistory>{};
+
+    for (final siteHistory in _bombHistory!.bombSitesHistory) {
+      // Créer un nouvel état basé sur l'état actuel
+      BombSiteHistory currentState = BombSiteHistory(
+        id: siteHistory.id,
+        gameSessionId: siteHistory.gameSessionId,
+        originalBombSiteId: siteHistory.originalBombSiteId,
+        name: siteHistory.name,
+        latitude: siteHistory.latitude,
+        longitude: siteHistory.longitude,
+        radius: siteHistory.radius,
+        status: _calculateStatusAtTime(siteHistory, _currentTime!),
+        createdAt: siteHistory.createdAt,
+        updatedAt: siteHistory.updatedAt,
+        activatedAt: siteHistory.activatedAt,
+        armedAt: siteHistory.armedAt,
+        disarmedAt: siteHistory.disarmedAt,
+        explodedAt: siteHistory.explodedAt,
+        armedByUserId: siteHistory.armedByUserId,
+        armedByUserName: siteHistory.armedByUserName,
+        disarmedByUserId: siteHistory.disarmedByUserId,
+        disarmedByUserName: siteHistory.disarmedByUserName,
+        bombTimer: siteHistory.bombTimer,
+        expectedExplosionAt: siteHistory.expectedExplosionAt,
+        timeRemainingSeconds: siteHistory.timeRemainingSeconds,
+        shouldHaveExploded: siteHistory.shouldHaveExploded,
+      );
+
+      // Vérifier si le site était créé à ce moment
+      if (siteHistory.createdAt.isAfter(_currentTime!)) {
+        continue; // Site pas encore créé
+      }
+
+      newSitesState[siteHistory.originalBombSiteId] = currentState;
+    }
+
+    setState(() {
+      _currentBombSitesState = newSitesState;
+    });
+  }
+
+  String _calculateStatusAtTime(BombSiteHistory siteHistory, DateTime time) {
+    // Déterminer le statut au temps donné
+    String status = 'INACTIVE';
+
+    if (siteHistory.activatedAt != null && !time.isBefore(siteHistory.activatedAt!)) {
+      status = 'ACTIVE';
+    }
+
+    if (siteHistory.armedAt != null && !time.isBefore(siteHistory.armedAt!)) {
+      status = 'ARMED';
+    }
+
+    if (siteHistory.disarmedAt != null && !time.isBefore(siteHistory.disarmedAt!)) {
+      status = 'DISARMED';
+    }
+
+    if (siteHistory.explodedAt != null && !time.isBefore(siteHistory.explodedAt!)) {
+      status = 'EXPLODED';
+    }
+
+    return status;
+  }
+
+  void _updateVisibleEvents() {
+    if (_currentTime == null || _bombHistory == null) return;
+
+    final visibleEvents = _bombHistory!.timeline
+        .where((event) => !event.timestamp.isAfter(_currentTime!))
+        .toList();
+
+    setState(() {
+      _visibleEvents = visibleEvents;
+    });
+  }
+
   void _startPlayback() {
     if (_currentTime == null || _endTime == null) return;
     
@@ -184,7 +308,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         _currentTime = newTime;
       });
       
-      _updateDisplayedPositions();
+      _updateDisplayedData();
     });
   }
   
@@ -204,9 +328,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
       _playbackSpeed = speed;
     });
     
-    // Si le replay est en cours, redémarrer avec la nouvelle vitesse
+    // Redémarrer le timer avec la nouvelle vitesse si en cours de lecture
     if (_isPlaying) {
-      _stopPlayback();
       _startPlayback();
     }
   }
@@ -214,175 +337,429 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
   void _onTimelineChanged(double value) {
     if (_startTime == null || _endTime == null) return;
     
-    // Calculer le nouveau temps en fonction de la valeur du slider
-    final totalDuration = _endTime!.difference(_startTime!).inMilliseconds;
-    final newTimeOffset = (totalDuration * value).round();
-    final newTime = _startTime!.add(Duration(milliseconds: newTimeOffset));
+    final totalDuration = _endTime!.difference(_startTime!);
+    final newTime = _startTime!.add(Duration(
+      milliseconds: (totalDuration.inMilliseconds * value).round(),
+    ));
     
     setState(() {
       _currentTime = newTime;
     });
     
-    _updateDisplayedPositions();
+    _updateDisplayedData();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Replay de la partie'),
+        title: Text('Replay de la session'),
+        actions: [
+          if (_bombHistory != null)
+            IconButton(
+              icon: Icon(Icons.info_outline),
+              onPressed: _showBombOperationSummary,
+              tooltip: 'Résumé Bomb Operation',
+            ),
+        ],
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : _errorMessage != null
-          ? Center(child: Text(_errorMessage!))
-          : Column(
-              children: [
-                // Carte interactive (prend la majorité de l'espace)
-                Expanded(
-                  child: FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      center: LatLng(
-                        widget.gameMap.centerLatitude ?? 48.8566,
-                        widget.gameMap.centerLongitude ?? 2.3522
-                      ),
-                      zoom: widget.gameMap.initialZoom ?? 13.0,
-                      minZoom: 3.0,
-                      maxZoom: 18.0,
-                    ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Couche de tuiles (fond de carte)
-                      TileLayer(
-                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.airsoft.gamemapmaster',
-                      ),
-                      
-                      // Limites du terrain
-                      if (widget.gameMap.fieldBoundary != null)
-                        PolygonLayer(
-                          polygons: [
-                            Polygon(
-                              points: widget.gameMap.fieldBoundary!
-                                .map((coord) => LatLng(coord.latitude, coord.longitude))
-                                .toList(),
-                              color: Colors.blue.withOpacity(0.2),
-                              borderColor: Colors.blue,
-                              borderStrokeWidth: 2.0,
-                            ),
-                          ],
-                        ),
-                      
-                      // Zones
-                      if (widget.gameMap.mapZones != null)
-                        PolygonLayer(
-                          polygons: widget.gameMap.mapZones!
-                            .where((zone) => zone.visible)
-                            .map((zone) => Polygon(
-                              points: zone.zoneShape
-                                .map((coord) => LatLng(coord.latitude, coord.longitude))
-                                .toList(),
-                              color: _parseColor(zone.color).withOpacity(0.3),
-                              borderColor: _parseColor(zone.color),
-                              borderStrokeWidth: 2.0,
-                            ))
-                            .toList(),
-                        ),
-                      
-                      // Points d'intérêt
-                      if (widget.gameMap.mapPointsOfInterest != null)
-                        MarkerLayer(
-                          markers: widget.gameMap.mapPointsOfInterest!
-                              .where((poi) => poi.visible)
-                              .map((poi) => Marker(
-                            point: LatLng(poi.latitude, poi.longitude),
-                            width: 40,
-                            height: 40,
-                            child: Tooltip( // ✅ Remplace "builder" par "child"
-                              message: poi.name,
-                              child: Icon(
-                                _getIconDataFromIdentifier(poi.iconIdentifier),
-                                color: Colors.black87,
-                                size: 30,
-                              ),
-                            ),
-                          ))
-                              .toList(),
-                        ),
-
-                      // Positions des joueurs
-                      MarkerLayer(
-                        markers: _displayedPositions.entries.map((entry) {
-                          final userId = entry.key;
-                          final position = entry.value;
-                          final teamId = _playerTeams[userId];
-
-                          return Marker(
-                            point: LatLng(position.latitude, position.longitude),
-                            width: 40,
-                            height: 40,
-                            child: _buildPlayerMarker(userId, teamId), // ✅ ici aussi
-                          );
-                        }).toList(),
+                      Text(_errorMessage!, style: TextStyle(color: Colors.red)),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadReplayData,
+                        child: Text('Réessayer'),
                       ),
                     ],
                   ),
-                ),
-                
-                // Contrôles de replay
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.grey[200],
-                  child: Column(
-                    children: [
-                      // Affichage du temps actuel
-                      Text(
-                        _currentTime != null 
-                          ? _formatDateTime(_currentTime!) 
-                          : '--:--:--',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // Timeline (slider)
-                      Slider(
-                        value: _calculateTimelineValue(),
-                        onChanged: _onTimelineChanged,
-                        min: 0.0,
-                        max: 1.0,
-                      ),
-                      
-                      // Contrôles de lecture
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Bouton play/pause
-                          IconButton(
-                            icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                            onPressed: _isPlaying ? _stopPlayback : _startPlayback,
-                            iconSize: 36,
+                )
+              : Column(
+                  children: [
+                    // Panneau d'information Bomb Operation (si disponible)
+                    if (_bombHistory != null)
+                      _buildBombOperationInfoPanel(),
+
+                    // Carte
+                    Expanded(
+                      child: FlutterMap(
+                        mapController: _mapController,
+                        options: MapOptions(
+                          initialCenter: LatLng(
+                            widget.gameMap.centerLatitude ?? 0.0,
+                            widget.gameMap.centerLongitude ?? 0.0,
                           ),
-                          
-                          const SizedBox(width: 16),
-                          
-                          // Boutons de vitesse
-                          _buildSpeedButton(1.0),
-                          _buildSpeedButton(2.0),
-                          _buildSpeedButton(3.0),
+                          initialZoom: widget.gameMap.initialZoom ?? 13.0,
+                          minZoom: 5.0,
+                          maxZoom: 18.0,
+                        ),
+                        children: [
+                          // Couche de tuiles
+                          TileLayer(
+                            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            userAgentPackageName: 'com.example.app',
+                          ),
+
+                          // Sites de bombe (si disponibles)
+                          if (_bombHistory != null)
+                            MarkerLayer(
+                              markers: _currentBombSitesState.values.map((siteState) {
+                                return Marker(
+                                  point: LatLng(siteState.latitude, siteState.longitude),
+                                  width: 60,
+                                  height: 60,
+                                  child: _buildBombSiteMarker(siteState),
+                                );
+                              }).toList(),
+                            ),
+
+                          // Points d'intérêt
+                          if (widget.gameMap.mapPointsOfInterest != null)
+                            MarkerLayer(
+                              markers: widget.gameMap.mapPointsOfInterest!
+                                  .map((poi) => Marker(
+                                      point: LatLng(poi.latitude, poi.longitude),
+                                      width: 40,
+                                      height: 40,
+                                      child: Tooltip(
+                                        message: poi.name,
+                                        child: Icon(
+                                          _getIconDataFromIdentifier(poi.iconIdentifier),
+                                          color: Colors.black87,
+                                          size: 30,
+                                        ),
+                                      ),
+                                    ))
+                                  .toList(),
+                            ),
+
+                          // Positions des joueurs
+                          MarkerLayer(
+                            markers: _displayedPositions.entries.map((entry) {
+                              final userId = entry.key;
+                              final position = entry.value;
+                              final teamId = _playerTeams[userId];
+
+                              return Marker(
+                                point: LatLng(position.latitude, position.longitude),
+                                width: 40,
+                                height: 40,
+                                child: _buildPlayerMarker(userId, teamId),
+                              );
+                            }).toList(),
+                          ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Contrôles de replay
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      color: Colors.grey[200],
+                      child: Column(
+                        children: [
+                          // Affichage du temps actuel
+                          Text(
+                            _currentTime != null
+                              ? _formatDateTime(_currentTime!)
+                              : '--:--:--',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          // Timeline (slider)
+                          Slider(
+                            value: _calculateTimelineValue(),
+                            onChanged: _onTimelineChanged,
+                            min: 0.0,
+                            max: 1.0,
+                          ),
+
+                          // Contrôles de lecture
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                                onPressed: _isPlaying ? _stopPlayback : _startPlayback,
+                                iconSize: 36,
+                              ),
+                              const SizedBox(width: 16),
+                              Flexible(
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: [
+                                    _buildSpeedButton(0.5),
+                                    _buildSpeedButton(1.0),
+                                    _buildSpeedButton(2.0),
+                                    _buildSpeedButton(4.0),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+    );
+  }
+
+  // ===== MÉTHODES POUR L'INTERFACE BOMB OPERATION =====
+
+  Widget _buildBombOperationInfoPanel() {
+    if (_bombHistory == null) return SizedBox.shrink();
+
+    return Container(
+      padding: EdgeInsets.all(16),
+      color: Colors.grey[100],
+      child: Column(
+        children: [
+          // Résumé des équipes
+          Row(
+            children: [
+              // Équipe Terroriste
+              Expanded(
+                child: _buildTeamSummary(
+                  'Terroristes',
+                  Colors.red,
+                  _bombHistory!.finalStats.armedSites,
+                  _bombHistory!.finalStats.explodedSites,
+                  'Bombes armées',
+                  'Bombes explosées',
+                ),
+              ),
+              SizedBox(width: 16),
+              // Équipe Anti-terroriste
+              Expanded(
+                child: _buildTeamSummary(
+                  'Anti-terroristes',
+                  Colors.blue,
+                  _bombHistory!.finalStats.totalSites - _bombHistory!.finalStats.armedSites,
+                  _bombHistory!.finalStats.disarmedSites,
+                  'Sites protégés',
+                  'Bombes désarmées',
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 12),
+
+          // Résultat final
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            decoration: BoxDecoration(
+              color: _getResultColor(),
+              borderRadius: BorderRadius.circular(8),
             ),
+            child: Text(
+              _getResultText(),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+
+          SizedBox(height: 12),
+
+          // Timeline des événements visibles
+          if (_visibleEvents.isNotEmpty)
+            Container(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _visibleEvents.length,
+                itemBuilder: (context, index) {
+                  final event = _visibleEvents[index];
+                  return Container(
+                    width: 200,
+                    margin: EdgeInsets.only(right: 8),
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getEventIcon(event.eventType),
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          event.description,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          event.siteName,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeamSummary(String teamName, Color teamColor, int stat1, int stat2, String label1, String label2) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: teamColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: teamColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            teamName,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: teamColor,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text('$label1: $stat1'),
+          Text('$label2: $stat2'),
+        ],
+      ),
     );
   }
   
+  Widget _buildBombSiteMarker(BombSiteHistory siteState) {
+    Color markerColor;
+    IconData markerIcon;
+
+    switch (siteState.status) {
+      case 'ACTIVE':
+        markerColor = Colors.orange;
+        markerIcon = Icons.radio_button_checked;
+        break;
+      case 'ARMED':
+        markerColor = Colors.red;
+        markerIcon = Icons.dangerous;
+        break;
+      case 'DISARMED':
+        markerColor = Colors.blue;
+        markerIcon = Icons.check_circle;
+        break;
+      case 'EXPLODED':
+        markerColor = Colors.black;
+        markerIcon = Icons.whatshot;
+        break;
+      default:
+        markerColor = Colors.grey;
+        markerIcon = Icons.radio_button_unchecked;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: markerColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: Icon(
+        markerIcon,
+        color: Colors.white,
+        size: 30,
+      ),
+    );
+  }
+
+  void _showBombOperationSummary() {
+    if (_bombHistory == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Résumé Bomb Operation'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Scénario: ${_bombHistory!.scenarioName}'),
+              Text('Sites actifs: ${_bombHistory!.activeSites}'),
+              Text('Timer bombe: ${_bombHistory!.bombTimer}s'),
+              Text('Temps désarmement: ${_bombHistory!.defuseTime}s'),
+              SizedBox(height: 16),
+              Text('Résultat final:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(_getResultText()),
+              SizedBox(height: 16),
+              Text('Statistiques:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Bombes armées: ${_bombHistory!.finalStats.armedSites}'),
+              Text('Bombes désarmées: ${_bombHistory!.finalStats.disarmedSites}'),
+              Text('Bombes explosées: ${_bombHistory!.finalStats.explodedSites}'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getResultColor() {
+    if (_bombHistory == null) return Colors.grey;
+
+    final winningTeam = _bombHistory!.finalStats.winningTeam;
+    switch (winningTeam) {
+      case 'ATTACK':
+        return Colors.red;
+      case 'DEFENSE':
+        return Colors.blue;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  String _getResultText() {
+    if (_bombHistory == null) return 'Aucun résultat';
+
+    final winningTeam = _bombHistory!.finalStats.winningTeam;
+    switch (winningTeam) {
+      case 'ATTACK':
+        return '🔥 Victoire des Terroristes';
+      case 'DEFENSE':
+        return '🛡️ Victoire des Anti-terroristes';
+      default:
+        return '🤝 Match nul';
+    }
+  }
+
   Widget _buildSpeedButton(double speed) {
     final isSelected = _playbackSpeed == speed;
     
@@ -394,7 +771,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
           foregroundColor: isSelected ? Colors.white : Colors.black,
         ),
         onPressed: () => _setPlaybackSpeed(speed),
-        child: Text('x${speed.toInt()}'),
+        child: Text('x${speed == speed.toInt() ? speed.toInt().toString() : speed.toString()}'),
       ),
     );
   }
@@ -439,6 +816,22 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     }
   }
   
+
+  String _getEventIcon(String eventType) {
+    switch (eventType) {
+      case 'ACTIVATED':
+        return '🟠';
+      case 'ARMED':
+        return '💣';
+      case 'DISARMED':
+        return '🛡️';
+      case 'EXPLODED':
+        return '💥';
+      default:
+        return '📍';
+    }
+  }
+
   IconData _getIconDataFromIdentifier(String identifier) {
     // Liste des icônes disponibles (similaire à celle de InteractiveMapEditorScreen)
     final Map<String, IconData> icons = {
@@ -462,3 +855,4 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     return icons[identifier] ?? Icons.location_pin;
   }
 }
+
