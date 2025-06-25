@@ -84,6 +84,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
 
   StreamSubscription<EnhancedPosition>? _positionSubscription;
   EnhancedPosition? _currentPosition;
+  final PlayerLocationService _playerLocationService = GetIt.I<PlayerLocationService>();
 
   @override
   void initState() {
@@ -145,13 +146,32 @@ class _GameMapScreenState extends State<GameMapScreen> {
         },
       );
     } catch (e) {
-      print('Erreur géolocalisation: $e');
+      logger.e('Erreur géolocalisation: $e');
     }
   }
 
   void _sendPositionToServer(EnhancedPosition position) {
-    // Utiliser votre service WebSocket existant
-    // Adapter selon votre implémentation
+    if (widget.fieldId == null) {
+      logger.w('⚠️ Aucun fieldId disponible pour envoyer la position');
+      return;
+    }
+
+    final correctedLat = position.latitude;
+    final correctedLng = position.longitude;
+
+    _playerLocationService.updatePlayerPosition(
+      widget.userId,
+      Coordinate(latitude: correctedLat, longitude: correctedLng),
+    );
+
+    _playerLocationService.shareEnhancedPosition(
+      gameSessionId: widget.gameSessionId,
+      fieldId: widget.fieldId!,
+      userId: widget.userId,
+      latitude: correctedLat,
+      longitude: correctedLng,
+      teamId: widget.teamId,
+    );
   }
 
   @override

@@ -34,10 +34,13 @@ class PlayerLocationService {
   int? _currentGameSessionId;
 
   StreamSubscription<EnhancedPosition>? _advancedLocationSubscription;
+  final AdvancedLocationService _advancedLocationService;
 
-  PlayerLocationService(this._apiService, this._webSocketService) {
+  PlayerLocationService(this._apiService, this._webSocketService,
+      this._advancedLocationService) {
     _webSocketService.registerOnPlayerPositionUpdate(_handlePositionUpdate);
   }
+  AdvancedLocationService get advancedLocationService => _advancedLocationService;
 
   void initialize(int userId, int? teamId, int fieldId) {
     if (fieldId <= 0) {
@@ -58,8 +61,16 @@ class PlayerLocationService {
       final advancedLocationService = GetIt.instance<AdvancedLocationService>();
       _currentGameSessionId = gameSessionId;
 
+      if (!advancedLocationService.isInitialized) {
+        logger.i('[PlayerLocationService] Initializing AdvancedLocationService...');
+        await advancedLocationService.initialize();
+        logger.i('[PlayerLocationService] AdvancedLocationService initialized.');
+      }
+
       if (!advancedLocationService.isActive) {
+        logger.i('[PlayerLocationService] Starting AdvancedLocationService...');
         await advancedLocationService.start();
+        logger.i('[PlayerLocationService] AdvancedLocationService started.');
       }
 
       _advancedLocationSubscription = advancedLocationService.positionStream.listen(

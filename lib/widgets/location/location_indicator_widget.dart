@@ -4,6 +4,7 @@ import 'dart:async';
 
 import '../../services/location/advanced_location_service.dart';
 import '../../services/location/location_models.dart';
+import '../../services/player_location_service.dart';
 
 /// Widget indicateur GPS compact
 class LocationIndicatorWidget extends StatefulWidget {
@@ -25,8 +26,8 @@ class LocationIndicatorWidget extends StatefulWidget {
 class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   StreamSubscription<EnhancedPosition>? _positionSubscription;
   StreamSubscription<LocationQualityMetrics>? _metricsSubscription;
-  AdvancedLocationService get _locationService => GetIt.instance<AdvancedLocationService>();
-
+  AdvancedLocationService get _locationService =>
+      GetIt.I<PlayerLocationService>().advancedLocationService;
   EnhancedPosition? _currentPosition;
   LocationQualityMetrics? _currentMetrics;
 
@@ -47,6 +48,7 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
     if (_locationService.isActive) {
       _positionSubscription = _locationService.positionStream.listen(
             (position) {
+          print('[LocationIndicatorWidget] 📍 Position reçue : $position'); // ⬅️
           if (mounted) {
             setState(() {
               _currentPosition = position;
@@ -54,6 +56,7 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
           }
         },
       );
+
 
       _metricsSubscription = _locationService.metricsStream.listen(
             (metrics) {

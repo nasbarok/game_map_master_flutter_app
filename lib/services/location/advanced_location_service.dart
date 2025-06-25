@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -61,9 +62,9 @@ class AdvancedLocationService {
       }
 
       _isInitialized = true;
-      print('AdvancedLocationService initialisé avec succès');
+      logger.d('[AdvancedLocationService] initialisé avec succès');
     } catch (e) {
-      print('Erreur initialisation AdvancedLocationService: $e');
+      logger.e('[AdvancedLocationService] Erreur initialisation AdvancedLocationService: $e');
       rethrow;
     }
   }
@@ -71,11 +72,11 @@ class AdvancedLocationService {
   /// Démarre le service
   Future<void> start() async {
     if (!_isInitialized) {
-      throw StateError('Service non initialisé');
+      throw StateError('[AdvancedLocationService] [start] Service non initialisé');
     }
 
     if (_isActive) return;
-
+    logger.d('[AdvancedLocationService] [start] ✅  start');
     try {
       _sessionStartTime = DateTime.now();
       _totalPositionsReceived = 0;
@@ -123,7 +124,7 @@ class AdvancedLocationService {
     _positionSubscription = null;
     _isActive = false;
 
-    print('AdvancedLocationService arrêté');
+    logger.d('[AdvancedLocationService] [stop] arrêté');
   }
 
   /// Obtient la position actuelle
@@ -165,6 +166,7 @@ class AdvancedLocationService {
 
   /// Traite une mise à jour de position
   void _onPositionUpdate(Position position) {
+ logger.d('[AdvancedLocationService] Position updated : $position.latitude, $position.longitude (accuracy: ${position.accuracy})');
     try {
       _totalPositionsReceived++;
 

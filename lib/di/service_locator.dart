@@ -84,7 +84,19 @@ void setupServiceLocator() {
   final bombOperationWebSocketHandler = BombOperationWebSocketHandler(authService,webSocketService, navigatorKey,apiService);
   final bombOperationService = BombOperationService(apiService,bombOperationWebSocketHandler);
 
-  final playerLocationService = PlayerLocationService(apiService,webSocketService);
+  // Services de géolocalisation avancée
+  final locationFilter = LocationFilter();
+  final movementDetector = MovementDetector();
+
+  final advancedLocationService = AdvancedLocationService(
+    filter: locationFilter,
+    movementDetector: movementDetector,
+  );
+  final playerLocationService = PlayerLocationService(
+    apiService,
+    webSocketService,
+    advancedLocationService, // ← passe l'instance partagée
+  );
   // 5. WebSocketManager
   final webSocketManager = WebSocketManager(
     webSocketService,
@@ -93,13 +105,7 @@ void setupServiceLocator() {
     fieldHandler,
   );
 
-  // Services de géolocalisation avancée
-  final locationFilter = LocationFilter();
-  final movementDetector = MovementDetector();
-  final advancedLocationService = AdvancedLocationService(
-    filter: locationFilter,
-    movementDetector: movementDetector,
-  );
+
 
 
   // ✅ 6. ENREGISTREMENTS dans GetIt (dans cet ordre)
