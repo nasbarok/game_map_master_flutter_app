@@ -27,7 +27,7 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   StreamSubscription<EnhancedPosition>? _positionSubscription;
   StreamSubscription<LocationQualityMetrics>? _metricsSubscription;
   AdvancedLocationService get _locationService =>
-      GetIt.I<PlayerLocationService>().advancedLocationService;
+      GetIt.I<AdvancedLocationService>(); // Modifié ici
   EnhancedPosition? _currentPosition;
   LocationQualityMetrics? _currentMetrics;
 
@@ -45,10 +45,12 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   }
 
   void _subscribeToLocationUpdates() {
-    if (_locationService.isActive) {
-      _positionSubscription = _locationService.positionStream.listen(
-            (position) {
-          print('[LocationIndicatorWidget] 📍 Position reçue : $position'); // ⬅️
+    // Suppression de la condition "if (_locationService.isActive)"
+    // pour s'abonner inconditionnellement.
+    // La logique d'affichage dans build() gérera l'état initial.
+    _positionSubscription = _locationService.positionStream.listen(
+          (position) {
+        print('[LocationIndicatorWidget] 📍 Position reçue : $position'); // ⬅️
           if (mounted) {
             setState(() {
               _currentPosition = position;

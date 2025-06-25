@@ -60,15 +60,23 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   bool _hasCenteredOnce = false;
   final BombOperationService bombOperationService =
       GetIt.I<BombOperationService>();
-  StreamSubscription<EnhancedPosition>? _positionSubscription;
-  EnhancedPosition? _currentPosition;
-  final PlayerLocationService _playerLocationService = GetIt.I<PlayerLocationService>();
+  // StreamSubscription<EnhancedPosition>? _positionSubscription; // Supprimé
+  // EnhancedPosition? _currentPosition; // Supprimé
+  // final PlayerLocationService _playerLocationService = GetIt.I<PlayerLocationService>(); // Supprimé si non utilisé ailleurs
 
   @override
   void initState() {
     super.initState();
     logger.d('📍 [GameMapWidget] [initState] Initialisation du widget');
     _positionStream = GetIt.I<PlayerLocationService>().positionStream;
+
+    // Potentiellement, appeler PlayerLocationService.startLocationTracking ici
+    // si GameMapWidget peut être le premier à nécessiter la localisation.
+    // Exemple:
+    // if (widget.fieldId != null) {
+    //   GetIt.I<PlayerLocationService>().startLocationTracking(widget.gameSessionId);
+    // }
+
 
     _positionSub = _positionStream.listen((posMap) {
       logger.d(
@@ -136,53 +144,10 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         setState(() {}); // Redessine lors du zoom ou déplacement
       }
     });
-    _initializeAdvancedLocation();
+    // _initializeAdvancedLocation(); // Supprimé
   }
 
-  Future<void> _initializeAdvancedLocation() async {
-    try {
-      if (!locationService.isActive) {
-        await locationService.start();
-      }
-
-      _positionSubscription = locationService.positionStream.listen(
-        (position) {
-          setState(() {
-            _currentPosition = position;
-          });
-          // Intégrer avec votre WebSocket existant
-          _sendPositionToServer(position);
-        },
-      );
-    } catch (e) {
-      print('Erreur géolocalisation: $e');
-    }
-  }
-
-  void _sendPositionToServer(EnhancedPosition position) {
-    if (widget.fieldId == null) {
-      logger.w('⚠️ Aucun fieldId disponible pour envoyer la position');
-      return;
-    }
-
-    final correctedLat = position.latitude;
-    final correctedLng = position.longitude;
-
-    _playerLocationService.updatePlayerPosition(
-      widget.userId,
-      Coordinate(latitude: correctedLat, longitude: correctedLng),
-    );
-
-    _playerLocationService.shareEnhancedPosition(
-      gameSessionId: widget.gameSessionId,
-      fieldId: widget.fieldId!,
-      userId: widget.userId,
-      latitude: correctedLat,
-      longitude: correctedLng,
-      teamId: widget.teamId,
-    );
-  }
-
+  // _initializeAdvancedLocation() et _sendPositionToServer() supprimés
 
   @override
   Widget build(BuildContext context) {
