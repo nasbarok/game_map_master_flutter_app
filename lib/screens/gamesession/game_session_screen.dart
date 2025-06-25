@@ -123,7 +123,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     logger.d(
         '🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
     locationService.loadInitialPositions(effectiveFieldId);
-    locationService.startLocationSharing(widget.gameSession.id!);
+    locationService.startLocationTracking(widget.gameSession.id!);
     // 🔁 Abonnement aux positions pour mise à jour de l’auto-manager
     _locationSub = locationService.positionStream.listen((positions) {
       final myPos = positions[widget.userId];

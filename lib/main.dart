@@ -44,14 +44,6 @@ void main() async {
   // ⚙️ Setup GetIt une seule fois ici
   setupServiceLocator();
 
-  // AJOUTER CES LIGNES :
-  try {
-    final locationService = GetIt.instance<AdvancedLocationService>();
-    await locationService.initialize();
-  } catch (e) {
-    print('Erreur initialisation géolocalisation: $e');
-  }
-
   // 📦 Wrapping App with MultiProvider
   runApp(
     MultiProvider(
@@ -79,6 +71,7 @@ void main() async {
         Provider<HistoryService>.value(value: GetIt.I<HistoryService>()),
         Provider<GeocodingService>.value(value: GetIt.I<GeocodingService>()),
         Provider<PlayerLocationService>.value(value: GetIt.I<PlayerLocationService>()),
+        Provider<AdvancedLocationService>.value(value: GetIt.I<AdvancedLocationService>()),
 
         // Ajouter obligatoirement les nouveaux services ici
       ],

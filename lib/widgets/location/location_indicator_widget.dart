@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'dart:async';
 
 import '../../services/location/advanced_location_service.dart';
@@ -24,17 +25,14 @@ class LocationIndicatorWidget extends StatefulWidget {
 class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   StreamSubscription<EnhancedPosition>? _positionSubscription;
   StreamSubscription<LocationQualityMetrics>? _metricsSubscription;
+  AdvancedLocationService get _locationService => GetIt.instance<AdvancedLocationService>();
 
   EnhancedPosition? _currentPosition;
   LocationQualityMetrics? _currentMetrics;
-  late AdvancedLocationService _locationService;
 
   @override
   void initState() {
     super.initState();
-    // Vous devrez adapter cette ligne selon votre ServiceLocator
-    // _locationService = GetIt.instance<AdvancedLocationService>();
-    _locationService = AdvancedLocationService(); // Temporaire
     _subscribeToLocationUpdates();
   }
 

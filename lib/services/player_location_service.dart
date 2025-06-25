@@ -5,44 +5,40 @@ import 'package:game_map_master_flutter_app/models/game_session_position_history
 import 'package:game_map_master_flutter_app/services/api_service.dart';
 import 'package:game_map_master_flutter_app/services/team_service.dart';
 import 'package:game_map_master_flutter_app/services/websocket_service.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+
+import 'location/location_models.dart';
+import 'location/advanced_location_service.dart';
 
 /// Service pour gérer la géolocalisation des joueurs
 class PlayerLocationService {
   final ApiService _apiService;
   final WebSocketService _webSocketService;
-  Timer? _locationUpdateTimer;
 
-  // Dernière position connue
+  // Position en cache
   double? _lastLatitude;
   double? _lastLongitude;
+  DateTime? _lastTimestamp;
 
-  // Stream pour les mises à jour de position
+  // Flux des positions partagées
   final _positionStreamController = StreamController<Map<int, Coordinate>>.broadcast();
   Stream<Map<int, Coordinate>> get positionStream => _positionStreamController.stream;
 
-  // Cache des positions actuelles des joueurs
   final Map<int, Coordinate> _currentPlayerPositions = {};
   Map<int, Coordinate> get currentPlayerPositions => Map.unmodifiable(_currentPlayerPositions);
 
-  // Équipe du joueur actuel
   int? _currentUserTeamId;
-
-  // ID de l'utilisateur actuel
   int? _currentUserId;
   int? _currentFieldId;
+  int? _currentGameSessionId;
 
-  DateTime? _lastTimestamp;
-  final List<Position> _lastPositions = [];
+  StreamSubscription<EnhancedPosition>? _advancedLocationSubscription;
 
   PlayerLocationService(this._apiService, this._webSocketService) {
-    // S'abonner aux mises à jour de position via WebSocket
     _webSocketService.registerOnPlayerPositionUpdate(_handlePositionUpdate);
   }
 
-  /// Initialise le service avec les informations de l'utilisateur actuel
   void initialize(int userId, int? teamId, int fieldId) {
     if (fieldId <= 0) {
       logger.e('❌ [PlayerLocationService] [initialize] fieldId invalide ($fieldId), abandon');
@@ -53,106 +49,90 @@ class PlayerLocationService {
     _currentFieldId = fieldId;
   }
 
-  /// Met à jour l'équipe de l'utilisateur actuel
   void updateCurrentUserTeam(int? teamId) {
     _currentUserTeamId = teamId;
   }
 
-  /// Démarre le partage de position
-  void startLocationSharing(int gameSessionId) async {
-    logger.d('🚀 [PlayerLocationService] [startLocationSharing] Démarrage du partage de position pour gameSessionId=$gameSessionId');
-
-    // ✅ Vérifier si le service de localisation est activé
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      logger.e('📍 Service de localisation désactivé.');
-      return;
-    }
-
-    // ✅ Vérifier et demander les permissions
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        logger.e('❌ Permission de localisation refusée');
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      logger.e('❌ Permission refusée définitivement');
-      return;
-    }
-
-    // ✅ Continuer si les permissions sont OK
-    _locationUpdateTimer?.cancel();
-
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      //logger.d('📡 [PlayerLocationService] Partage de position toutes les 30 secondes pour gameSessionId=$gameSessionId');
-      _shareCurrentLocation(gameSessionId);
-    });
-
-    // Envoie initial
-    _shareCurrentLocation(gameSessionId);
-  }
-
-  /// Arrête le partage de position
-  void stopLocationSharing() {
-    _locationUpdateTimer?.cancel();
-    _locationUpdateTimer = null;
-  }
-
-  /// Partage la position actuelle
-  Future<void> _shareCurrentLocation(int gameSessionId) async {
+  Future<void> startLocationTracking(int gameSessionId) async {
     try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation,
-        forceAndroidLocationManager: true,
-      ).timeout(const Duration(seconds: 6));
+      final advancedLocationService = GetIt.instance<AdvancedLocationService>();
+      _currentGameSessionId = gameSessionId;
 
-      logger.d('[GPS] ${position.latitude}, ${position.longitude}, accuracy: ${position.accuracy}, timestamp: ${position.timestamp}, isMocked: ${position.isMocked}');
-
-      if (position.timestamp == _lastTimestamp) {
-        logger.w('[GPS] Position identique (timestamp), ignorée');
-        return;
-      }
-      _lastTimestamp = position.timestamp;
-
-      if (position.accuracy > 25.0) {
-        logger.w('[GPS] Précision insuffisante (${position.accuracy} m), ignorée');
-        return;
+      if (!advancedLocationService.isActive) {
+        await advancedLocationService.start();
       }
 
-      const latOffset = 0.000035;
-      const lngOffset = -0.000085;
-
-      final correctedLat = position.latitude + latOffset;
-      final correctedLng = position.longitude + lngOffset;
-
-      if (_lastLatitude == correctedLat && _lastLongitude == correctedLng) return;
-
-      _lastLatitude = correctedLat;
-      _lastLongitude = correctedLng;
-
-      if (_currentFieldId == null || _currentUserId == null) return;
-
-      _webSocketService.sendPlayerPosition(
-        _currentFieldId!,
-        gameSessionId,
-        correctedLat,
-        correctedLng,
-        _currentUserTeamId,
+      _advancedLocationSubscription = advancedLocationService.positionStream.listen(
+            (enhancedPosition) {
+          _handleEnhancedPosition(enhancedPosition);
+        },
+        onError: (error) => logger.e('❌ Erreur AdvancedLocation: $error'),
       );
 
-      _currentPlayerPositions[_currentUserId!] = Coordinate(
-        latitude: correctedLat,
-        longitude: correctedLng,
-      );
-      _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
-
+      logger.d('✅ [PlayerLocationService] Utilise AdvancedLocationService');
     } catch (e) {
-      logger.e('Erreur lors du partage de la position: $e');
+      logger.e('❌ Erreur configuration PlayerLocationService: $e');
     }
+  }
+
+  void stopLocationTracking() {
+    _advancedLocationSubscription?.cancel();
+    _advancedLocationSubscription = null;
+  }
+
+  void _handleEnhancedPosition(EnhancedPosition position) {
+    if (_currentFieldId == null || _currentUserId == null || _currentGameSessionId == null) return;
+
+    if (position.timestamp == _lastTimestamp) return;
+    _lastTimestamp = position.timestamp;
+
+    if (position.accuracy > 25.0) {
+      logger.w('[GPS] Précision insuffisante (${position.accuracy} m), ignorée');
+      return;
+    }
+
+    const latOffset = 0.000035;
+    const lngOffset = -0.000085;
+
+    final correctedLat = position.latitude + latOffset;
+    final correctedLng = position.longitude + lngOffset;
+
+    if (_lastLatitude == correctedLat && _lastLongitude == correctedLng) return;
+
+    _lastLatitude = correctedLat;
+    _lastLongitude = correctedLng;
+
+    shareEnhancedPosition(
+      gameSessionId: _currentGameSessionId!,
+      fieldId: _currentFieldId!,
+      userId: _currentUserId!,
+      latitude: correctedLat,
+      longitude: correctedLng,
+      teamId: _currentUserTeamId,
+    );
+  }
+
+  void shareEnhancedPosition({
+    required int gameSessionId,
+    required int fieldId,
+    required int userId,
+    required double latitude,
+    required double longitude,
+    int? teamId,
+  }) {
+    _currentPlayerPositions[userId] = Coordinate(
+      latitude: latitude,
+      longitude: longitude,
+    );
+    _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
+
+    _webSocketService.sendPlayerPosition(
+      fieldId,
+      gameSessionId,
+      latitude,
+      longitude,
+      teamId,
+    );
   }
 
   void sendManualPositionUpdate({
@@ -168,50 +148,33 @@ class PlayerLocationService {
 
     _webSocketService.sendPlayerPosition(fieldId, gameSessionId, lat, lng, teamId);
   }
-  /// Gère les mises à jour de position reçues via WebSocket
+
   void _handlePositionUpdate(Map<String, dynamic> data) {
     final int userId = data['userId'];
     final double latitude = data['latitude'];
     final double longitude = data['longitude'];
     final int? teamId = data['teamId'];
 
-    // Ne pas traiter notre propre position (déjà gérée dans _shareCurrentLocation)
-    if (_currentUserId != null && userId == _currentUserId) {
-      return;
-    }
+    if (_currentUserId != null && userId == _currentUserId) return;
 
-    // En mode jeu, filtrer les positions selon l'équipe
-    // Seuls les joueurs de la même équipe sont visibles
-    bool shouldShowPlayer = false;
-
-    // Si c'est un membre de notre équipe, l'afficher
     if (_currentUserTeamId != null && teamId == _currentUserTeamId) {
-      shouldShowPlayer = true;
-    }
-
-    if (shouldShowPlayer) {
-      // Mettre à jour le cache des positions
       _currentPlayerPositions[userId] = Coordinate(
         latitude: latitude,
-        longitude: longitude
+        longitude: longitude,
       );
     } else {
-      // Supprimer la position si le joueur ne doit plus être visible
       _currentPlayerPositions.remove(userId);
     }
 
-    // Notifier les écouteurs
     _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
   }
 
-  /// Récupère l'historique des positions pour une session de jeu
   Future<GameSessionPositionHistory> getPositionHistory(int gameSessionId) async {
     try {
       final response = await _apiService.get('game-sessions/$gameSessionId/position-history');
       return GameSessionPositionHistory.fromJson(response);
     } catch (e) {
-      logger.d('Erreur lors de la récupération de l\'historique des positions: $e');
-      // Retourner un historique vide en cas d'erreur
+      logger.d('Erreur récupération historique de positions : $e');
       return GameSessionPositionHistory(
         gameSessionId: gameSessionId,
         playerPositions: {},
@@ -220,11 +183,9 @@ class PlayerLocationService {
   }
 
   Future<void> loadInitialPositions(int fieldId) async {
-    logger.d('🔄 [PlayerLocationService] Chargement des positions initiales pour fieldId=$fieldId');
+    logger.d('🔄 Chargement des positions initiales pour fieldId=$fieldId');
     try {
       final response = await _apiService.get('field/$fieldId/positions');
-
-      // Extrait les positions et les met à jour
       Map<int, Coordinate> loadedPositions = {};
       response.forEach((key, value) {
         final userId = int.tryParse(key);
@@ -241,20 +202,19 @@ class PlayerLocationService {
         ..addAll(loadedPositions);
 
       _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
-      logger.d('📡 [PlayerLocationService] Positions initiales chargées : ${_currentPlayerPositions.length} joueurs');
-
+      logger.d('📡 Positions initiales chargées : ${_currentPlayerPositions.length}');
     } catch (e) {
-      logger.d('❌ [PlayerLocationService] Erreur lors du chargement des positions initiales : $e');
+      logger.d('❌ Erreur chargement positions initiales : $e');
     }
-  }
-
-  void dispose() {
-    stopLocationSharing();
-    _positionStreamController.close();
   }
 
   void updatePlayerPosition(int userId, Coordinate coordinate) {
     _currentPlayerPositions[userId] = coordinate;
     _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
+  }
+
+  void dispose() {
+    stopLocationTracking();
+    _positionStreamController.close();
   }
 }

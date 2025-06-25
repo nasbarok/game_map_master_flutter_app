@@ -95,7 +95,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
     logger.d(
         '🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
     locationService.loadInitialPositions(widget.fieldId!);
-    locationService.startLocationSharing(widget.gameSessionId);
+    locationService.startLocationTracking(widget.gameSessionId);
     _positionSub = locationService.positionStream.listen(_handlePositionStream);
 
     logger.d(

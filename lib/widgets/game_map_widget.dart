@@ -173,12 +173,12 @@ class _GameMapWidgetState extends State<GameMapWidget> {
       Coordinate(latitude: correctedLat, longitude: correctedLng),
     );
 
-    _playerLocationService.sendManualPositionUpdate(
-      fieldId: widget.fieldId!,
+    _playerLocationService.shareEnhancedPosition(
       gameSessionId: widget.gameSessionId,
+      fieldId: widget.fieldId!,
       userId: widget.userId,
-      lat: correctedLat,
-      lng: correctedLng,
+      latitude: correctedLat,
+      longitude: correctedLng,
       teamId: widget.teamId,
     );
   }
