@@ -20,15 +20,19 @@ class LocationIndicatorWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<LocationIndicatorWidget> createState() => _LocationIndicatorWidgetState();
+  State<LocationIndicatorWidget> createState() =>
+      _LocationIndicatorWidgetState();
 }
 
 class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   StreamSubscription<EnhancedPosition>? _positionSubscription;
   StreamSubscription<LocationQualityMetrics>? _metricsSubscription;
+
   AdvancedLocationService get _locationService =>
-      GetIt.I<AdvancedLocationService>(); // Modifié ici
-  EnhancedPosition? _currentPosition;
+      GetIt.I<PlayerLocationService>().advancedLocationService;
+  EnhancedPosition? _currentPosition = GetIt.I<PlayerLocationService>()
+      .advancedLocationService
+      .latestPosition;
   LocationQualityMetrics? _currentMetrics;
 
   @override
@@ -45,12 +49,16 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   }
 
   void _subscribeToLocationUpdates() {
-    // Suppression de la condition "if (_locationService.isActive)"
-    // pour s'abonner inconditionnellement.
-    // La logique d'affichage dans build() gérera l'état initial.
-    _positionSubscription = _locationService.positionStream.listen(
-          (position) {
-        print('[LocationIndicatorWidget] 📍 Position reçue : $position'); // ⬅️
+    if (mounted && _locationService.latestPosition != null) {
+      setState(() {
+        _currentPosition = _locationService.latestPosition;
+      });
+    }
+    if (_locationService.isActive) {
+      _positionSubscription = _locationService.positionStream.listen(
+        (position) {
+          print(
+              '[LocationIndicatorWidget] 📍 Position reçue : $position'); // ⬅️
           if (mounted) {
             setState(() {
               _currentPosition = position;
@@ -59,9 +67,8 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
         },
       );
 
-
       _metricsSubscription = _locationService.metricsStream.listen(
-            (metrics) {
+        (metrics) {
           if (mounted) {
             setState(() {
               _currentMetrics = metrics;
@@ -77,7 +84,8 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
-        padding: widget.padding ?? EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding:
+            widget.padding ?? EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: _getBackgroundColor(),
           borderRadius: BorderRadius.circular(20),
@@ -148,17 +156,38 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   }
 
   Widget _buildLocationInfo() {
-    if (!_locationService.isActive || _currentPosition == null) {
+    if (!_locationService.isActive) {
       return Text(
         'GPS: Inactif',
-        style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w500),
+        style: TextStyle(
+            fontSize: 12, color: Colors.red, fontWeight: FontWeight.w500),
+      );
+    }
+
+    if (_currentPosition == null) {
+      return Row(
+        children: [
+          const SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2.0),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'Recherche signal...',
+            style: TextStyle(
+                fontSize: 11,
+                color: Colors.orange.shade700,
+                fontWeight: FontWeight.w500),
+          ),
+        ],
       );
     }
 
     String accuracyText = '${_currentPosition!.accuracy.toStringAsFixed(0)}m';
-    String speedText = _currentPosition!.speed > 0.1
-        ? '${(_currentPosition!.speed * 3.6).toStringAsFixed(1)} km/h'
-        : 'Immobile';
+    String speedText = _currentPosition!.isStationary
+        ? 'Immobile'
+        : '${(_currentPosition!.speed * 3.6).toStringAsFixed(1)} km/h';
 
     String statusIcon = _getAirsoftMovementIcon();
 
@@ -170,7 +199,10 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
           children: [
             Text(
               'GPS: $accuracyText',
-              style: TextStyle(fontSize: 11, color: _getTextColor(), fontWeight: FontWeight.w500),
+              style: TextStyle(
+                  fontSize: 11,
+                  color: _getTextColor(),
+                  fontWeight: FontWeight.w500),
             ),
             SizedBox(width: 4),
             Text(statusIcon, style: TextStyle(fontSize: 10)),
@@ -191,8 +223,10 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('Reçus: ${_currentMetrics!.totalPositions}', style: TextStyle(fontSize: 9, color: Colors.grey)),
-        Text('Filtrés: ${_currentMetrics!.filteredPositions}', style: TextStyle(fontSize: 9, color: Colors.grey)),
+        Text('Reçus: ${_currentMetrics!.totalPositions}',
+            style: TextStyle(fontSize: 9, color: Colors.grey)),
+        Text('Filtrés: ${_currentMetrics!.filteredPositions}',
+            style: TextStyle(fontSize: 9, color: Colors.grey)),
       ],
     );
   }
@@ -212,16 +246,22 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
     if (!_locationService.isActive || _currentPosition == null) return 0;
 
     switch (_currentPosition!.quality) {
-      case LocationQuality.excellent: return 5;
-      case LocationQuality.good: return 4;
-      case LocationQuality.fair: return 3;
-      case LocationQuality.poor: return 2;
-      case LocationQuality.unusable: return 1;
+      case LocationQuality.excellent:
+        return 5;
+      case LocationQuality.good:
+        return 4;
+      case LocationQuality.fair:
+        return 3;
+      case LocationQuality.poor:
+        return 2;
+      case LocationQuality.unusable:
+        return 1;
     }
   }
 
   Color _getSignalColor() {
-    if (!_locationService.isActive || _currentPosition == null) return Colors.red;
+    if (!_locationService.isActive || _currentPosition == null)
+      return Colors.red;
 
     switch (_currentPosition!.quality) {
       case LocationQuality.excellent:
@@ -236,7 +276,8 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   }
 
   Color _getBackgroundColor() {
-    if (!_locationService.isActive || _currentPosition == null) return Colors.red.shade50;
+    if (!_locationService.isActive || _currentPosition == null)
+      return Colors.red.shade50;
 
     switch (_currentPosition!.quality) {
       case LocationQuality.excellent:
@@ -251,7 +292,8 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   }
 
   Color _getBorderColor() {
-    if (!_locationService.isActive || _currentPosition == null) return Colors.red.shade200;
+    if (!_locationService.isActive || _currentPosition == null)
+      return Colors.red.shade200;
 
     switch (_currentPosition!.quality) {
       case LocationQuality.excellent:
@@ -266,7 +308,8 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
   }
 
   Color _getTextColor() {
-    if (!_locationService.isActive || _currentPosition == null) return Colors.red.shade700;
+    if (!_locationService.isActive || _currentPosition == null)
+      return Colors.red.shade700;
 
     switch (_currentPosition!.quality) {
       case LocationQuality.excellent:

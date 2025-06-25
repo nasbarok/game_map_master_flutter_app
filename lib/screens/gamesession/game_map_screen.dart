@@ -94,7 +94,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
     final playerLocationService = GetIt.I<PlayerLocationService>(); // Renommé pour clarté
     playerLocationService.initialize(widget.userId, widget.teamId, widget.fieldId!);
     logger.d(
-        '🔄 [WebSocketService] Reconnecté. Chargement des positions initiales...');
+        '🔄 [GameMapScreen]  [initState] [playerLocationService] Reconnecté. Chargement des positions initiales...');
     playerLocationService.loadInitialPositions(widget.fieldId!);
     playerLocationService.startLocationTracking(widget.gameSessionId); // Cet appel est crucial et conservé
     _positionSub = playerLocationService.positionStream.listen(_handlePositionStream);

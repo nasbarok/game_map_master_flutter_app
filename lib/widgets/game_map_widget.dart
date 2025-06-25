@@ -60,59 +60,51 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   bool _hasCenteredOnce = false;
   final BombOperationService bombOperationService =
       GetIt.I<BombOperationService>();
-  // StreamSubscription<EnhancedPosition>? _positionSubscription; // Supprimé
-  // EnhancedPosition? _currentPosition; // Supprimé
-  // final PlayerLocationService _playerLocationService = GetIt.I<PlayerLocationService>(); // Supprimé si non utilisé ailleurs
+  StreamSubscription<EnhancedPosition>? _positionSubscription;
+  EnhancedPosition? _currentPosition;
+  final PlayerLocationService _playerLocationService =
+      GetIt.I<PlayerLocationService>();
 
   @override
   void initState() {
     super.initState();
     logger.d('📍 [GameMapWidget] [initState] Initialisation du widget');
-    _positionStream = GetIt.I<PlayerLocationService>().positionStream;
 
-    // Potentiellement, appeler PlayerLocationService.startLocationTracking ici
-    // si GameMapWidget peut être le premier à nécessiter la localisation.
-    // Exemple:
-    // if (widget.fieldId != null) {
-    //   GetIt.I<PlayerLocationService>().startLocationTracking(widget.gameSessionId);
-    // }
+    final playerLocationService = GetIt.I<PlayerLocationService>();
 
+    // 🚀 Initialisation complète du tracking
+    playerLocationService.initialize(widget.userId, widget.teamId, widget.fieldId!);
+    playerLocationService.loadInitialPositions(widget.fieldId!);
+    playerLocationService.startLocationTracking(widget.gameSessionId);
 
+    _positionStream = playerLocationService.positionStream;
+
+    // 🔄 Abonnement aux positions
     _positionSub = _positionStream.listen((posMap) {
-      logger.d(
-          '📡 [GameMapWidget] [initState] Positions reçues : ${posMap.length}');
+      logger.d('📡 [GameMapWidget] Positions reçues : ${posMap.length}');
 
       if (!mounted) return;
 
-      final List<int> receivedIds = posMap.keys.toList();
-      final List<int> participantIds =
-          widget.participants.map((p) => p.userId).toList();
+      final participantIds = widget.participants.map((p) => p.userId).toList();
+      final receivedIds = posMap.keys.toList();
 
       for (final entry in posMap.entries) {
         final userId = entry.key;
         final coord = entry.value;
-
         final participant = _findParticipantByUserId(userId);
         final username = participant?.username ?? 'Inconnu';
         final team = participant?.teamName ?? 'Sans équipe';
-        final role = participant?.participantType ?? 'PLAYER';
-        final isCurrentUser = userId == widget.userId ? ' 👈 (moi)' : '';
-
-        logger.d(
-            '🧭 $username (ID: $userId, équipe: $team, rôle: $role)$isCurrentUser → '
-            'lat=${coord.latitude}, lng=${coord.longitude}');
+        final isMe = userId == widget.userId ? ' 👈 (moi)' : '';
+        logger.d('🧭 $username (ID: $userId, équipe: $team)$isMe → lat=${coord.latitude}, lng=${coord.longitude}');
       }
 
-      // 🔍 Détection des participants attendus sans position
-      final missingUsers =
-          participantIds.where((id) => !receivedIds.contains(id));
+      final missingUsers = participantIds.where((id) => !receivedIds.contains(id));
       if (missingUsers.isNotEmpty) {
         logger.w('⚠️ Participants sans position reçue :');
         for (final userId in missingUsers) {
           final participant = _findParticipantByUserId(userId);
           final name = participant?.username ?? 'Inconnu';
-          logger.w(
-              '⛔ $name (ID: $userId, équipe: ${participant?.teamName ?? "N/A"})');
+          logger.w('⛔ $name (ID: $userId)');
         }
       }
 
@@ -120,7 +112,6 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         _positions = posMap;
       });
 
-      // Centrer une seule fois dès que la position du joueur est disponible
       if (!_hasCenteredOnce && posMap.containsKey(widget.userId)) {
         final pos = posMap[widget.userId]!;
         _mapController.move(
@@ -131,23 +122,60 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         logger.d('📍 Carte recentrée sur la position du joueur : $pos');
       }
 
-      // Forcer un redessin après le move pour recalculer les cercles
       Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {}); // Redessine
-        }
+        if (mounted) setState(() {});
       });
     });
 
     _mapEventSub = _mapController.mapEventStream.listen((event) {
-      if (event is MapEventMove && mounted) {
-        setState(() {}); // Redessine lors du zoom ou déplacement
-      }
+      if (event is MapEventMove && mounted) setState(() {});
     });
-    // _initializeAdvancedLocation(); // Supprimé
   }
 
-  // _initializeAdvancedLocation() et _sendPositionToServer() supprimés
+
+  Future<void> _initializeAdvancedLocation() async {
+    try {
+      if (!locationService.isActive) {
+        await locationService.start();
+      }
+
+      _positionSubscription = locationService.positionStream.listen(
+        (position) {
+          setState(() {
+            _currentPosition = position;
+          });
+          // Intégrer avec votre WebSocket existant
+          _sendPositionToServer(position);
+        },
+      );
+    } catch (e) {
+      print('Erreur géolocalisation: $e');
+    }
+  }
+
+  void _sendPositionToServer(EnhancedPosition position) {
+    if (widget.fieldId == null) {
+      logger.w('⚠️ Aucun fieldId disponible pour envoyer la position');
+      return;
+    }
+
+    final correctedLat = position.latitude;
+    final correctedLng = position.longitude;
+
+    _playerLocationService.updatePlayerPosition(
+      widget.userId,
+      Coordinate(latitude: correctedLat, longitude: correctedLng),
+    );
+
+    _playerLocationService.shareEnhancedPosition(
+      gameSessionId: widget.gameSessionId,
+      fieldId: widget.fieldId!,
+      userId: widget.userId,
+      latitude: correctedLat,
+      longitude: correctedLng,
+      teamId: widget.teamId,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

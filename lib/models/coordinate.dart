@@ -17,5 +17,7 @@ class Coordinate {
       "longitude": longitude,
     };
   }
+  @override
+  String toString() => '($latitude, $longitude)';
 }
 

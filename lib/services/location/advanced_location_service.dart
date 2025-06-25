@@ -31,6 +31,8 @@ class AdvancedLocationService {
   int _totalPositionsReceived = 0;
   int _totalPositionsFiltered = 0;
   double _totalDistanceTraveled = 0.0;
+  EnhancedPosition? latestPosition;
+  EnhancedPosition? get lastKnownPosition => latestPosition;
 
   AdvancedLocationService({
     LocationFilter? filter,
@@ -194,7 +196,7 @@ class AdvancedLocationService {
         EnhancedPosition enhancedPosition = filteredPosition.copyWith(
           isStationary: isStationary,
         );
-
+        latestPosition = enhancedPosition;
         // Ajout à l'historique
         _positionHistory.add(enhancedPosition);
 
