@@ -1,5 +1,5 @@
 // lib/models/websocket/player_connected_message.dart
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 
 class PlayerConnectedMessage extends WebSocketMessage {
   final int playerId;

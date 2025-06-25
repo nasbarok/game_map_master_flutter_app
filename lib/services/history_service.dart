@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/field.dart';
 import '../models/game_session.dart';
 import 'api_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class HistoryService {
   final ApiService _apiService;

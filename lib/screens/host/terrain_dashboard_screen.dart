@@ -20,7 +20,7 @@ import '../../widgets/bomb_operation_team_role_selector.dart';
 import '../gamesession/game_session_screen.dart';
 import '../scenario/bomb_operation/bomb_operation_config.dart';
 import 'scenario_selection_dialog.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class TerrainDashboardScreen extends StatefulWidget {
   const TerrainDashboardScreen({Key? key}) : super(key: key);

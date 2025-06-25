@@ -3,9 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
+import '../config/environment_config.dart';
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:8080/api'; // URL pour l'émulateur Android
+  // Utilisation de la configuration d'environnement
+  static String get baseUrl => EnvironmentConfig.apiBaseUrl;
   // static const String baseUrl = 'http://localhost:8080/api'; // URL pour iOS simulator
 
 

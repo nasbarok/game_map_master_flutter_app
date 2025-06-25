@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_notification.dart';
 import '../websocket_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class TreasureHuntWebSocketHandler {
   final WebSocketService _webSocketService;
 

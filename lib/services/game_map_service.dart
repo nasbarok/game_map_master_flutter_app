@@ -44,11 +44,18 @@ class GameMapService extends ChangeNotifier {
   }
 
   /// Ajoute une nouvelle carte
-  Future<void> addGameMap(GameMap gameMap) async {
+  Future<GameMap> addGameMap(GameMap gameMap) async {
     try {
-      await _apiService.post('maps', gameMap.toJson());
-      _gameMaps.add(gameMap);  // Ajoute la carte à la liste locale
-      notifyListeners();  // Notifie les widgets abonnés
+      final response = await _apiService.post('maps', gameMap.toJson());
+      final createdMap = GameMap.fromJson(response);
+
+      // 🔒 Évite les doublons en vérifiant s'il existe déjà
+      if (!_gameMaps.any((m) => m.id == createdMap.id)) {
+        _gameMaps.add(createdMap);
+        notifyListeners();
+      }
+      notifyListeners();
+      return createdMap;
     } catch (e) {
       throw Exception('Erreur lors de l\'ajout de la carte: $e');
     }

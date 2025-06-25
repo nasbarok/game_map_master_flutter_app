@@ -1,14 +1,14 @@
 import 'dart:math' as math;
 
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_state.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_team.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
 
+import '../models/scenario/bomb_operation/bomb_operation_scenario.dart';
+import '../models/scenario/bomb_operation/bomb_operation_state.dart';
+import '../models/scenario/bomb_operation/bomb_operation_team.dart';
+import '../models/scenario/bomb_operation/bomb_site.dart';
 import '../utils/app_utils.dart';
 
 /// Extension d'affichage pour GameMapWidget (ou tout widget similaire) avec gestion des sites de bombe

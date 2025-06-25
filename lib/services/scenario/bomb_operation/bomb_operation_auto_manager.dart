@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_service.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_site.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_scenario.dart';
+import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_operation_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 import '../../../models/websocket/bomb_defused_message.dart';
 import '../../../models/websocket/bomb_exploded_message.dart';

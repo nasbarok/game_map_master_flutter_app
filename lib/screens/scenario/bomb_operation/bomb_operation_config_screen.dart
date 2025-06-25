@@ -1,10 +1,11 @@
-import 'package:airsoft_game_map/models/scenario.dart';
+import 'package:game_map_master_flutter_app/models/scenario.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import '../../../models/coordinate.dart';
 import '../../../models/game_map.dart';
 import '../../../models/scenario/bomb_operation/bomb_operation_scenario.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
@@ -12,8 +13,9 @@ import '../../../services/auth_service.dart';
 import '../../../services/game_map_service.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../../../services/scenario_service.dart';
+import '../../../utils/app_utils.dart';
 import 'bomb_site_list_screen.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 /// Écran de configuration d'un scénario Opération Bombe
 class BombOperationConfigScreen extends StatefulWidget {
@@ -44,7 +46,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   late GameMapService _gameMapService;
   late ScenarioService _scenarioService;
 
-  late final fm.MapControllerImpl _mapController;
+  late final fm.MapController _mapController;
 
   BombOperationScenario? _scenarioBombOperation;
   late GameMap _gameMap;
@@ -73,7 +75,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     _bombOperationService = GetIt.I<BombOperationScenarioService>();
     _gameMapService = GetIt.I<GameMapService>();
     _scenarioService = GetIt.I<ScenarioService>();
-    _mapController = fm.MapControllerImpl();
+    _mapController = fm.MapController();
     _loadScenario();
   }
 
@@ -216,14 +218,13 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
           '🗺️ [BombOperationConfigScreen] [_loadGameMap] Affichage carte préparé');
 
       // Centre la carte sur les coordonnées de la carte
-      if (_gameMap?.centerLatitude != null &&
-          _gameMap?.centerLongitude != null) {
+      if (_gameMap.centerLatitude != null && _gameMap.centerLongitude != null) {
         logger.d(
             '📍 [BombOperationConfigScreen] [_loadGameMap] Centre: ${_gameMap!.centerLatitude}, ${_gameMap!.centerLongitude}');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _mapController.move(
-            LatLng(_gameMap!.centerLatitude!, _gameMap!.centerLongitude!),
-            _gameMap?.initialZoom ?? 15.0,
+            LatLng(_gameMap.centerLatitude!, _gameMap.centerLongitude!),
+            _gameMap.initialZoom ?? 15.0,
           );
         });
       }
@@ -378,11 +379,24 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     logger.d(
         '🗺️ [BombOperationConfigScreen] [_buildMap] Affichage de la carte avec ${_bombSites?.length ?? 0} sites.');
 
+    final List<Coordinate>? fieldBoundaryCoords = _gameMap.fieldBoundary;
+    if (fieldBoundaryCoords == null) {
+      logger.w(
+          '[BombOperationConfigScreen] fieldBoundaryCoords est null : aucun polygone affiché.');
+    } else if (fieldBoundaryCoords.isEmpty) {
+      logger.w(
+          '[BombOperationConfigScreen] fieldBoundaryCoords vide : polygone non dessiné.');
+    }
+    logger.d(
+        '[BombOperationConfigScreen] Zones disponibles: ${_gameMap.mapZones?.length}');
+    _gameMap.mapZones?.forEach((z) {
+      logger.d('🔍 Zone "${z.name}" → coordinates: ${z.coordinates}');
+    });
     return fm.FlutterMap(
       mapController: _mapController,
       options: fm.MapOptions(
         center: LatLng(_gameMap!.centerLatitude!, _gameMap!.centerLongitude!),
-        zoom: _gameMap!.initialZoom ?? 15.0,
+        zoom: _gameMap.initialZoom ?? 15.0,
         maxZoom: 20.0,
         minZoom: 3.0,
       ),
@@ -392,11 +406,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
           userAgentPackageName: 'com.airsoft.gamemapmaster',
         ),
         // Limites du terrain (toujours affichées)
-        if (_gameMap!.fieldBoundary != null)
+        if (fieldBoundaryCoords != null)
           fm.PolygonLayer(
             polygons: [
               fm.Polygon(
-                points: _gameMap!.fieldBoundary!
+                points: fieldBoundaryCoords
                     .map((coord) => LatLng(coord.latitude, coord.longitude))
                     .toList(),
                 color: Colors.blue.withOpacity(0.3),
@@ -409,11 +423,13 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
         // Zones (conditionnellement affichées)
         if (_showZones && _gameMap!.mapZones != null)
           fm.PolygonLayer(
-            polygons: _gameMap!.mapZones!.map((zone) {
+            polygons: _gameMap!.mapZones!
+                .where((zone) => zone.coordinates != null) // ← AJOUT ici
+                .map((zone) {
               final color =
                   Color(int.parse(zone.color.replaceAll('#', '0xFF')));
               return fm.Polygon(
-                points: zone.coordinates
+                points: zone.coordinates!
                     .map((coord) => LatLng(coord.latitude, coord.longitude))
                     .toList(),
                 color: color.withOpacity(0.3),
@@ -439,11 +455,9 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     Icon(
                       _getIconDataFromIdentifier(poi.iconIdentifier),
                       // Icone dynamique selon le POI
-                      color: Color(int.parse(poi.color
-                          .replaceAll('#', '0xFF'))), // Couleur dynamique
+                      color: AppUtils.parsePoiColor(poi.color), // Couleur dynamique
                       size: 40, // Taille de l'icône
                     ),
-                    // Vous pouvez ajouter plus de widgets ici si nécessaire, comme des labels ou des infos supplémentaires
                   ],
                 ),
               );
@@ -476,6 +490,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       ],
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {

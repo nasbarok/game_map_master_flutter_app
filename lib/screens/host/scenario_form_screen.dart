@@ -66,17 +66,17 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
       final maps = gameMapService.gameMaps;
 
       // Filtrer les cartes valides (avec configuration interactive)
-      final validMaps = maps.where((map) => map.hasInteractiveMapConfig).toList();
+      final validMaps =
+          maps.where((map) => map.hasInteractiveMapConfig).toList();
 
       GameMap? selected;
 
-      if (widget.scenario != null &&
-          widget.scenario!.gameMapId != null) {
+      if (widget.scenario != null && widget.scenario!.gameMapId != null) {
         // Chercher d'abord dans les cartes valides
         selected = validMaps.firstWhere(
-              (map) => map.id == widget.scenario!.gameMapId,
+          (map) => map.id == widget.scenario!.gameMapId,
           orElse: () => maps.firstWhere(
-                (map) => map.id == widget.scenario!.gameMapId,
+            (map) => map.id == widget.scenario!.gameMapId,
             orElse: () => validMaps.isNotEmpty ? validMaps.first : maps.first,
           ),
         );
@@ -101,7 +101,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
-            Text('Erreur lors du chargement des cartes: ${e.toString()}'),
+                Text('Erreur lors du chargement des cartes: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -130,10 +130,12 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
 
       // Vérifier si la carte sélectionnée a une configuration interactive valide
       if (!_selectedMap!.hasInteractiveMapConfig &&
-          (_selectedType == 'bomb_operation' || _selectedType == 'treasure_hunt')) {
+          (_selectedType == 'bomb_operation' ||
+              _selectedType == 'treasure_hunt')) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
+            content: Text(
+                'Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -205,235 +207,260 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nom du scénario *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom pour le scénario';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Type de scénario *',
-                  border: OutlineInputBorder(),
-                ),
-                items: _scenarioTypes.map((type) {
-                  return DropdownMenuItem<String>(
-                    value: type['value'],
-                    child: Text(type['name']),
-                  );
-                }).toList(),
-                onChanged: (widget.scenario != null &&
-                    (_selectedType == 'treasure_hunt' || _selectedType == 'bomb_operation'))
-                    ? null // Désactiver si édition et type spécial
-                    : (value) async {
-                  if (value != null) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-
-                    if (value == 'treasure_hunt') {
-                      await _handleTreasureHuntTypeSelected();
-                    } else if (value == 'bomb_operation') {
-                      await BombOperationIntegration.handleBombOperationTypeSelected(
-                        context,
-                        widget.scenario,
-                        _nameController,
-                        _descriptionController,
-                        _selectedMap?.id,
-                      );
-                    }
-                  }
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez sélectionner un type de scénario';
-                  }
-                  return null;
-                },
-              ),
-              if (widget.scenario != null &&
-                  _selectedType == 'treasure_hunt') ...[
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TreasureHuntConfigScreen(
-                          scenarioId: widget.scenario!.id!,
-                          scenarioName: widget.scenario!.name,
-                        ),
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nom du scénario *',
+                        border: OutlineInputBorder(),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.settings),
-                  label: const Text('Configurer la chasse au trésor'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.blueGrey,
-                  ),
-                ),
-              ],
-              if (widget.scenario != null && _selectedType == 'bomb_operation') ...[
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BombOperationConfigScreen(
-                          scenarioId: widget.scenario!.id!,
-                          scenarioName: widget.scenario!.name,
-                          gameMapId: widget.scenario!.gameMapId!,
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.settings),
-                  label: const Text('Configurer l\'opération bombe'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.blueGrey,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              _isLoadingMaps
-                  ? const Center(child: CircularProgressIndicator())
-                  : _availableMaps.isEmpty
-                  ? const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Aucune carte disponible. Veuillez d\'abord créer une carte.',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              )
-                  : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Légende pour les icônes
-                  if (_selectedType == 'bomb_operation' || _selectedType == 'treasure_hunt')
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(
-                            Icons.map,
-                            color: Colors.green,
-                            size: 16,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Carte interactive disponible',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez entrer un nom pour le scénario';
+                        }
+                        return null;
+                      },
                     ),
-                  DropdownButtonFormField<GameMap>(
-                    value: _selectedMap,
-                    decoration: const InputDecoration(
-                      labelText: 'Carte *',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: const InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
                     ),
-                    items: _availableMaps.map((map) {
-                      final bool needsInteractiveMap =
-                          _selectedType == 'bomb_operation' || _selectedType == 'treasure_hunt';
-                      final bool isInteractive = map.hasInteractiveMapConfig;
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _selectedType,
+                      decoration: const InputDecoration(
+                        labelText: 'Type de scénario *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _scenarioTypes.map((type) {
+                        return DropdownMenuItem<String>(
+                          value: type['value'],
+                          child: Text(type['name']),
+                        );
+                      }).toList(),
+                      onChanged: (widget.scenario != null &&
+                              (_selectedType == 'treasure_hunt' ||
+                                  _selectedType == 'bomb_operation'))
+                          ? null
+                          : (value) async {
+                              if (value != null) {
+                                if (_selectedMap == null) {
+                                  setState(() {
+                                    _selectedType = null;
+                                  });
 
-                      return DropdownMenuItem<GameMap>(
-                        value: map,
-                        enabled: !needsInteractiveMap || isInteractive,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Icône pour les cartes interactives
-                            if (isInteractive)
-                              const Padding(
-                                padding: EdgeInsets.only(right: 8.0),
-                                child: Icon(
-                                  Icons.map,
-                                  color: Colors.green,
-                                  size: 16,
-                                ),
-                              ),
-                            // Utiliser Flexible au lieu de Expanded
-                            Flexible(
-                              fit: FlexFit.loose,
-                              child: Text(
-                                map.name,
-                                style: TextStyle(
-                                  color: (needsInteractiveMap && !isInteractive)
-                                      ? Colors.grey
-                                      : null,
-                                ),
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          "Veuillez d'abord sélectionner une carte avant de choisir le type de scénario."),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                setState(() {
+                                  _selectedType = value;
+                                });
+
+                                if (value == 'treasure_hunt') {
+                                  await _handleTreasureHuntTypeSelected();
+                                } else if (value == 'bomb_operation') {
+                                  await BombOperationIntegration
+                                      .handleBombOperationTypeSelected(
+                                    context,
+                                    widget.scenario,
+                                    _nameController,
+                                    _descriptionController,
+                                    _selectedMap!.id,
+                                  );
+                                }
+                              }
+                            },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Veuillez sélectionner un type de scénario';
+                        }
+                        return null;
+                      },
+                    ),
+                    if (widget.scenario != null &&
+                        _selectedType == 'treasure_hunt') ...[
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TreasureHuntConfigScreen(
+                                scenarioId: widget.scenario!.id!,
+                                scenarioName: widget.scenario!.name,
                               ),
                             ),
-                          ],
+                          );
+                        },
+                        icon: const Icon(Icons.settings),
+                        label: const Text('Configurer la chasse au trésor'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.blueGrey,
                         ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedMap = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Veuillez sélectionner une carte';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _availableMaps.isEmpty ? null : _saveScenario,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ],
+                    if (widget.scenario != null &&
+                        _selectedType == 'bomb_operation') ...[
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BombOperationConfigScreen(
+                                scenarioId: widget.scenario!.id!,
+                                scenarioName: widget.scenario!.name,
+                                gameMapId: widget.scenario!.gameMapId!,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.settings),
+                        label: const Text('Configurer l\'opération bombe'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    _isLoadingMaps
+                        ? const Center(child: CircularProgressIndicator())
+                        : _availableMaps.isEmpty
+                            ? const Card(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Text(
+                                    'Aucune carte disponible. Veuillez d\'abord créer une carte.',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Légende pour les icônes
+                                  if (_selectedType == 'bomb_operation' ||
+                                      _selectedType == 'treasure_hunt')
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          Icon(
+                                            Icons.map,
+                                            color: Colors.green,
+                                            size: 16,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'Carte interactive disponible',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  DropdownButtonFormField<GameMap>(
+                                    value: _selectedMap,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Carte *',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    items: _availableMaps.map((map) {
+                                      final bool needsInteractiveMap =
+                                          _selectedType == 'bomb_operation' ||
+                                              _selectedType == 'treasure_hunt';
+                                      final bool isInteractive =
+                                          map.hasInteractiveMapConfig;
+
+                                      return DropdownMenuItem<GameMap>(
+                                        value: map,
+                                        enabled: !needsInteractiveMap ||
+                                            isInteractive,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // Icône pour les cartes interactives
+                                            if (isInteractive)
+                                              const Padding(
+                                                padding:
+                                                    EdgeInsets.only(right: 8.0),
+                                                child: Icon(
+                                                  Icons.map,
+                                                  color: Colors.green,
+                                                  size: 16,
+                                                ),
+                                              ),
+                                            // Utiliser Flexible au lieu de Expanded
+                                            Flexible(
+                                              fit: FlexFit.loose,
+                                              child: Text(
+                                                map.name,
+                                                style: TextStyle(
+                                                  color: (needsInteractiveMap &&
+                                                          !isInteractive)
+                                                      ? Colors.grey
+                                                      : null,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedMap = value;
+                                      });
+                                    },
+                                    validator: (value) {
+                                      if (value == null) {
+                                        return 'Veuillez sélectionner une carte';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _availableMaps.isEmpty ? null : _saveScenario,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        widget.scenario == null
+                            ? 'Créer le scénario'
+                            : 'Mettre à jour le scénario',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  widget.scenario == null
-                      ? 'Créer le scénario'
-                      : 'Mettre à jour le scénario',
-                  style: const TextStyle(fontSize: 16),
-                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 

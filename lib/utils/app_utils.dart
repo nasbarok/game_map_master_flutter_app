@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:flutter/material.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class AppUtils {
   /// Convertit une distance en mètres en pixels sur la carte selon le niveau de zoom
   static double metersToPixels(double meters, double latitude, double zoom) {
@@ -14,6 +16,14 @@ class AppUtils {
     // Conversion des mètres en pixels
     return meters / metersPerPixel;
   }
+
+  static double metersToPixelsForReplay(double meters, double latitude, double zoom) {
+    const earthCircumference = 40075016.686;
+    final latitudeRad = latitude * math.pi / 180;
+    final metersPerPixel = (earthCircumference * math.cos(latitudeRad)) / (256 * math.pow(2, zoom));
+    return meters / metersPerPixel;
+  }
+
   static double computeDistanceMeters(
       double lat1,
       double lon1,
@@ -33,4 +43,16 @@ class AppUtils {
   }
 
   static double degToRad(double deg) => deg * math.pi / 180;
+
+  static Color parsePoiColor(String? color) {
+    if (color != null && color.length == 7 && color.startsWith('#')) {
+      try {
+        return Color(int.parse(color.replaceAll('#', '0xFF')));
+      } catch (e) {
+        // log possible ici
+        return Colors.orange;
+      }
+    }
+    return Colors.orange;
+  }
 }

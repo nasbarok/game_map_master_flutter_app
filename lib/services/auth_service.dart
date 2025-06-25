@@ -1,16 +1,18 @@
 import 'dart:convert';
-import 'package:airsoft_game_map/services/game_state_service.dart';
-import 'package:airsoft_game_map/services/player_connection_service.dart';
-import 'package:airsoft_game_map/services/websocket_service.dart';
+import 'package:game_map_master_flutter_app/services/game_state_service.dart';
+import 'package:game_map_master_flutter_app/services/player_connection_service.dart';
+import 'package:game_map_master_flutter_app/services/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/environment_config.dart';
 import '../models/user.dart';
 import 'package:provider/provider.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://10.0.2.2:8080/api/auth'; // URL pour l'émulateur Android
-  
+  final String apiBaseUrl;
+  final String authBaseUrl;
+
   User? _currentUser;
   String? _token;
   bool _isLoading = false;
@@ -21,11 +23,14 @@ class AuthService extends ChangeNotifier {
   bool get isAuthenticated => _token != null;
   bool get isLoggedIn => _currentUser != null;
   String? get currentUsername => _currentUser?.username;
-  AuthService() {
+  AuthService({required this.apiBaseUrl, required this.authBaseUrl}) {
     _loadUserFromPrefs();
   }
   factory AuthService.placeholder() {
-    return AuthService();
+    return AuthService(
+      apiBaseUrl: EnvironmentConfig.apiBaseUrl,
+      authBaseUrl: '${EnvironmentConfig.apiBaseUrl}/auth',
+    );
   }
 
   Future<void> loadSession() async {
@@ -77,9 +82,9 @@ class AuthService extends ChangeNotifier {
     logger.d('🔐 Démarrage du login...');
 
     try {
-      logger.d('📡 Envoi de la requête à $baseUrl/login...');
+      logger.d('📡 Envoi de la requête à $authBaseUrl/login...');
       final response = await http.post(
-        Uri.parse('$baseUrl/login'),
+        Uri.parse('$authBaseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
@@ -118,14 +123,26 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<bool> register(String username, String email, String password, 
+  Future<bool> register(String username, String email, String password,
       String firstName, String lastName, String phoneNumber, String role) async {
     _isLoading = true;
     notifyListeners();
-    
+
     try {
+      final url = Uri.parse('$authBaseUrl/register');
+      logger.d('🔵 Sending POST to $url');
+      logger.d('🔵 Payload: ${{
+        'username': username,
+        'email': email,
+        'password': password,
+        'firstName': firstName,
+        'lastName': lastName,
+        'phoneNumber': phoneNumber,
+        'role': role,
+      }}');
+
       final response = await http.post(
-        Uri.parse('$baseUrl/register'),
+        url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
@@ -137,41 +154,67 @@ class AuthService extends ChangeNotifier {
           'role': role,
         }),
       );
-      
+
+      logger.d('🔵 Status code: ${response.statusCode}');
+      logger.d('🔵 Body: ${response.body}');
+
       _isLoading = false;
       notifyListeners();
-      
+
       return response.statusCode == 200;
-    } catch (e) {
+    } catch (e, stack) {
+      logger.d('🔴 Register error: $e');
+      logger.d('🔴 Stacktrace: $stack');
+
       _isLoading = false;
       notifyListeners();
       return false;
     }
   }
-  
+
+
   Future<void> _fetchUserInfo() async {
-    if (_token == null) return;
-    
+    if (_token == null) {
+      logger.d('❌ [_fetchUserInfo] Token nul, abandon.');
+      return;
+    }
+
+    final url = '$apiBaseUrl/users/me';
+    logger.d('📡 [_fetchUserInfo] Requête vers $url');
+
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8080/api/users/me'),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
       );
-      
+
+      logger.d('📬 [_fetchUserInfo] Status: ${response.statusCode}');
+      logger.d('📦 [_fetchUserInfo] Body: ${response.body}');
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        _currentUser = User.fromJson(data);
+        try {
+          final data = jsonDecode(response.body);
+          logger.d('🔍 [_fetchUserInfo] Données JSON : $data');
+
+          _currentUser = User.fromJson(data);
+          logger.d('✅ [_fetchUserInfo] Utilisateur désérialisé : ${_currentUser?.username}');
+        } catch (e, stack) {
+          logger.e('❌ [_fetchUserInfo] Erreur lors du parsing JSON → $e', stackTrace: stack);
+        }
       } else if (response.statusCode == 401) {
-        await logout(); // Token expiré côté serveur
+        logger.d('🔒 [_fetchUserInfo] Token expiré ou invalide. Déconnexion...');
+        await logout();
+      } else {
+        logger.d('⚠️ [_fetchUserInfo] Réponse inattendue : ${response.statusCode}');
       }
-    } catch (e) {
-      // Gérer l'erreur
-      logger.d('❌ Erreur lors de la récupération des informations utilisateur: $e');
+    } catch (e, stack) {
+      logger.e('❌ [_fetchUserInfo] Erreur réseau ou autre : $e', stackTrace: stack);
     }
   }
+
 
   bool _isTokenExpired(String token) {
     try {

@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/models/user.dart';
+import 'package:game_map_master_flutter_app/models/user.dart';
 
 class Scenario {
   final int? id;

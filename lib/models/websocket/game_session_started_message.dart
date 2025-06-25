@@ -1,11 +1,11 @@
 // lib/models/websocket/game_session_started_message.dart
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 
-import 'package:airsoft_game_map/models/field.dart';
-import 'package:airsoft_game_map/models/game_map.dart';
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
-import 'package:airsoft_game_map/models/game_session_participant.dart';
-import 'package:airsoft_game_map/models/game_session_scenario.dart';
+import 'package:game_map_master_flutter_app/models/field.dart';
+import 'package:game_map_master_flutter_app/models/game_map.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/game_session_participant.dart';
+import 'package:game_map_master_flutter_app/models/game_session_scenario.dart';
 
 class GameSessionStartedMessage extends WebSocketMessage {
   final int gameSessionId;

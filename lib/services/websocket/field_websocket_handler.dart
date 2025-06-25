@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/websocket/field_closed_message.dart';
 import '../auth_service.dart';
 import '../game_state_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class FieldWebSocketHandler {
   final GameStateService _gameStateService;
   final AuthService _authService;

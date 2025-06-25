@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +8,7 @@ import '../../services/invitation_service.dart';
 import '../../services/team_service.dart';
 import '../../services/api_service.dart';
 import '../../services/websocket_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({Key? key}) : super(key: key);
 

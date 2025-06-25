@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/screens/host/players_screen.dart';
+import 'package:game_map_master_flutter_app/screens/host/players_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
@@ -15,7 +15,7 @@ import 'scenario_form_screen.dart';
 import 'game_map_form_screen.dart';
 import 'terrain_dashboard_screen.dart';
 import 'package:go_router/go_router.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class HostDashboardScreen extends StatefulWidget {
   const HostDashboardScreen({Key? key}) : super(key: key);
 

@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../services/team_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/auth_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class TeamManagementScreen extends StatefulWidget {
   const TeamManagementScreen({Key? key}) : super(key: key);

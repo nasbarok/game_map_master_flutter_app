@@ -1,5 +1,5 @@
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
-import 'package:airsoft_game_map/models/game_session_scenario.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/game_session_scenario.dart';
 
 class ScenarioAddedMessage extends WebSocketMessage {
   final int gameSessionId;

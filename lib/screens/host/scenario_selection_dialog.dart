@@ -6,7 +6,7 @@ import '../../models/scenario/scenario_dto.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_scenario.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class ScenarioSelectionDialog extends StatefulWidget {
   final int mapId;
 

@@ -1,6 +1,6 @@
 import 'dart:ffi';
 
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 
 class TeamUpdateMessage extends WebSocketMessage {
   final String action;

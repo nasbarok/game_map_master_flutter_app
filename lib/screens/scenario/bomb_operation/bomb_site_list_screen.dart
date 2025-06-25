@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/models/game_map.dart';
+import 'package:game_map_master_flutter_app/models/game_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
@@ -6,7 +6,7 @@ import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'bomb_site_edit_screen.dart';
 import 'package:flutter/widgets.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 /// Écran de gestion des sites de bombe pour un scénario Opération Bombe
 class BombSiteListScreen extends StatefulWidget {
   /// Identifiant du scénario

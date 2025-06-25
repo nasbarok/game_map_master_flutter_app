@@ -1,129 +1,162 @@
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_history.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site_history.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_history_service.dart';
-import 'package:airsoft_game_map/utils/app_utils.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_site_history.dart';
+import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_operation_history_service.dart';
+import 'package:game_map_master_flutter_app/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:math' as math;
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import '../../../models/scenario/bomb_operation/bomb_operation_history.dart';
 import '../../../models/scenario/scenario_replay_extension.dart';
 
 /// Extension de replay pour le scénario Bomb Operation
-/// 
+///
 /// Cette classe gère l'affichage et la logique de replay spécifique
 /// au scénario Bomb Operation, en réutilisant le même style visuel
 /// que BombOperationMapExtension
 class BombOperationReplayExtension implements ScenarioReplayExtension {
-  
   final BombOperationHistoryService _historyService;
-  
+
   BombOperationHistory? _bombHistory;
   Map<int, BombSiteHistory> _currentSitesState = {};
   List<BombEvent> _visibleEvents = [];
   DateTime? _currentTime;
-  
-  BombOperationReplayExtension() : _historyService = BombOperationHistoryService();
-  
+  double _zoomLevel = 17.0; // Valeur par défaut
+
+  BombOperationReplayExtension()
+      : _historyService = BombOperationHistoryService();
+
   @override
   Future<void> loadData(int gameSessionId) async {
     try {
       _bombHistory = await _historyService.getSessionHistory(gameSessionId);
     } catch (e) {
-      print('❌ Erreur lors du chargement des données Bomb Operation: $e');
+      logger.d(
+          '❌[BombOperationReplayExtension] [loadData] Erreur lors du chargement des données Bomb Operation: $e');
       _bombHistory = null;
     }
   }
-  
+
   @override
   void updateState(DateTime currentTime) {
     _currentTime = currentTime;
     _updateSitesState();
     _updateVisibleEvents();
   }
-  
+
   void _updateSitesState() {
     if (_bombHistory == null || _currentTime == null) return;
-    
+
     final newSitesState = <int, BombSiteHistory>{};
-    
-    for (final siteHistory in _bombHistory!.bombSitesHistory) {
-      // Créer un état basé sur le temps actuel
-      final currentState = BombSiteHistory(
-        id: siteHistory.id,
-        gameSessionId: siteHistory.gameSessionId,
-        originalBombSiteId: siteHistory.originalBombSiteId,
-        name: siteHistory.name,
-        latitude: siteHistory.latitude,
-        longitude: siteHistory.longitude,
-        radius: siteHistory.radius,
-        status: _calculateStatusAtTime(siteHistory, _currentTime!),
-        createdAt: siteHistory.createdAt,
-        updatedAt: siteHistory.updatedAt,
-        activatedAt: siteHistory.activatedAt,
-        armedAt: siteHistory.armedAt,
-        disarmedAt: siteHistory.disarmedAt,
-        explodedAt: siteHistory.explodedAt,
-        armedByUserId: siteHistory.armedByUserId,
-        armedByUserName: siteHistory.armedByUserName,
-        disarmedByUserId: siteHistory.disarmedByUserId,
-        disarmedByUserName: siteHistory.disarmedByUserName,
-        bombTimer: siteHistory.bombTimer,
-        expectedExplosionAt: siteHistory.expectedExplosionAt,
-        timeRemainingSeconds: siteHistory.timeRemainingSeconds,
-        shouldHaveExploded: siteHistory.shouldHaveExploded,
-      );
-      
-      // Vérifier si le site était créé à ce moment
-      if (!siteHistory.createdAt.isAfter(_currentTime!)) {
-        newSitesState[siteHistory.originalBombSiteId] = currentState;
+
+    // 1️⃣ Associer les timestamps SITE_ACTIVATED aux sites
+    final Map<int, DateTime> activatedTimes = {};
+    for (final event in _bombHistory!.timeline) {
+      if (event.eventType == 'SITE_ACTIVATED') {
+        final site = _bombHistory!.bombSitesHistory.firstWhere(
+          (s) => s.name == event.siteName,
+          orElse: () => BombSiteHistory(
+            id: -1,
+            originalBombSiteId: -1,
+            name: '',
+            latitude: 0.0,
+            longitude: 0.0,
+            radius: 5.0,
+            status: 'INACTIVE',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            gameSessionId: null,
+          ),
+        );
+        if (site != null) {
+          activatedTimes[site.originalBombSiteId] = event.timestamp;
+        }
       }
     }
-    
+
+    // 2️⃣ Construire l'état actuel de chaque site
+    for (final siteHistory in _bombHistory!.bombSitesHistory) {
+      final activationTime = siteHistory.activatedAt ??
+          activatedTimes[siteHistory.originalBombSiteId];
+
+      // ⚠️ Ne pas masquer les sites si un event SITE_ACTIVATED existe déjà
+      final siteWasActivated = _bombHistory!.timeline.any(
+            (e) => e.eventType == 'SITE_ACTIVATED' && e.siteName == siteHistory.name,
+      );
+
+      if (!siteWasActivated) {
+        debugPrint('[ReplayExtension] ⏳ Site ${siteHistory.name} ignoré (jamais activé dans la timeline)');
+        continue;
+      }
+
+      // 👷 Appliquer une version modifiée avec activatedAt injecté
+      final patchedSite = siteHistory.copyWith(activatedAt: activationTime);
+
+      final computedStatus = _calculateStatusAtTime(patchedSite, _currentTime!);
+
+      final visibleSite = patchedSite.copyWith(status: computedStatus);
+      newSitesState[visibleSite.originalBombSiteId] = visibleSite;
+
+      debugPrint(
+          '[ReplayExtension] ✅ Site visible : ${visibleSite.name} (id=${visibleSite.originalBombSiteId}) → statut calculé=$computedStatus');
+    }
+
     _currentSitesState = newSitesState;
   }
-  
+
   void _updateVisibleEvents() {
     if (_bombHistory == null || _currentTime == null) return;
-    
+
     _visibleEvents = _bombHistory!.timeline
         .where((event) => !event.timestamp.isAfter(_currentTime!))
         .toList();
   }
-  
+
   String _calculateStatusAtTime(BombSiteHistory siteHistory, DateTime time) {
     // Déterminer le statut au temps donné
     String status = 'INACTIVE';
-    
-    if (siteHistory.activatedAt != null && !time.isBefore(siteHistory.activatedAt!)) {
+
+    if (siteHistory.activatedAt != null &&
+        !time.isBefore(siteHistory.activatedAt!)) {
       status = 'ACTIVE';
     }
-    
+
     if (siteHistory.armedAt != null && !time.isBefore(siteHistory.armedAt!)) {
       status = 'ARMED';
     }
-    
-    if (siteHistory.disarmedAt != null && !time.isBefore(siteHistory.disarmedAt!)) {
+
+    if (siteHistory.disarmedAt != null &&
+        !time.isBefore(siteHistory.disarmedAt!)) {
       status = 'DISARMED';
     }
-    
-    if (siteHistory.explodedAt != null && !time.isBefore(siteHistory.explodedAt!)) {
+
+    if (siteHistory.explodedAt != null &&
+        !time.isBefore(siteHistory.explodedAt!)) {
       status = 'EXPLODED';
     }
-    
+
     return status;
   }
-  
+
   @override
   List<Marker> buildMarkers() {
     if (_bombHistory == null) return [];
-    
+
+    logger.d('[ReplayExtension] 📍 Construction des marqueurs... ${_currentSitesState.length} sites visibles à l’instant');
+
     final List<Marker> markers = [];
-    const double currentZoom = 15.0; // Zoom par défaut pour le calcul des rayons
-    
+
     for (final siteState in _currentSitesState.values) {
-      final radiusInPixels = AppUtils.metersToPixels(siteState.radius, siteState.latitude, currentZoom);
-      
+      final radiusInMeters = siteState.radius;
+      final lat = siteState.latitude;
+      final zoom = _zoomLevel;
+
+      final radiusInPixels = AppUtils.metersToPixelsForReplay(
+          radiusInMeters, lat, zoom);
+
+      logger.d('🔍 Site "${siteState.name}" : radius=$radiusInMeters m, zoom=$zoom → radiusPixels=$radiusInPixels');
+
       markers.add(
         Marker(
           point: LatLng(siteState.latitude, siteState.longitude),
@@ -136,10 +169,11 @@ class BombOperationReplayExtension implements ScenarioReplayExtension {
         ),
       );
     }
-    
+
     return markers;
   }
-  
+
+
   /// Construit un marqueur pour un site de bombe (style identique à BombOperationMapExtension)
   Widget _buildBombSiteMarker({
     required BombSiteHistory siteState,
@@ -147,7 +181,7 @@ class BombOperationReplayExtension implements ScenarioReplayExtension {
   }) {
     Color markerColor;
     IconData markerIcon;
-    
+
     switch (siteState.status) {
       case 'EXPLODED':
         markerColor = Colors.black;
@@ -169,9 +203,9 @@ class BombOperationReplayExtension implements ScenarioReplayExtension {
         markerColor = Colors.grey;
         markerIcon = Icons.location_on;
     }
-    
+
     final double dynamicFontSize = math.max(8, radiusInPixels / 3);
-    
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -184,254 +218,123 @@ class BombOperationReplayExtension implements ScenarioReplayExtension {
             color: markerColor.withOpacity(0.2),
             border: Border.all(
               color: markerColor,
-              width: 2,
+              width: siteState.status == 'EXPLODED' ? 3 : 2,
             ),
           ),
         ),
-        
+
         // Icône centrale
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: markerColor,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Icon(
-            markerIcon,
-            color: Colors.white,
-            size: 24,
-          ),
+        Icon(
+          markerIcon,
+          color: markerColor,
+          size: dynamicFontSize * 1.2,
         ),
-        
+
         // Nom du site
         Positioned(
-          bottom: -25,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              siteState.name,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: math.min(dynamicFontSize, 12),
-                fontWeight: FontWeight.bold,
-              ),
+          bottom: radiusInPixels * 0.1,
+          child: Text(
+            siteState.name,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color:
+                  siteState.status == 'EXPLODED' ? Colors.white : Colors.black,
+              fontSize: dynamicFontSize,
+              fontWeight: siteState.status == 'EXPLODED'
+                  ? FontWeight.w900
+                  : FontWeight.bold,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0, 0),
+                  blurRadius: 2,
+                  color: siteState.status == 'EXPLODED'
+                      ? Colors.black
+                      : Colors.white,
+                ),
+              ],
             ),
           ),
         ),
       ],
     );
   }
-  
+
   @override
   Widget? buildInfoPanel() {
     if (_bombHistory == null) return null;
-    
+
+    // Afficher uniquement un petit indicateur d'état des sites
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       color: Colors.grey[100],
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Résumé des équipes
-          Row(
-            children: [
-              // Équipe Terroriste
-              Expanded(
-                child: _buildTeamSummary(
-                  'Terroristes',
-                  Colors.red,
-                  _bombHistory!.finalStats.armedSites,
-                  _bombHistory!.finalStats.explodedSites,
-                  'Bombes armées',
-                  'Bombes explosées',
-                ),
-              ),
-              SizedBox(width: 16),
-              // Équipe Anti-terroriste
-              Expanded(
-                child: _buildTeamSummary(
-                  'Anti-terroristes',
-                  Colors.blue,
-                  _bombHistory!.finalStats.totalSites - _bombHistory!.finalStats.armedSites,
-                  _bombHistory!.finalStats.disarmedSites,
-                  'Sites protégés',
-                  'Bombes désarmées',
-                ),
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 12),
-          
-          // Résultat final
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(
-              color: _getResultColor(),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              _getResultText(),
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-          
-          SizedBox(height: 12),
-          
-          // Timeline des événements visibles
-          if (_visibleEvents.isNotEmpty)
-            Container(
-              height: 100,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _visibleEvents.length,
-                itemBuilder: (context, index) {
-                  final event = _visibleEvents[index];
-                  return Container(
-                    width: 200,
-                    margin: EdgeInsets.only(right: 8),
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getEventIcon(event.eventType),
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          event.description,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          event.siteName,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+          _buildStatusIndicator(
+              'ACTIVE', Colors.orange, _countSitesByStatus('ACTIVE')),
+          SizedBox(width: 16),
+          _buildStatusIndicator(
+              'ARMED', Colors.red.shade800, _countSitesByStatus('ARMED')),
+          SizedBox(width: 16),
+          _buildStatusIndicator(
+              'DISARMED', Colors.blue, _countSitesByStatus('DISARMED')),
+          SizedBox(width: 16),
+          _buildStatusIndicator(
+              'EXPLODED', Colors.black, _countSitesByStatus('EXPLODED')),
         ],
       ),
     );
   }
-  
-  Widget _buildTeamSummary(String teamName, Color teamColor, int stat1, int stat2, String label1, String label2) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: teamColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: teamColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            teamName,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: teamColor,
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text('$label1: $stat1'),
-          Text('$label2: $stat2'),
-        ],
-      ),
-    );
-  }
-  
-  String _getEventIcon(String eventType) {
-    switch (eventType) {
-      case 'ACTIVATED':
-        return '🟠';
-      case 'ARMED':
-        return '💣';
-      case 'DISARMED':
-        return '🛡️';
+
+  Widget _buildStatusIndicator(String status, Color color, int count) {
+    IconData icon;
+    switch (status) {
       case 'EXPLODED':
-        return '💥';
+        icon = Icons.whatshot;
+        break;
+      case 'DISARMED':
+        icon = Icons.shield;
+        break;
+      case 'ARMED':
+        icon = Icons.local_fire_department;
+        break;
+      case 'ACTIVE':
+        icon = Icons.location_on;
+        break;
       default:
-        return '📍';
+        icon = Icons.circle;
     }
+
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 16),
+        SizedBox(width: 4),
+        Text('$count', style: TextStyle(fontWeight: FontWeight.bold)),
+      ],
+    );
   }
-  
-  Color _getResultColor() {
-    if (_bombHistory == null) return Colors.grey;
-    
-    final winningTeam = _bombHistory!.finalStats.winningTeam;
-    switch (winningTeam) {
-      case 'ATTACK':
-        return Colors.red;
-      case 'DEFENSE':
-        return Colors.blue;
-      default:
-        return Colors.orange;
-    }
+
+  int _countSitesByStatus(String status) {
+    return _currentSitesState.values
+        .where((site) => site.status == status)
+        .length;
   }
-  
-  String _getResultText() {
-    if (_bombHistory == null) return 'Aucun résultat';
-    
-    final winningTeam = _bombHistory!.finalStats.winningTeam;
-    switch (winningTeam) {
-      case 'ATTACK':
-        return '🔥 Victoire des Terroristes';
-      case 'DEFENSE':
-        return '🛡️ Victoire des Anti-terroristes';
-      default:
-        return '🤝 Match nul';
-    }
-  }
-  
+
   @override
   bool get hasData => _bombHistory != null;
-  
+
   @override
   String get scenarioName => _bombHistory?.scenarioName ?? 'Bomb Operation';
-  
+
   @override
   String get scenarioType => 'BOMB_OPERATION';
-  
+
+  @override
+  void updateZoom(double zoom) {
+    _zoomLevel = zoom;
+  }
   @override
   void dispose() {
-    _bombHistory = null;
-    _currentSitesState.clear();
-    _visibleEvents.clear();
-    _currentTime = null;
+    // Rien à libérer pour l'instant
   }
 }
-

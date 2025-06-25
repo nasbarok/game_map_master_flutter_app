@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_service.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_site.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_scenario.dart';
+import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_operation_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 /// Dialog automatique pour l'armement/désarmement de bombe avec compte à rebours
 class BombActionDialog extends StatefulWidget {

@@ -2,15 +2,15 @@
 
 import 'dart:math' as math;
 
-import "package:airsoft_game_map/models/coordinate.dart";
-import "package:airsoft_game_map/models/game_map.dart";
-import "package:airsoft_game_map/models/geocoding_result.dart";
-import "package:airsoft_game_map/models/map_point_of_interest.dart";
-import "package:airsoft_game_map/models/map_zone.dart";
-import "package:airsoft_game_map/services/game_map_service.dart";
-import "package:airsoft_game_map/services/geocoding_service.dart";
-import "package:airsoft_game_map/widgets/zone_edit_dialog.dart";
-import "package:airsoft_game_map/widgets/poi_edit_dialog.dart"; // Import POI edit dialog
+import "package:game_map_master_flutter_app/models/coordinate.dart";
+import "package:game_map_master_flutter_app/models/game_map.dart";
+import "package:game_map_master_flutter_app/models/geocoding_result.dart";
+import "package:game_map_master_flutter_app/models/map_point_of_interest.dart";
+import "package:game_map_master_flutter_app/models/map_zone.dart";
+import "package:game_map_master_flutter_app/services/game_map_service.dart";
+import "package:game_map_master_flutter_app/services/geocoding_service.dart";
+import "package:game_map_master_flutter_app/widgets/zone_edit_dialog.dart";
+import "package:game_map_master_flutter_app/widgets/poi_edit_dialog.dart"; // Import POI edit dialog
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart" as fm;
 import "package:get_it/get_it.dart";
@@ -19,7 +19,7 @@ import "package:screenshot/screenshot.dart";
 import "dart:convert";
 import "dart:typed_data";
 import "package:uuid/uuid.dart";
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 // Enum to manage editor modes
 enum MapEditorMode { view, drawBoundary, drawZone, placePoi }
 
@@ -738,12 +738,9 @@ class _InteractiveMapEditorScreenState
         jsonEncode(_mapPois.map((p) => p.toJson()).toList());
 
     try {
-      logger.d(
-          "🟢 Saving map with backgroundBoundsJson: ${_currentMap.backgroundBoundsJson}");
-      logger.d(
-          "🟢 Saving map with satelliteBoundsJson: ${_currentMap.satelliteBoundsJson}");
+
       if (_currentMap.id == null) {
-        await _gameMapService.addGameMap(_currentMap);
+        _currentMap = await _gameMapService.addGameMap(_currentMap);
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text("Carte créée avec succès !")));
       } else {

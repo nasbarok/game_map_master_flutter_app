@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:airsoft_game_map/services/websocket/player_websocket_handler.dart';
-import 'package:airsoft_game_map/services/websocket/team_websocket_handler.dart';
+import 'package:game_map_master_flutter_app/services/websocket/player_websocket_handler.dart';
+import 'package:game_map_master_flutter_app/services/websocket/team_websocket_handler.dart';
 
 import '../../models/websocket/field_closed_message.dart';
 import '../../models/websocket/game_ended_message.dart';
@@ -13,7 +13,7 @@ import '../../models/websocket/team_update_message.dart';
 import '../../models/websocket/websocket_message.dart';
 import '../websocket_service.dart';
 import 'field_websocket_handler.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class WebSocketManager {
   final WebSocketService _webSocketService;
   final PlayerWebSocketHandler _playerHandler;

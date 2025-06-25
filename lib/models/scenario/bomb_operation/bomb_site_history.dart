@@ -1,7 +1,7 @@
 /// Modèle pour l'historique d'un site de bombe
 class BombSiteHistory {
   final int id;
-  final int gameSessionId;
+  final int? gameSessionId;
   final int originalBombSiteId;
   final String name;
   final double latitude;
@@ -10,8 +10,8 @@ class BombSiteHistory {
   final String status;
   
   // Timestamps pour la timeline
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final DateTime? activatedAt;
   final DateTime? armedAt;
   final DateTime? disarmedAt;
@@ -58,30 +58,31 @@ class BombSiteHistory {
 
   factory BombSiteHistory.fromJson(Map<String, dynamic> json) {
     return BombSiteHistory(
-      id: json['id'] as int,
-      gameSessionId: json['gameSessionId'] as int,
-      originalBombSiteId: json['originalBombSiteId'] as int,
-      name: json['name'] as String,
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
-      radius: (json['radius'] as num).toDouble(),
-      status: json['status'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      activatedAt: json['activatedAt'] != null ? DateTime.parse(json['activatedAt'] as String) : null,
-      armedAt: json['armedAt'] != null ? DateTime.parse(json['armedAt'] as String) : null,
-      disarmedAt: json['disarmedAt'] != null ? DateTime.parse(json['disarmedAt'] as String) : null,
-      explodedAt: json['explodedAt'] != null ? DateTime.parse(json['explodedAt'] as String) : null,
+      id: json['id'] as int? ?? -1,
+      gameSessionId: json['gameSessionId'] as int?,
+      originalBombSiteId: json['originalBombSiteId'] as int? ?? -1,
+      name: json['name']?.toString() ?? 'Inconnu',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      radius: (json['radius'] as num?)?.toDouble() ?? 5.0,
+      status: json['status']?.toString() ?? 'INACTIVE',
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt'].toString()) : null,
+      activatedAt: json['activatedAt'] != null ? DateTime.tryParse(json['activatedAt'].toString()) : null,
+      armedAt: json['armedAt'] != null ? DateTime.tryParse(json['armedAt'].toString()) : null,
+      disarmedAt: json['disarmedAt'] != null ? DateTime.tryParse(json['disarmedAt'].toString()) : null,
+      explodedAt: json['explodedAt'] != null ? DateTime.tryParse(json['explodedAt'].toString()) : null,
       armedByUserId: json['armedByUserId'] as int?,
-      armedByUserName: json['armedByUserName'] as String?,
+      armedByUserName: json['armedByUserName']?.toString(),
       disarmedByUserId: json['disarmedByUserId'] as int?,
-      disarmedByUserName: json['disarmedByUserName'] as String?,
+      disarmedByUserName: json['disarmedByUserName']?.toString(),
       bombTimer: json['bombTimer'] as int?,
-      expectedExplosionAt: json['expectedExplosionAt'] != null ? DateTime.parse(json['expectedExplosionAt'] as String) : null,
+      expectedExplosionAt: json['expectedExplosionAt'] != null ? DateTime.tryParse(json['expectedExplosionAt'].toString()) : null,
       timeRemainingSeconds: json['timeRemainingSeconds'] as int?,
       shouldHaveExploded: json['shouldHaveExploded'] as bool?,
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {
@@ -93,8 +94,8 @@ class BombSiteHistory {
       'longitude': longitude,
       'radius': radius,
       'status': status,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
       'activatedAt': activatedAt?.toIso8601String(),
       'armedAt': armedAt?.toIso8601String(),
       'disarmedAt': disarmedAt?.toIso8601String(),
@@ -153,5 +154,56 @@ class BombSiteHistory {
     if (wasActiveAt(timestamp)) return 'ACTIVE';
     return 'INACTIVE';
   }
+
+  BombSiteHistory copyWith({
+    int? id,
+    int? gameSessionId,
+    int? originalBombSiteId,
+    String? name,
+    double? latitude,
+    double? longitude,
+    double? radius,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? activatedAt,
+    DateTime? armedAt,
+    DateTime? disarmedAt,
+    DateTime? explodedAt,
+    int? armedByUserId,
+    String? armedByUserName,
+    int? disarmedByUserId,
+    String? disarmedByUserName,
+    int? bombTimer,
+    DateTime? expectedExplosionAt,
+    int? timeRemainingSeconds,
+    bool? shouldHaveExploded,
+  }) {
+    return BombSiteHistory(
+      id: id ?? this.id,
+      gameSessionId: gameSessionId ?? this.gameSessionId,
+      originalBombSiteId: originalBombSiteId ?? this.originalBombSiteId,
+      name: name ?? this.name,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      radius: radius ?? this.radius,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      activatedAt: activatedAt ?? this.activatedAt,
+      armedAt: armedAt ?? this.armedAt,
+      disarmedAt: disarmedAt ?? this.disarmedAt,
+      explodedAt: explodedAt ?? this.explodedAt,
+      armedByUserId: armedByUserId ?? this.armedByUserId,
+      armedByUserName: armedByUserName ?? this.armedByUserName,
+      disarmedByUserId: disarmedByUserId ?? this.disarmedByUserId,
+      disarmedByUserName: disarmedByUserName ?? this.disarmedByUserName,
+      bombTimer: bombTimer ?? this.bombTimer,
+      expectedExplosionAt: expectedExplosionAt ?? this.expectedExplosionAt,
+      timeRemainingSeconds: timeRemainingSeconds ?? this.timeRemainingSeconds,
+      shouldHaveExploded: shouldHaveExploded ?? this.shouldHaveExploded,
+    );
+  }
+
 }
 

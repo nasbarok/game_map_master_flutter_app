@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../services/game_state_service.dart';
 import '../../services/player_connection_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -29,57 +29,60 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    logger.d('🔐 Tentative de connexion en cours...');
     if (_formKey.currentState!.validate()) {
       final authService = GetIt.I<AuthService>();
       final gameStateService = GetIt.I<GameStateService>();
       final apiService = GetIt.I<ApiService>();
 
+      logger.d('📡 Envoi des identifiants à AuthService...');
       final success = await authService.login(
         _usernameController.text,
         _passwordController.text,
       );
 
       if (success && mounted) {
+        logger.d('✅ Connexion réussie. Début de restauration de session...');
         try {
-          // 🌟 1. Restaurer la session du terrain ouvert
-          await gameStateService.restoreSessionIfNeeded(apiService,null);
+          await gameStateService.restoreSessionIfNeeded(apiService, null);
+          logger.d('🔁 Session terrain potentiellement restaurée.');
 
-          // 🌟 2. Si un terrain est actif, vérifier si l'utilisateur est connecté
           final fieldId = gameStateService.selectedMap?.field?.id;
           final userId = authService.currentUser?.id;
+          logger.d('🧾 fieldId=$fieldId, userId=$userId');
 
           if (fieldId != null && userId != null) {
-            final isAlreadyConnected =
-                gameStateService.isPlayerConnected(userId);
+            final isAlreadyConnected = gameStateService.isPlayerConnected(userId);
+            logger.d('🔎 isAlreadyConnected=$isAlreadyConnected');
 
             if (!isAlreadyConnected) {
-              logger.d(
-                  '🚀 Reconnexion automatique de l’utilisateur au terrain...');
+              logger.d('🚀 Reconnexion automatique de l’utilisateur au terrain...');
               await GetIt.I<PlayerConnectionService>().joinMap(fieldId);
-
-              // On recharge la session pour bien rafraîchir les joueurs
-              await gameStateService.restoreSessionIfNeeded(apiService,fieldId);
+              logger.d('✅ Rejoint le terrain avec succès. Rechargement de la session...');
+              await gameStateService.restoreSessionIfNeeded(apiService, fieldId);
             } else {
-              logger.d('ℹ️ Utilisateur déjà connecté au terrain');
+              logger.d('ℹ️ Utilisateur déjà connecté au terrain.');
             }
           } else {
-            logger.d('ℹ️ Aucun terrain ouvert ou utilisateur non connecté.');
+            logger.d('⚠️ Aucun terrain actif ou utilisateur non défini.');
           }
-        } catch (e) {
-          logger.d(
-              '⚠️ Erreur lors de la tentative de reconnexion automatique : $e');
+        } catch (e, stack) {
+          logger.e('❌ Erreur lors de la tentative de reconnexion automatique', error: e, stackTrace: stack);
         }
 
-        // 🌟 3. Redirection après login
         final user = authService.currentUser;
         if (user != null) {
+          logger.d('➡️ Redirection en fonction du rôle : ${user.roles}');
           if (user.hasRole('HOST')) {
             context.go('/host');
           } else {
             context.go('/gamer/lobby');
           }
+        } else {
+          logger.d('⚠️ Utilisateur null après login');
         }
       } else if (mounted) {
+        logger.d('❌ Connexion échouée, affichage du SnackBar');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Échec de la connexion. Vérifiez vos identifiants.'),
@@ -87,6 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       }
+    } else {
+      logger.d('⚠️ Formulaire non valide');
     }
   }
 

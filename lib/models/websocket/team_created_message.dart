@@ -1,5 +1,5 @@
 // lib/models/websocket/team_deleted_message.dart
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 class TeamCreatedMessage extends WebSocketMessage {
   final int mapId;
   final Map<String, dynamic> team;

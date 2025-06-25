@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/models/websocket/bomb_defused_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/bomb_defused_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../models/websocket/bomb_exploded_message.dart';
@@ -11,7 +11,7 @@ import '../game_state_service.dart';
 import '../scenario/bomb_operation/bomb_operation_service.dart';
 import '../scenario/bomb_operation/bomb_proximity_detection_service.dart';
 import '../websocket_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class BombOperationWebSocketHandler {
   final WebSocketService _webSocketService;

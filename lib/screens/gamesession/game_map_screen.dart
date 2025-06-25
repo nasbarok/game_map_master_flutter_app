@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math show max;
 
-import 'package:airsoft_game_map/models/coordinate.dart';
-import 'package:airsoft_game_map/models/game_map.dart';
-import 'package:airsoft_game_map/services/player_location_service.dart';
+import 'package:game_map_master_flutter_app/models/coordinate.dart';
+import 'package:game_map_master_flutter_app/models/game_map.dart';
+import 'package:game_map_master_flutter_app/services/player_location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
@@ -14,10 +14,10 @@ import '../../models/scenario/bomb_operation/bomb_operation_state.dart';
 import '../../models/team.dart';
 import '../../services/game_state_service.dart';
 import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
-import 'package:airsoft_game_map/screens/scenario/bomb_operation/bomb_operation_map_extension.dart';
+import 'package:game_map_master_flutter_app/screens/scenario/bomb_operation/bomb_operation_map_extension.dart';
 
 import '../../services/team_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 enum TileLayerType {
   osm,

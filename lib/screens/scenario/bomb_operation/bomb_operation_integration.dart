@@ -8,7 +8,7 @@ import '../../../services/game_map_service.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../../../services/scenario_service.dart';
 import 'bomb_operation_config_screen.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 /// Extension du ScenarioFormScreen pour intégrer le scénario Opération Bombe
 class BombOperationIntegration {
   /// Ajoute le type "Opération Bombe" à la liste des types de scénarios

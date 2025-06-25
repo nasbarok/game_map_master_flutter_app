@@ -62,6 +62,8 @@ abstract class ScenarioReplayExtension {
   /// 
   /// Retourne le type du scénario (ex: "BOMB_OPERATION", "TREASURE_HUNT")
   String get scenarioType;
+
+  void updateZoom(double zoom) {} // méthode vide par défaut
   
   /// Libère les ressources utilisées par l'extension
   /// 

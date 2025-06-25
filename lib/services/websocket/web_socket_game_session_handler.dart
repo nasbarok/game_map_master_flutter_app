@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:airsoft_game_map/models/websocket/scenario_activated_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/scenario_activated_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +23,7 @@ import '../game_state_service.dart';
 import '../player_location_service.dart';
 import '../scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../team_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class WebSocketGameSessionHandler {
   final GameSessionService _gameSessionService;
   final TreasureHuntScoreService _treasureHuntScoreService;

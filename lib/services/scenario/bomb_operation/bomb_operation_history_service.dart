@@ -5,7 +5,7 @@ import '../../../models/scenario/bomb_operation/bomb_operation_history.dart';
 import '../../../models/scenario/bomb_operation/bomb_site_history.dart';
 import '../../../utils/app_utils.dart';
 import '../../api_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 /// Service pour gérer l'historique et le replay des sessions Bomb Operation
 class BombOperationHistoryService {
@@ -36,7 +36,7 @@ class BombOperationHistoryService {
   Future<List<BombSiteHistory>> getBombSitesHistory(int gameSessionId) async {
     try {
       final response = await _apiService.get('bomb-operation/history/$gameSessionId/sites');
-
+      logger.d('[BombOperationHistoryService] [getBombSitesHistory] $gameSessionId : $response');
       if (response != null && response is List) {
         return response.map((e) => BombSiteHistory.fromJson(e as Map<String, dynamic>)).toList();
       } else {

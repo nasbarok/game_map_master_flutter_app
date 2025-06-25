@@ -1,5 +1,7 @@
-import 'package:airsoft_game_map/models/scenario.dart';
-import 'package:airsoft_game_map/models/scenario/treasure_hunt/treasure_hunt_scenario.dart';
+
+import 'package:game_map_master_flutter_app/models/scenario/treasure_hunt/treasure_hunt_scenario.dart';
+
+import '../scenario.dart';
 
 class ScenarioDTO {
   final Scenario scenario;

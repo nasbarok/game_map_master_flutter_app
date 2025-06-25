@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_state.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_team.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
-import 'package:airsoft_game_map/services/api_service.dart';
-import 'package:airsoft_game_map/services/game_session_service.dart';
-import 'package:airsoft_game_map/services/websocket/bomb_operation_web_socket_handler.dart';
-import 'package:airsoft_game_map/services/websocket/web_socket_game_session_handler.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_scenario.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_state.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_team.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_site.dart';
+import 'package:game_map_master_flutter_app/services/api_service.dart';
+import 'package:game_map_master_flutter_app/services/game_session_service.dart';
+import 'package:game_map_master_flutter_app/services/websocket/bomb_operation_web_socket_handler.dart';
+import 'package:game_map_master_flutter_app/services/websocket/web_socket_game_session_handler.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 

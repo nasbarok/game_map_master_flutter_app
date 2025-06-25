@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:airsoft_game_map/models/game_map.dart';
-import 'package:airsoft_game_map/screens/gamesession/game_map_screen.dart';
-import 'package:airsoft_game_map/services/player_location_service.dart';
+import 'package:game_map_master_flutter_app/models/game_map.dart';
+import 'package:game_map_master_flutter_app/screens/gamesession/game_map_screen.dart';
+import 'package:game_map_master_flutter_app/services/player_location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
@@ -16,10 +16,10 @@ import '../models/game_session_participant.dart';
 import '../models/team.dart';
 import '../services/game_state_service.dart';
 import '../services/scenario/bomb_operation/bomb_operation_service.dart';
-import 'package:airsoft_game_map/widgets/bomb_operation_map_widget_extension.dart';
+import 'package:game_map_master_flutter_app/widgets/bomb_operation_map_widget_extension.dart';
 
 import '../services/team_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 /// Widget pour afficher une carte miniature dans l'écran de session de jeu
 class GameMapWidget extends StatefulWidget {

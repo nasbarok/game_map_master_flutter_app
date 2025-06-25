@@ -1,11 +1,10 @@
-import 'package:airsoft_game_map/services/player_location_service.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 import 'package:flutter/src/widgets/navigator.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart' as Http;
 
+import '../config/environment_config.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/game_map_service.dart';
@@ -16,6 +15,8 @@ import '../services/history_service.dart';
 import '../services/invitation_service.dart';
 import '../services/navigation_service.dart';
 import '../services/player_connection_service.dart';
+import '../services/player_location_service.dart';
+import '../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../services/scenario/bomb_operation/bomb_operation_service.dart';
 import '../services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
 import '../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
@@ -34,7 +35,9 @@ import 'package:get_it/get_it.dart';
 
 void setupServiceLocator() {
   // 1. Services de base http
-  final authService = AuthService();
+  final baseUrl = EnvironmentConfig.apiBaseUrl;
+  final authService = AuthService(apiBaseUrl: baseUrl, authBaseUrl: '$baseUrl/auth');
+
   final apiService = ApiService(authService, http.Client());
 
   // TreasureHuntService

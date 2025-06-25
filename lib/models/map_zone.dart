@@ -35,7 +35,7 @@ class MapZone {
     );
   }
 
-  get coordinates => null;
+  List<Coordinate>? get coordinates => zoneShape;
 
   Map<String, dynamic> toJson() {
     return {

@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:airsoft_game_map/models/user.dart';
+import 'package:game_map_master_flutter_app/models/user.dart';
 
 import 'coordinate.dart';
 import 'field.dart';
 import 'map_point_of_interest.dart';
 import 'map_zone.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class GameMap {
   final int? id;
@@ -64,26 +64,44 @@ class GameMap {
 
   // Helper getters to deserialize JSON fields
   List<Coordinate>? get fieldBoundary {
-    if (fieldBoundaryJson == null || fieldBoundaryJson!.isEmpty) return null;
+    if (fieldBoundaryJson == null || fieldBoundaryJson!.isEmpty) {
+      logger.w('[GameMap] ⚠️ fieldBoundaryJson est null');
+      return null;
+    }
     try {
       final List<dynamic> decodedJson = jsonDecode(fieldBoundaryJson!);
-      return decodedJson.map((item) => Coordinate.fromJson(item as Map<String, dynamic>)).toList();
-    } catch (e) {
-      logger.d('Error decoding fieldBoundaryJson: $e');
+      final coords = decodedJson.map((item) => Coordinate.fromJson(item as Map<String, dynamic>)).toList();
+      return coords;
+    } catch (e, stack) {
+      logger.e(stack);
       return null;
     }
   }
 
   List<MapZone>? get mapZones {
-    if (mapZonesJson == null || mapZonesJson!.isEmpty) return null;
+    if (mapZonesJson == null || mapZonesJson!.isEmpty) {
+      logger.w('[GameMap] ⚠️ mapZonesJson est null ou vide');
+      return null;
+    }
     try {
       final List<dynamic> decodedJson = jsonDecode(mapZonesJson!);
+      for (var item in decodedJson) {
+        final zone = item as Map<String, dynamic>;
+        if (!zone.containsKey('zoneShape') || zone['zoneShape'] == null || !(zone['zoneShape'] is List) || zone['zoneShape'].isEmpty) {
+          logger.w('❌ Zone sans coordonnées : id=${zone['id']} name=${zone['name']}');
+        }
+        if (!zone.containsKey('color') || zone['color'] == null || zone['color'].toString().trim().length < 7) {
+          logger.w('⚠️ Couleur de zone invalide ou vide : id=${zone['id']} color=${zone['color']}');
+        }
+      }
       return decodedJson.map((item) => MapZone.fromJson(item as Map<String, dynamic>)).toList();
-    } catch (e) {
-      logger.d('Error decoding mapZonesJson: $e');
+    } catch (e, stack) {
+      logger.e('[GameMap] ❌ Erreur lors du parsing de mapZonesJson: $e');
+      logger.e(stack);
       return null;
     }
   }
+
 
   List<MapPointOfInterest>? get mapPointsOfInterest {
     if (mapPointsOfInterestJson == null || mapPointsOfInterestJson!.isEmpty) return null;

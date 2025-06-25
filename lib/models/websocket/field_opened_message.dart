@@ -1,5 +1,5 @@
 // lib/models/websocket/field_closed_message.dart
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 
 class FieldOpenedMessage extends WebSocketMessage {
   final int fieldId;

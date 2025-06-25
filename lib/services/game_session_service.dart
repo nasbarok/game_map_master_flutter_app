@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:airsoft_game_map/models/game_session.dart';
-import 'package:airsoft_game_map/services/api_service.dart';
-import 'package:airsoft_game_map/services/auth_service.dart';
-import 'package:airsoft_game_map/services/team_service.dart';
+import 'package:game_map_master_flutter_app/models/game_session.dart';
+import 'package:game_map_master_flutter_app/services/api_service.dart';
+import 'package:game_map_master_flutter_app/services/auth_service.dart';
+import 'package:game_map_master_flutter_app/services/team_service.dart';
 import 'package:get_it/get_it.dart';
 
 import '../models/field.dart';
@@ -11,7 +11,7 @@ import '../models/game_session_participant.dart';
 import '../models/game_session_scenario.dart';
 import '../models/team.dart';
 import 'game_state_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class GameSessionService {
   final ApiService _apiService;
 

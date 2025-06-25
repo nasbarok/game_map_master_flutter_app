@@ -1,20 +1,20 @@
-import 'package:airsoft_game_map/services/game_map_service.dart';
-import 'package:airsoft_game_map/services/game_session_service.dart';
-import 'package:airsoft_game_map/services/game_state_service.dart';
-import 'package:airsoft_game_map/services/geocoding_service.dart';
-import 'package:airsoft_game_map/services/history_service.dart';
-import 'package:airsoft_game_map/services/invitation_service.dart';
-import 'package:airsoft_game_map/services/navigation_service.dart';
-import 'package:airsoft_game_map/services/player_location_service.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
-import 'package:airsoft_game_map/services/scenario/bomb_operation/bomb_operation_service.dart';
-import 'package:airsoft_game_map/services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
-import 'package:airsoft_game_map/services/scenario_service.dart';
-import 'package:airsoft_game_map/services/team_service.dart';
-import 'package:airsoft_game_map/services/websocket/bomb_operation_web_socket_handler.dart';
-import 'package:airsoft_game_map/services/websocket/treasure_hunt_websocket_handler.dart';
-import 'package:airsoft_game_map/services/websocket/web_socket_game_session_handler.dart';
-import 'package:airsoft_game_map/services/websocket/websocket_manager.dart';
+import 'package:game_map_master_flutter_app/services/game_map_service.dart';
+import 'package:game_map_master_flutter_app/services/game_session_service.dart';
+import 'package:game_map_master_flutter_app/services/game_state_service.dart';
+import 'package:game_map_master_flutter_app/services/geocoding_service.dart';
+import 'package:game_map_master_flutter_app/services/history_service.dart';
+import 'package:game_map_master_flutter_app/services/invitation_service.dart';
+import 'package:game_map_master_flutter_app/services/navigation_service.dart';
+import 'package:game_map_master_flutter_app/services/player_location_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_operation_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario_service.dart';
+import 'package:game_map_master_flutter_app/services/team_service.dart';
+import 'package:game_map_master_flutter_app/services/websocket/bomb_operation_web_socket_handler.dart';
+import 'package:game_map_master_flutter_app/services/websocket/treasure_hunt_websocket_handler.dart';
+import 'package:game_map_master_flutter_app/services/websocket/web_socket_game_session_handler.dart';
+import 'package:game_map_master_flutter_app/services/websocket/websocket_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
@@ -28,10 +28,11 @@ import 'services/websocket_service.dart';
 import 'services/notifications.dart' as notifications;
 import 'services/player_connection_service.dart';
 import 'services/scenario/treasure_hunt/treasure_hunt_service.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  logger.d('⚡️ Starting app...');
   await notifications.initNotifications();
 
   const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');

@@ -1,5 +1,5 @@
-import 'package:airsoft_game_map/services/navigation_service.dart';
-import 'package:airsoft_game_map/widgets/websocket_initializer.dart';
+import 'package:game_map_master_flutter_app/services/navigation_service.dart';
+import 'package:game_map_master_flutter_app/widgets/websocket_initializer.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -52,8 +52,13 @@ class App extends StatelessWidget {
         final isLoggingIn = state.location == '/login' || state.location == '/register';
         final isSplash = state.location == '/splash';
 
+       // ⚠️ NE RIEN FAIRE tant qu’on est sur le splash (il gère tout)
         if (isSplash) return null;
+
+       // ➕ Empêche accès aux autres pages sans session
         if (!isLoggedIn && !isLoggingIn) return '/login';
+
+       // ➕ Empêche retour à login/register après authentification
         if (isLoggedIn && isLoggingIn) {
           final user = authService.currentUser;
           if (user != null) {

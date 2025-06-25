@@ -1,8 +1,8 @@
-import 'package:airsoft_game_map/models/field.dart';
-import 'package:airsoft_game_map/services/auth_service.dart';
-import 'package:airsoft_game_map/services/scenario/treasure_hunt/treasure_hunt_service.dart';
-import 'package:airsoft_game_map/services/team_service.dart';
-import 'package:airsoft_game_map/services/websocket_service.dart';
+import 'package:game_map_master_flutter_app/models/field.dart';
+import 'package:game_map_master_flutter_app/services/auth_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario/treasure_hunt/treasure_hunt_service.dart';
+import 'package:game_map_master_flutter_app/services/team_service.dart';
+import 'package:game_map_master_flutter_app/services/websocket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'dart:async';
@@ -12,7 +12,7 @@ import '../models/scenario/scenario_dto.dart';
 import '../screens/scenario/bomb_operation/bomb_operation_config.dart';
 import 'api_service.dart';
 import 'game_session_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 // Service pour gérer l'état du jeu et la communication entre les composants
 class GameStateService extends ChangeNotifier {

@@ -8,7 +8,7 @@ import '../services/websocket/bomb_operation_web_socket_handler.dart';
 import '../services/websocket/web_socket_game_session_handler.dart';
 import '../services/websocket_service.dart';
 import 'websocket_message_handler.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class WebSocketInitializer extends StatefulWidget {
   final Widget child;

@@ -1,8 +1,8 @@
-import 'package:airsoft_game_map/models/scenario/scenario_replay_extension.dart';
+import 'package:game_map_master_flutter_app/models/scenario/scenario_replay_extension.dart';
 import 'package:get_it/get_it.dart';
-import 'package:airsoft_game_map/services/api_service.dart';
 
 import '../../screens/scenario/bomb_operation/bomb_operation_replay_extension.dart';
+import '../../services/api_service.dart';
 
 /// Service de détection automatique des scénarios pour le replay
 /// 

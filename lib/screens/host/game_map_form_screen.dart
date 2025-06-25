@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:airsoft_game_map/screens/map_editor/interactive_map_editor_screen.dart';
+import 'package:game_map_master_flutter_app/screens/map_editor/interactive_map_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +8,7 @@ import '../../models/game_map.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class GameMapFormScreen extends StatefulWidget {
   final GameMap? gameMap;
 
@@ -35,6 +35,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
   String? _mapZonesJson;
   String? _mapPointsOfInterestJson;
   String? _backgroundImageBase64;
+  GameMap? _localGameMap;
 
   @override
   void initState() {
@@ -101,6 +102,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
         // Update the form's state with data from the editor
         // This is crucial if the editor modifies these fields directly
         // and returns the full map object.
+        _localGameMap = updatedMapData;
         _nameController.text = updatedMapData.name;
         _descriptionController.text = updatedMapData.description ?? '';
         _scaleController.text =
@@ -128,7 +130,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
         // Use the GameMap instance from widget.gameMap if editing, or create a new one
         // Then, apply all current field values, including those from the interactive editor
         final gameMap = GameMap(
-          id: widget.gameMap?.id,
+          id: _localGameMap?.id ?? widget.gameMap?.id,
           name: _nameController.text,
           description: _descriptionController.text,
           scale: double.tryParse(_scaleController.text) ?? 1.0,
@@ -142,8 +144,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
           mapPointsOfInterestJson: _mapPointsOfInterestJson,
           backgroundImageBase64: _backgroundImageBase64,
           // Preserve other fields if editing an existing map
-          fieldId: widget.gameMap?.fieldId,
-          ownerId: widget.gameMap?.ownerId,
+          fieldId: _localGameMap?.fieldId ?? widget.gameMap?.fieldId,
+          ownerId: _localGameMap?.ownerId ?? widget.gameMap?.ownerId,
           scenarioIds: widget.gameMap?.scenarioIds,
           imageUrl: widget.gameMap?.imageUrl,
           // Keep existing non-interactive image if any
@@ -153,10 +155,10 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
 
         final gameMapService = context.read<GameMapService>();
 
-        if (widget.gameMap == null) {
+        if (_localGameMap?.id != null || widget.gameMap?.id != null) {
           logger.d('📤 [GameMapFormScreen] Données envoyées pour création :');
           logger.d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
-          await gameMapService.addGameMap(gameMap);
+          _localGameMap = await gameMapService.addGameMap(gameMap);
         } else {
           logger.d('📤 [GameMapFormScreen] Données envoyées pour update :');
           logger.d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
@@ -306,9 +308,9 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: Text(
-                        widget.gameMap == null
-                            ? 'Créer la carte'
-                            : 'Mettre à jour la carte',
+                        (_localGameMap?.id != null || widget.gameMap?.id != null)
+                            ? 'Mettre à jour la carte'
+                            : 'Créer la carte',
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),

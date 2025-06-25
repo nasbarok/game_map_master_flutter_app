@@ -5,7 +5,7 @@ import '../../../models/scenario/bomb_operation/bomb_operation_scenario.dart';
 import '../../../models/scenario/bomb_operation/bomb_operation_score.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../api_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 /// Service dédié à la gestion des scénarios Opération Bombe
 class BombOperationScenarioService {
   final ApiService _apiService;

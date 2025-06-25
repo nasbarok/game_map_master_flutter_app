@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/models/coordinate.dart';
+import 'package:game_map_master_flutter_app/models/coordinate.dart';
 
 /// Modèle représentant la position d'un joueur à un moment donné
 class PlayerPosition {

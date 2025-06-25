@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:airsoft_game_map/models/geocoding_result.dart'; // To be created
-import 'package:airsoft_game_map/services/api_service.dart';
+import 'package:game_map_master_flutter_app/models/geocoding_result.dart'; // To be created
+import 'package:game_map_master_flutter_app/services/api_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class GeocodingService {
   final ApiService _apiService;

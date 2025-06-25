@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/models/player_position.dart';
+import 'package:game_map_master_flutter_app/models/player_position.dart';
 
 /// Modèle représentant l'historique des positions des joueurs pour une session de jeu
 class GameSessionPositionHistory {

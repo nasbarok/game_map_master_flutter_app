@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:airsoft_game_map/services/team_service.dart';
-import 'package:airsoft_game_map/services/websocket/web_socket_game_session_handler.dart';
+import 'package:game_map_master_flutter_app/services/team_service.dart';
+import 'package:game_map_master_flutter_app/services/websocket/web_socket_game_session_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +17,7 @@ import '../services/websocket_service.dart';
 import '../services/notifications.dart' as notifications;
 import '../services/invitation_service.dart';
 import '../../services/game_state_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class WebSocketMessageHandler {
   final AuthService authService;

@@ -1,10 +1,10 @@
 // lib/services/websocket/team_websocket_handler.dart
-import 'package:airsoft_game_map/models/websocket/team_update_message.dart';
-import 'package:airsoft_game_map/services/auth_service.dart';
+import 'package:game_map_master_flutter_app/models/websocket/team_update_message.dart';
+import 'package:game_map_master_flutter_app/services/auth_service.dart';
 
 import '../../models/websocket/team_deleted_message.dart';
 import '../team_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class TeamWebSocketHandler {
   final TeamService _teamService;
   final AuthService authService;

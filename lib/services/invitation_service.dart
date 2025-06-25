@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:airsoft_game_map/models/websocket/websocket_message.dart';
+import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as client;
@@ -15,7 +15,7 @@ import '../models/game_map.dart';
 import '../models/invitation.dart';
 import '../models/websocket/game_invitation_message.dart';
 import '../models/websocket/invitation_response_message.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class InvitationService extends ChangeNotifier {
   final WebSocketService _webSocketService;

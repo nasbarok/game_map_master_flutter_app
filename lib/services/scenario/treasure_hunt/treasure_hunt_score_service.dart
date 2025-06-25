@@ -1,7 +1,7 @@
-import 'package:airsoft_game_map/services/api_service.dart';
+import 'package:game_map_master_flutter_app/services/api_service.dart';
 
 import '../../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 class TreasureHuntScoreService {
   final ApiService _apiService;
 

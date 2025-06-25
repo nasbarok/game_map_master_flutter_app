@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:airsoft_game_map/models/coordinate.dart';
-import 'package:airsoft_game_map/models/game_map.dart';
-import 'package:airsoft_game_map/models/game_session_position_history.dart';
-import 'package:airsoft_game_map/models/player_position.dart';
-import 'package:airsoft_game_map/services/player_location_service.dart';
+import 'package:game_map_master_flutter_app/models/coordinate.dart';
+import 'package:game_map_master_flutter_app/models/game_map.dart';
+import 'package:game_map_master_flutter_app/models/game_session_position_history.dart';
+import 'package:game_map_master_flutter_app/models/player_position.dart';
+import 'package:game_map_master_flutter_app/services/player_location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
@@ -66,12 +66,21 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
   
   // Informations sur les équipes des joueurs
   final Map<int, int?> _playerTeams = {};
-  
+
   @override
   void initState() {
     super.initState();
     _locationService = GetIt.I<PlayerLocationService>();
     _scenarioDetector = ScenarioDetectorService();
+
+    // Écoute du zoom pour mise à jour des extensions
+    _mapController.mapEventStream.listen((event) {
+      final currentZoom = _mapController.zoom;
+      for (final extension in _scenarioExtensions) {
+        extension.updateZoom(currentZoom);
+      }
+    });
+
     _loadReplayData();
   }
 
@@ -260,7 +269,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
             Text('Replay de la session'),
             if (_scenarioExtensions.isNotEmpty)
               Text(
-                _getScenarioNames(),
+                _scenarioExtensions.map((e) => e?.scenarioName).join(', '),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
               ),
           ],
@@ -307,8 +316,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                             widget.gameMap.centerLongitude ?? 0.0,
                           ),
                           initialZoom: widget.gameMap.initialZoom ?? 13.0,
-                          minZoom: 5.0,
-                          maxZoom: 18.0,
+                          minZoom: 3.0,
+                          maxZoom: 20.0,
                         ),
                         children: [
                           // Couche de tuiles
@@ -353,8 +362,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
 
                               return Marker(
                                 point: LatLng(position.latitude, position.longitude),
-                                width: 40,
-                                height: 40,
+                                width: 30,
+                                height: 30,
                                 child: _buildPlayerMarker(userId, teamId),
                               );
                             }).toList(),
@@ -397,27 +406,30 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                           const SizedBox(height: 8),
 
                           // Contrôles de lecture
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Bouton Play/Pause
-                              IconButton(
-                                onPressed: _isPlaying ? _stopPlayback : _startPlayback,
-                                icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                                iconSize: 32,
-                              ),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Bouton Play/Pause
+                                IconButton(
+                                  onPressed: _isPlaying ? _stopPlayback : _startPlayback,
+                                  icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                                  iconSize: 32,
+                                ),
 
-                              const SizedBox(width: 16),
+                                const SizedBox(width: 16),
 
-                              // Sélecteur de vitesse
-                              Text('Vitesse: ${_playbackSpeed}x'),
-                              const SizedBox(width: 8),
+                                // Sélecteur de vitesse
+                                Text('Vitesse: ${_playbackSpeed}x'),
+                                const SizedBox(width: 8),
 
-                              _buildSpeedButton(0.5),
-                              _buildSpeedButton(1.0),
-                              _buildSpeedButton(2.0),
-                              _buildSpeedButton(4.0),
-                            ],
+                                _buildSpeedButton(0.5),
+                                _buildSpeedButton(1.0),
+                                _buildSpeedButton(2.0),
+                                _buildSpeedButton(4.0),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -435,40 +447,58 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: _playbackSpeed == speed ? Colors.blue : Colors.grey[300],
           foregroundColor: _playbackSpeed == speed ? Colors.white : Colors.black,
-          minimumSize: const Size(40, 30),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          minimumSize: const Size(30, 24),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
         ),
-        child: Text('${speed}x'),
+        child: Text('${speed}x', style: TextStyle(fontSize: 12)),
       ),
     );
   }
 
-  Widget _buildPlayerMarker(int userId, int? teamId) {
+    Widget _buildPlayerMarker(int userId, int? teamId) {
     final color = teamId != null ? _teamColors[teamId] ?? Colors.grey : Colors.grey;
+    final String playerName = userId.toString();
+    final double radius = 8;
+    final double fontSize = 8;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          userId.toString(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        // Point du joueur
+        Container(
+          width: radius * 2,
+          height: radius * 2,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+            border: Border.all(
+              color: Colors.white,
+              width: 2,
+            ),
           ),
         ),
-      ),
+        // Nom du joueur en dessous
+        Positioned(
+          top: radius * 2 + 2,
+          child: Text(
+            playerName,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              shadows: [
+                Shadow(
+                  offset: Offset(0.5, 0.5),
+                  blurRadius: 1.0,
+                  color: Colors.white.withOpacity(0.8),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
   
@@ -539,20 +569,5 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
       ),
     );
   }
-  String _getScenarioNames() {
-    try {
-      return _scenarioExtensions
-          .map((e) => e.scenarioName)
-          .toList()
-          .join(', ');
-    } catch (e) {
-      return 'Scénarios détectés';
-    }
-  }
 }
-
-
-
-  // Méthode helper pour obtenir les noms des scénarios en gérant la nullabilité
-
 

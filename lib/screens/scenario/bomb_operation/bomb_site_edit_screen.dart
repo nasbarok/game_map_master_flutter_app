@@ -1,17 +1,20 @@
-import 'package:airsoft_game_map/models/game_map.dart';
+import 'package:game_map_master_flutter_app/models/game_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:game_map_master_flutter_app/utils/app_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'dart:math';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
+
 /// Écran d'édition d'un site de bombe
 class BombSiteEditScreen extends StatefulWidget {
   /// Identifiant du scénario
   final int scenarioId;
   final int bombOperationScenarioId;
+
   /// Site à éditer (null pour création)
   final BombSite? site;
   final List<BombSite> otherSites;
@@ -33,10 +36,11 @@ class BombSiteEditScreen extends StatefulWidget {
 
 class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late BombOperationScenarioService _bombOperationService;
   bool _isSaving = false;
   bool _satelliteView = false;
+
   // Contrôleurs pour les champs de formulaire
   final _nameController = TextEditingController();
   final _radiusController = TextEditingController();
@@ -45,9 +49,11 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
   LatLng _position = const LatLng(48.8566, 2.3522); // Paris par défaut
   double _zoom = 15.0;
   final MapController _mapController = MapController();
+
   String get _tileUrl => _satelliteView
       ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
       : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
   // Couleur du site
   Color _siteColor = Colors.red;
   final List<Color> _availableColors = [
@@ -57,14 +63,14 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
   ];
   final String _emojiMarker = '💣';
 
-
   @override
   void initState() {
     super.initState();
     _bombOperationService = GetIt.I<BombOperationScenarioService>();
     _position = widget.site != null
         ? LatLng(widget.site!.latitude, widget.site!.longitude)
-        : LatLng(widget.gameMap.centerLatitude!, widget.gameMap.centerLongitude!);
+        : LatLng(
+            widget.gameMap.centerLatitude!, widget.gameMap.centerLongitude!);
     _zoom = widget.gameMap.initialZoom ?? 15.0;
     // Initialise les valeurs si on édite un site existant
     if (widget.site != null) {
@@ -74,19 +80,20 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
 
       if (widget.site!.color != null && widget.site!.color!.isNotEmpty) {
         try {
-          final colorValue = int.parse(widget.site!.color!.replaceAll('#', '0xFF'));
+          final colorValue =
+              int.parse(widget.site!.color!.replaceAll('#', '0xFF'));
           _siteColor = Color(colorValue);
         } catch (e) {
           // Utilise la couleur par défaut
         }
       }
     } else {
-      _nameController.text = 'Site ${String.fromCharCode(65 + DateTime.now().microsecond % 26)}'; // A, B, C, etc.
+      _nameController.text =
+          'Site ${String.fromCharCode(65 + DateTime.now().microsecond % 26)}'; // A, B, C, etc.
       _radiusController.text = '5.0';
     }
-
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -94,15 +101,15 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
     _mapController.dispose();
     super.dispose();
   }
-  
+
   /// Sauvegarde le site de bombe
   Future<void> _saveSite() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() {
       _isSaving = true;
     });
-    
+
     try {
       final colorHex = '#${_siteColor.value.toRadixString(16).substring(2)}';
       logger.d('📌 Valeurs avant instanciation du BombSite:');
@@ -125,15 +132,17 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
         radius: double.parse(_radiusController.text),
         color: colorHex,
       );
-      
+
       if (widget.site == null) {
-        logger.d('[BombSiteEditScreen] Création d\'un nouveau site: ${site.toJson()}');
+        logger.d(
+            '[BombSiteEditScreen] Création d\'un nouveau site: ${site.toJson()}');
         await _bombOperationService.createBombSite(site);
       } else {
-        logger.d('[BombSiteEditScreen] Mise à jour du site existant: ${site.toJson()}');
+        logger.d(
+            '[BombSiteEditScreen] Mise à jour du site existant: ${site.toJson()}');
         await _bombOperationService.updateBombSite(site);
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -145,7 +154,8 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        logger.d('[BombSiteEditScreen] Erreur lors de la sauvegarde du site: $e');
+        logger
+            .d('[BombSiteEditScreen] Erreur lors de la sauvegarde du site: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),
@@ -159,12 +169,13 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final distanceInMeters = double.tryParse(_radiusController.text) ?? 5.0;
     final zoom = _zoom;
-    final metersPerPixel = 156543.03392 * cos(_position.latitude * pi / 180) / pow(2, zoom);
+    final metersPerPixel =
+        156543.03392 * cos(_position.latitude * pi / 180) / pow(2, zoom);
     final radiusInPixels = distanceInMeters / metersPerPixel;
 
     return Scaffold(
@@ -209,7 +220,8 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                                 _position = point;
                               });
                             },
-                            onPositionChanged: (MapPosition pos, bool hasGesture) {
+                            onPositionChanged:
+                                (MapPosition pos, bool hasGesture) {
                               if (pos.zoom != null && pos.zoom != _zoom) {
                                 setState(() {
                                   _zoom = pos.zoom!;
@@ -228,7 +240,8 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                                 polygons: [
                                   Polygon(
                                     points: widget.gameMap.fieldBoundary!
-                                        .map((coord) => LatLng(coord.latitude, coord.longitude))
+                                        .map((coord) => LatLng(
+                                            coord.latitude, coord.longitude))
                                         .toList(),
                                     color: Colors.blue.withOpacity(0.3),
                                     borderColor: Colors.blue,
@@ -241,10 +254,12 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                             if (widget.gameMap.mapZones != null)
                               PolygonLayer(
                                 polygons: widget.gameMap.mapZones!.map((zone) {
-                                  final color = Color(int.parse(zone.color.replaceAll('#', '0xFF')));
+                                  final color = Color(int.parse(
+                                      zone.color.replaceAll('#', '0xFF')));
                                   return Polygon(
-                                    points: zone.coordinates
-                                        .map((coord) => LatLng(coord.latitude, coord.longitude))
+                                    points: zone.coordinates!
+                                        .map((coord) => LatLng(
+                                            coord.latitude, coord.longitude))
                                         .toList(),
                                     color: color.withOpacity(0.3),
                                     borderColor: color,
@@ -259,20 +274,22 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                                 markers: widget.gameMap.mapPointsOfInterest!
                                     .where((poi) => poi.visible)
                                     .map((poi) => Marker(
-                                  point: LatLng(poi.latitude, poi.longitude),
-                                  width: 60,
-                                  height: 60,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        _getPOIIcon(poi.iconIdentifier),
-                                        color: Color(int.parse(poi.color.replaceAll('#', '0xFF'))),
-                                        size: 32,
-                                      ),
-                                    ],
-                                  ),
-                                ))
+                                          point: LatLng(
+                                              poi.latitude, poi.longitude),
+                                          width: 60,
+                                          height: 60,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                _getPOIIcon(poi.iconIdentifier),
+                                                color: AppUtils.parsePoiColor(
+                                                    poi.color),
+                                                size: 32,
+                                              ),
+                                            ],
+                                          ),
+                                        ))
                                     .toList(),
                               ),
 
@@ -293,8 +310,15 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                               CircleLayer(
                                 circles: widget.otherSites.map((site) {
                                   final grayColor = Colors.grey;
+                                  // Calculer le metersPerPixel au niveau du site affiché
+                                  final metersPerPixel = 156543.03392 *
+                                      cos(site.latitude * pi / 180) /
+                                      pow(2, _zoom);
+                                  final radiusInPixels =
+                                      site.radius / metersPerPixel;
                                   return CircleMarker(
-                                    point: LatLng(site.latitude, site.longitude),
+                                    point:
+                                        LatLng(site.latitude, site.longitude),
                                     radius: radiusInPixels,
                                     color: grayColor.withOpacity(0.3),
                                     borderColor: grayColor,
@@ -363,7 +387,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                       ],
                     ),
                   ),
-                  
+
                   // Formulaire pour les détails du site
                   Expanded(
                     flex: 2,
@@ -393,9 +417,11 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                               labelText: 'Rayon (mètres) *',
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.radio_button_checked),
-                              helperText: 'Rayon de la zone où la bombe peut être posée/désamorcée',
+                              helperText:
+                                  'Rayon de la zone où la bombe peut être posée/désamorcée',
                             ),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Veuillez entrer un rayon';

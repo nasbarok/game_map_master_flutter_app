@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:airsoft_game_map/services/api_service.dart';
-import 'package:airsoft_game_map/services/scenario_service.dart';
+import 'package:game_map_master_flutter_app/services/api_service.dart';
+import 'package:game_map_master_flutter_app/services/scenario_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +27,7 @@ import '../../widgets/qr_code_scanner_widgets.dart';
 import '../../widgets/time_remaining_card.dart';
 import '../../widgets/treasure_hunt_scoreboard_card.dart';
 import '../scenario/treasure_hunt/treasure_hunt_scanner_screen.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class GameSessionScreen extends StatefulWidget {
   GameSession gameSession;
@@ -215,12 +215,14 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
     _bombAutoManager?.onStatusUpdate = (message, {bool isSuccess = true}) {
       logger.d('🟢 Mise à jour status auto-manager : $message');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: isSuccess ? Colors.green : Colors.orange,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: isSuccess ? Colors.green : Colors.orange,
+          ),
+        );
+      }
     };
 
     _bombAutoManager?.onBombEvent = (site, action, playerName) {

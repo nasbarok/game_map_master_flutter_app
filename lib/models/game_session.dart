@@ -1,5 +1,5 @@
-import 'package:airsoft_game_map/models/game_map.dart';
-import 'package:airsoft_game_map/models/websocket/game_session_started_message.dart';
+import 'package:game_map_master_flutter_app/models/game_map.dart';
+import 'package:game_map_master_flutter_app/models/websocket/game_session_started_message.dart';
 
 import 'field.dart';
 import 'game_session_participant.dart';

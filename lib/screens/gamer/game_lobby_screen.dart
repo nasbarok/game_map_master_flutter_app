@@ -1,4 +1,4 @@
-import 'package:airsoft_game_map/screens/gamer/team_management_screen.dart';
+import 'package:game_map_master_flutter_app/screens/gamer/team_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +16,7 @@ import '../../models/team.dart';
 import '../../widgets/gamer_history_button.dart';
 import '../gamesession/game_session_screen.dart';
 import '../history/field_sessions_screen.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class GameLobbyScreen extends StatefulWidget {
   const GameLobbyScreen({Key? key}) : super(key: key);

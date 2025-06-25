@@ -1,5 +1,5 @@
-name: airsoft_game_map
-description: Application mobile pour l'Airsoft Game Map Master
+name: game_map_master_flutter_app
+description: AndroidApp GamemapMaster
 publish_to: 'none'
 version: 1.0.0+1
 

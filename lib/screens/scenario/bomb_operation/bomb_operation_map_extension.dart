@@ -1,15 +1,15 @@
 import 'dart:math' as math;
 
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_scenario.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_state.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_operation_team.dart';
-import 'package:airsoft_game_map/models/scenario/bomb_operation/bomb_site.dart';
-import 'package:airsoft_game_map/screens/gamesession/game_map_screen.dart';
-import 'package:airsoft_game_map/utils/app_utils.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_scenario.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_state.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_operation_team.dart';
+import 'package:game_map_master_flutter_app/models/scenario/bomb_operation/bomb_site.dart';
+import 'package:game_map_master_flutter_app/screens/gamesession/game_map_screen.dart';
+import 'package:game_map_master_flutter_app/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 /// Extension du GameMapScreen pour le scénario Opération Bombe
 extension BombOperationMapExtension on GameMapScreen {

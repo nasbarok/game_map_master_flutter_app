@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:airsoft_game_map/services/team_service.dart';
-import 'package:airsoft_game_map/widgets/websocket_message_handler.dart';
+import 'package:game_map_master_flutter_app/services/team_service.dart';
+import 'package:game_map_master_flutter_app/widgets/websocket_message_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
+import '../config/environment_config.dart';
 import '../models/websocket/field_closed_message.dart';
 import '../models/websocket/field_opened_message.dart';
 import '../models/websocket/game_ended_message.dart';
@@ -18,11 +19,10 @@ import '../models/websocket/team_update_message.dart';
 import '../models/websocket/websocket_message.dart';
 import 'auth_service.dart';
 import 'game_state_service.dart';
-import 'package:airsoft_game_map/utils/logger.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class WebSocketService with ChangeNotifier {
-  static const String wsUrl = 'ws://10.0.2.2:8080/ws';
-
+  String get wsUrl => EnvironmentConfig.wsBaseUrl;
   AuthService? _authService;
   GameStateService? _gameStateService;
   TeamService? _teamService;
