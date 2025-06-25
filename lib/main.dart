@@ -4,6 +4,7 @@ import 'package:game_map_master_flutter_app/services/game_state_service.dart';
 import 'package:game_map_master_flutter_app/services/geocoding_service.dart';
 import 'package:game_map_master_flutter_app/services/history_service.dart';
 import 'package:game_map_master_flutter_app/services/invitation_service.dart';
+import 'package:game_map_master_flutter_app/services/location/advanced_location_service.dart';
 import 'package:game_map_master_flutter_app/services/navigation_service.dart';
 import 'package:game_map_master_flutter_app/services/player_location_service.dart';
 import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
@@ -42,6 +43,14 @@ void main() async {
 
   // ⚙️ Setup GetIt une seule fois ici
   setupServiceLocator();
+
+  // AJOUTER CES LIGNES :
+  try {
+    final locationService = GetIt.instance<AdvancedLocationService>();
+    await locationService.initialize();
+  } catch (e) {
+    print('Erreur initialisation géolocalisation: $e');
+  }
 
   // 📦 Wrapping App with MultiProvider
   runApp(

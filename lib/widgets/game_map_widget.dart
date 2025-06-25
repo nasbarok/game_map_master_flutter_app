@@ -21,6 +21,10 @@ import 'package:game_map_master_flutter_app/widgets/bomb_operation_map_widget_ex
 import '../services/team_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import '../../services/location/location_service_locator.dart';
+import '../../services/location/location_models.dart';
+import '../../widgets/location/location_indicator_widget.dart';
+
 /// Widget pour afficher une carte miniature dans l'écran de session de jeu
 class GameMapWidget extends StatefulWidget {
   final int gameSessionId;
@@ -56,6 +60,9 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   bool _hasCenteredOnce = false;
   final BombOperationService bombOperationService =
       GetIt.I<BombOperationService>();
+  StreamSubscription<EnhancedPosition>? _positionSubscription;
+  EnhancedPosition? _currentPosition;
+  final PlayerLocationService _playerLocationService = GetIt.I<PlayerLocationService>();
 
   @override
   void initState() {
@@ -64,8 +71,8 @@ class _GameMapWidgetState extends State<GameMapWidget> {
     _positionStream = GetIt.I<PlayerLocationService>().positionStream;
 
     _positionSub = _positionStream.listen((posMap) {
-
-      logger.d('📡 [GameMapWidget] [initState] Positions reçues : ${posMap.length}');
+      logger.d(
+          '📡 [GameMapWidget] [initState] Positions reçues : ${posMap.length}');
 
       if (!mounted) return;
 
@@ -129,7 +136,53 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         setState(() {}); // Redessine lors du zoom ou déplacement
       }
     });
+    _initializeAdvancedLocation();
   }
+
+  Future<void> _initializeAdvancedLocation() async {
+    try {
+      if (!locationService.isActive) {
+        await locationService.start();
+      }
+
+      _positionSubscription = locationService.positionStream.listen(
+        (position) {
+          setState(() {
+            _currentPosition = position;
+          });
+          // Intégrer avec votre WebSocket existant
+          _sendPositionToServer(position);
+        },
+      );
+    } catch (e) {
+      print('Erreur géolocalisation: $e');
+    }
+  }
+
+  void _sendPositionToServer(EnhancedPosition position) {
+    if (widget.fieldId == null) {
+      logger.w('⚠️ Aucun fieldId disponible pour envoyer la position');
+      return;
+    }
+
+    final correctedLat = position.latitude;
+    final correctedLng = position.longitude;
+
+    _playerLocationService.updatePlayerPosition(
+      widget.userId,
+      Coordinate(latitude: correctedLat, longitude: correctedLng),
+    );
+
+    _playerLocationService.sendManualPositionUpdate(
+      fieldId: widget.fieldId!,
+      gameSessionId: widget.gameSessionId,
+      userId: widget.userId,
+      lat: correctedLat,
+      lng: correctedLng,
+      teamId: widget.teamId,
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -299,6 +352,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
               textAlign: TextAlign.center,
             ),
           ),
+          LocationIndicatorWidget(),
         ],
       ),
     );
@@ -426,6 +480,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   void dispose() {
     _positionSub?.cancel();
     _mapEventSub?.cancel();
+    _positionSubscription?.cancel();
     super.dispose();
   }
 }

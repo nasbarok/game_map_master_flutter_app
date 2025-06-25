@@ -31,6 +31,11 @@ import '../services/websocket/treasure_hunt_websocket_handler.dart';
 import '../services/websocket/web_socket_game_session_handler.dart';
 import '../services/websocket/websocket_manager.dart';
 import '../services/websocket_service.dart';
+
+import '../services/location/advanced_location_service.dart';
+import '../services/location/location_filter.dart';
+import '../services/location/movement_detector.dart';
+
 import 'package:get_it/get_it.dart';
 
 void setupServiceLocator() {
@@ -88,6 +93,15 @@ void setupServiceLocator() {
     fieldHandler,
   );
 
+  // Services de géolocalisation avancée
+  final locationFilter = LocationFilter();
+  final movementDetector = MovementDetector();
+  final advancedLocationService = AdvancedLocationService(
+    filter: locationFilter,
+    movementDetector: movementDetector,
+  );
+
+
   // ✅ 6. ENREGISTREMENTS dans GetIt (dans cet ordre)
   GetIt.I.registerSingleton<AuthService>(authService);
   GetIt.I.registerSingleton<ApiService>(apiService);
@@ -110,7 +124,9 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<PlayerLocationService>(playerLocationService);
   GetIt.I.registerSingleton<BombOperationService>(bombOperationService);
   GetIt.I.registerSingleton<BombOperationWebSocketHandler>(bombOperationWebSocketHandler);
-
+  GetIt.I.registerSingleton<LocationFilter>(locationFilter);
+  GetIt.I.registerSingleton<MovementDetector>(movementDetector);
+  GetIt.I.registerSingleton<AdvancedLocationService>(advancedLocationService);
 
   // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
   final invitationService = InvitationService(

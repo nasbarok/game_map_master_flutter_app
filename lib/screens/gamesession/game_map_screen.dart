@@ -11,13 +11,14 @@ import 'package:latlong2/latlong.dart';
 
 import '../../models/game_session_participant.dart';
 import '../../models/scenario/bomb_operation/bomb_operation_state.dart';
-import '../../models/team.dart';
-import '../../services/game_state_service.dart';
 import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
 import 'package:game_map_master_flutter_app/screens/scenario/bomb_operation/bomb_operation_map_extension.dart';
 
-import '../../services/team_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+
+import '../../services/location/location_service_locator.dart';
+import '../../services/location/location_models.dart';
+import '../../widgets/location/location_indicator_widget.dart';
 
 enum TileLayerType {
   osm,
@@ -78,13 +79,17 @@ class _GameMapScreenState extends State<GameMapScreen> {
   TileLayerType _tileLayerType = TileLayerType.osm;
 
   final String _osmTileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-  final String _satelliteTileUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+  final String _satelliteTileUrl =
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
+  StreamSubscription<EnhancedPosition>? _positionSubscription;
+  EnhancedPosition? _currentPosition;
 
   @override
   void initState() {
     super.initState();
-    logger.d('[GameMapScreen] [initState] ✅  initState sessionId=${widget.gameSessionId}');
+    logger.d(
+        '[GameMapScreen] [initState] ✅  initState sessionId=${widget.gameSessionId}');
     final locationService = GetIt.I<PlayerLocationService>();
     locationService.initialize(widget.userId, widget.teamId, widget.fieldId!);
     logger.d(
@@ -93,7 +98,8 @@ class _GameMapScreenState extends State<GameMapScreen> {
     locationService.startLocationSharing(widget.gameSessionId);
     _positionSub = locationService.positionStream.listen(_handlePositionStream);
 
-    logger.d('[GameMapScreen] ✅ _positionSub initialisé depuis widget.positionStream');
+    logger.d(
+        '[GameMapScreen] ✅ _positionSub initialisé depuis widget.positionStream');
 
     if (widget.hasBombOperationScenario) {
       _bombOperationService = GetIt.I<BombOperationService>();
@@ -110,6 +116,8 @@ class _GameMapScreenState extends State<GameMapScreen> {
         setState(() {});
       }
     });
+
+    _initializeAdvancedLocation();
   }
 
   @override
@@ -117,9 +125,33 @@ class _GameMapScreenState extends State<GameMapScreen> {
     if (widget.hasBombOperationScenario) {
       _bombOperationService.dispose();
     }
-  /*  _positionSub?.cancel();
-    _mapEventSub?.cancel();*/
+    _positionSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _initializeAdvancedLocation() async {
+    try {
+      if (!locationService.isActive) {
+        await locationService.start();
+      }
+
+      _positionSubscription = locationService.positionStream.listen(
+        (position) {
+          setState(() {
+            _currentPosition = position;
+          });
+          // Intégrer avec votre WebSocket existant
+          _sendPositionToServer(position);
+        },
+      );
+    } catch (e) {
+      print('Erreur géolocalisation: $e');
+    }
+  }
+
+  void _sendPositionToServer(EnhancedPosition position) {
+    // Utiliser votre service WebSocket existant
+    // Adapter selon votre implémentation
   }
 
   @override
@@ -155,6 +187,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
                     });
                   },
                 ),
+                LocationIndicatorWidget(),
               ],
             ),
       body: Stack(
@@ -496,15 +529,17 @@ class _GameMapScreenState extends State<GameMapScreen> {
     final remainingSeconds = seconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
+
   void _handlePositionStream(Map<int, Coordinate> posMap) {
-    logger.d('[GameMapScreen] [handlePositionStream] 🔔 Stream position reçu : ${posMap.length} positions');
+    logger.d(
+        '[GameMapScreen] [handlePositionStream] 🔔 Stream position reçu : ${posMap.length} positions');
 
     if (!mounted) return;
 
     logger.d('📡 [GameMapScreen] Positions reçues (${posMap.length}) :');
     final List<int> receivedIds = posMap.keys.toList();
     final List<int> participantIds =
-    widget.participants.map((p) => p.userId).toList();
+        widget.participants.map((p) => p.userId).toList();
 
     for (final entry in posMap.entries) {
       final userId = entry.key;
@@ -516,11 +551,11 @@ class _GameMapScreenState extends State<GameMapScreen> {
       final isCurrentUser = userId == widget.userId ? ' 👈 (moi)' : '';
       logger.d(
           '🧭 $username (ID: $userId, équipe: $team, rôle: $role)$isCurrentUser → '
-              'lat=${coord.latitude}, lng=${coord.longitude}');
+          'lat=${coord.latitude}, lng=${coord.longitude}');
     }
 
     final missingUsers =
-    participantIds.where((id) => !receivedIds.contains(id));
+        participantIds.where((id) => !receivedIds.contains(id));
     if (missingUsers.isNotEmpty) {
       logger.w('⚠️ Participants sans position reçue :');
       for (final userId in missingUsers) {
@@ -557,5 +592,4 @@ class _GameMapScreenState extends State<GameMapScreen> {
         ? _osmTileUrl
         : _satelliteTileUrl;
   }
-
 }

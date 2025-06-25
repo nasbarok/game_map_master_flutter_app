@@ -49,6 +49,7 @@ dependencies:
   # Pour la capture d'écran (widget en image)
   screenshot: ^3.0.0 # Ajout pour la capture d'image de fond
   flutter_colorpicker: ^1.0.3
+  permission_handler: ^11.0.0
 
 dev_dependencies:
   flutter_test:

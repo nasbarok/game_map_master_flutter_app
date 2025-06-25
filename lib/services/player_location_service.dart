@@ -155,7 +155,19 @@ class PlayerLocationService {
     }
   }
 
+  void sendManualPositionUpdate({
+    required int fieldId,
+    required int gameSessionId,
+    required int userId,
+    required double lat,
+    required double lng,
+    int? teamId,
+  }) {
+    _currentPlayerPositions[userId] = Coordinate(latitude: lat, longitude: lng);
+    _positionStreamController.add(Map.unmodifiable(_currentPlayerPositions));
 
+    _webSocketService.sendPlayerPosition(fieldId, gameSessionId, lat, lng, teamId);
+  }
   /// Gère les mises à jour de position reçues via WebSocket
   void _handlePositionUpdate(Map<String, dynamic> data) {
     final int userId = data['userId'];
