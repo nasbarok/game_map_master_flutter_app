@@ -30,9 +30,8 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
 
   AdvancedLocationService get _locationService =>
       GetIt.I<PlayerLocationService>().advancedLocationService;
-  EnhancedPosition? _currentPosition = GetIt.I<PlayerLocationService>()
-      .advancedLocationService
-      .latestPosition;
+  EnhancedPosition? _currentPosition =
+      GetIt.I<PlayerLocationService>().advancedLocationService.latestPosition;
   LocationQualityMetrics? _currentMetrics;
 
   @override
@@ -54,29 +53,26 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
         _currentPosition = _locationService.latestPosition;
       });
     }
-    if (_locationService.isActive) {
-      _positionSubscription = _locationService.positionStream.listen(
-        (position) {
-          print(
-              '[LocationIndicatorWidget] 📍 Position reçue : $position'); // ⬅️
-          if (mounted) {
-            setState(() {
-              _currentPosition = position;
-            });
-          }
-        },
-      );
+    _positionSubscription = _locationService.rawPositionStream.listen(
+      (position) {
+        print('[LocationIndicatorWidget] 📍 🧪 Raw position received : $position'); // ⬅️
+        if (mounted) {
+          setState(() {
+            _currentPosition = position;
+          });
+        }
+      },
+    );
 
-      _metricsSubscription = _locationService.metricsStream.listen(
-        (metrics) {
-          if (mounted) {
-            setState(() {
-              _currentMetrics = metrics;
-            });
-          }
-        },
-      );
-    }
+    _metricsSubscription = _locationService.metricsStream.listen(
+      (metrics) {
+        if (mounted) {
+          setState(() {
+            _currentMetrics = metrics;
+          });
+        }
+      },
+    );
   }
 
   @override
@@ -237,8 +233,9 @@ class _LocationIndicatorWidgetState extends State<LocationIndicatorWidget> {
     if (_currentPosition!.isStationary) return '🛑';
 
     double speedKmh = _currentPosition!.speed * 3.6;
-    if (speedKmh < 1.0) return '🥷';
-    if (speedKmh < 5.0) return '🚶';
+    if (speedKmh < 1.0) return '🛑'; // Très lent = immobile
+    if (speedKmh < 3.0) return '🏃'; // Mouvement tactique
+    if (speedKmh < 6.0) return '🚶'; // Marche
     return '🏃';
   }
 

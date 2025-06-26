@@ -32,21 +32,30 @@ class AdvancedLocationService {
   int _totalPositionsFiltered = 0;
   double _totalDistanceTraveled = 0.0;
   EnhancedPosition? latestPosition;
+
   EnhancedPosition? get lastKnownPosition => latestPosition;
+
+  final StreamController<EnhancedPosition> _rawPositionController = StreamController.broadcast();
+  Stream<EnhancedPosition> get rawPositionStream => _rawPositionController.stream;
+
 
   AdvancedLocationService({
     LocationFilter? filter,
     MovementDetector? movementDetector,
-  }) : _filter = filter ?? LocationFilter(),
+  })  : _filter = filter ?? LocationFilter(),
         _movementDetector = movementDetector ?? MovementDetector(),
         _positionHistory = CircularBuffer<EnhancedPosition>(20),
         _positionController = StreamController<EnhancedPosition>.broadcast(),
-        _metricsController = StreamController<LocationQualityMetrics>.broadcast();
+        _metricsController =
+            StreamController<LocationQualityMetrics>.broadcast();
 
   // Getters publics
   bool get isInitialized => _isInitialized;
+
   bool get isActive => _isActive;
+
   Stream<EnhancedPosition> get positionStream => _positionController.stream;
+
   Stream<LocationQualityMetrics> get metricsStream => _metricsController.stream;
 
   /// Initialise le service
@@ -66,7 +75,8 @@ class AdvancedLocationService {
       _isInitialized = true;
       logger.d('[AdvancedLocationService] initialisé avec succès');
     } catch (e) {
-      logger.e('[AdvancedLocationService] Erreur initialisation AdvancedLocationService: $e');
+      logger.e(
+          '[AdvancedLocationService] Erreur initialisation AdvancedLocationService: $e');
       rethrow;
     }
   }
@@ -74,7 +84,8 @@ class AdvancedLocationService {
   /// Démarre le service
   Future<void> start() async {
     if (!_isInitialized) {
-      throw StateError('[AdvancedLocationService] [start] Service non initialisé');
+      throw StateError(
+          '[AdvancedLocationService] [start] Service non initialisé');
     }
 
     if (_isActive) return;
@@ -87,19 +98,22 @@ class AdvancedLocationService {
 
       LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: MIN_DISTANCE_FILTER.toInt(),
+        distanceFilter:
+            0, // Accepter toutes les positions pour filtrage interne
       );
 
       if (Platform.isAndroid) {
         locationSettings = AndroidSettings(
           accuracy: LocationAccuracy.high,
-          distanceFilter: MIN_DISTANCE_FILTER.toInt(),
-          intervalDuration: UPDATE_INTERVAL,
+          distanceFilter: 0, // Pas de filtrage système
+          intervalDuration: Duration(seconds: 3), // Plus lent : 3 secondes
+          forceLocationManager: false,
         );
       } else if (Platform.isIOS) {
         locationSettings = AppleSettings(
           accuracy: LocationAccuracy.high,
-          distanceFilter: MIN_DISTANCE_FILTER.toInt(),
+          distanceFilter: 0,
+          pauseLocationUpdatesAutomatically: false,
         );
       }
 
@@ -168,19 +182,27 @@ class AdvancedLocationService {
 
   /// Traite une mise à jour de position
   void _onPositionUpdate(Position position) {
- logger.d('[AdvancedLocationService] Position updated : $position.latitude, $position.longitude (accuracy: ${position.accuracy})');
+    logger.d(
+        '[AdvancedLocationService] Position reçue → latitude=${position.latitude}, longitude=${position.longitude}, accuracy=${position.accuracy}');
     try {
       _totalPositionsReceived++;
 
       EnhancedPosition rawPosition = _convertToEnhancedPosition(position);
+      logger.d('[AdvancedLocationService] Position convertie en EnhancedPosition: '
+          'lat=${rawPosition.latitude}, lng=${rawPosition.longitude}, acc=${rawPosition.accuracy}');
+
       EnhancedPosition? filteredPosition = _filter.filterPosition(rawPosition);
+
+      _rawPositionController.add(rawPosition);
 
       if (filteredPosition != null) {
         // Calcul de la distance parcourue
         if (!_positionHistory.isEmpty) {
           EnhancedPosition? lastPosition = _positionHistory.last;
           if (lastPosition != null) {
-            _totalDistanceTraveled += filteredPosition.distanceTo(lastPosition);
+            double distance = filteredPosition.distanceTo(lastPosition);
+            _totalDistanceTraveled += distance;
+            logger.d('[AdvancedLocationService] Distance parcourue depuis dernière position: ${distance.toStringAsFixed(2)} m');
           }
         }
 
@@ -188,30 +210,38 @@ class AdvancedLocationService {
         List<EnhancedPosition> recentPositions = _positionHistory.getAll();
         recentPositions.add(filteredPosition);
 
-        MovementState movementState = _movementDetector.detectMovement(recentPositions);
+        MovementState movementState =
+        _movementDetector.detectMovement(recentPositions);
         bool isStationary = _movementDetector.isStationary(recentPositions);
         bool isTactical = _movementDetector.isTacticalMovement(recentPositions);
+
+        logger.d('[AdvancedLocationService] Mouvement détecté: '
+            'state=$movementState, isStationary=$isStationary, isTactical=$isTactical');
 
         // Position enrichie finale
         EnhancedPosition enhancedPosition = filteredPosition.copyWith(
           isStationary: isStationary,
         );
         latestPosition = enhancedPosition;
-        // Ajout à l'historique
         _positionHistory.add(enhancedPosition);
 
         // Publication
         _positionController.add(enhancedPosition);
+        logger.d('[AdvancedLocationService] ✅ Position publiée: '
+            'lat=${enhancedPosition.latitude}, lng=${enhancedPosition.longitude}, acc=${enhancedPosition.accuracy}, stationary=$isStationary');
 
         // Métriques
         _publishMetrics(movementState);
       } else {
         _totalPositionsFiltered++;
+        logger.w('[AdvancedLocationService] ❌ Position filtrée — trop imprécise ou outlier. '
+            'Accuracy=${rawPosition.accuracy}, seuil=${LocationFilter.MAX_ACCURACY_THRESHOLD}');
       }
     } catch (e) {
-      print('Erreur traitement position: $e');
+      logger.e('Erreur traitement position: $e');
     }
   }
+
 
   /// Gère les erreurs de position
   void _onPositionError(dynamic error) {
@@ -242,7 +272,8 @@ class AdvancedLocationService {
     // Calcul de l'accuracy moyenne
     List<EnhancedPosition> positions = _positionHistory.getAll();
     double averageAccuracy = positions.isNotEmpty
-        ? positions.map((p) => p.accuracy).reduce((a, b) => a + b) / positions.length
+        ? positions.map((p) => p.accuracy).reduce((a, b) => a + b) /
+            positions.length
         : 0.0;
 
     LocationQualityMetrics metrics = LocationQualityMetrics(
@@ -280,7 +311,8 @@ class AdvancedLocationService {
     return {
       'is_initialized': _isInitialized,
       'is_active': _isActive,
-      'total_positions_published': _totalPositionsReceived - _totalPositionsFiltered,
+      'total_positions_published':
+          _totalPositionsReceived - _totalPositionsFiltered,
       'session_duration': _sessionStartTime != null
           ? DateTime.now().difference(_sessionStartTime!).inSeconds
           : 0,
