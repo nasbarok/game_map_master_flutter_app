@@ -311,9 +311,12 @@ class GameStateService extends ChangeNotifier {
     final sessionId = _activeGameSession?.id;
     if (sessionId != null) {
       try {
+        final now = DateTime.now().toUtc();
         logger.d("📡 [GameStateService] POST /game-sessions/$sessionId/end");
         final response =
-            await _apiService.post('game-sessions/$sessionId/end', {});
+            await _apiService.post('game-sessions/$sessionId/end', {
+          'endTime': now.toIso8601String(),
+        });
         if (response != null) {
           logger.d("✅ Partie terminée côté serveur.");
         } else {
@@ -425,15 +428,16 @@ class GameStateService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> restoreSessionIfNeeded(ApiService apiService,
-      int? expectedFieldId) async {
+  Future<void> restoreSessionIfNeeded(
+      ApiService apiService, int? expectedFieldId) async {
     try {
       var activeFieldResponse = null;
       // 🔄 Si un fieldId attendu est précisé, attendre qu’il devienne actif ??
       if (expectedFieldId != null) {
         logger.d(
             '[GameStateService] 🔎 [RESTORE] Appel GET /fields/{expectedFieldId}');
-        activeFieldResponse = await apiService.get('fields/$expectedFieldId/with-role');
+        activeFieldResponse =
+            await apiService.get('fields/$expectedFieldId/with-role');
       } else {
         logger.d(
             '[GameStateService] 🔎 [RESTORE] Appel GET /fields/active/current');

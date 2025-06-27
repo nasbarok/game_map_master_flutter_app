@@ -12,12 +12,15 @@ import '../models/game_session_scenario.dart';
 import '../models/team.dart';
 import 'game_state_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+import 'dart:convert' as jsonConvert;
+
 class GameSessionService {
   final ApiService _apiService;
 
   GameSessionService(this._apiService);
 
-  Future<GameSession> createGameSession(int gameMapId,Field field, int durationMinutes) async {
+  Future<GameSession> createGameSession(
+      int gameMapId, Field field, int durationMinutes) async {
     final data = {
       'gameMapId': gameMapId,
       'field': field,
@@ -29,12 +32,29 @@ class GameSessionService {
   }
 
   Future<GameSession> startGameSession(int gameSessionId) async {
-    final json = await _apiService.post('game-sessions/$gameSessionId/start', {});
+    final now = DateTime.now().toUtc();
+    final json = await _apiService.post('game-sessions/$gameSessionId/start', {
+      'startTime': now.toIso8601String(),
+    });
     return GameSession.fromJson(json);
   }
 
   Future<GameSession> endGameSession(int gameSessionId) async {
-    final json = await _apiService.post('game-sessions/$gameSessionId/end', {});
+    logger.d('[GameSessionService] 📡 POST /game-sessions/$gameSessionId/end');
+
+    final now = DateTime.now().toUtc();
+    final endTimeString = now.toIso8601String();
+    logger.d('[GameSessionService] endTime que je vais envoyer: $endTimeString');
+    // Ici tu utilises le module importé : json.encode(...)
+    logger.d('[GameSessionService] Données envoyées pour end: ${jsonConvert.jsonEncode({
+      'endTime': endTimeString,
+    })}');
+
+    // Ici tu crées une variable "json" qui n'a rien à voir avec l'import
+    final json = await _apiService.post('game-sessions/$gameSessionId/end', {
+      'endTime': endTimeString,
+    });
+
     return GameSession.fromJson(json);
   }
 
@@ -46,18 +66,22 @@ class GameSessionService {
 
     if (session.gameMap != null) {
       final map = session.gameMap!;
-      logger.d('[GameSessionService] 🗺️ GameMap ID=${map.id}, name=${map.name}');
-      logger.d('[GameSessionService] 📐 backgroundBoundsJson présent : ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
-      logger.d('[GameSessionService] 📡 satelliteBoundsJson présent : ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
-      logger.d('[GameSessionService] 🖼️ backgroundImageBase64 longueur : ${map.backgroundImageBase64?.length ?? 0}');
-      logger.d('[GameSessionService] 🛰️ satelliteImageBase64 longueur : ${map.satelliteImageBase64?.length ?? 0}');
+      logger
+          .d('[GameSessionService] 🗺️ GameMap ID=${map.id}, name=${map.name}');
+      logger.d(
+          '[GameSessionService] 📐 backgroundBoundsJson présent : ${map.backgroundBoundsJson != null && map.backgroundBoundsJson!.isNotEmpty}');
+      logger.d(
+          '[GameSessionService] 📡 satelliteBoundsJson présent : ${map.satelliteBoundsJson != null && map.satelliteBoundsJson!.isNotEmpty}');
+      logger.d(
+          '[GameSessionService] 🖼️ backgroundImageBase64 longueur : ${map.backgroundImageBase64?.length ?? 0}');
+      logger.d(
+          '[GameSessionService] 🛰️ satelliteImageBase64 longueur : ${map.satelliteImageBase64?.length ?? 0}');
     } else {
       logger.d('[GameSessionService] ⚠️ Aucune GameMap reçue dans la session');
     }
 
     return session;
   }
-
 
   Future<List<GameSession>> getAllActiveGameSessions() async {
     final jsonList = await _apiService.get('game-sessions/active');
@@ -74,12 +98,13 @@ class GameSessionService {
   }
 
   Future<GameSessionParticipant> addParticipant(
-      int gameSessionId,
-      int userId,
-      int? teamId,
-      bool isHost,
-      ) async {
-    final json = await _apiService.post('game-sessions/$gameSessionId/participants', {
+    int gameSessionId,
+    int userId,
+    int? teamId,
+    bool isHost,
+  ) async {
+    final json =
+        await _apiService.post('game-sessions/$gameSessionId/participants', {
       'userId': userId,
       'teamId': teamId,
       'isHost': isHost,
@@ -88,55 +113,79 @@ class GameSessionService {
   }
 
   Future<void> removeParticipant(int gameSessionId, int userId) async {
-    await _apiService.delete('game-sessions/$gameSessionId/participants/$userId');
+    await _apiService
+        .delete('game-sessions/$gameSessionId/participants/$userId');
   }
 
-  Future<List<GameSessionParticipant>> getParticipants(int gameSessionId) async {
-    final jsonList = await _apiService.get('game-sessions/$gameSessionId/participants');
-    return (jsonList as List).map((e) => GameSessionParticipant.fromJson(e)).toList();
+  Future<List<GameSessionParticipant>> getParticipants(
+      int gameSessionId) async {
+    final jsonList =
+        await _apiService.get('game-sessions/$gameSessionId/participants');
+    return (jsonList as List)
+        .map((e) => GameSessionParticipant.fromJson(e))
+        .toList();
   }
 
-  Future<List<GameSessionParticipant>> getActiveParticipants(int gameSessionId) async {
-    final jsonList = await _apiService.get('game-sessions/$gameSessionId/active-participants');
-    return (jsonList as List).map((e) => GameSessionParticipant.fromJson(e)).toList();
+  Future<List<GameSessionParticipant>> getActiveParticipants(
+      int gameSessionId) async {
+    final jsonList = await _apiService
+        .get('game-sessions/$gameSessionId/active-participants');
+    return (jsonList as List)
+        .map((e) => GameSessionParticipant.fromJson(e))
+        .toList();
   }
 
-  Future<GameSessionScenario> addScenario(int gameSessionId, int scenarioId, bool isMainScenario) async {
-    final json = await _apiService.post('game-sessions/$gameSessionId/scenarios', {
+  Future<GameSessionScenario> addScenario(
+      int gameSessionId, int scenarioId, bool isMainScenario) async {
+    final json =
+        await _apiService.post('game-sessions/$gameSessionId/scenarios', {
       'scenarioId': scenarioId,
       'isMainScenario': isMainScenario,
     });
     return GameSessionScenario.fromJson(json);
   }
 
-  Future<GameSessionScenario> activateScenario(int gameSessionId, int scenarioId) async {
-    final json = await _apiService.post('game-sessions/$gameSessionId/scenarios/$scenarioId/activate', {});
+  Future<GameSessionScenario> activateScenario(
+      int gameSessionId, int scenarioId) async {
+    final json = await _apiService.post(
+        'game-sessions/$gameSessionId/scenarios/$scenarioId/activate', {});
     return GameSessionScenario.fromJson(json);
   }
 
-  Future<GameSessionScenario> deactivateScenario(int gameSessionId, int scenarioId) async {
-    final json = await _apiService.post('game-sessions/$gameSessionId/scenarios/$scenarioId/deactivate', {});
+  Future<GameSessionScenario> deactivateScenario(
+      int gameSessionId, int scenarioId) async {
+    final json = await _apiService.post(
+        'game-sessions/$gameSessionId/scenarios/$scenarioId/deactivate', {});
     return GameSessionScenario.fromJson(json);
   }
 
   Future<List<GameSessionScenario>> getScenarios(int gameSessionId) async {
-    final jsonList = await _apiService.get('game-sessions/$gameSessionId/scenarios');
-    return (jsonList as List).map((e) => GameSessionScenario.fromJson(e)).toList();
+    final jsonList =
+        await _apiService.get('game-sessions/$gameSessionId/scenarios');
+    return (jsonList as List)
+        .map((e) => GameSessionScenario.fromJson(e))
+        .toList();
   }
 
-  Future<List<GameSessionScenario>> getActiveScenarios(int gameSessionId) async {
-    final jsonList = await _apiService.get('game-sessions/$gameSessionId/active-scenarios');
-    return (jsonList as List).map((e) => GameSessionScenario.fromJson(e)).toList();
+  Future<List<GameSessionScenario>> getActiveScenarios(
+      int gameSessionId) async {
+    final jsonList =
+        await _apiService.get('game-sessions/$gameSessionId/active-scenarios');
+    return (jsonList as List)
+        .map((e) => GameSessionScenario.fromJson(e))
+        .toList();
   }
 
   Future<GameSession?> getCurrentSessionByFieldId(int fieldId) async {
     try {
-      final json = await _apiService.get('game-sessions/current-session/$fieldId');
+      final json =
+          await _apiService.get('game-sessions/current-session/$fieldId');
       logger.d('🗺️ Session active trouvée pour le terrain $fieldId : $json');
       return GameSession.fromJson(json);
     } catch (e) {
       // Log optionnel ou gestion d’erreur douce si 404
-      logger.d('⚠️ Aucune session active trouvée pour le terrain $fieldId : $e');
+      logger
+          .d('⚠️ Aucune session active trouvée pour le terrain $fieldId : $e');
       return null;
     }
   }
