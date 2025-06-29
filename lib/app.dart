@@ -80,7 +80,7 @@ class App extends StatelessWidget {
         child: Consumer<LocaleService>( // Utilise Consumer pour réagir aux changements de locale
           builder: (context, localeService, child) {
             return MaterialApp.router(
-              title: AppLocalizations.of(context)?.appName ?? 'Airsoft Game Master', // Utilise la chaîne localisée
+              title: AppLocalizations.of(context)?.appTitle ?? 'Airsoft Game Master', // Utilise la chaîne localisée
 
               // Configuration i18n
               locale: localeService.currentLocale, // La locale actuelle du service

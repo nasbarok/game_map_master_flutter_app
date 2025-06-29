@@ -73,7 +73,7 @@ void main() async {
         Provider<GeocodingService>.value(value: GetIt.I<GeocodingService>()),
         Provider<PlayerLocationService>.value(value: GetIt.I<PlayerLocationService>()),
         Provider<AdvancedLocationService>.value(value: GetIt.I<AdvancedLocationService>()),
-        Provider<LocaleService>.value(value: GetIt.I<LocaleService>()),
+        ChangeNotifierProvider<LocaleService>.value(value: GetIt.I<LocaleService>()),
         // Ajouter obligatoirement les nouveaux services ici
       ],
       child: App(),

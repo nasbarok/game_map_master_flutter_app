@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import 'package:go_router/go_router.dart';
@@ -97,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authService = GetIt.I<AuthService>();
 
     return Scaffold(
@@ -116,10 +118,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.green,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Airsoft Game Map',
+                  Text(
+                    l10n.appTitle,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -127,14 +129,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nom d\'utilisateur',
-                      prefixIcon: Icon(Icons.person),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.username,
+                      prefixIcon: const Icon(Icons.person),
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer votre nom d\'utilisateur';
+                        return l10n.promptUsername;
                       }
                       return null;
                     },
@@ -144,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Mot de passe',
+                      labelText: l10n.password,
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -162,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer votre mot de passe';
+                        return l10n.promptPassword;
                       }
                       return null;
                     },
@@ -175,14 +177,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: authService.isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('Se connecter'),
+                        : Text(l10n.login),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
                       context.go('/register');
                     },
-                    child: const Text('Pas encore inscrit ? Créer un compte'),
+                    child: Text(l10n.register),
                   ),
                 ],
               ),

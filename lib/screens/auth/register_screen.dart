@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import 'package:go_router/go_router.dart';
 
@@ -48,18 +49,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _selectedRole!,
       );
 
+     final l10n = AppLocalizations.of(context)!;
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Inscription réussie ! Vous pouvez maintenant vous connecter.'),
+          SnackBar(
+            content: Text(l10n.registrationSuccess),
             backgroundColor: Colors.green,
           ),
         );
         context.go('/login');
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Échec de l\'inscription. Veuillez réessayer.'),
+          SnackBar(
+            content: Text(l10n.registrationFailure),
             backgroundColor: Colors.red,
           ),
         );
@@ -70,10 +72,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authService = GetIt.I<AuthService>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inscription'),
+        title: Text(l10n.registerTitle),
       ),
       body: SafeArea(
         child: Center(
@@ -85,10 +88,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Créer un compte',
+                  Text(
+                    l10n.createAccount,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -96,14 +99,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nom d\'utilisateur',
-                      prefixIcon: Icon(Icons.person),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.usernameLabel,
+                      prefixIcon: const Icon(Icons.person),
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer un nom d\'utilisateur';
+                        return l10n.usernamePrompt;
                       }
                       return null;
                     },
@@ -112,17 +115,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.emailLabel,
+                      prefixIcon: const Icon(Icons.email),
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer votre email';
+                        return l10n.emailPrompt;
                       }
                       if (!value.contains('@')) {
-                        return 'Veuillez entrer un email valide';
+                        return l10n.emailInvalid;
                       }
                       return null;
                     },
@@ -132,7 +135,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Mot de passe',
+                      labelText: l10n.passwordLabel,
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -150,10 +153,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer un mot de passe';
+                        return l10n.passwordPrompt;
                       }
                       if (value.length < 6) {
-                        return 'Le mot de passe doit contenir au moins 6 caractères';
+                        return l10n.passwordTooShort;
                       }
                       return null;
                     },
@@ -162,17 +165,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: !_isPasswordVisible,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirmer le mot de passe',
-                      prefixIcon: Icon(Icons.lock),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.confirmPasswordLabel,
+                      prefixIcon: const Icon(Icons.lock),
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez confirmer votre mot de passe';
+                        return l10n.confirmPasswordPrompt;
                       }
                       if (value != _passwordController.text) {
-                        return 'Les mots de passe ne correspondent pas';
+                        return l10n.passwordsDoNotMatch;
                       }
                       return null;
                     },
@@ -180,42 +183,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _firstNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Prénom',
-                      prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.firstNameLabel,
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _lastNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nom',
-                      prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.lastNameLabel,
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _phoneNumberController,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Numéro de téléphone',
-                      prefixIcon: Icon(Icons.phone),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.phoneNumberLabel,
+                      prefixIcon: const Icon(Icons.phone),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: _selectedRole,
-                    decoration: const InputDecoration(
-                      labelText: 'Rôle',
-                      prefixIcon: Icon(Icons.person_pin),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.roleLabel,
+                      prefixIcon: const Icon(Icons.person_pin),
+                      border: const OutlineInputBorder(),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'HOST', child: Text('Organisateur')),
-                      DropdownMenuItem(value: 'GAMER', child: Text('Joueur')),
+                    items: [
+                      DropdownMenuItem(value: 'HOST', child: Text(l10n.roleHost)),
+                      DropdownMenuItem(value: 'GAMER', child: Text(l10n.roleGamer)),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -224,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez sélectionner un rôle';
+                        return l10n.rolePrompt;
                       }
                       return null;
                     },
@@ -237,14 +240,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     child: authService.isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('S\'inscrire'),
+                        : Text(l10n.registerButton),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
                       context.go('/login');
                     },
-                    child: const Text('Déjà inscrit ? Se connecter'),
+                    child: Text(l10n.alreadyRegistered),
                   ),
                 ],
               ),

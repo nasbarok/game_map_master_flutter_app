@@ -106,5 +106,30 @@
   "gameFinished": "Partita terminata",
   "waitingForPlayers": "In attesa di giocatori",
   "fieldClosed": "Campo chiuso",
-  "fieldOpen": "Campo aperto"
+  "fieldOpen": "Campo aperto",
+  "promptUsername": "Inserisci il tuo nome utente",
+  "promptPassword": "Inserisci la tua password",
+  "registerTitle": "Registrazione",
+  "createAccount": "Crea un account",
+  "usernameLabel": "Nome utente",
+  "usernamePrompt": "Inserisci un nome utente",
+  "emailLabel": "Email",
+  "emailPrompt": "Inserisci la tua email",
+  "passwordLabel": "Password",
+  "passwordPrompt": "Inserisci una password",
+  "confirmPasswordLabel": "Conferma password",
+  "confirmPasswordPrompt": "Conferma la tua password",
+  "firstNameLabel": "Nome",
+  "lastNameLabel": "Cognome",
+  "phoneNumberLabel": "Numero di telefono",
+  "roleLabel": "Ruolo",
+  "rolePrompt": "Seleziona un ruolo",
+  "roleHost": "Organizzatore",
+  "roleGamer": "Giocatore",
+  "registerButton": "Registrati",
+  "alreadyRegistered": "Già registrato? Accedi",
+  "registrationSuccess": "Registrazione completata! Ora puoi accedere.",
+  "registrationFailure": "Registrazione fallita. Riprova."
+
+
 }

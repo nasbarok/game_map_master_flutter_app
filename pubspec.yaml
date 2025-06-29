@@ -68,3 +68,5 @@ flutter:
 
 dependency_overrides:
   geolocator_android: ^4.4.3
+flutter_intl:
+  enabled: true

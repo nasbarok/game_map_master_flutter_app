@@ -1,529 +1,537 @@
 {
   "@@locale": "en",
   "@@last_modified": "2025-06-27T23:00:00.000Z",
-
   "appTitle": "Game Map Master",
   "@appTitle": {
     "description": "The title of the application"
   },
-
   "selectLanguage": "Select Language",
   "@selectLanguage": {
     "description": "Title for language selection dialog"
   },
-
   "cancel": "Cancel",
   "@cancel": {
     "description": "Cancel button text"
   },
-
   "ok": "OK",
   "@ok": {
     "description": "OK button text"
   },
-
   "yes": "Yes",
   "@yes": {
     "description": "Yes button text"
   },
-
   "no": "No",
   "@no": {
     "description": "No button text"
   },
-
   "save": "Save",
   "@save": {
     "description": "Save button text"
   },
-
   "delete": "Delete",
   "@delete": {
     "description": "Delete button text"
   },
-
   "edit": "Edit",
   "@edit": {
     "description": "Edit button text"
   },
-
   "create": "Create",
   "@create": {
     "description": "Create button text"
   },
-
   "loading": "Loading...",
   "@loading": {
     "description": "Loading indicator text"
   },
-
   "error": "Error",
   "@error": {
     "description": "Error message title"
   },
-
   "success": "Success",
   "@success": {
     "description": "Success message title"
   },
-
   "warning": "Warning",
   "@warning": {
     "description": "Warning message title"
   },
-
   "info": "Information",
   "@info": {
     "description": "Information message title"
   },
-
   "connectionInProgress": "Connection in progress...",
   "@connectionInProgress": {
     "description": "Message shown during login process"
   },
-
   "sendingCredentials": "Sending credentials to AuthService...",
   "@sendingCredentials": {
     "description": "Message shown when sending login credentials"
   },
-
   "connectionSuccessful": "Connection successful. Starting session restoration...",
   "@connectionSuccessful": {
     "description": "Message shown when login is successful"
   },
-
   "sessionPotentiallyRestored": "Field session potentially restored.",
   "@sessionPotentiallyRestored": {
     "description": "Message shown when session might be restored"
   },
-
   "automaticReconnection": "Automatic user reconnection to field...",
   "@automaticReconnection": {
     "description": "Message shown during automatic reconnection"
   },
-
   "rejoinedFieldSuccessfully": "Rejoined field successfully. Reloading session...",
   "@rejoinedFieldSuccessfully": {
     "description": "Message shown when successfully rejoined a field"
   },
-
   "userAlreadyConnected": "User already connected to field.",
   "@userAlreadyConnected": {
     "description": "Message shown when user is already connected"
   },
-
   "noActiveFieldOrUser": "No active field or user not defined.",
   "@noActiveFieldOrUser": {
     "description": "Message shown when no active field or user"
   },
-
   "automaticReconnectionError": "Error during automatic reconnection attempt",
   "@automaticReconnectionError": {
     "description": "Error message for automatic reconnection failure"
   },
-
   "username": "Username",
   "@username": {
     "description": "Username field label"
   },
-
   "password": "Password",
   "@password": {
     "description": "Password field label"
   },
-
   "login": "Login",
   "@login": {
     "description": "Login button text"
   },
-
   "register": "Register",
   "@register": {
     "description": "Register button text"
   },
-
   "email": "Email",
   "@email": {
     "description": "Email field label"
   },
-
   "confirmPassword": "Confirm Password",
   "@confirmPassword": {
     "description": "Confirm password field label"
   },
-
   "firstName": "First Name",
   "@firstName": {
     "description": "First name field label"
   },
-
   "lastName": "Last Name",
   "@lastName": {
     "description": "Last name field label"
   },
-
   "fieldManagement": "Field Management",
   "@fieldManagement": {
     "description": "Field management tab title"
   },
-
   "mapsManagement": "Maps Management",
   "@mapsManagement": {
     "description": "Maps management tab title"
   },
-
   "scenariosManagement": "Scenarios Management",
   "@scenariosManagement": {
     "description": "Scenarios management tab title"
   },
-
   "playersManagement": "Players Management",
   "@playersManagement": {
     "description": "Players management tab title"
   },
-
   "openField": "Open Field",
   "@openField": {
     "description": "Open field button text"
   },
-
   "closeField": "Close Field",
   "@closeField": {
     "description": "Close field button text"
   },
-
   "startGame": "Start Game",
   "@startGame": {
     "description": "Start game button text"
   },
-
   "stopGame": "Stop Game",
   "@stopGame": {
     "description": "Stop game button text"
   },
-
   "gameTime": "Game Time",
   "@gameTime": {
     "description": "Game time label"
   },
-
   "selectMap": "Select Map",
   "@selectMap": {
     "description": "Select map label"
   },
-
   "selectScenarios": "Select Scenarios",
   "@selectScenarios": {
     "description": "Select scenarios label"
   },
-
   "connectedPlayers": "Connected Players",
   "@connectedPlayers": {
     "description": "Connected players label"
   },
-
   "teams": "Teams",
   "@teams": {
     "description": "Teams label"
   },
-
   "createTeam": "Create Team",
   "@createTeam": {
     "description": "Create team button text"
   },
-
   "teamName": "Team Name",
   "@teamName": {
     "description": "Team name field label"
   },
-
   "joinTeam": "Join Team",
   "@joinTeam": {
     "description": "Join team button text"
   },
-
   "leaveTeam": "Leave Team",
   "@leaveTeam": {
     "description": "Leave team button text"
   },
-
   "invitePlayers": "Invite Players",
   "@invitePlayers": {
     "description": "Invite players button text"
   },
-
   "searchPlayers": "Search Players",
   "@searchPlayers": {
     "description": "Search players placeholder"
   },
-
   "sendInvitation": "Send Invitation",
   "@sendInvitation": {
     "description": "Send invitation button text"
   },
-
   "acceptInvitation": "Accept Invitation",
   "@acceptInvitation": {
     "description": "Accept invitation button text"
   },
-
   "declineInvitation": "Decline Invitation",
   "@declineInvitation": {
     "description": "Decline invitation button text"
   },
-
   "invitations": "Invitations",
   "@invitations": {
     "description": "Invitations section title"
   },
-
   "noInvitations": "No invitations",
   "@noInvitations": {
     "description": "Message when no invitations available"
   },
-
   "mapName": "Map Name",
   "@mapName": {
     "description": "Map name field label"
   },
-
   "mapDescription": "Map Description",
   "@mapDescription": {
     "description": "Map description field label"
   },
-
   "createMap": "Create Map",
   "@createMap": {
     "description": "Create map button text"
   },
-
   "editMap": "Edit Map",
   "@editMap": {
     "description": "Edit map button text"
   },
-
   "deleteMap": "Delete Map",
   "@deleteMap": {
     "description": "Delete map button text"
   },
-
   "scenarioName": "Scenario Name",
   "@scenarioName": {
     "description": "Scenario name field label"
   },
-
   "scenarioDescription": "Scenario Description",
   "@scenarioDescription": {
     "description": "Scenario description field label"
   },
-
   "createScenario": "Create Scenario",
   "@createScenario": {
     "description": "Create scenario button text"
   },
-
   "editScenario": "Edit Scenario",
   "@editScenario": {
     "description": "Edit scenario button text"
   },
-
   "deleteScenario": "Delete Scenario",
   "@deleteScenario": {
     "description": "Delete scenario button text"
   },
-
   "treasureHunt": "Treasure Hunt",
   "@treasureHunt": {
     "description": "Treasure hunt scenario name"
   },
-
   "bombDefusal": "Bomb Defusal",
   "@bombDefusal": {
     "description": "Bomb defusal scenario name"
   },
-
   "captureTheFlag": "Capture The Flag",
   "@captureTheFlag": {
     "description": "Capture the flag scenario name"
   },
-
   "gpsQuality": "GPS Quality",
   "@gpsQuality": {
     "description": "GPS quality indicator label"
   },
-
   "speed": "Speed",
   "@speed": {
     "description": "Speed indicator label"
   },
-
   "stationary": "Stationary",
   "@stationary": {
     "description": "Stationary movement state"
   },
-
   "walking": "Walking",
   "@walking": {
     "description": "Walking movement state"
   },
-
   "running": "Running",
   "@running": {
     "description": "Running movement state"
   },
-
   "tactical": "Tactical",
   "@tactical": {
     "description": "Tactical movement state"
   },
-
   "immobile": "Immobile",
   "@immobile": {
     "description": "Immobile state for GPS"
   },
-
   "gameHistory": "Game History",
   "@gameHistory": {
     "description": "Game history section title"
   },
-
   "gameReplay": "Game Replay",
   "@gameReplay": {
     "description": "Game replay section title"
   },
-
   "sessionDetails": "Session Details",
   "@sessionDetails": {
     "description": "Session details title"
   },
-
   "duration": "Duration",
   "@duration": {
     "description": "Duration label"
   },
-
   "startTime": "Start Time",
   "@startTime": {
     "description": "Start time label"
   },
-
   "endTime": "End Time",
   "@endTime": {
     "description": "End time label"
   },
-
   "participants": "Participants",
   "@participants": {
     "description": "Participants label"
   },
-
   "settings": "Settings",
   "@settings": {
     "description": "Settings section title"
   },
-
   "language": "Language",
   "@language": {
     "description": "Language setting label"
   },
-
   "notifications": "Notifications",
   "@notifications": {
     "description": "Notifications setting label"
   },
-
   "sound": "Sound",
   "@sound": {
     "description": "Sound setting label"
   },
-
   "vibration": "Vibration",
   "@vibration": {
     "description": "Vibration setting label"
   },
-
   "about": "About",
   "@about": {
     "description": "About section title"
   },
-
   "version": "Version",
   "@version": {
     "description": "Version label"
   },
-
   "logout": "Logout",
   "@logout": {
     "description": "Logout button text"
   },
-
   "confirmLogout": "Are you sure you want to logout?",
   "@confirmLogout": {
     "description": "Logout confirmation message"
   },
-
   "networkError": "Network error. Please check your connection.",
   "@networkError": {
     "description": "Network error message"
   },
-
   "serverError": "Server error. Please try again later.",
   "@serverError": {
     "description": "Server error message"
   },
-
   "invalidCredentials": "Invalid username or password.",
   "@invalidCredentials": {
     "description": "Invalid credentials error message"
   },
-
   "fieldRequired": "This field is required.",
   "@fieldRequired": {
     "description": "Required field validation message"
   },
-
   "emailInvalid": "Please enter a valid email address.",
   "@emailInvalid": {
     "description": "Invalid email validation message"
   },
-
   "passwordTooShort": "Password must be at least 6 characters long.",
   "@passwordTooShort": {
     "description": "Password too short validation message"
   },
-
   "passwordsDoNotMatch": "Passwords do not match.",
   "@passwordsDoNotMatch": {
     "description": "Passwords mismatch validation message"
   },
-
   "welcomeMessage": "Welcome to Game Map Master!",
   "@welcomeMessage": {
     "description": "Welcome message for users"
   },
-
   "gameInProgress": "Game in Progress",
   "@gameInProgress": {
     "description": "Game in progress status"
   },
-
   "gameFinished": "Game Finished",
   "@gameFinished": {
     "description": "Game finished status"
   },
-
   "waitingForPlayers": "Waiting for Players",
   "@waitingForPlayers": {
     "description": "Waiting for players status"
   },
-
   "fieldClosed": "Field Closed",
   "@fieldClosed": {
     "description": "Field closed status"
   },
-
   "fieldOpen": "Field Open",
   "@fieldOpen": {
     "description": "Field open status"
+  },
+  "promptUsername": "Please enter your username",
+  "@promptUsername": {
+    "description": "Prompt asking the user to enter their username"
+  },
+  "promptPassword": "Please enter your password",
+  "@promptPassword": {
+    "description": "Prompt asking the user to enter their password"
+  },
+
+  "registerTitle": "Register",
+  "@registerTitle": {
+    "description": "Title of the registration screen"
+  },
+
+  "createAccount": "Create an account",
+  "@createAccount": {
+    "description": "Text displayed as heading to create a new account"
+  },
+
+  "usernameLabel": "Username",
+  "@usernameLabel": {
+    "description": "Label for username field"
+  },
+
+  "usernamePrompt": "Please enter a username",
+  "@usernamePrompt": {
+    "description": "Prompt asking the user to enter a username"
+  },
+
+  "emailLabel": "Email",
+  "@emailLabel": {
+    "description": "Label for email field"
+  },
+
+  "emailPrompt": "Please enter your email",
+  "@emailPrompt": {
+    "description": "Prompt asking the user to enter their email"
+  },
+
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Label for password field"
+  },
+
+  "passwordPrompt": "Please enter a password",
+  "@passwordPrompt": {
+    "description": "Prompt asking the user to enter a password"
+  },
+
+  "confirmPasswordLabel": "Confirm Password",
+  "@confirmPasswordLabel": {
+    "description": "Label for confirm password field"
+  },
+
+  "confirmPasswordPrompt": "Please confirm your password",
+  "@confirmPasswordPrompt": {
+    "description": "Prompt asking the user to confirm their password"
+  },
+
+  "firstNameLabel": "First Name",
+  "@firstNameLabel": {
+    "description": "Label for first name field"
+  },
+
+  "lastNameLabel": "Last Name",
+  "@lastNameLabel": {
+    "description": "Label for last name field"
+  },
+
+  "phoneNumberLabel": "Phone Number",
+  "@phoneNumberLabel": {
+    "description": "Label for phone number field"
+  },
+
+  "roleLabel": "Role",
+  "@roleLabel": {
+    "description": "Label for selecting user role"
+  },
+
+  "rolePrompt": "Please select a role",
+  "@rolePrompt": {
+    "description": "Prompt asking the user to select a role"
+  },
+
+  "roleHost": "Host",
+  "@roleHost": {
+    "description": "Role option for host/organizer"
+  },
+
+  "roleGamer": "Gamer",
+  "@roleGamer": {
+    "description": "Role option for gamer/player"
+  },
+
+  "registerButton": "Register",
+  "@registerButton": {
+    "description": "Register button text"
+  },
+
+  "alreadyRegistered": "Already registered? Log in",
+  "@alreadyRegistered": {
+    "description": "Prompt for users already registered to log in"
+  },
+
+  "registrationSuccess": "Registration successful! You can now log in.",
+  "@registrationSuccess": {
+    "description": "Message shown when registration succeeds"
+  },
+
+  "registrationFailure": "Registration failed. Please try again.",
+  "@registrationFailure": {
+    "description": "Message shown when registration fails"
   }
 }
