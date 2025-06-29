@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.5
   # Gestion d'état
   provider: ^6.0.5
@@ -33,7 +35,7 @@ dependencies:
   flutter_map: ^6.1.0 # Ajout de flutter_map pour OpenStreetMap
   latlong2: ^0.9.0 # Dépendance pour flutter_map
   # Autres
-  intl: ^0.18.0
+  intl: ^0.19.0
   uuid: 4.5.1
   logger: ^2.0.1
   flutter_datetime_picker_plus: ^2.1.0
@@ -57,6 +59,7 @@ dev_dependencies:
   flutter_lints: ^2.0.1
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/images/

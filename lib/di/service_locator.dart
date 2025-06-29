@@ -1,6 +1,7 @@
 import 'package:flutter/src/widgets/framework.dart';
 
 import 'package:flutter/src/widgets/navigator.dart';
+import 'package:game_map_master_flutter_app/services/l10n/locale_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart' as Http;
 
@@ -39,6 +40,9 @@ import '../services/location/movement_detector.dart';
 import 'package:get_it/get_it.dart';
 
 void setupServiceLocator() {
+  //service locator
+  final localServiceLocator = LocaleService();
+
   // 1. Services de base http
   final baseUrl = EnvironmentConfig.apiBaseUrl;
   final authService = AuthService(apiBaseUrl: baseUrl, authBaseUrl: '$baseUrl/auth');
@@ -109,6 +113,7 @@ void setupServiceLocator() {
 
 
   // ✅ 6. ENREGISTREMENTS dans GetIt (dans cet ordre)
+  GetIt.I.registerSingleton<LocaleService>(localServiceLocator);
   GetIt.I.registerSingleton<AuthService>(authService);
   GetIt.I.registerSingleton<ApiService>(apiService);
   GetIt.I.registerSingleton<GameStateService>(gameStateService);

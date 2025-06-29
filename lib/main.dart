@@ -4,6 +4,7 @@ import 'package:game_map_master_flutter_app/services/game_state_service.dart';
 import 'package:game_map_master_flutter_app/services/geocoding_service.dart';
 import 'package:game_map_master_flutter_app/services/history_service.dart';
 import 'package:game_map_master_flutter_app/services/invitation_service.dart';
+import 'package:game_map_master_flutter_app/services/l10n/locale_service.dart';
 import 'package:game_map_master_flutter_app/services/location/advanced_location_service.dart';
 import 'package:game_map_master_flutter_app/services/navigation_service.dart';
 import 'package:game_map_master_flutter_app/services/player_location_service.dart';
@@ -72,7 +73,7 @@ void main() async {
         Provider<GeocodingService>.value(value: GetIt.I<GeocodingService>()),
         Provider<PlayerLocationService>.value(value: GetIt.I<PlayerLocationService>()),
         Provider<AdvancedLocationService>.value(value: GetIt.I<AdvancedLocationService>()),
-
+        Provider<LocaleService>.value(value: GetIt.I<LocaleService>()),
         // Ajouter obligatoirement les nouveaux services ici
       ],
       child: App(),
