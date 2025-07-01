@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../models/coordinate.dart';
 import '../../../models/game_map.dart';
 import '../../../models/scenario/bomb_operation/bomb_operation_scenario.dart';
@@ -68,6 +69,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   // Options d'affichage de la carte
   bool _showZones = true;
   bool _showPointsOfInterest = true;
+  bool _didLoadScenario = false; // Pour éviter plusieurs chargements
 
   @override
   void initState() {
@@ -76,7 +78,15 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     _gameMapService = GetIt.I<GameMapService>();
     _scenarioService = GetIt.I<ScenarioService>();
     _mapController = fm.MapController();
-    _loadScenario();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didLoadScenario) {
+      _didLoadScenario = true;
+      _loadScenario(); // On appelle ici, contexte garanti prêt
+    }
   }
 
   @override
@@ -93,6 +103,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
   /// Charge les données du scénario depuis le backend
   Future<void> _loadScenario() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
       _mapLoadError = false;
@@ -157,10 +168,10 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       if (mounted) {
         // Affiche un message d'erreur si le chargement échoue
         logger.d(
-            '[BombOperationConfigScreen] Erreur lors du chargement du scénario: $e');
+            '[BombOperationConfigScreen] ${l10n.errorLoadingData(e.toString())}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement du scénario: $e'),
+            content: Text(l10n.errorLoadingData(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -173,6 +184,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
   /// Charge la carte associée au scénario
   Future<void> _loadGameMap(int gameMapId) async {
+    final l10n = AppLocalizations.of(context)!;
     logger.d(
         '📡 [BombOperationConfigScreen] [_loadGameMap] Chargement gameMapId=$gameMapId');
     setState(() {
@@ -194,9 +206,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
+            SnackBar(
+              content: Text(l10n.interactiveMapRequiredError),
               backgroundColor: Colors.orange,
             ),
           );
@@ -234,7 +245,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
             '❌ [BombOperationConfigScreen] [_loadGameMap] Erreur lors du chargement de la carte: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement de la carte: $e'),
+            content: Text(l10n.errorLoadingData(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -247,6 +258,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
   /// Sauvegarde les modifications du scénario
   Future<void> _saveScenario() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -296,18 +308,18 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Scénario sauvegardé avec succès'),
+          SnackBar(
+            content: Text(l10n.scenarioSavedSuccess),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        logger.d('Erreur lors de la sauvegarde du scénario: $e');
+        logger.d(l10n.errorSavingScenario(e.toString()));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la sauvegarde: $e'),
+            content: Text(l10n.errorSavingScenario(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -495,15 +507,16 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Configuration: ${widget.scenarioName}'),
+        title: Text(l10n.bombConfigScreenTitle(widget.scenarioName)),
         actions: [
           if (!_isLoading && !_isSaving)
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: _saveScenario,
-              tooltip: 'Sauvegarder',
+              tooltip: l10n.save,
             ),
         ],
       ),
@@ -517,23 +530,23 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Informations générales
-                    const Card(
+                    Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Informations générales',
-                              style: TextStyle(
+                              l10n.generalInformationLabel,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
-                              'Configurez les informations de base du scénario Opération Bombe.',
-                              style: TextStyle(color: Colors.grey),
+                              l10n.bombConfigGeneralInfoSubtitle,
+                              style: const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -542,14 +555,14 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nom du scénario *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.label),
+                      decoration: InputDecoration(
+                        labelText: l10n.scenarioName,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.label),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer un nom pour le scénario';
+                          return l10n.scenarioNameRequiredError;
                         }
                         return null;
                       },
@@ -557,12 +570,15 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.description),
+                      decoration: InputDecoration(
+                        labelText: l10n.scenarioDescription,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.description),
                       ),
-                      maxLines: 3,
+                      maxLines: 5,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(500), // bloque au-delà de 500 caractères
+                      ],
                     ),
 
                     // Carte interactive
@@ -573,17 +589,17 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Carte du terrain',
-                              style: TextStyle(
+                            Text(
+                              l10n.fieldMapLabel,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Visualisez la carte du terrain et les sites de bombe.',
-                              style: TextStyle(color: Colors.grey),
+                            Text(
+                              l10n.fieldMapSubtitle,
+                              style: const TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 16),
 
@@ -592,7 +608,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                               children: [
                                 Expanded(
                                   child: SwitchListTile(
-                                    title: const Text('Afficher les zones'),
+                                    title: Text(l10n.showZonesLabel),
                                     value: _showZones,
                                     onChanged: (value) {
                                       setState(() {
@@ -604,7 +620,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                                 ),
                                 Expanded(
                                   child: SwitchListTile(
-                                    title: const Text('Afficher les POI'),
+                                    title: Text(l10n.showPOIsLabel),
                                     value: _showPointsOfInterest,
                                     onChanged: (value) {
                                       setState(() {
@@ -626,21 +642,23 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: _isLoadingMap || _gameMap == null
-                                  ? const Center(
+                                  ? Center(
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          CircularProgressIndicator(),
-                                          SizedBox(height: 16),
-                                          Text('Chargement de la carte...'),
+                                          const CircularProgressIndicator(),
+                                          const SizedBox(height: 16),
+                                          Text(l10n.loadingMap),
                                         ],
                                       ),
                                     )
-                                  : ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: _buildMap(),
-                                    ),
+                                  : _mapLoadError
+                                      ? Center(child: Text(l10n.interactiveMapRequiredError, textAlign: TextAlign.center, style: TextStyle(color: Colors.red)))
+                                      : ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: _buildMap(),
+                                        ),
                             ),
                           ],
                         ),
@@ -649,23 +667,23 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
                     // Paramètres de jeu
                     const SizedBox(height: 24),
-                    const Card(
+                    Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Paramètres de jeu',
-                              style: TextStyle(
+                              l10n.gameSettingsLabel,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
-                              'Configurez les règles et paramètres du scénario Opération Bombe.',
-                              style: TextStyle(color: Colors.grey),
+                              l10n.bombConfigSettingsSubtitle,
+                              style: const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -675,10 +693,10 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
                     TextFormField(
                       controller: _bombTimerController,
-                      decoration: const InputDecoration(
-                        labelText: 'Timer de la bombe (secondes) *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.alarm),
+                      decoration: InputDecoration(
+                        labelText: l10n.bombTimerLabel,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.alarm),
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -686,11 +704,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Requis';
+                          return l10n.valueRequiredError;
                         }
                         final timer = int.tryParse(value);
                         if (timer == null || timer < 10) {
-                          return 'Min 10s';
+                          return l10n.minSecondsError("10");
                         }
                         return null;
                       },
@@ -699,10 +717,10 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _defuseTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Temps de désamorçage (secondes) *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.security),
+                      decoration: InputDecoration(
+                        labelText: l10n.defuseTimeLabel,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.security),
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -710,11 +728,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Requis';
+                          return l10n.valueRequiredError;
                         }
                         final defuseTime = int.tryParse(value);
                         if (defuseTime == null || defuseTime < 3) {
-                          return 'Min 3s';
+                          return l10n.minSecondsError("3");
                         }
                         return null;
                       },
@@ -722,11 +740,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _armingTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Temps d\'armement (secondes) *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.timer),
-                        helperText: 'Temps requis pour poser une bombe',
+                      decoration: InputDecoration(
+                        labelText: l10n.armingTimeLabel,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.timer),
+                        helperText: l10n.armingTimeHelperText,
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -734,11 +752,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Requis';
+                          return l10n.valueRequiredError;
                         }
                         final time = int.tryParse(value);
                         if (time == null || time < 3) {
-                          return 'Min 3s';
+                          return l10n.minSecondsError("3");
                         }
                         return null;
                       },
@@ -746,12 +764,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _activeSitesPerRoundController,
-                      decoration: const InputDecoration(
-                        labelText: 'Sites actifs par round *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.place),
-                        helperText:
-                            'Nombre de sites de bombe actifs aléatoirement par round',
+                      decoration: InputDecoration(
+                        labelText: l10n.activeSitesPerRoundLabel,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.place),
+                        helperText: l10n.activeSitesHelperText,
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -759,11 +776,11 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Requis';
+                          return l10n.valueRequiredError;
                         }
                         final sites = int.tryParse(value);
                         if (sites == null || sites < 1) {
-                          return 'Min 1';
+                          return l10n.minCountError("1");
                         }
                         return null;
                       },
@@ -771,23 +788,23 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
                     // Sites de bombe
                     const SizedBox(height: 24),
-                    const Card(
+                    Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Sites de bombe',
-                              style: TextStyle(
+                              l10n.bombSitesSectionTitle,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
-                              'Gérez les sites où les bombes peuvent être posées et désamorcées.',
-                              style: TextStyle(color: Colors.grey),
+                              l10n.bombSitesSectionSubtitle,
+                              style: const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -797,7 +814,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     ElevatedButton.icon(
                       onPressed: _navigateToBombSites,
                       icon: const Icon(Icons.map),
-                      label: const Text('Gérer les sites de bombe'),
+                      label: Text(l10n.manageBombSitesButton),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: Colors.blueGrey,
@@ -813,9 +830,9 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ),
                       child: _isSaving
                           ? const CircularProgressIndicator()
-                          : const Text(
-                              'Sauvegarder les paramètres',
-                              style: TextStyle(fontSize: 16),
+                          : Text(
+                              l10n.saveSettingsButton,
+                              style: const TextStyle(fontSize: 16),
                             ),
                     ),
                   ],

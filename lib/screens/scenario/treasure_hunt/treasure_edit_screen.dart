@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../models/scenario/treasure_hunt/treasure.dart';
 import '../../../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 
@@ -73,8 +74,9 @@ class _TreasureEditScreenState extends State<TreasureEditScreen> {
         Navigator.pop(context, updatedTreasure);
       }
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors de la mise à jour du trésor: $e';
+        _errorMessage = l10n.errorUpdatingTreasure(e.toString());
         _isLoading = false;
       });
     }
@@ -82,14 +84,15 @@ class _TreasureEditScreenState extends State<TreasureEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Modifier le trésor'),
+        title: Text(l10n.editTreasureTitle),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -97,8 +100,8 @@ class _TreasureEditScreenState extends State<TreasureEditScreen> {
             children: [
               if (_errorMessage != null)
                 Container(
-                  margin: EdgeInsets.only(bottom: 16),
-                  padding: EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.red[100],
                     borderRadius: BorderRadius.circular(4),
@@ -112,49 +115,49 @@ class _TreasureEditScreenState extends State<TreasureEditScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Nom du trésor',
-                  border: OutlineInputBorder(),
+                  labelText: l10n.treasureNameLabel,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom';
+                    return l10n.nameRequiredError;
                   }
                   return null;
                 },
               ),
 
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               TextFormField(
                 controller: _valueController,
                 decoration: InputDecoration(
-                  labelText: 'Valeur (points)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.attach_money),
+                  labelText: l10n.valuePointsLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.attach_money),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer une valeur';
+                    return l10n.valueRequiredError;
                   }
                   if (int.tryParse(value) == null) {
-                    return 'Veuillez entrer un nombre valide';
+                    return l10n.invalidNumberError;
                   }
                   return null;
                 },
               ),
 
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               Text(
-                'Symbole',
-                style: TextStyle(
+                l10n.symbolLabel,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
 
               Wrap(
                 spacing: 12,
@@ -184,7 +187,7 @@ class _TreasureEditScreenState extends State<TreasureEditScreen> {
                       child: Center(
                         child: Text(
                           symbol,
-                          style: TextStyle(fontSize: 24),
+                          style: const TextStyle(fontSize: 24),
                         ),
                       ),
                     ),
@@ -192,16 +195,16 @@ class _TreasureEditScreenState extends State<TreasureEditScreen> {
                 }).toList(),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               ElevatedButton(
                 onPressed: _saveTreasure,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: Text(
-                  'Enregistrer les modifications',
-                  style: TextStyle(fontSize: 16),
+                  l10n.saveChangesButton,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ],

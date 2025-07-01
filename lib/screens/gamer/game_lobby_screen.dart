@@ -2,6 +2,7 @@ import 'package:game_map_master_flutter_app/screens/gamer/team_management_screen
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
 import '../../models/websocket/player_left_message.dart';
 import '../../services/api_service.dart';
@@ -64,6 +65,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final gameState = context.read<GameStateService>();
 
     final selectedMap = gameState.selectedMap;
@@ -80,7 +82,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Partie sur ${gameState.selectedMap?.name ?? ""}'),
+        title: Text(l10n.mapLabel(selectedMap?.name ?? l10n.unknownMap)),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -95,9 +97,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.map), text: 'Terrain'),
-            Tab(icon: Icon(Icons.people), text: 'Joueurs'),
+          tabs: [
+            Tab(icon: const Icon(Icons.map), text: l10n.terrainTab),
+            Tab(icon: const Icon(Icons.people), text: l10n.playersTab),
           ],
         ),
       ),
@@ -114,6 +116,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Widget _buildTerrainTab() {
+    final l10n = AppLocalizations.of(context)!;
     final gameState = context.watch<GameStateService>();
 
     if (!gameState.isTerrainOpen || gameState.selectedMap == null) {
@@ -138,11 +141,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Carte : ${gameState.selectedMap?.name ?? "Inconnue"}',
+                          l10n.mapLabel(gameState.selectedMap?.name ?? l10n.unknownMap),
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         IconButton(
-                          tooltip: 'Historique des sessions',
+                          tooltip: l10n.sessionsHistoryTooltip,
                           icon: const Icon(Icons.history),
                           onPressed: () {
                             final fieldId = gameState.selectedMap?.field?.id;
@@ -156,9 +159,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                     content:
-                                        Text('Aucun terrain associé trouvé')),
+                                    Text(l10n.noAssociatedField)),
                               );
                             }
                           },
@@ -181,7 +184,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                             const Icon(Icons.timer, color: Colors.blue),
                             const SizedBox(width: 8),
                             Text(
-                              'Temps restant : ${gameState.timeLeftDisplay}',
+                              l10n.remainingTimeLabel(gameState.timeLeftDisplay),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue,
@@ -203,23 +206,23 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Partie en cours',
-                        style: TextStyle(
+                      Text(
+                        l10n.gameInProgressTitle,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Suivez les instructions de l\'hôte et collaborez avec votre équipe pour atteindre les objectifs du scénario.',
+                      Text(
+                        l10n.gameInProgressInstructions,
                       ),
                       const SizedBox(height: 16),
                       Center(
                         child: ElevatedButton.icon(
                           onPressed: () => _navigateToGameSession(context),
                           icon: const Icon(Icons.play_arrow),
-                          label: const Text('Rejoindre la partie'),
+                          label: Text(l10n.joinGameButton),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -231,23 +234,23 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 ),
               )
             else
-              const Card(
+              Card(
                 elevation: 4,
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'En attente de démarrage',
-                        style: TextStyle(
+                        l10n.waitingForGameStartTitle,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
-                        'L\'hôte n\'a pas encore lancé la partie. Préparez votre équipement et rejoignez une équipe en attendant.',
+                        l10n.waitingForGameStartInstructions,
                       ),
                     ],
                   ),
@@ -260,7 +263,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                   _showLeaveConfirmationDialog(gameState.selectedMap!.field!);
                 },
                 icon: const Icon(Icons.logout),
-                label: const Text('Quitter le terrain'),
+                label: Text(l10n.leaveFieldButton),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
@@ -274,14 +277,15 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Widget _buildSelectedScenarios() {
+    final l10n = AppLocalizations.of(context)!;
     final gameState = context.read<GameStateService>();
 
     final scenarios = gameState.selectedScenarios ?? [];
 
     if (scenarios.isEmpty) {
-      return const Text(
-        'Aucun scénario sélectionné',
-        style: TextStyle(color: Colors.grey),
+      return Text(
+        l10n.noScenarioSelected,
+        style: const TextStyle(color: Colors.grey),
       );
     }
 
@@ -289,7 +293,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Scénarios sélectionnés :',
+          l10n.selectedScenariosLabel,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -297,8 +301,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           final String name = scenario.scenario.name;
           final treasure = scenario.treasureHuntScenario;
           final String description = treasure != null
-              ? 'Chasse au trésor : ${treasure.totalTreasures} QR codes (${treasure.defaultSymbol})'
-              : (scenario.scenario.description ?? 'Pas de description');
+              ? l10n.treasureHuntScenarioDetails(treasure.totalTreasures.toString(), treasure.defaultSymbol)
+              : (scenario.scenario.description ?? l10n.noDescription);
 
           return Card(
             elevation: 2,
@@ -316,6 +320,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
   // Méthode pour afficher la liste des anciens terrains
   Widget _buildPreviousFieldsList() {
+    final l10n = AppLocalizations.of(context)!;
     return FutureBuilder<List<Field>>(
       future: _loadPreviousFields(),
       builder: (context, snapshot) {
@@ -325,7 +330,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
         if (snapshot.hasError) {
           return Center(
-            child: Text('Erreur: ${snapshot.error}'),
+            child: Text(l10n.loadingError(snapshot.error.toString())),
           );
         }
 
@@ -338,14 +343,14 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               children: [
                 Icon(Icons.map, size: 80, color: Colors.grey.withOpacity(0.5)),
                 const SizedBox(height: 16),
-                const Text(
-                  'Aucun terrain visité',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.noFieldsVisited,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Attendez une invitation pour rejoindre un terrain',
-                  style: TextStyle(color: Colors.grey),
+                Text(
+                  l10n.waitForInvitation,
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ],
             ),
@@ -359,16 +364,16 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             final isOpen = field.active;
 
             String openedAtStr = field.openedAt != null
-                ? 'Ouvert le ${_formatDate(field.openedAt!)}'
-                : 'Date d\'ouverture inconnue';
+                ? l10n.fieldOpenedOn(_formatDate(field.openedAt!))
+                : l10n.unknownOpeningDate;
 
             String closedAtStr = field.closedAt != null
-                ? 'Fermé le ${_formatDate(field.closedAt!)}'
-                : 'Encore actif';
+                ? l10n.fieldClosedOn(_formatDate(field.closedAt!))
+                : l10n.stillActive;
 
             String ownerName = field.owner?.username != null
-                ? 'Propriétaire : ${field.owner!.username}'
-                : 'Propriétaire inconnu';
+                ? l10n.ownerLabel(field.owner!.username!)
+                : l10n.unknownOwner;
 
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -383,7 +388,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(isOpen ? 'Ouvert' : 'Fermé'),
+                        Text(isOpen ? l10n.fieldStatusOpen : l10n.fieldStatusClosed),
                         Text(openedAtStr),
                         Text(closedAtStr),
                         Text(ownerName),
@@ -396,11 +401,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                         if (isOpen)
                           ElevatedButton(
                             onPressed: () => _joinField(field.id!),
-                            child: const Text('Rejoindre'),
+                            child: Text(l10n.joinButton),
                           ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          tooltip: 'Supprimer de l\'historique',
+                          tooltip: l10n.deleteFromHistoryTooltip,
                           onPressed: () => _deleteHistoryEntry(field),
                         ),
                       ],
@@ -450,6 +455,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
   // Méthode pour rejoindre un terrain
   Future<void> _joinField(int fieldId) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final apiService = GetIt.I<ApiService>();
       final authService = GetIt.I<AuthService>();
@@ -471,8 +477,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         await gameStateService.restoreSessionIfNeeded(apiService,fieldId);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Vous avez rejoint le terrain avec succès'),
+          SnackBar(
+            content: Text(l10n.youJoinedFieldSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -481,7 +487,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       logger.d('❌ Erreur lors de la connexion au terrain: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur: $e'),
+          content: Text(l10n.loadingError(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -489,6 +495,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Future<void> _leaveField() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final gameStateService = GetIt.I<GameStateService>();
       final authService = GetIt.I<AuthService>();
@@ -512,8 +519,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       gameStateService.reset();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vous avez quitté le terrain'),
+        SnackBar(
+          content: Text(l10n.youLeftField),
           backgroundColor: Colors.blue,
         ),
       );
@@ -523,6 +530,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Widget _buildPlayersTab() {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
     final teamService = context.watch<TeamService>();
     final authService = context.read<AuthService>();
@@ -531,8 +539,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     final currentUserId = authService.currentUser?.id;
 
     if (!gameStateService.isTerrainOpen) {
-      return const Center(
-        child: Text("Vous n'êtes pas connecté à un terrain"),
+      return Center(
+        child: Text(l10n.notConnectedToField),
       );
     }
 
@@ -549,7 +557,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Joueurs connectés (${connectedPlayers.length})',
+                  l10n.connectedPlayersCount(connectedPlayers.length.toString()),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -557,12 +565,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 ),
                 const SizedBox(height: 8),
                 if (connectedPlayers.isEmpty)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'Aucun joueur connecté',
-                        style: TextStyle(color: Colors.grey),
+                        l10n.noPlayerConnected,
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
                   )
@@ -576,7 +584,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                       final isCurrentUser = player['id'] == currentUserId;
 
                       // ✅ Calcul dynamique du nom d'équipe
-                      String teamName = "Sans équipe";
+                      String teamName = l10n.noTeam;
                       Color teamColor = Colors.grey;
 
                       final teamId = player['teamId'];
@@ -593,7 +601,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                           child: const Icon(Icons.person, color: Colors.white),
                         ),
                         title: Text(
-                          player['username'] ?? 'Joueur',
+                          player['username'] ?? l10n.playersTab, // Fallback, should not happen
                           style: TextStyle(
                             fontWeight: isCurrentUser
                                 ? FontWeight.bold
@@ -605,10 +613,10 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                           style: TextStyle(color: teamColor),
                         ),
                         trailing: isCurrentUser
-                            ? const Chip(
-                                label: Text('Vous'),
+                            ? Chip(
+                                label: Text(l10n.youLabel),
                                 backgroundColor: Colors.amber,
-                                labelStyle: TextStyle(color: Colors.white),
+                                labelStyle: const TextStyle(color: Colors.white),
                               )
                             : null,
                       );
@@ -625,11 +633,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   // Dans GameLobbyScreen
 
   Widget _buildTeamInfo() {
+    final l10n = AppLocalizations.of(context)!;
     final teamService = GetIt.I<TeamService>();
     final myTeamId = teamService.myTeamId;
 
     // Trouver l'équipe du joueur
-    String teamName = "Aucune équipe";
+    String teamName = l10n.noTeam;
     Color teamColor = Colors.grey;
 
     if (myTeamId != null) {
@@ -649,8 +658,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Votre équipe',
-              style: TextStyle(
+              l10n.yourTeamLabel,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -686,7 +695,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 );
               },
               icon: const Icon(Icons.group),
-              label: const Text('Gérer les équipes'),
+              label: Text(l10n.manageTeamsButton),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
@@ -699,10 +708,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   void _showChangeTeamDialog(List<Team> teams) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Changer d\'équipe'),
+        title: Text(l10n.changeTeamTitle),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -716,7 +726,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               return ListTile(
                 title: Text(team.name),
                 subtitle: Text(
-                    '${team.players.length} joueur${team.players.length != 1 ? 's' : ''}'),
+                    l10n.playersCountSuffix(team.players.length)),
                 trailing: isCurrentTeam
                     ? const Icon(Icons.check_circle, color: Colors.green)
                     : null,
@@ -738,7 +748,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -746,19 +756,19 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   void _showLeaveConfirmationDialog(Field field) {
+    final l10n = AppLocalizations.of(context)!;
     final playerConnectionService = context.read<PlayerConnectionService>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Quitter le terrain'),
-        content: const Text(
-            'Êtes-vous sûr de vouloir quitter ce terrain ? Vous ne pourrez pas la rejoindre à nouveau si elle est fermée.'),
+        title: Text(l10n.leaveFieldConfirmationTitle),
+        content: Text(l10n.leaveFieldConfirmationMessage),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -769,7 +779,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Quitter'),
+            child: Text(l10n.leaveButton),
           ),
         ],
       ),
@@ -777,20 +787,20 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   Future<void> _deleteHistoryEntry(Field field) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer ce terrain ?'),
-        content: const Text(
-            'Voulez-vous vraiment supprimer ce terrain de votre historique ?'),
+        title: Text(l10n.deleteFieldHistoryTitle),
+        content: Text(l10n.deleteFieldHistoryMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Supprimer'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -806,12 +816,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           () {}); // ❗ Recharge le FutureBuilder (déclenche à nouveau _loadPreviousFields)
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Terrain supprimé de l’historique')),
+        SnackBar(content: Text(l10n.fieldDeletedFromHistory)),
       );
     } catch (e) {
       logger.d('❌ Erreur suppression terrain : $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la suppression')),
+        SnackBar(content: Text(l10n.errorDeletingField)),
       );
     }
   }
@@ -823,6 +833,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   void _navigateToGameSession(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authService = GetIt.I<AuthService>();
     final gameStateService = GetIt.I<GameStateService>();
 
@@ -848,7 +859,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       logger.d(
           '❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Impossible de rejoindre la partie')),
+        SnackBar(content: Text(l10n.cannotJoinGame)),
       );
     }
   }

@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
@@ -72,6 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -81,34 +83,34 @@ class _SplashScreenState extends State<SplashScreen> {
             colors: [Colors.green, Colors.lightGreen],
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.map,
                 size: 100,
                 color: Colors.white,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
-                'Game Map Master',
-                style: TextStyle(
+                l10n.appTitle,
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
-                'Créez et jouez des scénarios 2.0',
-                style: TextStyle(
+                l10n.splashScreenSubtitle,
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.white,
                 ),
               ),
-              SizedBox(height: 50),
-              CircularProgressIndicator(
+              const SizedBox(height: 50),
+              const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ],

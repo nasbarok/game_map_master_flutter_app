@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../services/game_state_service.dart';
 import '../../../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 
@@ -84,12 +85,13 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
     try {
       final gameStateService = Provider.of<GameStateService>(context, listen: false);
 
+      final l10n = AppLocalizations.of(context)!;
       // Vérifier si la partie est active
       if (!await gameStateService.isGameActive(widget.scenarioId)) {
         setState(() {
           _isProcessing = false;
           _scanSuccess = false;
-          _errorMessage = 'La partie n\'est pas active';
+          _errorMessage = l10n.gameNotActiveError;
         });
         return;
       }
@@ -105,7 +107,7 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
       });
 
       // Pause brève pour montrer le résultat
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
 
       if (_scanSuccess) {
         // Reprendre le scan après un succès
@@ -115,19 +117,21 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
         });
       }
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _isProcessing = false;
         _scanSuccess = false;
-        _errorMessage = 'Erreur lors du scan: $e';
+        _errorMessage = l10n.scanError(e.toString());
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scanner un QR code'),
+        title: Text(l10n.scanQRCodeTitle),
       ),
       body: Stack(
         children: [
@@ -148,7 +152,7 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
           if (_isProcessing)
             Container(
               color: Colors.black54,
-              child: Center(
+              child: const Center(
                 child: CircularProgressIndicator(),
               ),
             ),
@@ -159,53 +163,53 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
               color: Colors.black54,
               child: Center(
                 child: Card(
-                  margin: EdgeInsets.all(32),
+                  margin: const EdgeInsets.all(32),
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.check_circle,
                           color: Colors.green,
                           size: 64,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
-                          'Trésor trouvé !',
-                          style: TextStyle(
+                          l10n.treasureFoundTitle,
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
-                          _scanResult!['treasureName'] ?? 'Trésor',
-                          style: TextStyle(fontSize: 18),
+                          _scanResult!['treasureName'] ?? l10n.defaultTreasureName,
+                          style: const TextStyle(fontSize: 18),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              '+${_scanResult!['points']} points',
+                              l10n.pointsAwarded((_scanResult!['points'] ?? 0).toString()),
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.green[700],
                               ),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
                               _scanResult!['symbol'] ?? '💰',
-                              style: TextStyle(fontSize: 24),
+                              style: const TextStyle(fontSize: 24),
                             ),
                           ],
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
-                          'Score total: ${_scanResult!['currentScore']} points',
-                          style: TextStyle(fontSize: 16),
+                          l10n.totalScoreLabel((_scanResult!['currentScore'] ?? 0).toString()),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
@@ -220,40 +224,40 @@ class _QRCodeScannerScreenState extends State<QRCodeScannerScreen> {
               color: Colors.black54,
               child: Center(
                 child: Card(
-                  margin: EdgeInsets.all(32),
+                  margin: const EdgeInsets.all(32),
                   color: Colors.red[100],
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline,
                           color: Colors.red,
                           size: 64,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
-                          'Erreur',
-                          style: TextStyle(
+                          l10n.error,
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           _errorMessage!,
-                          style: TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
                               _errorMessage = null;
                             });
                           },
-                          child: Text('OK'),
+                          child: Text(l10n.ok),
                         ),
                       ],
                     ),

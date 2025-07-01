@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../generated/l10n/app_localizations.dart' show AppLocalizations;
 import '../../../models/scenario/treasure_hunt/treasure.dart';
 import '../../../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 import 'qr_codes_display_screen.dart';
@@ -40,30 +41,36 @@ class _TreasureListScreenState extends State<TreasureListScreen> {
     });
 
     try {
-      final treasureHuntService = Provider.of<TreasureHuntService>(context, listen: false);
-      final treasures = await treasureHuntService.getTreasures(widget.treasureHuntId);
+      final treasureHuntService =
+          Provider.of<TreasureHuntService>(context, listen: false);
+      final treasures =
+          await treasureHuntService.getTreasures(widget.treasureHuntId);
 
       setState(() {
         _treasures = treasures;
         _isLoading = false;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors du chargement des trésors: $e';
+        _errorMessage = l10n.errorLoadingTreasures(e.toString());
         _isLoading = false;
       });
     }
   }
 
   Future<void> _generateQRCodes() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isGeneratingQRCodes = true;
       _errorMessage = null;
     });
 
     try {
-      final treasureHuntService = Provider.of<TreasureHuntService>(context, listen: false);
-      final qrCodes = await treasureHuntService.generateQRCodes(widget.treasureHuntId);
+      final treasureHuntService =
+          Provider.of<TreasureHuntService>(context, listen: false);
+      final qrCodes =
+          await treasureHuntService.generateQRCodes(widget.treasureHuntId);
 
       setState(() {
         _qrCodes = qrCodes;
@@ -84,7 +91,7 @@ class _TreasureListScreenState extends State<TreasureListScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Erreur lors de la génération des QR codes: $e';
+        _errorMessage = l10n.error + e.toString();
         _isGeneratingQRCodes = false;
       });
     }
@@ -108,166 +115,174 @@ class _TreasureListScreenState extends State<TreasureListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Trésors - ${widget.scenarioName}'),
+        title: Text(l10n.treasuresScreenTitle(widget.scenarioName)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context, true); // On signale qu'on veut reload à la remontée
+            Navigator.pop(context, true);
           },
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _isLoading ? null : _loadTreasures,
-            tooltip: 'Rafraîchir',
+            tooltip: l10n.refreshButton,
           ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 48,
-            ),
-            SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadTreasures,
-              child: Text('Réessayer'),
-            ),
-          ],
-        ),
-      )
-          : _treasures.isEmpty
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.info_outline,
-              color: Colors.blue,
-              size: 48,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Aucun trésor trouvé pour ce scénario',
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      )
-          : Column(
-        children: [
-          // En-tête avec informations sur le scénario
-          Container(
-            padding: EdgeInsets.all(16),
-            color: Colors.blue[50],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Scénario: ${widget.scenarioName}',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Nombre de trésors: ${_treasures.length}',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-
-          // Liste des trésors
-          Expanded(
-            child: ListView.builder(
-              itemCount: _treasures.length,
-              itemBuilder: (context, index) {
-                final treasure = _treasures[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.amber,
-                      child: Text(
-                        treasure.symbol,
-                        style: TextStyle(fontSize: 20),
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 48,
                       ),
-                    ),
-                    title: Text(
-                      treasure.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text('Valeur: ${treasure.points} points'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadTreasures,
+                        child: Text(l10n.retryButton),
+                      ),
+                    ],
+                  ),
+                )
+              : _treasures.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            color: Colors.blue,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.noTreasuresFoundForScenario,
+                            style: const TextStyle(fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )
+                  : Column(
                       children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () => _editTreasure(treasure),
-                          tooltip: 'Modifier',
+                        // En-tête avec informations sur le scénario
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          color: Colors.blue[50],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.scenarioNameHeader(widget.scenarioName),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.numberOfTreasuresLabel(
+                                    _treasures.length.toString()),
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          color: Colors.red,
-                          onPressed: () => _confirmDeleteTreasure(treasure),
-                          tooltip: 'Supprimer',
+
+                        // Liste des trésors
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _treasures.length,
+                            itemBuilder: (context, index) {
+                              final treasure = _treasures[index];
+                              return Card(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.amber,
+                                    child: Text(
+                                      treasure.symbol,
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    treasure.name,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(l10n.treasureValueSubtitle(
+                                      treasure.points.toString())),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () =>
+                                            _editTreasure(treasure),
+                                        tooltip: l10n.edit,
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete),
+                                        color: Colors.red,
+                                        onPressed: () =>
+                                            _confirmDeleteTreasure(treasure),
+                                        tooltip: l10n.delete,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
       floatingActionButton: _isGeneratingQRCodes
           ? FloatingActionButton(
-        onPressed: null,
-        backgroundColor: Colors.grey,
-        child: CircularProgressIndicator(color: Colors.white),
-      )
+              onPressed: null,
+              backgroundColor: Colors.grey,
+              child: const CircularProgressIndicator(color: Colors.white),
+            )
           : FloatingActionButton.extended(
-        onPressed: _generateQRCodes,
-        icon: Icon(Icons.qr_code),
-        label: Text('Voir les QR Codes'),
-        tooltip: 'Voir les QR codes pour tous les trésors',
-      ),
+              onPressed: _generateQRCodes,
+              icon: const Icon(Icons.qr_code),
+              label: Text(l10n.viewQRCodesButton),
+              tooltip: l10n.viewQRCodesButton,
+            ),
     );
   }
 
   Future<void> _confirmDeleteTreasure(Treasure treasure) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Supprimer ce trésor ?'),
-        content: Text('Es-tu sûr de vouloir supprimer "${treasure.name}" ?'),
+        title: Text(l10n.confirmDeleteTreasureTitle),
+        content: Text(l10n.confirmDeleteTreasureMessage(treasure.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -275,15 +290,15 @@ class _TreasureListScreenState extends State<TreasureListScreen> {
 
     if (confirmed == true) {
       try {
-        final treasureHuntService = Provider.of<TreasureHuntService>(context, listen: false);
+        final treasureHuntService =
+            Provider.of<TreasureHuntService>(context, listen: false);
         await treasureHuntService.deleteTreasure(treasure.id!);
         _loadTreasures();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la suppression du trésor: $e')),
+          SnackBar(content: Text(l10n.errorDeletingTreasure(e.toString()))),
         );
       }
     }
   }
-
 }

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 class AppUtils {
   /// Convertit une distance en mètres en pixels sur la carte selon le niveau de zoom
@@ -54,5 +55,37 @@ class AppUtils {
       }
     }
     return Colors.orange;
+  }
+
+  static shortenDescription(String s, {required int maxLength}) {
+    if (s.length <= maxLength) return s;
+    return '${s.substring(0, maxLength).trim()}...';
+  }
+
+  static LocaleType getDatePickerLocale(Locale flutterLocale) {
+    switch (flutterLocale.languageCode) {
+      case 'fr':
+        return LocaleType.fr;
+      case 'de':
+        return LocaleType.de;
+      case 'es':
+        return LocaleType.es;
+      case 'it':
+        return LocaleType.it;
+      case 'ja':
+        return LocaleType.jp;
+      case 'nl':
+        return LocaleType.nl;
+      case 'no':
+        return LocaleType.no;
+      case 'pl':
+        return LocaleType.pl;
+      case 'pt':
+        return LocaleType.pt;
+      case 'sv':
+        return LocaleType.sv;
+      default:
+        return LocaleType.en; // fallback
+    }
   }
 }

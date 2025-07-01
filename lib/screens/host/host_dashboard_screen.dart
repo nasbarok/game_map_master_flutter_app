@@ -1,6 +1,8 @@
 import 'package:game_map_master_flutter_app/screens/host/players_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:game_map_master_flutter_app/utils/app_utils.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import '../../services/invitation_service.dart';
@@ -16,6 +18,7 @@ import 'game_map_form_screen.dart';
 import 'terrain_dashboard_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+
 class HostDashboardScreen extends StatefulWidget {
   const HostDashboardScreen({Key? key}) : super(key: key);
 
@@ -56,16 +59,20 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   }
 
   Future<void> _showInvitationDialog(Map<String, dynamic> invitation) async {
+    final l10n = AppLocalizations.of(context)!;
     // Vérifie si l'application est visible à l'écran
     if (ModalRoute.of(context)?.isCurrent == true) {
       // ✅ Affichage classique du Dialog
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Invitation reçue'),
+          title: Text(l10n.invitationReceivedTitle),
           content: Text(
-            'Vous avez été invité par ${invitation['fromUsername']} '
-            'pour rejoindre la carte "${invitation['mapName']}".',
+            l10n.invitationReceivedMessage(
+              invitation['fromUsername'] ?? l10n.unknownPlayerName,
+              // Assurez-vous d'avoir une clé pour utilisateur inconnu
+              invitation['mapName'] ?? l10n.unknownMap,
+            ),
           ),
           actions: [
             TextButton(
@@ -74,7 +81,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                     context, invitation, false);
                 Navigator.of(context).pop();
               },
-              child: const Text('Refuser'),
+              child: Text(l10n.declineInvitation),
             ),
             ElevatedButton(
               onPressed: () {
@@ -82,7 +89,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                     context, invitation, true);
                 Navigator.of(context).pop();
               },
-              child: const Text('Accepter'),
+              child: Text(l10n.acceptInvitation),
             ),
           ],
         ),
@@ -94,16 +101,18 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authService = context.watch<AuthService>();
     final gameStateService = context.watch<GameStateService>();
     final user = authService.currentUser;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Host Dashboard'),
+        title: Text(l10n.hostDashboardTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+            tooltip: l10n.logout,
             onPressed: () async {
               final authService = context.read<AuthService>();
               await authService.leaveAndLogout(context);
@@ -116,12 +125,14 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.dashboard), text: 'Terrain'),
-            Tab(icon: Icon(Icons.map), text: 'Cartes'),
-            Tab(icon: Icon(Icons.videogame_asset), text: 'Scénarios'),
-            Tab(icon: Icon(Icons.people), text: 'Joueurs'),
-            Tab(icon: Icon(Icons.history), text: 'Historique'),
+          tabs: [
+            Tab(icon: const Icon(Icons.dashboard), text: l10n.terrainTab),
+            Tab(icon: const Icon(Icons.map), text: l10n.mapTab),
+            Tab(
+                icon: const Icon(Icons.videogame_asset),
+                text: l10n.scenariosTab),
+            Tab(icon: const Icon(Icons.people), text: l10n.playersTab),
+            Tab(icon: const Icon(Icons.history), text: l10n.historyTab),
           ],
         ),
       ),
@@ -151,9 +162,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             case 0:
               // Pour l'onglet Terrain, pas d'action spécifique
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'Utilisez l\'onglet Cartes pour créer ou modifier des cartes'),
+                SnackBar(
+                  content: Text(l10n.noActionForFieldTabSnackbar),
                   backgroundColor: Colors.blue,
                 ),
               );
@@ -184,8 +194,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Veuillez d\'abord ouvrir un terrain'),
+                  SnackBar(
+                    content: Text(l10n.openFieldFirstSnackbar),
                     backgroundColor: Colors.orange,
                   ),
                 );
@@ -199,6 +209,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   }
 
   Widget _buildMapsTab() {
+    final l10n = AppLocalizations.of(context)!;
     final gameMapService = context.watch<GameMapService>();
 
     // Si la liste des cartes est vide
@@ -209,14 +220,14 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
           children: [
             const Icon(Icons.map_outlined, size: 80, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              'Aucune carte',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.noMapAvailable,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Créez une carte pour commencer',
-              style: TextStyle(color: Colors.grey),
+            Text(
+              l10n.createMapPrompt,
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -228,7 +239,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                 );
               },
               icon: const Icon(Icons.add),
-              label: const Text('Créer une carte'),
+              label: Text(l10n.createMap),
             ),
           ],
         ),
@@ -242,13 +253,14 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         final map = gameMapService.gameMaps[index];
         return Card(
           child: ListTile(
-            title: Text(map.name ?? 'Sans nom'),
-            subtitle: Text(map.description ?? 'Pas de description'),
+            title: Text(map.name ?? l10n.noMapAvailable),
+            subtitle: Text(map.description ?? l10n.noDescription),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit),
+                  tooltip: l10n.editMap,
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -262,21 +274,21 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
+                  tooltip: l10n.deleteMap,
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Confirmer la suppression'),
-                        content: const Text(
-                            'Voulez-vous vraiment supprimer cette carte ?'),
+                        title: Text(l10n.confirmDeleteTitle),
+                        content: Text(l10n.confirmDeleteMapMessage),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Annuler'),
+                            child: Text(l10n.cancel),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Supprimer'),
+                            child: Text(l10n.delete),
                           ),
                         ],
                       ),
@@ -287,15 +299,15 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                       try {
                         await gameMapService.deleteGameMap(map.id!);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Carte supprimée avec succès'),
+                          SnackBar(
+                            content: Text(l10n.mapDeletedSuccess),
                             backgroundColor: Colors.green,
                           ),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Erreur lors de la suppression : $e'),
+                            content: Text(l10n.errorDeletingMap(e.toString())),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -312,13 +324,14 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   }
 
   Widget _buildScenariosTab() {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
     final scenarioService = context.watch<ScenarioService>();
 
     final activeScenario =
-    gameStateService.selectedScenarios?.isNotEmpty == true
-        ? gameStateService.selectedScenarios!.first
-        : null;
+        gameStateService.selectedScenarios?.isNotEmpty == true
+            ? gameStateService.selectedScenarios!.first
+            : null;
 
     if (scenarioService.scenarios.isEmpty) {
       return Center(
@@ -327,29 +340,31 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
           children: [
             const Icon(Icons.videogame_asset, size: 80, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              'Aucun scénario',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.noScenarioAvailable,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Créez un scénario pour commencer',
-              style: TextStyle(color: Colors.grey),
+            Text(
+              l10n.createScenarioPrompt,
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ScenarioFormScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const ScenarioFormScreen()),
                 );
               },
               icon: const Icon(Icons.add),
-              label: const Text('Créer un scénario'),
+              label: Text(l10n.createScenario),
             ),
             const SizedBox(height: 24),
             // 👉 Bouton Tableau des scores si Treasure Hunt actif
-            if (activeScenario != null && activeScenario.scenario.type== 'treasure_hunt')
+            if (activeScenario != null &&
+                activeScenario.scenario.type == 'treasure_hunt')
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -363,7 +378,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                     ),
                   );
                 },
-                child: const Text('Tableau des scores'),
+                child: Text(l10n.scoreboardButton),
               ),
           ],
         ),
@@ -380,12 +395,18 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         return Card(
           child: ListTile(
             title: Text(scenario.name),
-            subtitle: Text(scenario.description ?? ''),
+            subtitle: Text(
+              scenario.description ?? '',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit),
+                  tooltip: l10n.editScenario,
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -399,20 +420,21 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
+                  tooltip: l10n.deleteScenario,
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Supprimer ce scénario ?'),
-                        content: const Text('Voulez-vous vraiment supprimer ce scénario ?'),
+                        title: Text(l10n.confirmDeleteTitle),
+                        content: Text(l10n.confirmDeleteScenarioMessage),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Annuler'),
+                            child: Text(l10n.cancel),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Supprimer'),
+                            child: Text(l10n.delete),
                           ),
                         ],
                       ),
@@ -420,17 +442,19 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
                     if (confirm == true) {
                       try {
-                        await context.read<ScenarioService>().deleteScenario(scenario.id!);
+                        await context
+                            .read<ScenarioService>()
+                            .deleteScenario(scenario.id!);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Scénario supprimé'),
+                          SnackBar(
+                            content: Text(l10n.scenarioDeletedSuccess),
                             backgroundColor: Colors.green,
                           ),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Erreur : $e'),
+                            content: Text(l10n.error + e.toString()),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -446,22 +470,22 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     );
   }
 
-
   Widget _buildTeamsTab() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.people, size: 80, color: Colors.grey),
           const SizedBox(height: 16),
-          const Text(
-            'Aucune équipe',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            l10n.noTeamsCreated,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Créez une équipe pour commencer',
-            style: TextStyle(color: Colors.grey),
+          Text(
+            l10n.createTeamPrompt,
+            style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -472,7 +496,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
               );
             },
             icon: const Icon(Icons.add),
-            label: const Text('Créer une équipe'),
+            label: Text(l10n.createTeam),
           ),
         ],
       ),
@@ -480,20 +504,21 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   }
 
   Widget _buildDisabledTeamsTab() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.people, size: 80, color: Colors.grey.withOpacity(0.5)),
           const SizedBox(height: 16),
-          const Text(
-            'Joueurs non disponibles',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            l10n.playersUnavailableTitle,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Veuillez d\'abord ouvrir un terrain',
-            style: TextStyle(color: Colors.grey),
+          Text(
+            l10n.openField,
+            style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -502,7 +527,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
               _tabController.animateTo(0);
             },
             icon: const Icon(Icons.dashboard),
-            label: const Text('Aller à l\'onglet Terrain'),
+            label: Text(l10n.goToFieldTabButton),
           ),
         ],
       ),
@@ -511,23 +536,25 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
   // Charger les cartes depuis GameMapService
   Future<void> _loadGameMaps() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final gameMapService = context.read<GameMapService>();
       await gameMapService
           .loadGameMaps(); // Charger les cartes via GameMapService
     } catch (e) {
-      logger.d('Erreur lors du chargement des cartes: $e');
+      logger.d(l10n.errorLoadingMaps(e.toString()));
     }
   }
 
   // Charger les scénarios depuis ScenarioService
   Future<void> _loadScenarios() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final scenarioService = context.read<ScenarioService>();
-      await scenarioService.loadScenarios(); // Charger les scénarios via ScenarioService
+      await scenarioService
+          .loadScenarios(); // Charger les scénarios via ScenarioService
     } catch (e) {
-      logger.d('Erreur lors du chargement des scénarios: $e');
+      logger.d(l10n.errorLoadingScenarios(e.toString()));
     }
   }
-
 }

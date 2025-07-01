@@ -4,6 +4,7 @@ import 'package:game_map_master_flutter_app/services/scenario_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/coordinate.dart';
 import '../../models/game_session.dart';
 import '../../models/game_session_participant.dart';
@@ -418,6 +419,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   }
 
   void _endGameSession() async {
+    final l10n = AppLocalizations.of(context)!;
     logger.d('⏹️ [GameSessionScreen] Fin de la partie demandée');
     try {
       final updatedSession =
@@ -434,8 +436,8 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('La partie a été arrêtée.'),
+        SnackBar(
+          content: Text(l10n.gameEndedMessage),
           backgroundColor: Colors.orange,
         ),
       );
@@ -443,7 +445,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       logger.d('❌ Erreur lors de la fin de la partie: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors de la fin de la partie: $e'),
+          content: Text(l10n.errorEndingGame(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -451,12 +453,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   }
 
   Widget _buildScoreboardSection() {
+    final l10n = AppLocalizations.of(context)!;
     if (_scoreboard != null &&
         (_scoreboard!.individualScores.isNotEmpty ||
             _scoreboard!.teamScores.isNotEmpty)) {
-      /*logger.d('🧩 Affichage du Scoreboard : '
-          '${_scoreboard!.individualScores.length} scores individuels, '
-          '${_scoreboard!.teamScores.length} scores équipes');*/
       return TreasureHuntScoreboardCard(
         scoreboard: _scoreboard!,
         currentUserId: widget.userId,
@@ -472,12 +472,13 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Session de jeu'),
+          title: Text(l10n.gameSessionScreenTitle),
         ),
-        body: Center(
+        body: const Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -486,23 +487,23 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     if (_errorMessage != null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Session de jeu'),
+          title: Text(l10n.gameSessionScreenTitle),
         ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Colors.red, size: 48),
-              SizedBox(height: 16),
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 16),
               Text(
                 _errorMessage!,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadInitialData,
-                child: Text('Réessayer'),
+                child: Text(l10n.retryButton),
               ),
             ],
           ),
@@ -515,18 +516,18 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         _scenarios.any((s) => s.scenarioType == 'bomb_operation');
     return Scaffold(
       appBar: AppBar(
-        title: Text('Session de jeu'),
+        title: Text(l10n.gameSessionScreenTitle),
         actions: [
           if (widget.isHost && isActive)
             IconButton(
-              icon: Icon(Icons.cancel),
+              icon: const Icon(Icons.cancel),
               onPressed: _endGameSession,
-              tooltip: 'Fin de la partie',
+              tooltip: l10n.endGameTooltip,
             ),
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _loadInitialData,
-            tooltip: 'Actualiser',
+            tooltip: l10n.refreshTooltip,
           ),
         ],
       ),
@@ -535,7 +536,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
           // Contenu principal
           SingleChildScrollView(
             controller: _scrollController,
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -545,7 +546,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                   isActive: isActive,
                   isCountdown: _isCountdownMode,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 // Widget d'information Bombe Operation (uniquement si le scénario est actif)
                 if (_hasBombOperationScenario)
                   _isBombManagerReady && _bombAutoManager != null
@@ -560,29 +561,29 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                SizedBox(
+                              children: [
+                                const SizedBox(
                                   height: 20,
                                   width: 20,
                                   child:
                                       CircularProgressIndicator(strokeWidth: 2),
                                 ),
-                                SizedBox(width: 12),
-                                Text("Chargement du scénario Bombe..."),
+                                const SizedBox(width: 12),
+                                Text(l10n.bombScenarioLoading),
                               ],
                             ),
                           ),
                         ),
 
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // Bouton de scan QR code (uniquement si la partie est active)
                 if (isActive && _isTreasureHuntActive)
                   QRCodeScannerButton(
                     onPressed: _navigateToQRCodeScanner,
-                    isActive: isActive,
+                    isActive: isActive, // Pass l10n.qrScannerButtonActive if you want the text from l10n
                   ),
                 // 👉 Ta carte interactive ici
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                 if (_gameSession?.gameMap != null &&
                     _gameSession!.gameMap!.hasInteractiveMapConfig)
@@ -596,7 +597,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                     fieldId:
                         _gameSession?.gameMap?.field?.id! ?? widget.fieldId,
                   ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // Tableau des scores (uniquement si un scénario de chasse au trésor est actif)
                 _buildScoreboardSection(),
                 // Carte des participants
@@ -606,7 +607,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
                 ),
 
                 // Espace pour les notifications de trésors trouvés
-                SizedBox(height: 100),
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -617,57 +618,59 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
             left: 0,
             right: 0,
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: Column(
                 children: _treasureFoundNotifications.map((notification) {
-                  final username = notification['username'] ?? 'Joueur';
+                  final username = notification['username'] ?? l10n.playersTab; // Fallback
                   final teamName = notification['teamName'];
                   final points = notification['points'] ?? 0;
                   final symbol = notification['symbol'] ?? '🏆';
 
                   return Card(
                     color: Colors.green.shade100,
-                    margin: EdgeInsets.only(bottom: 8),
+                    margin: const EdgeInsets.only(bottom: 8),
                     child: Padding(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       child: Row(
                         children: [
                           CircleAvatar(
                             backgroundColor: Colors.green,
                             child: Text(
                               symbol,
-                              style: TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.black, fontSize: 14),
                                 children: [
                                   TextSpan(
                                     text: username,
                                     style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                        const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   if (teamName != null) ...[
-                                    TextSpan(text: ' de l\'équipe '),
+                                    TextSpan(text: l10n.treasureFoundNotification(username, teamName, points.toString(), symbol).split(username)[1].split(points.toString())[0]), // complex way to extract " de l'équipe "
                                     TextSpan(
                                       text: teamName,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
+                                    TextSpan(text: l10n.treasureFoundNotification(username, teamName, points.toString(), symbol).split(teamName)[1].split(points.toString())[0]), // complex way to extract " a trouvé un trésor de "
+                                  ] else ... [
+                                     TextSpan(text: l10n.treasureFoundNotificationNoTeam(username, points.toString(), symbol).split(username)[1].split(points.toString())[0]),
                                   ],
-                                  TextSpan(text: ' a trouvé un trésor de '),
                                   TextSpan(
-                                    text: '$points points',
-                                    style: TextStyle(
+                                    text: '$points $symbol',
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.green,
                                     ),
                                   ),
-                                  TextSpan(text: ' !'),
+                                  const TextSpan(text: ' !'),
                                 ],
                               ),
                             ),

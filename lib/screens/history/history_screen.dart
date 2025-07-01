@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
 import '../../services/history_service.dart';
 import 'field_sessions_screen.dart';
@@ -48,27 +49,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors du chargement des terrains: ${e.toString()}';
+        _errorMessage = l10n.errorLoadingData(e.toString());
         _isLoading = false;
       });
     }
   }
 
   Future<void> _confirmDeleteField(Field field) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmation'),
-        content: Text('Voulez-vous vraiment supprimer le terrain "${field.name}" et tout son historique ?'),
+        title: Text(l10n.confirmation),
+        content: Text(l10n.deleteFieldConfirmationMessage(field.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -80,13 +83,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
         await historyService.deleteField(field.id!);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terrain "${field.name}" supprimé')),
+          SnackBar(content: Text(l10n.fieldDeletedSuccess(field.name))),
         );
 
         _loadFields(); // Rafraîchir la liste
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur : ${e.toString()}')),
+          SnackBar(content: Text(l10n.error +e.toString())),
         );
       }
     }
@@ -95,16 +98,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.fieldId != null ? 'Historique du terrain' : 'Historique des terrains'),
+        title: Text(widget.fieldId != null ? l10n.historyScreenTitleField : l10n.historyScreenTitleGeneric),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
           ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
           : _fields.isEmpty
-          ? const Center(child: Text('Aucun terrain disponible'))
+          ? Center(child: Text(l10n.noFieldsAvailable))
           : ListView.builder(
         itemCount: _fields.length,
         itemBuilder: (context, index) {
@@ -116,11 +120,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Ouvert le ${_formatDate(field.openedAt!)}'),
+                  Text(l10n.fieldOpenedOn(_formatDate(field.openedAt!))),
                   if (field.closedAt != null)
-                    Text('Fermé le ${_formatDate(field.closedAt!)}')
+                    Text(l10n.fieldClosedOn(_formatDate(field.closedAt!)))
                   else
-                    const Text('Ouvert', style: TextStyle(color: Colors.green)),
+                    Text(l10n.fieldStatusOpen, style: const TextStyle(color: Colors.green)),
                 ],
               ),
               trailing: Row(
@@ -129,7 +133,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   if (field.closedAt != null)
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    tooltip: 'Supprimer ce terrain',
+                    tooltip: l10n.deleteFieldTooltip,
                     onPressed: () => _confirmDeleteField(field),
                   ),
                   const Icon(Icons.arrow_forward_ios),
@@ -152,6 +156,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ? FloatingActionButton(
         heroTag: 'history_fab',
         onPressed: _loadFields,
+        tooltip: l10n.refreshTooltip,
         child: const Icon(Icons.refresh),
       )
           : null,

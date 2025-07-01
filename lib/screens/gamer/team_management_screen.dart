@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/team_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/auth_service.dart';
@@ -57,7 +58,8 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
         await teamService.loadTeams(selectedMap.id!);
       }
     } catch (e) {
-      logger.d('❌ Erreur lors du chargement des équipes: $e');
+      final l10n = AppLocalizations.of(context)!;
+      logger.d('❌ ${l10n.errorLoadingTeamsAlt}: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -66,6 +68,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
   }
 
   Future<void> _joinTeam(int teamId) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
     });
@@ -82,16 +85,16 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Vous avez rejoint l\'équipe avec succès'),
+            content: Text(l10n.joinedTeamSuccessAlt),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      logger.d('❌ Erreur lors du changement d\'équipe: $e');
+      logger.d('❌ ${l10n.errorJoiningTeam(e.toString())}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors du changement d\'équipe: $e'),
+          content: Text(l10n.errorJoiningTeam(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -104,6 +107,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final teamService = context.watch<TeamService>();
     final gameStateService = context.watch<GameStateService>();
     final teams = teamService.teams;
@@ -114,12 +118,12 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gestion des équipes'),
+        title: Text(l10n.teamManagementTitle),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Équipes'),
-            Tab(text: 'Joueurs'),
+          tabs: [
+            Tab(text: l10n.teams),
+            Tab(text: l10n.playersTab),
           ],
         ),
       ),
@@ -140,15 +144,15 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
                                   size: 80,
                                   color: Colors.grey.withOpacity(0.5)),
                               const SizedBox(height: 16),
-                              const Text(
-                                'Aucune équipe disponible',
-                                style: TextStyle(
+                              Text(
+                                l10n.noTeamsAvailableTitle,
+                                style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
-                              const Text(
-                                'Attendez que l\'hôte crée des équipes',
-                                style: TextStyle(color: Colors.grey),
+                              Text(
+                                l10n.noTeamsAvailableHostMessage,
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             ],
                           ),
@@ -180,17 +184,17 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
                                         : FontWeight.normal,
                                   ),
                                 ),
-                                subtitle: Text('${teamPlayers.length} joueurs'),
+                                subtitle: Text(l10n.playersCountSuffix(teamPlayers.length)),
                                 trailing: isMyTeam
-                                    ? const Chip(
-                                        label: Text('Votre équipe'),
+                                    ? Chip(
+                                        label: Text(l10n.yourTeamChip),
                                         backgroundColor: Colors.green,
                                         labelStyle:
-                                            TextStyle(color: Colors.white),
+                                            const TextStyle(color: Colors.white),
                                       )
                                     : ElevatedButton(
                                         onPressed: () => _joinTeam(team.id),
-                                        child: const Text('Rejoindre'),
+                                        child: Text(l10n.joinButton),
                                       ),
                                 children: [
                                   ...teamPlayers.map((player) => ListTile(
@@ -198,7 +202,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
                                           child: Icon(Icons.person),
                                         ),
                                         title: Text(
-                                            player['username'] ?? 'Joueur'),
+                                            player['username'] ?? l10n.playersTab), // Fallback
                                         trailing: player['id'] == currentUserId
                                             ? const Icon(Icons.star,
                                                 color: Colors.amber)
@@ -220,15 +224,15 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
                                   size: 80,
                                   color: Colors.grey.withOpacity(0.5)),
                               const SizedBox(height: 16),
-                              const Text(
-                                'Aucun joueur connecté',
-                                style: TextStyle(
+                              Text(
+                                l10n.noPlayerConnected,
+                                style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
-                              const Text(
-                                'Les joueurs connectés apparaîtront ici',
-                                style: TextStyle(color: Colors.grey),
+                              Text(
+                                l10n.noPlayersConnectedMessage,
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             ],
                           ),
@@ -240,7 +244,7 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
                             final isCurrentUser = player['id'] == currentUserId;
 
                             // Trouver l'équipe du joueur
-                            String teamName = "Sans équipe";
+                            String teamName = l10n.noTeam;
                             Color teamColor = Colors.grey;
 
                             if (player['teamId'] != null) {
@@ -260,13 +264,13 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
                                   backgroundColor: isCurrentUser
                                       ? Colors.amber
                                       : Colors.blue,
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.person,
                                     color: Colors.white,
                                   ),
                                 ),
                                 title: Text(
-                                  player['username'] ?? 'Joueur',
+                                  player['username'] ?? l10n.playersTab, // Fallback
                                   style: TextStyle(
                                     fontWeight: isCurrentUser
                                         ? FontWeight.bold
@@ -280,11 +284,11 @@ class _TeamManagementScreenState extends State<TeamManagementScreen>
                                   ),
                                 ),
                                 trailing: isCurrentUser
-                                    ? const Chip(
-                                        label: Text('Vous'),
+                                    ? Chip(
+                                        label: Text(l10n.youLabel),
                                         backgroundColor: Colors.amber,
                                         labelStyle:
-                                            TextStyle(color: Colors.white),
+                                            const TextStyle(color: Colors.white),
                                       )
                                     : null,
                               ),

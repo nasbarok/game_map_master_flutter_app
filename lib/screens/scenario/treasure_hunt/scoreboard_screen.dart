@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
 import '../../../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 import '../../../services/websocket/treasure_hunt_websocket_handler.dart';
@@ -81,8 +82,9 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
 
       _updateScoreboard(scoreboard);
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors du chargement du tableau des scores: $e';
+        _errorMessage = l10n.errorLoadingScoreboard(e.toString());
         _isLoading = false;
       });
     }
@@ -111,32 +113,33 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
   }
 
   Future<void> _toggleLockScores() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final treasureHuntService = Provider.of<TreasureHuntService>(context, listen: false);
       await treasureHuntService.lockScores(widget.treasureHuntId, !_scoresLocked);
 
-      // Le changement sera reflété via WebSocket, pas besoin de setState ici
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(content: Text(l10n.error + e.toString())),
       );
     }
   }
 
   Future<void> _resetScores() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Réinitialiser les scores'),
-        content: Text('Êtes-vous sûr de vouloir réinitialiser tous les scores ? Cette action est irréversible.'),
+        title: Text(l10n.resetScoresTitle),
+        content: Text(l10n.resetScoresConfirmationMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Réinitialiser'),
+            child: Text(l10n.resetButton),
           ),
         ],
       ),
@@ -147,10 +150,9 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
         final treasureHuntService = Provider.of<TreasureHuntService>(context, listen: false);
         await treasureHuntService.resetScores(widget.treasureHuntId);
 
-        // Le changement sera reflété via WebSocket, pas besoin de setState ici
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(l10n.error + e.toString())),
         );
       }
     }
@@ -158,39 +160,40 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scores - ${widget.scenarioName}'),
+        title: Text(l10n.scoreboardScreenTitle(widget.scenarioName)),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _isLoading ? null : _loadScoreboard,
-            tooltip: 'Rafraîchir',
+            tooltip: l10n.refreshButton,
           ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
           ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               color: Colors.red,
               size: 48,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadScoreboard,
-              child: Text('Réessayer'),
+              child: Text(l10n.retryButton),
             ),
           ],
         ),
@@ -199,19 +202,19 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
         children: [
           // En-tête avec informations sur le scénario
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             color: Colors.blue[50],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tableau des scores - ${widget.scenarioName}',
-                  style: TextStyle(
+                  l10n.scoreboardHeader(widget.scenarioName),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Icon(
@@ -219,9 +222,9 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
                       size: 16,
                       color: _scoresLocked ? Colors.red : Colors.green,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
-                      _scoresLocked ? 'Scores verrouillés' : 'Scores déverrouillés',
+                      _scoresLocked ? l10n.scoresLockedLabel : l10n.scoresUnlockedLabel,
                       style: TextStyle(
                         fontSize: 14,
                         color: _scoresLocked ? Colors.red : Colors.green,
@@ -236,25 +239,25 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
           // Contrôles pour l'hôte
           if (widget.isHost)
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _toggleLockScores,
                       icon: Icon(_scoresLocked ? Icons.lock_open : Icons.lock),
-                      label: Text(_scoresLocked ? 'Déverrouiller' : 'Verrouiller'),
+                      label: Text(_scoresLocked ? l10n.unlockButton : l10n.lockButton),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _scoresLocked ? Colors.orange : Colors.blue,
                       ),
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _resetScores,
-                      icon: Icon(Icons.refresh),
-                      label: Text('Réinitialiser'),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.resetButton),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                       ),
@@ -267,10 +270,10 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
           // Scores des équipes (si disponibles)
           if (_teamScores.isNotEmpty) ...[
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Text(
-                'Scores des équipes',
-                style: TextStyle(
+                l10n.teamScoresLabel,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -283,26 +286,26 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
                 itemBuilder: (context, index) {
                   final score = _teamScores[index];
                   return Card(
-                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     color: index == 0 ? Colors.amber[100] : null,
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: index == 0 ? Colors.amber : Colors.blue,
                         child: Text(
                           '${index + 1}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       title: Text(
-                        score.teamName ?? 'Équipe inconnue',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        score.teamName ?? l10n.unknownTeamName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text('${score.treasuresFound} trésors trouvés'),
+                      subtitle: Text(l10n.treasuresFoundCount(score.treasuresFound.toString())),
                       trailing: Text(
-                        '${score.score} pts',
+                        l10n.pointsSuffix(score.score.toString()),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -318,10 +321,10 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
 
           // Scores individuels
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Text(
-              'Scores individuels',
-              style: TextStyle(
+              l10n.individualScoresLabel,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -334,33 +337,33 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
               itemBuilder: (context, index) {
                 final score = _individualScores[index];
                 return Card(
-                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   color: index == 0 ? Colors.amber[100] : null,
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: index == 0 ? Colors.amber : Colors.blue,
                       child: Text(
                         '${index + 1}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     title: Text(
-                      score.username ?? 'Joueur inconnu',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      score.username ?? l10n.unknownPlayerName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${score.treasuresFound} trésors trouvés'),
+                        Text(l10n.treasuresFoundCount(score.treasuresFound.toString())),
                         if (score.teamName != null)
-                          Text('Équipe: ${score.teamName}'),
+                          Text(l10n.teamLabelPlayerList(score.teamName!)),
                       ],
                     ),
                     trailing: Text(
-                      '${score.score} pts',
+                      l10n.pointsSuffix(score.score.toString()),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

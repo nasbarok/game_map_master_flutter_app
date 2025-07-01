@@ -4,6 +4,7 @@ import 'package:game_map_master_flutter_app/screens/map_editor/interactive_map_e
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/game_map.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
@@ -121,6 +122,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
   }
 
   Future<void> _saveGameMap() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -167,8 +169,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Carte sauvegardée avec succès'),
+            SnackBar(
+              content: Text(l10n.mapSavedSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -179,7 +181,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
+              content: Text(l10n.error + e.toString()),
               backgroundColor: Colors.red,
             ),
           );
@@ -196,10 +198,11 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            widget.gameMap == null ? 'Nouvelle carte' : 'Modifier la carte'),
+            widget.gameMap == null ? l10n.newMapTitle : l10n.editMap),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -212,13 +215,13 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nom de la carte *',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.mapName,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer un nom pour la carte';
+                          return l10n.mapNameRequiredError;
                         }
                         return null;
                       },
@@ -226,25 +229,25 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.mapDescription,
+                        border: const OutlineInputBorder(),
                       ),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _scaleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Échelle (m/pixel)',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.scaleLabel,
+                        border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value != null && value.isNotEmpty) {
                           final scale = double.tryParse(value);
                           if (scale == null || scale <= 0) {
-                            return 'Veuillez entrer une échelle valide';
+                            return l10n.invalidScaleError;
                           }
                         }
                         return null;
@@ -270,7 +273,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                                     size: 20),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Adresse du terrain',
+                                  l10n.interactiveMapAddressLabel,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -288,14 +291,14 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                         ),
                       ),
                     ElevatedButton.icon(
-                      icon: Icon(
+                      icon: const Icon(
                           Icons.map_outlined), // Choose an appropriate icon
                       label: Text((_backgroundImageBase64 == null ||
                                   _backgroundImageBase64!.isEmpty) &&
                               (_fieldBoundaryJson == null ||
                                   _fieldBoundaryJson!.isEmpty)
-                          ? "Définir la carte interactive"
-                          : "Modifier la carte interactive"),
+                          ? l10n.defineInteractiveMapButton
+                          : l10n.editInteractiveMapButton),
                       onPressed: _openInteractiveMapEditor,
                       style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -309,8 +312,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                       ),
                       child: Text(
                         (_localGameMap?.id != null || widget.gameMap?.id != null)
-                            ? 'Mettre à jour la carte'
-                            : 'Créer la carte',
+                            ? l10n.updateMapButton
+                            : l10n.createMap,
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),

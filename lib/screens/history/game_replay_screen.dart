@@ -9,6 +9,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/scenario/scenario_detector_service.dart';
 import '../../models/scenario/scenario_replay_extension.dart';
 
@@ -145,8 +146,9 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         _updateDisplayedData();
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors du chargement de l\'historique: $e';
+        _errorMessage = l10n.errorLoadingHistory(e.toString());
         _isLoading = false;
       });
     }
@@ -261,40 +263,41 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Replay de la session'),
+            Text(l10n.replayScreenTitle),
             if (_scenarioExtensions.isNotEmpty)
               Text(
-                _scenarioExtensions.map((e) => e?.scenarioName).join(', '),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+                _scenarioExtensions.map((e) => e.scenarioName).join(', '),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
               ),
           ],
         ),
         actions: [
           if (_scenarioExtensions.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.info_outline),
+              icon: const Icon(Icons.info_outline),
               onPressed: _showScenarioSummary,
-              tooltip: 'Résumé des scénarios',
+              tooltip: l10n.scenarioSummaryTitle,
             ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(_errorMessage!, style: TextStyle(color: Colors.red)),
-                      SizedBox(height: 16),
+                      Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadReplayData,
-                        child: Text('Réessayer'),
+                        child: Text(l10n.retryButton),
                       ),
                     ],
                   ),
@@ -421,7 +424,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                                 const SizedBox(width: 16),
 
                                 // Sélecteur de vitesse
-                                Text('Vitesse: ${_playbackSpeed}x'),
+                                Text(l10n.playbackSpeedLabel(_playbackSpeed.toString())),
                                 const SizedBox(width: 8),
 
                                 _buildSpeedButton(0.5),
@@ -450,14 +453,16 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
           minimumSize: const Size(30, 24),
           padding: const EdgeInsets.symmetric(horizontal: 4),
         ),
-        child: Text('${speed}x', style: TextStyle(fontSize: 12)),
+        child: Text('${speed}x', style: const TextStyle(fontSize: 12)),
       ),
     );
   }
 
     Widget _buildPlayerMarker(int userId, int? teamId) {
     final color = teamId != null ? _teamColors[teamId] ?? Colors.grey : Colors.grey;
-    final String playerName = userId.toString();
+    // final String playerName = userId.toString(); // Remplacé par l10n si nécessaire
+    final l10n = AppLocalizations.of(context)!;
+    final String playerName = l10n.playerMarkerLabel(userId.toString());
     final double radius = 8;
     final double fontSize = 8;
 
@@ -490,7 +495,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
               fontWeight: FontWeight.bold,
               shadows: [
                 Shadow(
-                  offset: Offset(0.5, 0.5),
+                  offset: const Offset(0.5, 0.5),
                   blurRadius: 1.0,
                   color: Colors.white.withOpacity(0.8),
                 ),
@@ -536,12 +541,13 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
   }
 
   void _showScenarioSummary() {
+    final l10n = AppLocalizations.of(context)!;
     if (_scenarioExtensions.isEmpty) return;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Résumé des Scénarios'),
+        title: Text(l10n.scenarioSummaryTitle),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,11 +557,11 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                 if (extension.hasData) ...[
                   Text(
                     extension.scenarioName,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  SizedBox(height: 8),
-                  extension.buildInfoPanel() ?? Text('Aucune information disponible'),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  extension.buildInfoPanel() ?? Text(l10n.scenarioInfoNotAvailable),
+                  const SizedBox(height: 16),
                 ],
             ],
           ),
@@ -563,7 +569,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Fermer'),
+            child: Text(l10n.ok), // Utilisation de l10n.ok comme bouton de fermeture
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/game_session.dart';
 import '../../services/history_service.dart';
 import 'game_session_details_screen.dart';
@@ -41,70 +42,82 @@ class _FieldSessionsScreenState extends State<FieldSessionsScreen> {
 
       // Charger les sessions de jeu pour ce terrain
       final gameSessions = await historyService.getGameSessionsByFieldId(widget.fieldId);
-
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _fieldName = field?.name ?? 'Terrain inconnu';
+        _fieldName = field?.name ?? l10n.unknownField;
         _gameSessions = gameSessions;
         _isLoading = false;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors du chargement des données: ${e.toString()}';
+        _errorMessage = l10n.errorLoadingData(e.toString());
         _isLoading = false;
       });
     }
   }
 
   Future<void> _deleteGameSession(GameSession gameSession) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final historyService = Provider.of<HistoryService>(context, listen: false);
       await historyService.deleteGameSession(gameSession.id!);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Session de jeu supprimée avec succès')),
+        SnackBar(content: Text(l10n.deleteSessionSuccess)),
       );
 
       _loadFieldAndSessions();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: ${e.toString()}')),
+        SnackBar(content: Text(l10n.error + e.toString())),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_fieldName.isNotEmpty ? 'Sessions - $_fieldName' : 'Sessions de jeu'),
+        title: Text(_fieldName.isNotEmpty && _fieldName != l10n.unknownField
+            ? l10n.fieldSessionsTitle(_fieldName)
+            : l10n.gameSessionsTitle),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-          ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.red)))
+          ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
           : _gameSessions.isEmpty
-          ? Center(child: Text('Aucune session de jeu disponible pour ce terrain'))
+          ? Center(child: Text(l10n.noGameSessionsForField))
           : ListView.builder(
         itemCount: _gameSessions.length,
         itemBuilder: (context, index) {
           final gameSession = _gameSessions[index];
+          String subtitle;
+          if (gameSession.startTime != null && gameSession.endTime != null) {
+            subtitle = l10n.sessionTimeLabel(_formatDate(gameSession.startTime!), _formatDate(gameSession.endTime!));
+          } else if (gameSession.startTime != null) {
+            subtitle = l10n.sessionStartTimeLabel(_formatDate(gameSession.startTime!));
+          } else {
+            subtitle = '';
+          }
+
           return Card(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
-              title: Text('Session #${index + 1}'),
+              title: Text(l10n.sessionListItemTitle((index + 1).toString())),
               subtitle: Text(
-                'Statut: ${gameSession.active}\n'
-                    '${gameSession.startTime != null ? 'Début: ${_formatDate(gameSession.startTime!)}' : ''}'
-                    '${gameSession.endTime != null ? ' - Fin: ${_formatDate(gameSession.endTime!)}' : ''}',
+                '${l10n.sessionStatusLabel(gameSession.active.toString())}\n$subtitle',
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () => _showDeleteConfirmationDialog(gameSession),
                   ),
-                  Icon(Icons.arrow_forward_ios),
+                  const Icon(Icons.arrow_forward_ios),
                 ],
               ),
               onTap: () {
@@ -125,7 +138,7 @@ class _FieldSessionsScreenState extends State<FieldSessionsScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'field_sessions_fab',
         onPressed: _loadFieldAndSessions,
-        child: Icon(Icons.refresh),
+        child: const Icon(Icons.refresh),
       ),
     );
   }
@@ -135,22 +148,23 @@ class _FieldSessionsScreenState extends State<FieldSessionsScreen> {
   }
 
   Future<void> _showDeleteConfirmationDialog(GameSession gameSession) async {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Confirmation'),
-        content: Text('Êtes-vous sûr de vouloir supprimer cette session de jeu ?'),
+        title: Text(l10n.confirmation),
+        content: Text(l10n.deleteSessionConfirmationMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _deleteGameSession(gameSession);
             },
-            child: Text('Supprimer'),
+            child: Text(l10n.delete),
           ),
         ],
       ),

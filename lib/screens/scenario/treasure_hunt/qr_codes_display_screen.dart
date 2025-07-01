@@ -11,6 +11,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:archive/archive_io.dart';
 
+import '../../../generated/l10n/app_localizations.dart';
+
 class QRCodesDisplayScreen extends StatefulWidget {
   final List<Map<String, dynamic>> qrCodes;
   final String scenarioName;
@@ -50,16 +52,18 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
         }
       }
 
+      final l10n = AppLocalizations.of(context)!;
       if (filePaths.isNotEmpty) {
         await Share.shareFiles(
           filePaths,
-          text: 'QR Codes pour ${widget.scenarioName}',
+          text: l10n.qrCodesForScenarioShareText(widget.scenarioName),
         );
       } else {
-        _showMessage('Aucun QR code à partager');
+        _showMessage(l10n.noQRCodesToShareError);
       }
     } catch (e) {
-      _showMessage('Erreur lors du partage: $e');
+      final l10n = AppLocalizations.of(context)!;
+      _showMessage(l10n.sharingError(e.toString()));
     } finally {
       setState(() {
         _isProcessing = false;
@@ -68,6 +72,7 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
   }
 
   Future<Uint8List> _generatePdfBytes() async {
+    final l10n = AppLocalizations.of(context)!;
     final pdf = pw.Document();
     final emojiFont = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSansSymbols2-Regular.ttf'));
     final ttf = await PdfGoogleFonts.notoSansRegular();
@@ -99,7 +104,7 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
                     mainAxisAlignment: pw.MainAxisAlignment.center,
                     children: [
                       pw.Text(
-                        qrCode['name'] ?? 'Trésor',
+                        qrCode['name'] ?? l10n.defaultTreasureName,
                         style: pw.TextStyle(fontSize: 14, font: boldTtf),
                         textAlign: pw.TextAlign.center,
                       ),
@@ -107,12 +112,12 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
                       pw.Image(image, width: 120, height: 120),
                       pw.SizedBox(height: 8),
                       pw.Text(
-                        '${qrCode['points']} ${symbol}',
+                        l10n.pointsSuffix((qrCode['points'] ?? 0).toString()) + " " + symbol,
                         style: pw.TextStyle(
                           fontSize: 12,
                           font: ttf,
                           color: PdfColors.green900,
-                          fontFallback: [emojiFont], // Ici on fallback sur la font locale
+                          fontFallback: [emojiFont],
                         ),
                       ),
                     ],
@@ -155,6 +160,7 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
 
 
   Future<void> _downloadAllAsZip() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isProcessing = true;
     });
@@ -177,9 +183,9 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
 
       encoder.close();
 
-      await Share.shareXFiles([XFile(zipPath)], text: 'QR Codes (zip) pour ${widget.scenarioName}');
+      await Share.shareXFiles([XFile(zipPath)], text: l10n.qrCodesForScenarioShareText(widget.scenarioName));
     } catch (e) {
-      _showMessage('Erreur lors de la création du ZIP: $e');
+      _showMessage(l10n.zipCreationError(e.toString()));
     } finally {
       setState(() {
         _isProcessing = false;
@@ -193,14 +199,15 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('QR Codes - ${widget.scenarioName}'),
+        title: Text(l10n.qrCodesScreenTitle(widget.scenarioName)),
         actions: [
           IconButton(
             icon: _isProcessing
-                ? CircularProgressIndicator(color: Colors.white)
-                : Icon(Icons.picture_as_pdf),
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Icon(Icons.picture_as_pdf),
             onPressed: _isProcessing
                 ? null
                 : () async {
@@ -208,55 +215,55 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
                 await _printQRCodesPreview();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Impression non disponible sur cette plateforme')),
+                  SnackBar(content: Text(l10n.printingNotAvailableError)),
                 );
               }
             },
-            tooltip: 'Imprimer',
+            tooltip: l10n.printButton,
           ),
           IconButton(
-            icon: Icon(Icons.print),
+            icon: const Icon(Icons.print),
             onPressed: _isProcessing ? null : _printDirectly,
-            tooltip: 'Impression directe',
+            tooltip: l10n.directPrintButton,
           ),
           IconButton(
-            icon: Icon(Icons.archive),
+            icon: const Icon(Icons.archive),
             onPressed: _isProcessing ? null : _downloadAllAsZip,
-            tooltip: 'Télécharger ZIP',
+            tooltip: l10n.downloadZipButton,
           ),
           IconButton(
             icon: _isProcessing
-                ? CircularProgressIndicator(color: Colors.white)
-                : Icon(Icons.share),
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Icon(Icons.share),
             onPressed: _isProcessing ? null : _shareQRCodes,
-            tooltip: 'Partager',
+            tooltip: l10n.shareButton,
           ),
         ],
       ),
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             color: Colors.blue[50],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'QR Codes pour ${widget.scenarioName}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  l10n.qrCodesForScenarioShareText(widget.scenarioName),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Imprimez, téléchargez ou partagez ces QR codes pour votre chasse au trésor.',
-                  style: TextStyle(fontSize: 14),
+                  l10n.qrCodesDisplayInstructions,
+                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
           ),
           Expanded(
             child: GridView.builder(
-              padding: EdgeInsets.all(16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 0.75,
                 crossAxisSpacing: 16,
@@ -268,12 +275,12 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
                 return Card(
                   elevation: 4,
                   child: Padding(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     child: Column(
                       children: [
                         Text(
-                          qrCode['name'] ?? 'Trésor ${index + 1}',
-                          style: TextStyle(
+                          qrCode['name'] ?? l10n.defaultTreasureNameIndexed((index + 1).toString()),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -281,32 +288,32 @@ class _QRCodesDisplayScreenState extends State<QRCodesDisplayScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              '${qrCode['points']}',
+                              (qrCode['points'] ?? 0).toString(),
                               style: TextStyle(
                                 color: Colors.green[700],
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Text(
                               qrCode['symbol'] ?? '💰',
-                              style: TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Expanded(
                           child: qrCode['qrCodeImage'] != null
                               ? Image.memory(
                             base64Decode(qrCode['qrCodeImage']),
                             fit: BoxFit.contain,
                           )
-                              : Center(
+                              : const Center(
                             child: Icon(
                               Icons.qr_code,
                               size: 80,

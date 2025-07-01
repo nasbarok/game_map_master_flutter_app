@@ -84,9 +84,10 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else if (mounted) {
         logger.d('❌ Connexion échouée, affichage du SnackBar');
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Échec de la connexion. Vérifiez vos identifiants.'),
+          SnackBar(
+            content: Text(l10n.loginFailed),
             backgroundColor: Colors.red,
           ),
         );

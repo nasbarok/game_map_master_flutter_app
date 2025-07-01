@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/history_service.dart';
 import 'field_sessions_screen.dart';
 import 'game_replay_screen.dart';
@@ -50,6 +51,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
       final statistics =
           await historyService.getGameSessionStatistics(widget.gameSessionId);
 
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _gameSessionData = {
           'id': gameSession.id,
@@ -64,9 +66,9 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage =
-            'Erreur lors du chargement des détails: ${e.toString()}';
+        _errorMessage = l10n.errorLoadingData(e.toString());
         _isLoading = false;
       });
     }
@@ -74,22 +76,23 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.sessionIndex != null
-            ? 'Session #${widget.sessionIndex! + 1}'
-            : _gameSessionData != null
-                ? 'Session #${widget.sessionIndex! + 1}'
-                : 'Détails de la session'),
+            ? l10n.sessionTitleWithIndex((widget.sessionIndex! + 1).toString())
+            : _gameSessionData != null && widget.sessionIndex != null
+                ? l10n.sessionTitleWithIndex((widget.sessionIndex! + 1).toString())
+                : l10n.sessionDetailsScreenTitle),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
               ? Center(
                   child:
-                      Text(_errorMessage!, style: TextStyle(color: Colors.red)))
+                      Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
               : _gameSessionData == null
-                  ? Center(child: Text('Session non trouvée'))
+                  ? Center(child: Text(l10n.noSessionFound))
                   : SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,12 +107,14 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                     ),
       floatingActionButton: FloatingActionButton(
         onPressed: _loadGameSessionDetails,
-        child: Icon(Icons.refresh),
+        tooltip: l10n.refreshTooltip,
+        child: const Icon(Icons.refresh),
       ),
     );
   }
 
   Widget _buildSessionInfoCard() {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -122,12 +127,12 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Session #${widget.sessionIndex! + 1}',
+                    l10n.sessionTitleWithIndex((widget.sessionIndex! + 1).toString()),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   IconButton(
                     icon: const Icon(Icons.history),
-                    tooltip: 'Voir les sessions de ce terrain',
+                    tooltip: l10n.viewSessionsForFieldTooltip,
                     onPressed: () {
                       final fieldId = _gameSessionData?['fieldId'];
                       if (fieldId != null) {
@@ -140,37 +145,37 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Aucun terrain associé trouvé')),
+                          SnackBar(
+                              content: Text(l10n.noAssociatedField)),
                         );
                       }
                     },
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                'Terrain: ${_gameSessionData!['fieldName']}',
+                l10n.fieldLabel(_gameSessionData!['fieldName'] ?? l10n.unknownField),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
-                'Statut: ${_gameSessionData!['status']}',
+                l10n.sessionStatusLabel(_gameSessionData!['active'].toString()),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               if (_gameSessionData!['startTime'] != null)
                 Text(
-                  'Début: ${_formatDate(_gameSessionData!['startTime'])}',
+                  l10n.sessionStartTimeLabel(_formatDate(_gameSessionData!['startTime'])),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               if (_gameSessionData!['endTime'] != null)
                 Text(
-                  'Fin: ${_formatDate(_gameSessionData!['endTime'])}',
+                  l10n.endTimeLabel(_formatDate(_gameSessionData!['endTime'])),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               if (_statistics != null &&
                   _statistics!['totalParticipants'] != null)
                 Text(
-                  'Participants: ${_statistics!['totalParticipants']}',
+                  l10n.participantsLabel(_statistics!['totalParticipants'].toString()),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               const SizedBox(height: 12),
@@ -178,7 +183,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                   _gameSessionData!['active'] == false)
                 ElevatedButton.icon(
                   icon: const Icon(Icons.replay),
-                  label: const Text('Voir le replay'),
+                  label: Text(l10n.viewReplayButton),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -199,13 +204,14 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
   }
 
   List<Widget> _buildScenariosSection(List<dynamic> scenarios) {
+    final l10n = AppLocalizations.of(context)!;
     List<Widget> widgets = [];
 
     widgets.add(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Text(
-          'Scénarios',
+          l10n.scenariosLabel,
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
@@ -222,10 +228,10 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    scenario['scenarioName'] ?? 'Scénario sans nom',
+                    scenario['scenarioName'] ?? l10n.scenarioNameDefault,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
                   // Scénario Treasure Hunt
                   if (scenario['treasureHuntStats'] != null)
@@ -248,13 +254,14 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
   }
 
   List<Widget> _buildBombOperationStatsSection(Map<String, dynamic> bombOperationStats) {
+    final l10n = AppLocalizations.of(context)!;
     List<Widget> widgets = [];
 
-    widgets.add(SizedBox(height: 16));
+    widgets.add(const SizedBox(height: 16));
 
     widgets.add(
       Text(
-        'Résultats Bomb Operation',
+        l10n.bombOperationResultsTitle,
         style: Theme.of(context)
             .textTheme
             .titleMedium
@@ -262,7 +269,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
       ),
     );
 
-    widgets.add(SizedBox(height: 12));
+    widgets.add(const SizedBox(height: 12));
 
     // Résumé des équipes
     widgets.add(
@@ -271,41 +278,52 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
           // Équipe Terroriste
           Expanded(
             child: _buildBombOperationTeamCard(
-              'Terroristes',
+              l10n.terroristsTeam,
               Colors.red,
               bombOperationStats['armedSites'] ?? 0,
               bombOperationStats['explodedSites'] ?? 0,
-              'Bombes armées',
-              'Bombes explosées',
+              l10n.armedSitesLabel,
+              l10n.explodedSitesLabel,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           // Équipe Anti-terroriste
           Expanded(
             child: _buildBombOperationTeamCard(
-              'Anti-terroristes',
+              l10n.counterTerroristsTeam,
               Colors.blue,
               bombOperationStats['activeSites'] ?? 0,
               bombOperationStats['disarmedSites'] ?? 0,
-              'Sites actifs',
-              'Bombes désarmées',
+              l10n.activeSitesLabel,
+              l10n.disarmedSitesLabel,
             ),
           ),
         ],
       ),
     );
 
-    widgets.add(SizedBox(height: 12));
+    widgets.add(const SizedBox(height: 12));
 
     // Résultat final
     final result = bombOperationStats['result'] ?? 'DRAW';
     final resultColor = _getBombOperationResultColor(result);
-    final resultText = _getBombOperationResultText(result);
+    String resultText;
+    switch (result) {
+      case 'TERRORISTS_WIN':
+        resultText = l10n.terroristsWinResult;
+        break;
+      case 'COUNTER_TERRORISTS_WIN':
+        resultText = l10n.counterTerroristsWinResult;
+        break;
+      default:
+        resultText = l10n.drawResult;
+    }
+
 
     widgets.add(
       Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: resultColor,
           borderRadius: BorderRadius.circular(8),
@@ -313,7 +331,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
         child: Text(
           resultText,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -322,17 +340,17 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
       ),
     );
 
-    widgets.add(SizedBox(height: 16));
+    widgets.add(const SizedBox(height: 16));
 
     // Statistiques détaillées
     widgets.add(
       Text(
-        'Statistiques détaillées',
+        l10n.detailedStatsLabel,
         style: Theme.of(context).textTheme.titleSmall,
       ),
     );
 
-    widgets.add(SizedBox(height: 8));
+    widgets.add(const SizedBox(height: 8));
 
     widgets.add(
       _buildBombOperationStatsTable(bombOperationStats),
@@ -343,7 +361,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
 
   Widget _buildBombOperationTeamCard(String teamName, Color teamColor, int stat1, int stat2, String label1, String label2) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: teamColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
@@ -360,14 +378,14 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
               fontSize: 14,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
             '$label1: $stat1',
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
           ),
           Text(
             '$label2: $stat2',
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
           ),
         ],
       ),
@@ -375,9 +393,10 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
   }
 
   Widget _buildBombOperationStatsTable(Map<String, dynamic> stats) {
+    final l10n = AppLocalizations.of(context)!;
     return Table(
       border: TableBorder.all(color: Colors.grey[300]!),
-      columnWidths: {
+      columnWidths: const {
         0: FlexColumnWidth(2),
         1: FlexColumnWidth(1),
       },
@@ -387,25 +406,25 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text('Statistique', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.statisticLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text('Valeur', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.valueLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
-        _buildBombOperationStatsRow('Sites totaux', '${stats['totalSites'] ?? 0}'),
-        _buildBombOperationStatsRow('Sites actifs', '${stats['activeSites'] ?? 0}'),
-        _buildBombOperationStatsRow('Bombes armées', '${stats['armedSites'] ?? 0}'),
-        _buildBombOperationStatsRow('Bombes désarmées', '${stats['disarmedSites'] ?? 0}'),
-        _buildBombOperationStatsRow('Bombes explosées', '${stats['explodedSites'] ?? 0}'),
+        _buildBombOperationStatsRow(l10n.totalSitesStat, '${stats['totalSites'] ?? 0}'),
+        _buildBombOperationStatsRow(l10n.activeSitesLabel, '${stats['activeSites'] ?? 0}'), // Re-using activeSitesLabel as it's the same text
+        _buildBombOperationStatsRow(l10n.armedSitesLabel, '${stats['armedSites'] ?? 0}'),
+        _buildBombOperationStatsRow(l10n.disarmedSitesLabel, '${stats['disarmedSites'] ?? 0}'),
+        _buildBombOperationStatsRow(l10n.explodedSitesLabel, '${stats['explodedSites'] ?? 0}'),
         if (stats['bombTimer'] != null)
-          _buildBombOperationStatsRow('Timer bombe', '${stats['bombTimer']}s'),
+          _buildBombOperationStatsRow(l10n.bombTimerStat, '${stats['bombTimer']}s'),
         if (stats['defuseTime'] != null)
-          _buildBombOperationStatsRow('Temps désarmement', '${stats['defuseTime']}s'),
+          _buildBombOperationStatsRow(l10n.defuseTimeStat, '${stats['defuseTime']}s'),
         if (stats['armingTime'] != null)
-          _buildBombOperationStatsRow('Temps armement', '${stats['armingTime']}s'),
+          _buildBombOperationStatsRow(l10n.armingTimeStat, '${stats['armingTime']}s'),
       ],
     );
   }
@@ -419,7 +438,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(value, style: TextStyle(fontWeight: FontWeight.w500)),
+          child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ),
       ],
     );
@@ -437,27 +456,30 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
   }
 
   String _getBombOperationResultText(String result) {
+    // This will be replaced by l10n calls in the build method
+    final l10n = AppLocalizations.of(context)!;
     switch (result) {
       case 'TERRORISTS_WIN':
-        return '🔥 Victoire des Terroristes';
+        return l10n.terroristsWinResult;
       case 'COUNTER_TERRORISTS_WIN':
-        return '🛡️ Victoire des Anti-terroristes';
+        return l10n.counterTerroristsWinResult;
       default:
-        return '🤝 Match nul';
+        return l10n.drawResult;
     }
   }
 
   List<Widget> _buildTreasureHuntStatsSection(
       Map<String, dynamic> treasureHuntStats) {
+    final l10n = AppLocalizations.of(context)!;
     List<Widget> widgets = [];
 
     widgets.add(
-      SizedBox(height: 16),
+      const SizedBox(height: 16),
     );
 
     widgets.add(
       Text(
-        'Tableau des scores',
+        l10n.treasureHuntScoreboardTitle,
         style: Theme.of(context)
             .textTheme
             .titleMedium
@@ -466,19 +488,19 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
     );
 
     widgets.add(
-      SizedBox(height: 8),
+      const SizedBox(height: 8),
     );
 
     if (treasureHuntStats['teamScores'] != null) {
       widgets.add(
         Text(
-          'Scores par équipe',
+          l10n.teamScoresLabel,
           style: Theme.of(context).textTheme.titleSmall,
         ),
       );
 
       widgets.add(
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
       );
 
       // Tableau des scores par équipe
@@ -487,20 +509,20 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
       );
 
       widgets.add(
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
       );
     }
 
     if (treasureHuntStats['individualScores'] != null) {
       widgets.add(
         Text(
-          'Scores individuels',
+          l10n.individualScoresLabel,
           style: Theme.of(context).textTheme.titleSmall,
         ),
       );
 
       widgets.add(
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
       );
 
       // Tableau des scores individuels
@@ -513,12 +535,13 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
   }
 
   Widget _buildScoreTable(List<dynamic> scores) {
+    final l10n = AppLocalizations.of(context)!;
     // Tri du tableau des scores par points (ordre décroissant)
     scores.sort((a, b) => (b['score'] as int).compareTo(a['score'] as int));
 
     return Table(
       border: TableBorder.all(),
-      columnWidths: {
+      columnWidths: const {
         0: FlexColumnWidth(1),
         1: FlexColumnWidth(2),
         2: FlexColumnWidth(1.5),
@@ -531,21 +554,21 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child:
-                  Text('Rang', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(l10n.rankLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text('Nom', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.nameLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text('Trésors',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.treasuresLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child:
-                  Text('Score', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(l10n.scoreLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -562,7 +585,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(item['username'] ?? 'Joueur'),
+                child: Text(item['username'] ?? l10n.playersTab), // Fallback
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),

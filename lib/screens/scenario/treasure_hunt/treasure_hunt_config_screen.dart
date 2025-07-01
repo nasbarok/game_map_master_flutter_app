@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../models/scenario/treasure_hunt/treasure_hunt_scenario.dart';
 import '../../../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 import 'treasure_list_screen.dart';
@@ -73,8 +74,9 @@ class _TreasureHuntConfigScreenState extends State<TreasureHuntConfigScreen> {
         _size = scenario.size;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors du chargement du scénario treasureHunt : $e';
+        _errorMessage = l10n.errorLoadingTreasureHuntScenario(e.toString());
         _isLoading = false;
       });
     }
@@ -82,6 +84,7 @@ class _TreasureHuntConfigScreenState extends State<TreasureHuntConfigScreen> {
 
 
   Future<void> _createTreasures() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -125,7 +128,7 @@ class _TreasureHuntConfigScreenState extends State<TreasureHuntConfigScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Erreur lors de la création des trésors: $e';
+        _errorMessage = l10n.errorCreatingTreasures(e.toString());
         _isCreating = false;
       });
     }
@@ -133,38 +136,39 @@ class _TreasureHuntConfigScreenState extends State<TreasureHuntConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Configuration - ${widget.scenarioName}'),
+        title: Text(l10n.treasureHuntConfigTitle(widget.scenarioName)),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
           ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               color: Colors.red,
               size: 48,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadScenario,
-              child: Text('Réessayer'),
+              child: Text(l10n.retryButton),
             ),
           ],
         ),
       )
           : SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -172,68 +176,68 @@ class _TreasureHuntConfigScreenState extends State<TreasureHuntConfigScreen> {
             children: [
               Card(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Configuration de la chasse au trésor',
-                        style: TextStyle(
+                        l10n.treasureHuntSetupTitle,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _countController,
                         decoration: InputDecoration(
-                          labelText: 'Nombre de QR codes',
-                          border: OutlineInputBorder(),
-                          helperText: 'Entre 1 et 50',
+                          labelText: l10n.numberOfQRCodesLabel,
+                          border: const OutlineInputBorder(),
+                          helperText: l10n.qrCodeCountHelperText,
                         ),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer un nombre';
+                            return l10n.numberRequiredError;
                           }
                           final count = int.tryParse(value);
                           if (count == null) {
-                            return 'Veuillez entrer un nombre valide';
+                            return l10n.invalidNumberError;
                           }
                           if (count < 1 || count > 50) {
-                            return 'Le nombre doit être entre 1 et 50';
+                            return l10n.qrCodeCountRangeError;
                           }
                           return null;
                         },
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _valueController,
                         decoration: InputDecoration(
-                          labelText: 'Valeur par défaut (points)',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.attach_money),
+                          labelText: l10n.defaultValuePointsLabel,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.attach_money),
                         ),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer une valeur';
+                            return l10n.valueRequiredError;
                           }
                           if (int.tryParse(value) == null) {
-                            return 'Veuillez entrer un nombre valide';
+                            return l10n.invalidNumberError;
                           }
                           return null;
                         },
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
-                        'Symbole par défaut',
-                        style: TextStyle(
+                        l10n.defaultSymbolLabel,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Wrap(
                         spacing: 12,
                         runSpacing: 12,
@@ -262,33 +266,33 @@ class _TreasureHuntConfigScreenState extends State<TreasureHuntConfigScreen> {
                               child: Center(
                                 child: Text(
                                   symbol,
-                                  style: TextStyle(fontSize: 24),
+                                  style: const TextStyle(fontSize: 24),
                                 ),
                               ),
                             ),
                           );
                         }).toList(),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isCreating ? null : _createTreasures,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: _isCreating
-                    ? CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                  'Générer les QR codes',
-                  style: TextStyle(fontSize: 16),
+                  l10n.generateQRCodesButton,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
-              if (_scenario!.totalTreasures > 0) ...[
-                SizedBox(height: 16),
+              if (_scenario != null && _scenario!.totalTreasures > 0) ...[
+                const SizedBox(height: 16),
                 OutlinedButton(
                   onPressed: () {
                     Navigator.push(
@@ -302,11 +306,11 @@ class _TreasureHuntConfigScreenState extends State<TreasureHuntConfigScreen> {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
-                    'Voir les trésors existants (${_scenario!.totalTreasures})',
-                    style: TextStyle(fontSize: 16),
+                    l10n.viewExistingTreasuresButton(_scenario!.totalTreasures.toString()),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               ],

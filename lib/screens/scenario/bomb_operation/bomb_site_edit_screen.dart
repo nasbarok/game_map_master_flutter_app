@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:game_map_master_flutter_app/utils/app_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'dart:math';
@@ -143,22 +144,24 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
         await _bombOperationService.updateBombSite(site);
       }
 
+      final l10n = AppLocalizations.of(context)!;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Site sauvegardé avec succès'),
+          SnackBar(
+            content: Text(l10n.siteSavedSuccess),
             backgroundColor: Colors.green,
           ),
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       if (mounted) {
         logger
             .d('[BombSiteEditScreen] Erreur lors de la sauvegarde du site: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la sauvegarde: $e'),
+            content: Text(l10n.errorSavingSite(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -172,6 +175,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final distanceInMeters = double.tryParse(_radiusController.text) ?? 5.0;
     final zoom = _zoom;
     final metersPerPixel =
@@ -180,17 +184,17 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.site == null ? 'Nouveau site' : 'Modifier le site'),
+        title: Text(widget.site == null ? l10n.newBombSiteTitle : l10n.editBombSiteTitle),
         actions: [
           if (!_isSaving)
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: _saveSite,
-              tooltip: 'Sauvegarder',
+              tooltip: l10n.save,
             ),
           IconButton(
             icon: Icon(_satelliteView ? Icons.map : Icons.satellite_alt),
-            tooltip: _satelliteView ? 'Vue Standard' : 'Vue Satellite',
+            tooltip: _satelliteView ? l10n.standardViewTooltip : l10n.satelliteViewTooltip,
             onPressed: () {
               setState(() {
                 _satelliteView = !_satelliteView;
@@ -376,7 +380,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                               ],
                             ),
                             child: Text(
-                              'Appuyez sur la carte pour définir la position',
+                              l10n.tapToDefinePositionInstruction,
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -398,14 +402,14 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                         children: [
                           TextFormField(
                             controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nom du site *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.label),
+                            decoration: InputDecoration(
+                              labelText: l10n.bombSiteNameLabel,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.label),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer un nom pour le site';
+                                return l10n.siteNameRequiredError;
                               }
                               return null;
                             },
@@ -413,22 +417,21 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _radiusController,
-                            decoration: const InputDecoration(
-                              labelText: 'Rayon (mètres) *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.radio_button_checked),
-                              helperText:
-                                  'Rayon de la zone où la bombe peut être posée/désamorcée',
+                            decoration: InputDecoration(
+                              labelText: l10n.radiusMetersLabel,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.radio_button_checked),
+                              helperText: l10n.radiusHelperText,
                             ),
                             keyboardType: const TextInputType.numberWithOptions(
                                 decimal: true),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer un rayon';
+                                return l10n.radiusRequiredError;
                               }
                               final radius = double.tryParse(value);
                               if (radius == null || radius <= 0) {
-                                return 'Rayon invalide';
+                                return l10n.invalidRadiusError;
                               }
                               return null;
                             },
@@ -439,9 +442,9 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                             },
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'Couleur du site:',
-                            style: TextStyle(
+                          Text(
+                            l10n.siteColorLabel,
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -483,7 +486,7 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'Position: ${_position.latitude.toStringAsFixed(6)}, ${_position.longitude.toStringAsFixed(6)}',
+                            l10n.positionLabel(_position.latitude.toStringAsFixed(6), _position.longitude.toStringAsFixed(6)),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -498,8 +501,8 @@ class _BombSiteEditScreenState extends State<BombSiteEditScreen> {
                                 ? const CircularProgressIndicator()
                                 : Text(
                                     widget.site == null
-                                        ? 'Créer le site'
-                                        : 'Mettre à jour le site',
+                                        ? l10n.createSiteButton
+                                        : l10n.updateSiteButton,
                                     style: const TextStyle(fontSize: 16),
                                   ),
                           ),

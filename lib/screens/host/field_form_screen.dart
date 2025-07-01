@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
 import '../../services/api_service.dart';
 
 class FieldFormScreen extends StatefulWidget {
   final Field? field;
-  
+
   const FieldFormScreen({Key? key, this.field}) : super(key: key);
 
   @override
@@ -52,6 +53,7 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
   }
   
   Future<void> _saveField() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -81,8 +83,8 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Terrain sauvegardé avec succès'),
+            SnackBar(
+              content: Text(l10n.fieldSavedSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -92,7 +94,7 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
+              content: Text(l10n.error + e.toString()),
               backgroundColor: Colors.red,
             ),
           );
@@ -109,9 +111,10 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.field == null ? 'Nouveau terrain' : 'Modifier le terrain'),
+        title: Text(widget.field == null ? l10n.newFieldTitle : l10n.editFieldTitle),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -124,13 +127,13 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nom du terrain *',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.fieldNameLabel,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer un nom pour le terrain';
+                          return l10n.fieldRequiredError;
                         }
                         return null;
                       },
@@ -138,18 +141,18 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.fieldDescriptionLabel,
+                        border: const OutlineInputBorder(),
                       ),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _addressController,
-                      decoration: const InputDecoration(
-                        labelText: 'Adresse',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.fieldAddressLabel,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -158,9 +161,9 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
                         Expanded(
                           child: TextFormField(
                             controller: _latitudeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Latitude',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: l10n.latitudeLabel,
+                              border: const OutlineInputBorder(),
                             ),
                             keyboardType: TextInputType.number,
                           ),
@@ -169,9 +172,9 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
                         Expanded(
                           child: TextFormField(
                             controller: _longitudeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Longitude',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: l10n.longitudeLabel,
+                              border: const OutlineInputBorder(),
                             ),
                             keyboardType: TextInputType.number,
                           ),
@@ -184,9 +187,9 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
                         Expanded(
                           child: TextFormField(
                             controller: _sizeXController,
-                            decoration: const InputDecoration(
-                              labelText: 'Largeur (m)',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: l10n.widthLabel,
+                              border: const OutlineInputBorder(),
                             ),
                             keyboardType: TextInputType.number,
                           ),
@@ -195,9 +198,9 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
                         Expanded(
                           child: TextFormField(
                             controller: _sizeYController,
-                            decoration: const InputDecoration(
-                              labelText: 'Longueur (m)',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: l10n.lengthLabel,
+                              border: const OutlineInputBorder(),
                             ),
                             keyboardType: TextInputType.number,
                           ),
@@ -211,7 +214,7 @@ class _FieldFormScreenState extends State<FieldFormScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: Text(
-                        widget.field == null ? 'Créer le terrain' : 'Mettre à jour le terrain',
+                        widget.field == null ? l10n.createFieldButton : l10n.updateFieldButton,
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),

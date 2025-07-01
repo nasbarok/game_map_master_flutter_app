@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n/app_localizations.dart';
+
 void showTreasurePopup({
   required BuildContext context,
   required String symbol,
@@ -63,25 +65,26 @@ class _AnimatedTreasurePopupState extends State<AnimatedTreasurePopup> with Sing
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Material(
         color: Colors.transparent,
         child: Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.green.shade100,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+            boxShadow: const [BoxShadow(blurRadius: 10, color: Colors.black26)],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(widget.symbol, style: TextStyle(fontSize: 48)),
-              SizedBox(height: 8),
-              Text(widget.treasureName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              SizedBox(height: 4),
-              Text("+${widget.points} points", style: TextStyle(color: Colors.green.shade800)),
+              Text(widget.symbol, style: const TextStyle(fontSize: 48)),
+              const SizedBox(height: 8),
+              Text(widget.treasureName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const SizedBox(height: 4),
+              Text(l10n.pointsAwarded(widget.points.toString()), style: TextStyle(color: Colors.green.shade800)),
             ],
           ),
         ),

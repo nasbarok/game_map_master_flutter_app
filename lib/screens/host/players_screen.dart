@@ -2,6 +2,7 @@ import 'package:game_map_master_flutter_app/models/websocket/websocket_message.d
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/invitation_service.dart';
@@ -142,6 +143,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
         return;
       }
 
+      final l10n = AppLocalizations.of(context)!;
       final apiService = context.read<ApiService>();
 
       // Appel à l'API pour déconnecter le joueur
@@ -149,15 +151,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$playerName a été déconnecté de la partie'),
+          content: Text(l10n.playerKickedSuccess(playerName)),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
-      logger.d('❌ Erreur lors de la déconnexion du joueur: $e');
+      final l10n = AppLocalizations.of(context)!;
+      logger.d('❌ ${l10n.errorKickingPlayer(e.toString())}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors de la déconnexion du joueur: $e'),
+          content: Text(l10n.errorKickingPlayer(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -166,6 +169,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
     final invitationService = context.watch<InvitationService>();
 
@@ -177,14 +181,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
           children: [
             Icon(Icons.people, size: 80, color: Colors.grey.withOpacity(0.5)),
             const SizedBox(height: 16),
-            const Text(
-              'Gestion des joueurs non disponible',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.playerManagementUnavailableTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Veuillez d\'abord ouvrir un terrain',
-              style: TextStyle(color: Colors.grey),
+            Text(
+              l10n.openField,
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -193,7 +197,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 DefaultTabController.of(context)?.animateTo(0);
               },
               icon: const Icon(Icons.dashboard),
-              label: const Text('Aller à l\'onglet Terrain'),
+              label: Text(l10n.goToFieldTabButton),
             ),
           ],
         ),
@@ -204,12 +208,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Gestion des joueurs'),
-          bottom: const TabBar(
+          title: Text(l10n.playersManagement),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Rechercher'),
-              Tab(text: 'Invitations'),
-              Tab(text: 'Équipes'),
+              Tab(text: l10n.searchTab),
+              Tab(text: l10n.invitations),
+              Tab(text: l10n.teams),
             ],
           ),
         ),
@@ -230,6 +234,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   Widget _buildSearchTab() {
+    final l10n = AppLocalizations.of(context)!;
     final invitationService = context.watch<InvitationService>();
     final canInvite = invitationService.canSendInvitations();
 
@@ -240,8 +245,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              labelText: 'Rechercher des joueurs',
-              hintText: 'Entrez un nom d\'utilisateur',
+              labelText: l10n.searchPlayers,
+              hintText: l10n.searchPlayersHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.clear),
@@ -259,10 +264,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
             child: _isSearching
                 ? const Center(child: CircularProgressIndicator())
                 : _searchResults.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
-                          'Aucun résultat. Essayez une autre recherche.',
-                          style: TextStyle(color: Colors.grey),
+                          l10n.noResultsFound,
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       )
                     : ListView.builder(
@@ -274,14 +279,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
                               child: Text(user['username'][0].toUpperCase()),
                             ),
                             title: Text(user['username']),
-                            subtitle: Text(user['role'] ?? 'Joueur'),
+                            subtitle: Text(user['role'] ?? l10n.roleGamer),
                             trailing: canInvite
                                 ? ElevatedButton(
                                     onPressed: () => _sendInvitation(
                                       user['id'],
                                       user['username'],
                                     ),
-                                    child: const Text('Inviter'),
+                                    child: Text(l10n.inviteButton),
                                   )
                                 : const SizedBox.shrink(),
                           );
@@ -294,6 +299,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   Widget _buildInvitationsTab(InvitationService invitationService) {
+    final l10n = AppLocalizations.of(context)!;
     final pendingInvitations = invitationService.pendingInvitations;
     final sentInvitations = invitationService.sentInvitations;
 
@@ -303,17 +309,17 @@ class _PlayersScreenState extends State<PlayersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Invitations reçues',
+            l10n.invitations,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           pendingInvitations.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Center(
                     child: Text(
-                      'Aucune invitation en attente',
-                      style: TextStyle(color: Colors.grey),
+                      l10n.noInvitations,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 )
@@ -324,13 +330,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       final invitation = pendingInvitations[index];
                       final invitationToJson = invitation.toJson();
                       final payload = invitationToJson['payload'] ?? {};
-                      // Accéder au payload de manière sécurisée
-                      final fromUsername = payload['fromUsername'] ?? 'Inconnu';
-                      final mapName = payload['mapName'] ?? 'Carte inconnue';
+                      final fromUsername = payload['fromUsername'] ?? l10n.unknownPlayerName;
+                      final mapName = payload['mapName'] ?? l10n.unknownMap;
                       return Card(
                         child: ListTile(
-                          title: Text('Invitation de $fromUsername'),
-                          subtitle: Text('Carte: $mapName'),
+                          title: Text(l10n.invitationFrom(fromUsername)),
+                          subtitle: Text(l10n.mapLabelShort(mapName)),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -338,13 +343,13 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                 onPressed: () =>
                                     invitationService.respondToInvitation(
                                         context, invitationToJson, false),
-                                child: const Text('Refuser'),
+                                child: Text(l10n.declineInvitation),
                               ),
                               ElevatedButton(
                                 onPressed: () =>
                                     invitationService.respondToInvitation(
                                         context, invitationToJson, true),
-                                child: const Text('Accepter'),
+                                child: Text(l10n.acceptInvitation),
                               ),
                             ],
                           ),
@@ -355,17 +360,17 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 ),
           const SizedBox(height: 16),
           Text(
-            'Invitations envoyées',
+            l10n.invitationsSentTitle,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           sentInvitations.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Center(
                     child: Text(
-                      'Aucune invitation envoyée',
-                      style: TextStyle(color: Colors.grey),
+                      l10n.noInvitationsSent,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 )
@@ -377,21 +382,21 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       final invitationToJson = invitation.toJson();
                       final payload = invitationToJson['payload'] ?? {};
                       final status = invitationToJson['status'] ?? 'pending';
-                      final toUsername = payload['toUsername'] ?? 'Inconnu';
+                      final toUsername = payload['toUsername'] ?? l10n.unknownPlayerName;
 
                       String statusText;
                       if (status == 'pending') {
-                        statusText = 'En attente';
+                        statusText = l10n.statusPending;
                       } else if (status == 'accepted') {
-                        statusText = 'Acceptée';
+                        statusText = l10n.statusAccepted;
                       } else {
-                        statusText = 'Refusée';
+                        statusText = l10n.statusDeclined;
                       }
 
                       return Card(
                         child: ListTile(
-                          title: Text('Invitation à $toUsername'),
-                          subtitle: Text('Statut: $statusText'),
+                          title: Text(l10n.invitationTo(toUsername)),
+                          subtitle: Text(l10n.sessionStatusLabel(statusText)),
                           trailing: status == 'pending'
                               ? const Icon(Icons.hourglass_empty)
                               : status == 'accepted'
@@ -409,18 +414,19 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   Widget _buildUnassignedPlayerTile(Map<String, dynamic> player,
       List<dynamic> teams, TeamService teamService, int? mapId) {
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       leading: const CircleAvatar(
         backgroundColor: Colors.grey,
         child: Icon(Icons.person, color: Colors.white),
       ),
-      title: Text(player['username'] ?? 'Joueur inconnu'),
-      subtitle: const Text('Non assigné'),
+      title: Text(player['username'] ?? l10n.unknownPlayerName),
+      subtitle: Text(l10n.noTeam),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButton<int>(
-            hint: const Text('Assigner'),
+            hint: Text(l10n.assignTeamHint),
             onChanged: (teamId) {
               if (teamId != null && mapId != null) {
                 teamService.assignPlayerToTeam(player['id'], teamId, mapId);
@@ -436,7 +442,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.exit_to_app, color: Colors.red),
-            tooltip: 'Déconnecter le joueur',
+            tooltip: l10n.kickPlayerTooltip,
             onPressed: () => kickPlayer(player['id'], player['username']),
           ),
         ],
@@ -451,18 +457,19 @@ class _PlayersScreenState extends State<PlayersScreen> {
       TeamService teamService,
       int? mapId,
       List<dynamic> teams) {
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       leading: const CircleAvatar(
         backgroundColor: Colors.blue,
         child: Icon(Icons.person, color: Colors.white),
       ),
-      title: Text(player['username'] ?? 'Joueur inconnu'),
+      title: Text(player['username'] ?? l10n.unknownPlayerName),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             icon: const Icon(Icons.group_remove),
-            tooltip: 'Retirer de l\'équipe',
+            tooltip: l10n.removeFromTeamTooltip,
             onPressed: () {
               if (mapId != null) {
                 teamService.removePlayerFromTeam(player['id'], mapId);
@@ -471,7 +478,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.exit_to_app, color: Colors.red),
-            tooltip: 'Déconnecter le joueur',
+            tooltip: l10n.kickPlayerTooltip,
             onPressed: () => kickPlayer(player['id'], player['username']),
           ),
         ],
@@ -481,6 +488,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   Widget _buildTeamsTab(
       TeamService teamService, GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
     final connectedPlayers = gameStateService.connectedPlayersList;
     final mapId = getCurrentMapId(context);
     final teams = teamService.teams;
@@ -504,23 +512,23 @@ class _PlayersScreenState extends State<PlayersScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Équipes', style: Theme.of(context).textTheme.titleLarge),
+              Text(l10n.teams, style: Theme.of(context).textTheme.titleLarge),
               ElevatedButton.icon(
                 onPressed: () {
                   final nameController = TextEditingController();
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Créer une équipe'),
+                      title: Text(l10n.createTeam),
                       content: TextField(
                         controller: nameController,
-                        decoration: const InputDecoration(
-                            labelText: 'Nom de l\'équipe'),
+                        decoration: InputDecoration(
+                            labelText: l10n.teamName),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Annuler'),
+                          child: Text(l10n.cancel),
                         ),
                         ElevatedButton(
                           onPressed: () {
@@ -529,14 +537,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
                               Navigator.of(context).pop();
                             }
                           },
-                          child: const Text('Créer'),
+                          child: Text(l10n.create),
                         ),
                       ],
                     ),
                   );
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('Nouvelle équipe'),
+                label: Text(l10n.newTeamButton),
               ),
             ],
           ),
@@ -545,16 +553,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
           // ✅ Liste scrollable dans Expanded dans Column (et plus dans Row)
           Expanded(
             child: (teams.isEmpty && unassignedPlayers.isEmpty)
-                ? const Center(
+                ? Center(
                     child: Text(
-                      'Aucune équipe créée',
-                      style: TextStyle(color: Colors.grey),
+                      l10n.noTeamsCreated,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   )
                 : ListView(
                     children: [
                       if (unassignedPlayers.isNotEmpty) ...[
-                        Text('Joueurs sans équipe',
+                        Text(l10n.unassignedPlayersLabel,
                             style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 8),
                         ...unassignedPlayers.map((player) =>
@@ -582,17 +590,17 @@ class _PlayersScreenState extends State<PlayersScreen> {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Sauvegarder la configuration'),
+                  title: Text(l10n.saveConfigurationDialogTitle),
                   content: TextField(
                     controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nom de la configuration',
+                    decoration: InputDecoration(
+                      labelText: l10n.configurationNameLabel,
                     ),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Annuler'),
+                      child: Text(l10n.cancel),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -601,21 +609,21 @@ class _PlayersScreenState extends State<PlayersScreen> {
                               nameController.text);
                           Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Configuration sauvegardée'),
+                            SnackBar(
+                              content: Text(l10n.configurationSavedSuccess),
                               backgroundColor: Colors.green,
                             ),
                           );
                         }
                       },
-                      child: const Text('Sauvegarder'),
+                      child: Text(l10n.save),
                     ),
                   ],
                 ),
               );
             },
             icon: const Icon(Icons.save),
-            label: const Text('Sauvegarder configuration'),
+            label: Text(l10n.saveConfigurationButton),
           ),
         ],
       ),
@@ -629,6 +637,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     int? mapId,
     List<dynamic> connectedPlayers,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: ExpansionTile(
         title: Row(
@@ -637,21 +646,22 @@ class _PlayersScreenState extends State<PlayersScreen> {
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.edit, size: 16),
+              tooltip: l10n.edit,
               onPressed: () {
                 final nameController = TextEditingController(text: team.name);
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Renommer l\'équipe'),
+                    title: Text(l10n.renameTeamDialogTitle),
                     content: TextField(
                       controller: nameController,
                       decoration:
-                          const InputDecoration(labelText: 'Nouveau nom'),
+                          InputDecoration(labelText: l10n.newTeamNameLabel),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Annuler'),
+                        child: Text(l10n.cancel),
                       ),
                       ElevatedButton(
                         onPressed: () {
@@ -661,7 +671,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                             Navigator.of(context).pop();
                           }
                         },
-                        child: const Text('Renommer'),
+                        child: Text(l10n.renameButton),
                       ),
                     ],
                   ),
@@ -670,13 +680,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.delete, size: 16),
+              tooltip: l10n.delete,
               onPressed: () {
                 teamService.deleteTeam(team.id);
               },
             ),
           ],
         ),
-        subtitle: Text('${team.players.length} joueurs'),
+        subtitle: Text(l10n.playersCountSuffix(team.players.length)),
         children: [
           ...team.players.map(
             (player) => _buildTeamPlayerTile(
@@ -690,7 +701,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Ajouter des joueurs'),
+                    title: Text(l10n.addPlayersToTeamDialogTitle),
                     content: SizedBox(
                       width: double.maxFinite,
                       height: 300,
@@ -705,9 +716,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
                             leading: const CircleAvatar(
                               child: Icon(Icons.person),
                             ),
-                            title: Text(player['username'] ?? 'Joueur inconnu'),
+                            title: Text(player['username'] ?? l10n.unknownPlayerName),
                             trailing: isInTeam
-                                ? const Text('Déjà dans une équipe')
+                                ? Text(l10n.alreadyInTeamLabel)
                                 : ElevatedButton(
                                     onPressed: () {
                                       if (mapId != null) {
@@ -716,7 +727,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                         Navigator.of(context).pop();
                                       }
                                     },
-                                    child: const Text('Ajouter'),
+                                    child: Text(l10n.addButton),
                                   ),
                           );
                         },
@@ -725,14 +736,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Fermer'),
+                        child: Text(l10n.ok), // ou l10n.closeButton si créé
                       ),
                     ],
                   ),
                 );
               },
               icon: const Icon(Icons.person_add),
-              label: const Text('Ajouter des joueurs'),
+              label: Text(l10n.addPlayersToTeamDialogTitle),
             ),
           ),
         ],

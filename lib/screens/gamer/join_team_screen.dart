@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/team.dart';
 import '../../services/api_service.dart';
 
@@ -39,14 +40,16 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors du chargement des équipes: ${e.toString()}';
+        _errorMessage = l10n.errorLoadingTeams(e.toString());
         _isLoading = false;
       });
     }
   }
 
   Future<void> _joinTeam(Team team) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
     });
@@ -58,7 +61,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Vous avez rejoint l\'équipe ${team.name}'),
+            content: Text(l10n.joinedTeamSuccess(team.name)),
             backgroundColor: Colors.green,
           ),
         );
@@ -68,7 +71,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text(l10n.error +e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -81,9 +84,10 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rejoindre une équipe'),
+        title: Text(l10n.joinTeamTitle),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -100,7 +104,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadTeams,
-                        child: const Text('Réessayer'),
+                        child: Text(l10n.retryButton),
                       ),
                     ],
                   ),
@@ -112,19 +116,19 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                         children: [
                           const Icon(Icons.people, size: 80, color: Colors.grey),
                           const SizedBox(height: 16),
-                          const Text(
-                            'Aucune équipe disponible',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          Text(
+                            l10n.noTeamsAvailableTitle,
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Demandez à un organisateur de créer une équipe',
-                            style: TextStyle(color: Colors.grey),
+                          Text(
+                            l10n.noTeamsAvailableMessage,
+                            style: const TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _loadTeams,
-                            child: const Text('Actualiser'),
+                            child: Text(l10n.refreshButton),
                           ),
                         ],
                       ),
@@ -138,8 +142,8 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                           margin: const EdgeInsets.only(bottom: 16),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: team.color != null 
-                                  ? _hexToColor(team.color!) 
+                              backgroundColor: team.color != null
+                                  ? _hexToColor(team.color!)
                                   : Colors.grey,
                               child: Text(
                                 team.name.substring(0, 1).toUpperCase(),
@@ -152,7 +156,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                                 : null,
                             trailing: ElevatedButton(
                               onPressed: () => _joinTeam(team),
-                              child: const Text('Rejoindre'),
+                              child: Text(l10n.joinButton),
                             ),
                           ),
                         );
@@ -160,7 +164,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                     ),
     );
   }
-  
+
   Color _hexToColor(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');

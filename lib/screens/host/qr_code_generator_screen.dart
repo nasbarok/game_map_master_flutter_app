@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 
 class QRCodeGeneratorScreen extends StatefulWidget {
   final String scenarioId;
-  
+
   const QRCodeGeneratorScreen({
-    Key? key, 
+    Key? key,
     required this.scenarioId,
   }) : super(key: key);
 
@@ -52,8 +53,9 @@ class _QRCodeGeneratorScreenState extends State<QRCodeGeneratorScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = 'Erreur lors de la génération du QR code: ${e.toString()}';
+        _errorMessage = l10n.errorGeneratingQRCode(e.toString());
         _isLoading = false;
       });
     }
@@ -61,9 +63,10 @@ class _QRCodeGeneratorScreenState extends State<QRCodeGeneratorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('QR Code pour $_scenarioName'),
+        title: Text(l10n.qrCodeForScenarioTitle(_scenarioName)),
       ),
       body: Center(
         child: _isLoading
@@ -80,16 +83,16 @@ class _QRCodeGeneratorScreenState extends State<QRCodeGeneratorScreen> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _generateQRCode,
-                        child: const Text('Réessayer'),
+                        child: Text(l10n.retryButton),
                       ),
                     ],
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Scannez ce QR code pour rejoindre la partie',
-                        style: TextStyle(fontSize: 16),
+                      Text(
+                        l10n.scanToJoinMessage,
+                        style: const TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 24),
                       Container(
@@ -115,16 +118,16 @@ class _QRCodeGeneratorScreenState extends State<QRCodeGeneratorScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Code d\'invitation: $_qrData',
+                        l10n.invitationCodeLabel(_qrData ?? ''),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Ce code est valide pendant 1 heure',
-                        style: TextStyle(
+                      Text(
+                        l10n.codeValidForHour,
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
                         ),
@@ -133,7 +136,7 @@ class _QRCodeGeneratorScreenState extends State<QRCodeGeneratorScreen> {
                       ElevatedButton.icon(
                         onPressed: _generateQRCode,
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Générer un nouveau code'),
+                        label: Text(l10n.generateNewCodeButton),
                       ),
                     ],
                   ),

@@ -429,109 +429,2138 @@
   "@promptPassword": {
     "description": "Prompt asking the user to enter their password"
   },
-
   "registerTitle": "Register",
   "@registerTitle": {
     "description": "Title of the registration screen"
   },
-
   "createAccount": "Create an account",
   "@createAccount": {
     "description": "Text displayed as heading to create a new account"
   },
-
   "usernameLabel": "Username",
   "@usernameLabel": {
     "description": "Label for username field"
   },
-
   "usernamePrompt": "Please enter a username",
   "@usernamePrompt": {
     "description": "Prompt asking the user to enter a username"
   },
-
   "emailLabel": "Email",
   "@emailLabel": {
     "description": "Label for email field"
   },
-
   "emailPrompt": "Please enter your email",
   "@emailPrompt": {
     "description": "Prompt asking the user to enter their email"
   },
-
   "passwordLabel": "Password",
   "@passwordLabel": {
     "description": "Label for password field"
   },
-
   "passwordPrompt": "Please enter a password",
   "@passwordPrompt": {
     "description": "Prompt asking the user to enter a password"
   },
-
   "confirmPasswordLabel": "Confirm Password",
   "@confirmPasswordLabel": {
     "description": "Label for confirm password field"
   },
-
   "confirmPasswordPrompt": "Please confirm your password",
   "@confirmPasswordPrompt": {
     "description": "Prompt asking the user to confirm their password"
   },
-
   "firstNameLabel": "First Name",
   "@firstNameLabel": {
     "description": "Label for first name field"
   },
-
   "lastNameLabel": "Last Name",
   "@lastNameLabel": {
     "description": "Label for last name field"
   },
-
   "phoneNumberLabel": "Phone Number",
   "@phoneNumberLabel": {
     "description": "Label for phone number field"
   },
-
   "roleLabel": "Role",
   "@roleLabel": {
     "description": "Label for selecting user role"
   },
-
   "rolePrompt": "Please select a role",
   "@rolePrompt": {
     "description": "Prompt asking the user to select a role"
   },
-
   "roleHost": "Host",
   "@roleHost": {
     "description": "Role option for host/organizer"
   },
-
   "roleGamer": "Gamer",
   "@roleGamer": {
     "description": "Role option for gamer/player"
   },
-
   "registerButton": "Register",
   "@registerButton": {
     "description": "Register button text"
   },
-
   "alreadyRegistered": "Already registered? Log in",
   "@alreadyRegistered": {
     "description": "Prompt for users already registered to log in"
   },
-
   "registrationSuccess": "Registration successful! You can now log in.",
   "@registrationSuccess": {
     "description": "Message shown when registration succeeds"
   },
-
   "registrationFailure": "Registration failed. Please try again.",
   "@registrationFailure": {
     "description": "Message shown when registration fails"
-  }
+  },
+  "loginFailed": "Login failed. Please check your credentials.",
+  "@loginFailed": {
+    "description": "Message shown when login fails"
+  },
+  "splashTitle": "Game Map Master",
+  "@splashTitle": {
+    "description": "Title on the splash screen"
+  },
+  "splashSubtitle": "Créez et jouez des scénarios 2.0",
+  "@splashSubtitle": {
+    "description": "Subtitle on the splash screen"
+  },
+  "splashScreenSubtitle": "Create and play 2.0 scenarios",
+  "@splashScreenSubtitle": {
+    "description": "Subtitle on the splash screen"
+  },
+  "gameLobbyTitle": "Game Lobby",
+  "@gameLobbyTitle": {
+    "description": "Title for the game lobby screen"
+  },
+  "terrainTab": "Field",
+  "@terrainTab": {
+    "description": "Label for the Field tab"
+  },
+  "playersTab": "Players",
+  "@playersTab": {
+    "description": "Label for the Players tab"
+  },
+  "mapLabel": "Map: {mapName}",
+  "@mapLabel": {
+    "description": "Label showing the current map name",
+    "placeholders": {
+      "mapName": {}
+    }
+  },
+  "unknownMap": "Unknown",
+  "@unknownMap": {
+    "description": "Placeholder for an unknown map name"
+  },
+  "sessionsHistoryTooltip": "Sessions history",
+  "@sessionsHistoryTooltip": {
+    "description": "Tooltip for the session history button"
+  },
+  "noAssociatedField": "No associated field found",
+  "@noAssociatedField": {
+    "description": "Message when no field is associated with the map"
+  },
+  "remainingTimeLabel": "Time remaining: {time}",
+  "@remainingTimeLabel": {
+    "description": "Label showing the remaining game time",
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "gameInProgressTitle": "Game in progress",
+  "@gameInProgressTitle": {
+    "description": "Title for the game in progress section"
+  },
+  "gameInProgressInstructions": "Follow the host's instructions and collaborate with your team to achieve the scenario objectives.",
+  "@gameInProgressInstructions": {
+    "description": "Instructions for players when a game is in progress"
+  },
+  "joinGameButton": "Join Game",
+  "@joinGameButton": {
+    "description": "Button text to join an ongoing game"
+  },
+  "waitingForGameStartTitle": "Waiting for game to start",
+  "@waitingForGameStartTitle": {
+    "description": "Title when waiting for the host to start the game"
+  },
+  "waitingForGameStartInstructions": "The host has not started the game yet. Prepare your gear and join a team while you wait.",
+  "@waitingForGameStartInstructions": {
+    "description": "Instructions for players when waiting for the game to start"
+  },
+  "leaveFieldButton": "Leave Field",
+  "@leaveFieldButton": {
+    "description": "Button text to leave the current field"
+  },
+  "noScenarioSelected": "No scenario selected",
+  "@noScenarioSelected": {
+    "description": "Message when no scenario is selected for the game"
+  },
+  "selectedScenariosLabel": "Selected scenarios:",
+  "@selectedScenariosLabel": {
+    "description": "Label for the list of selected scenarios"
+  },
+  "treasureHuntScenarioDetails": "Treasure Hunt: {count} QR codes ({symbol})",
+  "@treasureHuntScenarioDetails": {
+    "description": "Details for a treasure hunt scenario",
+    "placeholders": {
+      "count": {},
+      "symbol": {}
+    }
+  },
+  "noDescription": "No description",
+  "@noDescription": {
+    "description": "Placeholder for when an item has no description"
+  },
+  "loadingError": "Error: {error}",
+  "@loadingError": {
+    "description": "Generic error message with a placeholder for the error details",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noFieldsVisited": "No fields visited",
+  "@noFieldsVisited": {
+    "description": "Message when the user has not visited any fields yet"
+  },
+  "waitForInvitation": "Wait for an invitation to join a field",
+  "@waitForInvitation": {
+    "description": "Instruction to wait for an invitation"
+  },
+  "fieldOpenedOn": "Opened on {date}",
+  "@fieldOpenedOn": {
+    "description": "Indicates when a field was opened",
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "unknownOpeningDate": "Unknown opening date",
+  "@unknownOpeningDate": {
+    "description": "Placeholder for an unknown field opening date"
+  },
+  "fieldClosedOn": "Closed on {date}",
+  "@fieldClosedOn": {
+    "description": "Indicates when a field was closed",
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "stillActive": "Still active",
+  "@stillActive": {
+    "description": "Status indication that a field is still active"
+  },
+  "ownerLabel": "Owner: {username}",
+  "@ownerLabel": {
+    "description": "Label showing the owner of a field",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "unknownOwner": "Unknown owner",
+  "@unknownOwner": {
+    "description": "Placeholder for an unknown field owner"
+  },
+  "fieldStatusOpen": "Open",
+  "@fieldStatusOpen": {
+    "description": "Status indicating a field is open"
+  },
+  "fieldStatusClosed": "Closed",
+  "@fieldStatusClosed": {
+    "description": "Status indicating a field is closed"
+  },
+  "joinButton": "Join",
+  "@joinButton": {
+    "description": "Generic join button text"
+  },
+  "deleteFromHistoryTooltip": "Delete from history",
+  "@deleteFromHistoryTooltip": {
+    "description": "Tooltip for the delete from history button"
+  },
+  "youJoinedFieldSuccess": "You have successfully joined the field",
+  "@youJoinedFieldSuccess": {
+    "description": "Success message when a user joins a field"
+  },
+  "youLeftField": "You have left the field",
+  "@youLeftField": {
+    "description": "Message when a user leaves a field"
+  },
+  "notConnectedToField": "You are not connected to a field",
+  "@notConnectedToField": {
+    "description": "Message when the user is not connected to any field"
+  },
+  "connectedPlayersCount": "Connected players ({count})",
+  "@connectedPlayersCount": {
+    "description": "Label showing the number of connected players",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "noPlayerConnected": "No player connected",
+  "@noPlayerConnected": {
+    "description": "Message when no players are connected"
+  },
+  "noTeam": "No team",
+  "@noTeam": {
+    "description": "Indicates that a player is not in any team"
+  },
+  "youLabel": "You",
+  "@youLabel": {
+    "description": "Label to identify the current user"
+  },
+  "yourTeamLabel": "Your team",
+  "@yourTeamLabel": {
+    "description": "Label for the user's current team section"
+  },
+  "manageTeamsButton": "Manage teams",
+  "@manageTeamsButton": {
+    "description": "Button text to navigate to team management"
+  },
+  "changeTeamTitle": "Change team",
+  "@changeTeamTitle": {
+    "description": "Title for the change team dialog"
+  },
+  "playersCountSuffix": "{count,plural, =0{players} =1{player} other{players}}",
+  "@playersCountSuffix": {
+    "description": "Suffix for player count, handles pluralization",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "leaveFieldConfirmationTitle": "Leave field?",
+  "@leaveFieldConfirmationTitle": {
+    "description": "Title for the leave field confirmation dialog"
+  },
+  "leaveFieldConfirmationMessage": "Are you sure you want to leave this field? You will not be able to rejoin if it is closed.",
+  "@leaveFieldConfirmationMessage": {
+    "description": "Confirmation message when a user tries to leave a field"
+  },
+  "leaveButton": "Leave",
+  "@leaveButton": {
+    "description": "Button text for leaving an action or a place"
+  },
+  "deleteFieldHistoryTitle": "Delete this field?",
+  "@deleteFieldHistoryTitle": {
+    "description": "Title for the delete field from history confirmation dialog"
+  },
+  "deleteFieldHistoryMessage": "Are you sure you want to delete this field from your history?",
+  "@deleteFieldHistoryMessage": {
+    "description": "Confirmation message when deleting a field from history"
+  },
+  "fieldDeletedFromHistory": "Field deleted from history",
+  "@fieldDeletedFromHistory": {
+    "description": "Success message when a field is deleted from history"
+  },
+  "errorDeletingField": "Error during deletion",
+  "@errorDeletingField": {
+    "description": "Error message when field deletion fails"
+  },
+  "cannotJoinGame": "Cannot join game",
+  "@cannotJoinGame": {
+    "description": "Error message when a user cannot join a game"
+  },
+  "joinTeamTitle": "Join a team",
+  "@joinTeamTitle": {
+    "description": "Title for the join team screen"
+  },
+  "errorLoadingTeams": "Error loading teams: {error}",
+  "@errorLoadingTeams": {
+    "description": "Error message when teams fail to load",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "retryButton": "Retry",
+  "@retryButton": {
+    "description": "Button text to retry an action"
+  },
+  "noTeamsAvailableTitle": "No teams available",
+  "@noTeamsAvailableTitle": {
+    "description": "Title shown when no teams are available to join"
+  },
+  "noTeamsAvailableMessage": "Ask an organizer to create a team",
+  "@noTeamsAvailableMessage": {
+    "description": "Message shown when no teams are available, prompting user to ask organizer"
+  },
+  "refreshButton": "Refresh",
+  "@refreshButton": {
+    "description": "Button text to refresh data"
+  },
+  "joinedTeamSuccess": "You have joined team {teamName}",
+  "@joinedTeamSuccess": {
+    "description": "Success message when a user joins a team",
+    "placeholders": {
+      "teamName": {}
+    }
+  },
+  "teamManagementTitle": "Team Management",
+  "@teamManagementTitle": {
+    "description": "Title for the team management screen"
+  },
+  "errorLoadingTeamsAlt": "Error loading teams",
+  "@errorLoadingTeamsAlt": {
+    "description": "Alternative error message when teams fail to load"
+  },
+  "joinedTeamSuccessAlt": "Successfully joined the team",
+  "@joinedTeamSuccessAlt": {
+    "description": "Alternative success message when a user joins a team"
+  },
+  "errorJoiningTeam": "Error joining team: {error}",
+  "@errorJoiningTeam": {
+    "description": "Error message when failing to join a team",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noTeamsAvailableHostMessage": "Wait for the host to create teams",
+  "@noTeamsAvailableHostMessage": {
+    "description": "Message shown to players when no teams are created by the host yet"
+  },
+  "yourTeamChip": "Your team",
+  "@yourTeamChip": {
+    "description": "Label for a chip indicating the user's team"
+  },
+  "noPlayersConnectedMessage": "Connected players will appear here",
+  "@noPlayersConnectedMessage": {
+    "description": "Message shown when there are no connected players to display"
+  },
+  "gameMapScreenTitle": "Game Map",
+  "@gameMapScreenTitle": {
+    "description": "Title for the game map screen"
+  },
+  "fullscreenTooltip": "Fullscreen",
+  "@fullscreenTooltip": {
+    "description": "Tooltip for the fullscreen button"
+  },
+  "satelliteViewTooltip": "Satellite view",
+  "@satelliteViewTooltip": {
+    "description": "Tooltip for the satellite view button"
+  },
+  "standardViewTooltip": "Standard view",
+  "@standardViewTooltip": {
+    "description": "Tooltip for the standard map view button"
+  },
+  "bombTimeRemaining": "BOMB: {time}",
+  "@bombTimeRemaining": {
+    "description": "Label showing remaining time for a bomb",
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "centerOnLocationTooltip": "Center on current location",
+  "@centerOnLocationTooltip": {
+    "description": "Tooltip for the center on location button"
+  },
+  "errorCenteringLocation": "Error centering on current location: {error}",
+  "@errorCenteringLocation": {
+    "description": "Error message when centering on location fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "playerMarkerLabel": "Player {playerName}",
+  "@playerMarkerLabel": {
+    "description": "Label for a player marker on the map if username is not available",
+    "placeholders": {
+      "playerName": {}
+    }
+  },
+  "gameSessionScreenTitle": "Game Session",
+  "@gameSessionScreenTitle": {
+    "description": "Title for the game session screen"
+  },
+  "errorLoadingSessionData": "Error loading session data: {error}",
+  "@errorLoadingSessionData": {
+    "description": "Error message when game session data fails to load",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "endGameTooltip": "End game",
+  "@endGameTooltip": {
+    "description": "Tooltip for the end game button"
+  },
+  "refreshTooltip": "Refresh",
+  "@refreshTooltip": {
+    "description": "Tooltip for the refresh button"
+  },
+  "bombScenarioLoading": "Loading Bomb scenario...",
+  "@bombScenarioLoading": {
+    "description": "Message shown while the bomb scenario is loading"
+  },
+  "qrScannerButtonActive": "Scan QR Code",
+  "@qrScannerButtonActive": {
+    "description": "Button text to open QR code scanner when game is active"
+  },
+  "noActiveTreasureHunt": "No active treasure hunt scenario",
+  "@noActiveTreasureHunt": {
+    "description": "Message shown when trying to scan QR for non-existent treasure hunt"
+  },
+  "gameEndedMessage": "The game has ended.",
+  "@gameEndedMessage": {
+    "description": "Message shown when the game has been stopped/ended"
+  },
+  "errorEndingGame": "Error ending game: {error}",
+  "@errorEndingGame": {
+    "description": "Error message when failing to end a game",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noScoresYet": "No scores to display yet",
+  "@noScoresYet": {
+    "description": "Message shown in scoreboard when there are no scores"
+  },
+  "treasureFoundNotification": "{username} from team {teamName} found a treasure worth {points} points! ({symbol})",
+  "@treasureFoundNotification": {
+    "description": "Notification message when a player from a team finds a treasure",
+    "placeholders": {
+      "username": {},
+      "teamName": {},
+      "points": {},
+      "symbol": {}
+    }
+  },
+  "treasureFoundNotificationNoTeam": "{username} found a treasure worth {points} points! ({symbol})",
+  "@treasureFoundNotificationNoTeam": {
+    "description": "Notification message when a player (no team) finds a treasure",
+    "placeholders": {
+      "username": {},
+      "points": {},
+      "symbol": {}
+    }
+  },
+  "fieldSessionsTitle": "Sessions - {fieldName}",
+  "@fieldSessionsTitle": {
+    "description": "Title for the field sessions screen, showing the field name",
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "unknownField": "Unknown Field",
+  "@unknownField": {
+    "description": "Placeholder for an unknown field name"
+  },
+  "gameSessionsTitle": "Game Sessions",
+  "@gameSessionsTitle": {
+    "description": "Generic title for game sessions screen if field name is not available"
+  },
+  "errorLoadingData": "Error loading data: {error}",
+  "@errorLoadingData": {
+    "description": "Generic error message when data loading fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noGameSessionsForField": "No game sessions available for this field",
+  "@noGameSessionsForField": {
+    "description": "Message shown when a field has no game sessions"
+  },
+  "sessionListItemTitle": "Session #{index}",
+  "@sessionListItemTitle": {
+    "description": "Title for a list item representing a game session, with its index",
+    "placeholders": {
+      "index": {}
+    }
+  },
+  "sessionStatusLabel": "Status: {status}",
+  "@sessionStatusLabel": {
+    "description": "Label showing the status of a game session",
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "sessionTimeLabel": "Start: {startTime} - End: {endTime}",
+  "@sessionTimeLabel": {
+    "description": "Label showing the start and end time of a game session",
+    "placeholders": {
+      "startTime": {},
+      "endTime": {}
+    }
+  },
+  "sessionStartTimeLabel": "Start: {startTime}",
+  "@sessionStartTimeLabel": {
+    "description": "Label showing only the start time of a game session (if end time is not available)",
+    "placeholders": {
+      "startTime": {}
+    }
+  },
+  "deleteSessionSuccess": "Game session deleted successfully",
+  "@deleteSessionSuccess": {
+    "description": "Success message when a game session is deleted"
+  },
+  "confirmation": "Confirmation",
+  "@confirmation": {
+    "description": "Generic confirmation dialog title"
+  },
+  "deleteSessionConfirmationMessage": "Are you sure you want to delete this game session?",
+  "@deleteSessionConfirmationMessage": {
+    "description": "Confirmation message when attempting to delete a game session"
+  },
+  "replayScreenTitle": "Session Replay",
+  "@replayScreenTitle": {
+    "description": "Title for the game replay screen"
+  },
+  "scenarioSummaryTitle": "Scenarios Summary",
+  "@scenarioSummaryTitle": {
+    "description": "Title for the scenario summary dialog in replay"
+  },
+  "scenarioInfoNotAvailable": "No information available",
+  "@scenarioInfoNotAvailable": {
+    "description": "Message shown when scenario information is not available in replay"
+  },
+  "playbackSpeedLabel": "Speed: {speed}x",
+  "@playbackSpeedLabel": {
+    "description": "Label for playback speed control in replay",
+    "placeholders": {
+      "speed": {}
+    }
+  },
+  "errorLoadingHistory": "Error loading history: {error}",
+  "@errorLoadingHistory": {
+    "description": "Error message when loading replay history fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "sessionDetailsScreenTitle": "Session Details",
+  "@sessionDetailsScreenTitle": {
+    "description": "Title for the session details screen"
+  },
+  "sessionTitleWithIndex": "Session #{index}",
+  "@sessionTitleWithIndex": {
+    "description": "Title for a specific session, including its index",
+    "placeholders": {
+      "index": {}
+    }
+  },
+  "noSessionFound": "Session not found",
+  "@noSessionFound": {
+    "description": "Message when specific session data cannot be found"
+  },
+  "viewSessionsForFieldTooltip": "View sessions for this field",
+  "@viewSessionsForFieldTooltip": {
+    "description": "Tooltip for the button to view all sessions of a field"
+  },
+  "fieldLabel": "Field: {fieldName}",
+  "@fieldLabel": {
+    "description": "Label showing the field name",
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "endTimeLabel": "End: {time}",
+  "@endTimeLabel": {
+    "description": "Label for the end time of a session",
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "participantsLabel": "Participants: {count}",
+  "@participantsLabel": {
+    "description": "Label showing the number of participants in a session",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "viewReplayButton": "View Replay",
+  "@viewReplayButton": {
+    "description": "Button text to view the replay of a session"
+  },
+  "scenariosLabel": "Scenarios",
+  "@scenariosLabel": {
+    "description": "Label for the scenarios section"
+  },
+  "scenarioNameDefault": "Unnamed Scenario",
+  "@scenarioNameDefault": {
+    "description": "Default name for a scenario if not specified"
+  },
+  "treasureHuntScoreboardTitle": "Treasure Hunt Scoreboard",
+  "@treasureHuntScoreboardTitle": {
+    "description": "Title for the treasure hunt scoreboard section"
+  },
+  "bombOperationResultsTitle": "Bomb Operation Results",
+  "@bombOperationResultsTitle": {
+    "description": "Title for the bomb operation results section"
+  },
+  "teamScoresLabel": "Team Scores",
+  "@teamScoresLabel": {
+    "description": "Label for team scores table/section"
+  },
+  "individualScoresLabel": "Individual Scores",
+  "@individualScoresLabel": {
+    "description": "Label for individual scores table/section"
+  },
+  "rankLabel": "Rank",
+  "@rankLabel": {
+    "description": "Table header for rank"
+  },
+  "nameLabel": "Name",
+  "@nameLabel": {
+    "description": "Table header for name"
+  },
+  "treasuresLabel": "Treasures",
+  "@treasuresLabel": {
+    "description": "Table header for treasures found"
+  },
+  "scoreLabel": "Score",
+  "@scoreLabel": {
+    "description": "Table header for score"
+  },
+  "terroristsTeam": "Terrorists",
+  "@terroristsTeam": {
+    "description": "Name for the Terrorists team in Bomb Operation"
+  },
+  "counterTerroristsTeam": "Counter-Terrorists",
+  "@counterTerroristsTeam": {
+    "description": "Name for the Counter-Terrorists team in Bomb Operation"
+  },
+  "armedSitesLabel": "Armed Sites",
+  "@armedSitesLabel": {
+    "description": "Label for armed bomb sites"
+  },
+  "explodedSitesLabel": "Exploded Sites",
+  "@explodedSitesLabel": {
+    "description": "Label for exploded bomb sites"
+  },
+  "activeSitesLabel": "Active Sites",
+  "@activeSitesLabel": {
+    "description": "Label for active bomb sites"
+  },
+  "disarmedSitesLabel": "Disarmed Sites",
+  "@disarmedSitesLabel": {
+    "description": "Label for disarmed bomb sites"
+  },
+  "terroristsWinResult": "🔥 Terrorists Win",
+  "@terroristsWinResult": {
+    "description": "Result message when terrorists win"
+  },
+  "counterTerroristsWinResult": "🛡️ Counter-Terrorists Win",
+  "@counterTerroristsWinResult": {
+    "description": "Result message when counter-terrorists win"
+  },
+  "drawResult": "🤝 Draw",
+  "@drawResult": {
+    "description": "Result message for a draw"
+  },
+  "detailedStatsLabel": "Detailed Statistics",
+  "@detailedStatsLabel": {
+    "description": "Label for the detailed statistics section"
+  },
+  "statisticLabel": "Statistic",
+  "@statisticLabel": {
+    "description": "Table header for statistic name"
+  },
+  "valueLabel": "Value",
+  "@valueLabel": {
+    "description": "Table header for statistic value"
+  },
+  "totalSitesStat": "Total Sites",
+  "@totalSitesStat": {
+    "description": "Statistic label for total bomb sites"
+  },
+  "bombTimerStat": "Bomb Timer",
+  "@bombTimerStat": {
+    "description": "Statistic label for bomb timer duration"
+  },
+  "defuseTimeStat": "Defuse Time",
+  "@defuseTimeStat": {
+    "description": "Statistic label for bomb defuse time"
+  },
+  "armingTimeStat": "Arming Time",
+  "@armingTimeStat": {
+    "description": "Statistic label for bomb arming time"
+  },
+  "historyScreenTitleField": "Field History",
+  "@historyScreenTitleField": {
+    "description": "Title for the history screen when a specific field is selected"
+  },
+  "historyScreenTitleGeneric": "Fields History",
+  "@historyScreenTitleGeneric": {
+    "description": "Generic title for the history screen showing all fields"
+  },
+  "noFieldsAvailable": "No fields available",
+  "@noFieldsAvailable": {
+    "description": "Message shown when there are no fields in the history"
+  },
+  "deleteFieldTooltip": "Delete this field",
+  "@deleteFieldTooltip": {
+    "description": "Tooltip for the delete field button"
+  },
+  "deleteFieldConfirmationMessage": "Are you sure you want to delete field \"{fieldName}\" and all its history?",
+  "@deleteFieldConfirmationMessage": {
+    "description": "Confirmation message when attempting to delete a field and its history",
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "fieldDeletedSuccess": "Field \"{fieldName}\" deleted",
+  "@fieldDeletedSuccess": {
+    "description": "Success message when a field is deleted",
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "newFieldTitle": "New Field",
+  "@newFieldTitle": {
+    "description": "Title for the new field form screen"
+  },
+  "editFieldTitle": "Edit Field",
+  "@editFieldTitle": {
+    "description": "Title for the edit field form screen"
+  },
+  "fieldNameLabel": "Field Name *",
+  "@fieldNameLabel": {
+    "description": "Label for the field name input"
+  },
+  "fieldDescriptionLabel": "Description",
+  "@fieldDescriptionLabel": {
+    "description": "Label for the field description input"
+  },
+  "fieldAddressLabel": "Address",
+  "@fieldAddressLabel": {
+    "description": "Label for the field address input"
+  },
+  "latitudeLabel": "Latitude",
+  "@latitudeLabel": {
+    "description": "Label for the latitude input"
+  },
+  "longitudeLabel": "Longitude",
+  "@longitudeLabel": {
+    "description": "Label for the longitude input"
+  },
+  "widthLabel": "Width (m)",
+  "@widthLabel": {
+    "description": "Label for the field width input"
+  },
+  "lengthLabel": "Length (m)",
+  "@lengthLabel": {
+    "description": "Label for the field length input"
+  },
+  "createFieldButton": "Create Field",
+  "@createFieldButton": {
+    "description": "Button text to create a new field"
+  },
+  "updateFieldButton": "Update Field",
+  "@updateFieldButton": {
+    "description": "Button text to update an existing field"
+  },
+  "fieldRequiredError": "Please enter a name for the field",
+  "@fieldRequiredError": {
+    "description": "Error message when field name is required but not provided"
+  },
+  "fieldSavedSuccess": "Field saved successfully",
+  "@fieldSavedSuccess": {
+    "description": "Success message when a field is saved"
+  },
+  "newMapTitle": "New Map",
+  "@newMapTitle": {
+    "description": "Title for the new map form screen"
+  },
+  "scaleLabel": "Scale (m/pixel)",
+  "@scaleLabel": {
+    "description": "Label for the map scale input"
+  },
+  "mapNameRequiredError": "Please enter a name for the map",
+  "@mapNameRequiredError": {
+    "description": "Error message when map name is required but not provided"
+  },
+  "invalidScaleError": "Please enter a valid scale",
+  "@invalidScaleError": {
+    "description": "Error message for invalid map scale input"
+  },
+  "interactiveMapAddressLabel": "Field Address",
+  "@interactiveMapAddressLabel": {
+    "description": "Label for the address of the field in interactive map editor"
+  },
+  "defineInteractiveMapButton": "Define Interactive Map",
+  "@defineInteractiveMapButton": {
+    "description": "Button text to define the interactive map features"
+  },
+  "editInteractiveMapButton": "Edit Interactive Map",
+  "@editInteractiveMapButton": {
+    "description": "Button text to edit the interactive map features"
+  },
+  "mapSavedSuccess": "Map saved successfully",
+  "@mapSavedSuccess": {
+    "description": "Success message when a map is saved"
+  },
+  "updateMapButton": "Update Map",
+  "@updateMapButton": {
+    "description": "Button text to update an existing map"
+  },
+  "hostDashboardTitle": "Host Dashboard",
+  "@hostDashboardTitle": {
+    "description": "Title for the host dashboard screen"
+  },
+  "historyTab": "History",
+  "@historyTab": {
+    "description": "Label for the History tab"
+  },
+  "invitationReceivedTitle": "Invitation Received",
+  "@invitationReceivedTitle": {
+    "description": "Title for the invitation received dialog"
+  },
+  "invitationReceivedMessage": "You have been invited by {username} to join the map \"{mapName}\".",
+  "@invitationReceivedMessage": {
+    "description": "Message content for a received invitation",
+    "placeholders": {
+      "username": {},
+      "mapName": {}
+    }
+  },
+  "noActionForFieldTabSnackbar": "Use the Maps tab to create or modify maps",
+  "@noActionForFieldTabSnackbar": {
+    "description": "Snackbar message guiding user to the maps tab"
+  },
+  "openFieldFirstSnackbar": "Please open a field first",
+  "@openFieldFirstSnackbar": {
+    "description": "Snackbar message asking user to open a field"
+  },
+  "noMapAvailable": "No map",
+  "@noMapAvailable": {
+    "description": "Message when no maps are available"
+  },
+  "createMapPrompt": "Create a map to get started",
+  "@createMapPrompt": {
+    "description": "Prompt to create a map when none exist"
+  },
+  "noScenarioAvailable": "No scenario",
+  "@noScenarioAvailable": {
+    "description": "Message when no scenarios are available"
+  },
+  "createScenarioPrompt": "Create a scenario to get started",
+  "@createScenarioPrompt": {
+    "description": "Prompt to create a scenario when none exist"
+  },
+  "scoreboardButton": "Scoreboard",
+  "@scoreboardButton": {
+    "description": "Button text to view the scoreboard"
+  },
+  "confirmDeleteTitle": "Confirm Deletion",
+  "@confirmDeleteTitle": {
+    "description": "Generic title for deletion confirmation dialogs"
+  },
+  "confirmDeleteMapMessage": "Are you sure you want to delete this map?",
+  "@confirmDeleteMapMessage": {
+    "description": "Confirmation message for deleting a map"
+  },
+  "mapDeletedSuccess": "Map deleted successfully",
+  "@mapDeletedSuccess": {
+    "description": "Success message when a map is deleted"
+  },
+  "errorDeletingMap": "Error deleting map: {error}",
+  "@errorDeletingMap": {
+    "description": "Error message when map deletion fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "confirmDeleteScenarioMessage": "Are you sure you want to delete this scenario?",
+  "@confirmDeleteScenarioMessage": {
+    "description": "Confirmation message for deleting a scenario"
+  },
+  "scenarioDeletedSuccess": "Scenario deleted",
+  "@scenarioDeletedSuccess": {
+    "description": "Success message when a scenario is deleted"
+  },
+  "noTeamsCreated": "No teams",
+  "@noTeamsCreated": {
+    "description": "Message when no teams have been created"
+  },
+  "createTeamPrompt": "Create a team to get started",
+  "@createTeamPrompt": {
+    "description": "Prompt to create a team when none exist"
+  },
+  "playersUnavailableTitle": "Players unavailable",
+  "@playersUnavailableTitle": {
+    "description": "Title indicating that player management is currently unavailable"
+  },
+  "goToFieldTabButton": "Go to Field Tab",
+  "@goToFieldTabButton": {
+    "description": "Button text to navigate to the field tab"
+  },
+  "errorLoadingMaps": "Error loading maps: {error}",
+  "@errorLoadingMaps": {
+    "description": "Error message when loading maps fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorLoadingScenarios": "Error loading scenarios: {error}",
+  "@errorLoadingScenarios": {
+    "description": "Error message when loading scenarios fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "searchTab": "Search",
+  "@searchTab": {
+    "description": "Label for the Search tab"
+  },
+  "searchPlayersHint": "Enter a username",
+  "@searchPlayersHint": {
+    "description": "Hint text for the player search input field"
+  },
+  "noResultsFound": "No results. Try another search.",
+  "@noResultsFound": {
+    "description": "Message displayed when player search yields no results"
+  },
+  "inviteButton": "Invite",
+  "@inviteButton": {
+    "description": "Button text to send an invitation"
+  },
+  "invitationFrom": "Invitation from {username}",
+  "@invitationFrom": {
+    "description": "Indicates who sent an invitation",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "mapLabelShort": "Map: {mapName}",
+  "@mapLabelShort": {
+    "description": "Short label for map name, possibly in a list item",
+    "placeholders": {
+      "mapName": {}
+    }
+  },
+  "invitationsSentTitle": "Invitations Sent",
+  "@invitationsSentTitle": {
+    "description": "Title for the section showing sent invitations"
+  },
+  "noInvitationsSent": "No invitations sent",
+  "@noInvitationsSent": {
+    "description": "Message when no invitations have been sent by the user"
+  },
+  "invitationTo": "Invitation to {username}",
+  "@invitationTo": {
+    "description": "Indicates to whom an invitation was sent",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "statusPending": "Pending",
+  "@statusPending": {
+    "description": "Status of an invitation that is pending"
+  },
+  "statusAccepted": "Accepted",
+  "@statusAccepted": {
+    "description": "Status of an invitation that has been accepted"
+  },
+  "statusDeclined": "Declined",
+  "@statusDeclined": {
+    "description": "Status of an invitation that has been declined"
+  },
+  "unassignedPlayersLabel": "Unassigned Players",
+  "@unassignedPlayersLabel": {
+    "description": "Label for the list of players not yet assigned to a team"
+  },
+  "assignTeamHint": "Assign",
+  "@assignTeamHint": {
+    "description": "Hint text for a dropdown or button to assign a team"
+  },
+  "kickPlayerTooltip": "Kick Player",
+  "@kickPlayerTooltip": {
+    "description": "Tooltip for the kick player button"
+  },
+  "removeFromTeamTooltip": "Remove from team",
+  "@removeFromTeamTooltip": {
+    "description": "Tooltip for the remove player from team button"
+  },
+  "playerKickedSuccess": "{playerName} has been kicked from the game",
+  "@playerKickedSuccess": {
+    "description": "Success message when a player is kicked",
+    "placeholders": {
+      "playerName": {}
+    }
+  },
+  "errorKickingPlayer": "Error kicking player: {error}",
+  "@errorKickingPlayer": {
+    "description": "Error message when kicking a player fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "playerManagementUnavailableTitle": "Player management unavailable",
+  "@playerManagementUnavailableTitle": {
+    "description": "Title shown when player management features are not available (e.g., field not open)"
+  },
+  "newTeamButton": "New Team",
+  "@newTeamButton": {
+    "description": "Button text to create a new team"
+  },
+  "saveConfigurationButton": "Save Configuration",
+  "@saveConfigurationButton": {
+    "description": "Button text to save team configuration"
+  },
+  "saveConfigurationDialogTitle": "Save Configuration",
+  "@saveConfigurationDialogTitle": {
+    "description": "Title for the save team configuration dialog"
+  },
+  "configurationNameLabel": "Configuration Name",
+  "@configurationNameLabel": {
+    "description": "Label for the configuration name input field"
+  },
+  "configurationSavedSuccess": "Configuration saved",
+  "@configurationSavedSuccess": {
+    "description": "Success message when team configuration is saved"
+  },
+  "addPlayersToTeamDialogTitle": "Add Players",
+  "@addPlayersToTeamDialogTitle": {
+    "description": "Title for the dialog to add players to a team"
+  },
+  "alreadyInTeamLabel": "Already in a team",
+  "@alreadyInTeamLabel": {
+    "description": "Label indicating a player is already in a team"
+  },
+  "addButton": "Add",
+  "@addButton": {
+    "description": "Generic add button text"
+  },
+  "renameTeamDialogTitle": "Rename Team",
+  "@renameTeamDialogTitle": {
+    "description": "Title for the rename team dialog"
+  },
+  "newTeamNameLabel": "New Name",
+  "@newTeamNameLabel": {
+    "description": "Label for the new team name input field"
+  },
+  "renameButton": "Rename",
+  "@renameButton": {
+    "description": "Button text to confirm renaming"
+  },
+  "qrCodeForScenarioTitle": "QR Code for {scenarioName}",
+  "@qrCodeForScenarioTitle": {
+    "description": "Title for the QR code generator screen, indicating the scenario name",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "errorGeneratingQRCode": "Error generating QR code: {error}",
+  "@errorGeneratingQRCode": {
+    "description": "Error message when QR code generation fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "scanToJoinMessage": "Scan this QR code to join the game",
+  "@scanToJoinMessage": {
+    "description": "Instructional message on the QR code screen"
+  },
+  "invitationCodeLabel": "Invitation Code: {code}",
+  "@invitationCodeLabel": {
+    "description": "Label displaying the textual invitation code",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "codeValidForHour": "This code is valid for 1 hour",
+  "@codeValidForHour": {
+    "description": "Message indicating the validity period of the QR code"
+  },
+  "generateNewCodeButton": "Generate New Code",
+  "@generateNewCodeButton": {
+    "description": "Button text to generate a new QR code"
+  },
+  "newScenarioTitle": "New Scenario",
+  "@newScenarioTitle": {
+    "description": "Title for the new scenario form screen"
+  },
+  "scenarioTypeLabel": "Scenario Type *",
+  "@scenarioTypeLabel": {
+    "description": "Label for the scenario type selection field"
+  },
+  "scenarioTypeBombOperation": "Bomb Operation",
+  "@scenarioTypeBombOperation": {
+    "description": "Scenario type option for Bomb Operation"
+  },
+  "scenarioTypeDomination": "Domination",
+  "@scenarioTypeDomination": {
+    "description": "Scenario type option for Domination"
+  },
+  "scenarioNameRequiredError": "Please enter a name for the scenario",
+  "@scenarioNameRequiredError": {
+    "description": "Error message when scenario name is required but not provided"
+  },
+  "scenarioTypeRequiredError": "Please select a scenario type",
+  "@scenarioTypeRequiredError": {
+    "description": "Error message when scenario type is required but not selected"
+  },
+  "mapRequiredError": "Please select a map",
+  "@mapRequiredError": {
+    "description": "Error message when map is required for a scenario but not selected"
+  },
+  "interactiveMapRequiredError": "This map does not have an interactive configuration. Please select another map or configure this one in the map editor.",
+  "@interactiveMapRequiredError": {
+    "description": "Error message when a scenario type requires an interactive map, but the selected map is not configured for it"
+  },
+  "scenarioSavedSuccess": "Scenario saved successfully",
+  "@scenarioSavedSuccess": {
+    "description": "Success message when a scenario is saved"
+  },
+  "updateScenarioButton": "Update Scenario",
+  "@updateScenarioButton": {
+    "description": "Button text to update an existing scenario"
+  },
+  "configureTreasureHuntButton": "Configure Treasure Hunt",
+  "@configureTreasureHuntButton": {
+    "description": "Button text to navigate to treasure hunt configuration"
+  },
+  "configureBombOperationButton": "Configure Bomb Operation",
+  "@configureBombOperationButton": {
+    "description": "Button text to navigate to bomb operation configuration"
+  },
+  "noMapAvailableError": "No map available. Please create a map first.",
+  "@noMapAvailableError": {
+    "description": "Error message shown in scenario form if no maps exist"
+  },
+  "interactiveMapAvailableLegend": "Interactive map available",
+  "@interactiveMapAvailableLegend": {
+    "description": "Legend indicating that a map has interactive features available"
+  },
+  "selectMapFirstError": "Please select a map before choosing the scenario type.",
+  "@selectMapFirstError": {
+    "description": "Error message prompting user to select a map first"
+  },
+  "selectScenariosDialogTitle": "Select Scenarios",
+  "@selectScenariosDialogTitle": {
+    "description": "Title for the scenario selection dialog"
+  },
+  "noScenariosAvailableDialogMessage": "No scenarios available.\nCreate a scenario first.",
+  "@noScenariosAvailableDialogMessage": {
+    "description": "Message shown in scenario selection dialog when no scenarios exist"
+  },
+  "validateButton": "Validate",
+  "@validateButton": {
+    "description": "Button text to validate a selection"
+  },
+  "newTeamScreenTitle": "New Team",
+  "@newTeamScreenTitle": {
+    "description": "Title for the new team form screen"
+  },
+  "editTeamTitle": "Edit Team",
+  "@editTeamTitle": {
+    "description": "Title for the edit team form screen"
+  },
+  "teamColorLabel": "Team Color",
+  "@teamColorLabel": {
+    "description": "Label for the team color selection field"
+  },
+  "colorRed": "Red",
+  "@colorRed": {
+    "description": "Color option Red"
+  },
+  "colorBlue": "Blue",
+  "@colorBlue": {
+    "description": "Color option Blue"
+  },
+  "colorGreen": "Green",
+  "@colorGreen": {
+    "description": "Color option Green"
+  },
+  "colorYellow": "Yellow",
+  "@colorYellow": {
+    "description": "Color option Yellow"
+  },
+  "colorOrange": "Orange",
+  "@colorOrange": {
+    "description": "Color option Orange"
+  },
+  "colorPurple": "Purple",
+  "@colorPurple": {
+    "description": "Color option Purple"
+  },
+  "colorBlack": "Black",
+  "@colorBlack": {
+    "description": "Color option Black"
+  },
+  "colorWhite": "White",
+  "@colorWhite": {
+    "description": "Color option White"
+  },
+  "teamNameRequiredError": "Please enter a name for the team",
+  "@teamNameRequiredError": {
+    "description": "Error message when team name is required but not provided"
+  },
+  "teamSavedSuccess": "Team saved successfully",
+  "@teamSavedSuccess": {
+    "description": "Success message when a team is saved"
+  },
+  "updateTeamButton": "Update Team",
+  "@updateTeamButton": {
+    "description": "Button text to update an existing team"
+  },
+  "selectMapError": "Please select a map first",
+  "@selectMapError": {
+    "description": "Error message when a map needs to be selected before an action"
+  },
+  "scenariosSelectedSuccess": "Scenarios selected",
+  "@scenariosSelectedSuccess": {
+    "description": "Success message when scenarios are selected"
+  },
+  "durationSetSuccess": "Duration set: {hours}h {minutes}min",
+  "@durationSetSuccess": {
+    "description": "Success message when game duration is set",
+    "placeholders": {
+      "hours": {},
+      "minutes": {}
+    }
+  },
+  "errorStartingGame": "Error starting game: {error}",
+  "@errorStartingGame": {
+    "description": "Error message when starting a game fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gameStartedSuccess": "The game has started!",
+  "@gameStartedSuccess": {
+    "description": "Success message when a game has started"
+  },
+  "bombScenarioRequiresTwoTeamsError": "Bomb Operation scenario requires exactly 2 teams with players.",
+  "@bombScenarioRequiresTwoTeamsError": {
+    "description": "Error message when bomb scenario requirements (2 teams) are not met"
+  },
+  "bombConfigurationCancelled": "Configuration cancelled.",
+  "@bombConfigurationCancelled": {
+    "description": "Message indicating that bomb scenario configuration was cancelled"
+  },
+  "bombConfigurationTitle": "Bomb Operation Configuration",
+  "@bombConfigurationTitle": {
+    "description": "Title for the bomb operation configuration dialog"
+  },
+  "mapSelectedSuccess": "Map \"{mapName}\" selected",
+  "@mapSelectedSuccess": {
+    "description": "Success message when a map is selected",
+    "placeholders": {
+      "mapName": {}
+    }
+  },
+  "fieldOpenedSuccess": "Field opened: {fieldName}",
+  "@fieldOpenedSuccess": {
+    "description": "Success message when a field is opened",
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "fieldClosedSuccess": "Field closed",
+  "@fieldClosedSuccess": {
+    "description": "Success message when a field is closed"
+  },
+  "errorOpeningClosingField": "Error opening/closing field: {error}",
+  "@errorOpeningClosingField": {
+    "description": "Error message when opening or closing a field fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "mapCardTitle": "{mapName}",
+  "@mapCardTitle": {
+    "description": "Title for the selected map card, showing map name",
+    "placeholders": {
+      "mapName": {}
+    }
+  },
+  "noScenarioInfoCard": "None",
+  "@noScenarioInfoCard": {
+    "description": "Text for info card when no scenario is selected"
+  },
+  "unlimitedDurationInfoCard": "Unlimited",
+  "@unlimitedDurationInfoCard": {
+    "description": "Text for info card when game duration is unlimited"
+  },
+  "gameConfigurationTitle": "Game Configuration",
+  "@gameConfigurationTitle": {
+    "description": "Title for the game configuration section"
+  },
+  "selectMapButtonLabel": "Choose a Map",
+  "@selectMapButtonLabel": {
+    "description": "Label for the select map button"
+  },
+  "selectScenariosButtonLabel": "Choose Scenarios",
+  "@selectScenariosButtonLabel": {
+    "description": "Label for the select scenarios button"
+  },
+  "setDurationButtonLabel": "Set Duration",
+  "@setDurationButtonLabel": {
+    "description": "Label for the set duration button"
+  },
+  "participateAsPlayerLabel": "Participate as player:",
+  "@participateAsPlayerLabel": {
+    "description": "Label for the switch to participate as a player"
+  },
+  "teamLabelPlayerList": "Team: {teamName}",
+  "@teamLabelPlayerList": {
+    "description": "Label showing team name in a player list",
+    "placeholders": {
+      "teamName": {}
+    }
+  },
+  "youHostLabel": "You (Host)",
+  "@youHostLabel": {
+    "description": "Label identifying the current user as the host"
+  },
+  "loadingDialogMessage": "Starting game...",
+  "@loadingDialogMessage": {
+    "description": "Message shown in a loading dialog when starting a game"
+  },
+  "interactiveMapEditorTitleCreate": "Create Interactive Map",
+  "@interactiveMapEditorTitleCreate": {
+    "description": "Title for the interactive map editor screen when creating a new map"
+  },
+  "interactiveMapEditorTitleEdit": "Edit: {mapName}",
+  "@interactiveMapEditorTitleEdit": {
+    "description": "Title for the interactive map editor screen when editing an existing map",
+    "placeholders": {
+      "mapName": {}
+    }
+  },
+  "saveMapTooltip": "Save Map",
+  "@saveMapTooltip": {
+    "description": "Tooltip for the save map button"
+  },
+  "descriptionOptionalLabel": "Description (optional)",
+  "@descriptionOptionalLabel": {
+    "description": "Label for an optional description field"
+  },
+  "searchAddressLabel": "Search Address",
+  "@searchAddressLabel": {
+    "description": "Label for the address search input field"
+  },
+  "viewModeLabel": "View",
+  "@viewModeLabel": {
+    "description": "Label for the view mode in map editor"
+  },
+  "drawBoundaryModeLabel": "Field",
+  "@drawBoundaryModeLabel": {
+    "description": "Label for the draw boundary mode in map editor"
+  },
+  "drawZoneModeLabel": "Zone",
+  "@drawZoneModeLabel": {
+    "description": "Label for the draw zone mode in map editor"
+  },
+  "placePOIModeLabel": "Points",
+  "@placePOIModeLabel": {
+    "description": "Label for the place POI mode in map editor"
+  },
+  "defineBoundariesButton": "Define Boundaries",
+  "@defineBoundariesButton": {
+    "description": "Button text to define field boundaries"
+  },
+  "undoPointButton": "Undo Point",
+  "@undoPointButton": {
+    "description": "Button text to undo the last placed point"
+  },
+  "clearAllButton": "Clear All",
+  "@clearAllButton": {
+    "description": "Button text to clear all points or drawings"
+  },
+  "addZoneButton": "Add Zone",
+  "@addZoneButton": {
+    "description": "Button text to add a new zone"
+  },
+  "clearCurrentZoneButton": "Clear Current Zone",
+  "@clearCurrentZoneButton": {
+    "description": "Button text to clear the currently drawn zone points"
+  },
+  "noZoneDefined": "No zone defined.",
+  "@noZoneDefined": {
+    "description": "Message when no zones are defined on the map"
+  },
+  "manageZonesTitle": "Manage Zones",
+  "@manageZonesTitle": {
+    "description": "Title for the zone management panel"
+  },
+  "hideTooltip": "Hide",
+  "@hideTooltip": {
+    "description": "Tooltip for the hide button"
+  },
+  "showTooltip": "Show",
+  "@showTooltip": {
+    "description": "Tooltip for the show button"
+  },
+  "confirmDeleteZoneTitle": "Delete Zone",
+  "@confirmDeleteZoneTitle": {
+    "description": "Title for the delete zone confirmation dialog"
+  },
+  "confirmDeleteZoneMessage": "Are you sure you want to delete zone \"{zoneName}\"?",
+  "@confirmDeleteZoneMessage": {
+    "description": "Confirmation message for deleting a zone",
+    "placeholders": {
+      "zoneName": {}
+    }
+  },
+  "noPOIDefined": "No strategic point defined.",
+  "@noPOIDefined": {
+    "description": "Message when no points of interest are defined"
+  },
+  "managePOIsTitle": "Manage Strategic Points",
+  "@managePOIsTitle": {
+    "description": "Title for the POI management panel"
+  },
+  "confirmDeletePOITitle": "Delete Strategic Point",
+  "@confirmDeletePOITitle": {
+    "description": "Title for the delete POI confirmation dialog"
+  },
+  "confirmDeletePOIMessage": "Are you sure you want to delete point \"{poiName}\"?",
+  "@confirmDeletePOIMessage": {
+    "description": "Confirmation message for deleting a POI",
+    "placeholders": {
+      "poiName": {}
+    }
+  },
+  "mapNameRequiredSnackbar": "Please enter a name for the map.",
+  "@mapNameRequiredSnackbar": {
+    "description": "Snackbar message when map name is required"
+  },
+  "mapCreatedSuccessSnackbar": "Map created successfully!",
+  "@mapCreatedSuccessSnackbar": {
+    "description": "Snackbar message when a map is created successfully"
+  },
+  "mapUpdatedSuccessSnackbar": "Map updated successfully!",
+  "@mapUpdatedSuccessSnackbar": {
+    "description": "Snackbar message when a map is updated successfully"
+  },
+  "errorSavingMapSnackbar": "Error saving map: {error}",
+  "@errorSavingMapSnackbar": {
+    "description": "Snackbar message when saving a map fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "defineBoundaryFirstSnackbar": "Please define a field boundary (at least 3 points) before capturing the background.",
+  "@defineBoundaryFirstSnackbar": {
+    "description": "Snackbar message asking to define boundary first"
+  },
+  "boundaryMinPointsError": "The field boundary must have at least 3 points.",
+  "@boundaryMinPointsError": {
+    "description": "Error message for minimum points required for a boundary"
+  },
+  "zoneMinPointsError": "A zone must have at least 3 points.",
+  "@zoneMinPointsError": {
+    "description": "Error message for minimum points required for a zone"
+  },
+  "redefineBoundaryWarningTitle": "Redefine Boundaries",
+  "@redefineBoundaryWarningTitle": {
+    "description": "Title for the redefine boundary warning dialog"
+  },
+  "redefineBoundaryWarningMessage": "Redefining the field boundaries will erase all existing zones and strategic points. Do you want to continue?",
+  "@redefineBoundaryWarningMessage": {
+    "description": "Warning message when redefining boundaries"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Button text to continue an action"
+  },
+  "boundariesDefinedAndBackgroundsCapturedSnackbar": "Field boundaries defined and map backgrounds captured.",
+  "@boundariesDefinedAndBackgroundsCapturedSnackbar": {
+    "description": "Success message when boundaries and backgrounds are set"
+  },
+  "errorGeocodingSnackbar": "Geocoding error: {error}",
+  "@errorGeocodingSnackbar": {
+    "description": "Snackbar message for geocoding errors",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "tapToDefinePositionInstruction": "Tap on the map to define the position",
+  "@tapToDefinePositionInstruction": {
+    "description": "Instructional text for map interaction"
+  },
+  "poiIconFlag": "Flag",
+  "poiIconBomb": "Bomb",
+  "poiIconStar": "Star",
+  "poiIconPlace": "Place",
+  "poiIconPinDrop": "Pin",
+  "poiIconHouse": "House",
+  "poiIconCabin": "Cabin",
+  "poiIconDoor": "Door",
+  "poiIconSkull": "Skull",
+  "poiIconNavigation": "Navigation",
+  "poiIconTarget": "Target",
+  "poiIconAmmo": "Ammo",
+  "poiIconMedical": "Medical",
+  "poiIconRadio": "Radio",
+  "poiIconDefault": "Default",
+  "bombArmingInProgressTitle": "Arming in progress",
+  "@bombArmingInProgressTitle": {
+    "description": "Title for bomb arming dialog"
+  },
+  "bombDisarmingInProgressTitle": "Disarming in progress",
+  "@bombDisarmingInProgressTitle": {
+    "description": "Title for bomb disarming dialog"
+  },
+  "stayInZoneToContinue": "Stay in the zone to continue",
+  "@stayInZoneToContinue": {
+    "description": "Instruction in bomb action dialog"
+  },
+  "leavingZoneWillCancel": "Leaving the zone will cancel the action",
+  "@leavingZoneWillCancel": {
+    "description": "Warning in bomb action dialog"
+  },
+  "bombConfigScreenTitle": "Configuration: {scenarioName}",
+  "@bombConfigScreenTitle": {
+    "description": "App bar title for bomb config screen",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "generalInformationLabel": "General Information",
+  "@generalInformationLabel": {
+    "description": "Section title for general info"
+  },
+  "bombConfigGeneralInfoSubtitle": "Configure the basic information for the Bomb Operation scenario.",
+  "@bombConfigGeneralInfoSubtitle": {
+    "description": "Subtitle for general info section in bomb config"
+  },
+  "fieldMapLabel": "Field Map",
+  "@fieldMapLabel": {
+    "description": "Label for field map section"
+  },
+  "fieldMapSubtitle": "Visualize the field map and bomb sites.",
+  "@fieldMapSubtitle": {
+    "description": "Subtitle for field map section"
+  },
+  "showZonesLabel": "Show Zones",
+  "@showZonesLabel": {
+    "description": "Label for toggle to show/hide zones"
+  },
+  "showPOIsLabel": "Show POIs",
+  "@showPOIsLabel": {
+    "description": "Label for toggle to show/hide POIs"
+  },
+  "loadingMap": "Loading map...",
+  "@loadingMap": {
+    "description": "Message shown while map is loading"
+  },
+  "gameSettingsLabel": "Game Settings",
+  "@gameSettingsLabel": {
+    "description": "Section title for game settings"
+  },
+  "bombConfigSettingsSubtitle": "Configure the rules and settings for the Bomb Operation scenario.",
+  "@bombConfigSettingsSubtitle": {
+    "description": "Subtitle for game settings section in bomb config"
+  },
+  "bombTimerLabel": "Bomb Timer (seconds) *",
+  "@bombTimerLabel": {
+    "description": "Label for bomb timer input"
+  },
+  "valueRequiredError": "Required",
+  "@valueRequiredError": {
+    "description": "Generic error for a required numeric field"
+  },
+  "minSecondsError": "Min {value}s",
+  "@minSecondsError": {
+    "description": "Error for minimum seconds required",
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "defuseTimeLabel": "Defuse Time (seconds) *",
+  "@defuseTimeLabel": {
+    "description": "Label for defuse time input"
+  },
+  "armingTimeLabel": "Arming Time (seconds) *",
+  "@armingTimeLabel": {
+    "description": "Label for arming time input"
+  },
+  "armingTimeHelperText": "Time required to plant a bomb",
+  "@armingTimeHelperText": {
+    "description": "Helper text for arming time input"
+  },
+  "activeSitesPerRoundLabel": "Active Sites per Round *",
+  "@activeSitesPerRoundLabel": {
+    "description": "Label for active sites per round input"
+  },
+  "activeSitesHelperText": "Number of randomly active bomb sites per round",
+  "@activeSitesHelperText": {
+    "description": "Helper text for active sites input"
+  },
+  "minCountError": "Min {value}",
+  "@minCountError": {
+    "description": "Error for minimum count required",
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "bombSitesSectionTitle": "Bomb Sites",
+  "@bombSitesSectionTitle": {
+    "description": "Section title for bomb sites"
+  },
+  "bombSitesSectionSubtitle": "Manage the sites where bombs can be planted and defused.",
+  "@bombSitesSectionSubtitle": {
+    "description": "Subtitle for bomb sites section"
+  },
+  "manageBombSitesButton": "Manage Bomb Sites",
+  "@manageBombSitesButton": {
+    "description": "Button text to manage bomb sites"
+  },
+  "saveSettingsButton": "Save Settings",
+  "@saveSettingsButton": {
+    "description": "Button text to save settings"
+  },
+  "errorSavingScenario": "Error saving scenario: {error}",
+  "@errorSavingScenario": {
+    "description": "Error message when saving scenario fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "newBombSiteTitle": "New Bomb Site",
+  "@newBombSiteTitle": {
+    "description": "Title for new bomb site screen"
+  },
+  "editBombSiteTitle": "Edit Bomb Site",
+  "@editBombSiteTitle": {
+    "description": "Title for edit bomb site screen"
+  },
+  "bombSiteNameLabel": "Site Name *",
+  "@bombSiteNameLabel": {
+    "description": "Label for bomb site name input"
+  },
+  "siteNameRequiredError": "Please enter a name for the site",
+  "@siteNameRequiredError": {
+    "description": "Error for required bomb site name"
+  },
+  "radiusMetersLabel": "Radius (meters) *",
+  "@radiusMetersLabel": {
+    "description": "Label for bomb site radius input"
+  },
+  "radiusHelperText": "Radius of the zone where the bomb can be planted/defused",
+  "@radiusHelperText": {
+    "description": "Helper text for bomb site radius"
+  },
+  "radiusRequiredError": "Please enter a radius",
+  "@radiusRequiredError": {
+    "description": "Error for required bomb site radius"
+  },
+  "invalidRadiusError": "Invalid radius",
+  "@invalidRadiusError": {
+    "description": "Error for invalid bomb site radius"
+  },
+  "siteColorLabel": "Site Color:",
+  "@siteColorLabel": {
+    "description": "Label for bomb site color selection"
+  },
+  "positionLabel": "Position: {lat}, {long}",
+  "@positionLabel": {
+    "description": "Label displaying coordinates",
+    "placeholders": {
+      "lat": {},
+      "long": {}
+    }
+  },
+  "createSiteButton": "Create Site",
+  "@createSiteButton": {
+    "description": "Button text to create a bomb site"
+  },
+  "updateSiteButton": "Update Site",
+  "@updateSiteButton": {
+    "description": "Button text to update a bomb site"
+  },
+  "siteSavedSuccess": "Site saved successfully",
+  "@siteSavedSuccess": {
+    "description": "Success message when bomb site is saved"
+  },
+  "errorSavingSite": "Error saving site: {error}",
+  "@errorSavingSite": {
+    "description": "Error message when saving bomb site fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "bombSiteListScreenTitle": "Bomb Sites: {scenarioName}",
+  "@bombSiteListScreenTitle": {
+    "description": "App bar title for bomb site list screen",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "errorLoadingSites": "Error loading sites: {error}",
+  "@errorLoadingSites": {
+    "description": "Error message when loading bomb sites fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "addSiteButton": "Add Site",
+  "@addSiteButton": {
+    "description": "Button text/tooltip to add a bomb site"
+  },
+  "noBombSitesDefined": "No bomb sites defined",
+  "@noBombSitesDefined": {
+    "description": "Message when no bomb sites are defined"
+  },
+  "addSitesInstruction": "Add sites where bombs can be planted and defused.",
+  "@addSitesInstruction": {
+    "description": "Instructional message to add bomb sites"
+  },
+  "siteDetailsSubtitle": "Radius: {radius}m • Position: {lat}, {long}",
+  "@siteDetailsSubtitle": {
+    "description": "Subtitle for bomb site list item",
+    "placeholders": {
+      "radius": {},
+      "lat": {},
+      "long": {}
+    }
+  },
+  "confirmDeleteSiteMessage": "Are you sure you want to delete site \"{siteName}\"?",
+  "@confirmDeleteSiteMessage": {
+    "description": "Confirmation message for deleting a bomb site",
+    "placeholders": {
+      "siteName": {}
+    }
+  },
+  "siteDeletedSuccess": "Site deleted successfully",
+  "@siteDeletedSuccess": {
+    "description": "Success message when bomb site is deleted"
+  },
+  "errorDeletingSite": "Error deleting site: {error}",
+  "@errorDeletingSite": {
+    "description": "Error message when deleting bomb site fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "pointsAwarded": "+{points} points",
+  "@pointsAwarded": {
+    "description": "Points awarded message in treasure popup",
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "scanQRCodeTitle": "Scan QR Code",
+  "@scanQRCodeTitle": {
+    "description": "Title for QR code scanner screen"
+  },
+  "gameNotActiveError": "Game is not active",
+  "@gameNotActiveError": {
+    "description": "Error message if game is not active during scan"
+  },
+  "scanError": "Error during scan: {error}",
+  "@scanError": {
+    "description": "Error message during QR scan",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "treasureFoundTitle": "Treasure Found!",
+  "@treasureFoundTitle": {
+    "description": "Title for treasure found dialog/popup"
+  },
+  "defaultTreasureName": "Treasure",
+  "@defaultTreasureName": {
+    "description": "Default name for a treasure if not specified"
+  },
+  "totalScoreLabel": "Total score: {score} points",
+  "@totalScoreLabel": {
+    "description": "Label showing total score after finding a treasure",
+    "placeholders": {
+      "score": {}
+    }
+  },
+  "qrCodesScreenTitle": "QR Codes - {scenarioName}",
+  "@qrCodesScreenTitle": {
+    "description": "Title for QR codes display screen",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "printButton": "Print",
+  "@printButton": {
+    "description": "Label for print button"
+  },
+  "printingNotAvailableError": "Printing not available on this platform",
+  "@printingNotAvailableError": {
+    "description": "Error message if printing is not supported"
+  },
+  "directPrintButton": "Direct Print",
+  "@directPrintButton": {
+    "description": "Label for direct print button"
+  },
+  "downloadZipButton": "Download ZIP",
+  "@downloadZipButton": {
+    "description": "Label for download ZIP button"
+  },
+  "shareButton": "Share",
+  "@shareButton": {
+    "description": "Label for share button"
+  },
+  "qrCodesForScenarioShareText": "QR Codes for {scenarioName}",
+  "@qrCodesForScenarioShareText": {
+    "description": "Default text when sharing QR codes",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "qrCodesDisplayInstructions": "Print, download, or share these QR codes for your treasure hunt.",
+  "@qrCodesDisplayInstructions": {
+    "description": "Instructions on the QR codes display screen"
+  },
+  "defaultTreasureNameIndexed": "Treasure {index}",
+  "@defaultTreasureNameIndexed": {
+    "description": "Default indexed name for a treasure",
+    "placeholders": {
+      "index": {}
+    }
+  },
+  "noQRCodesToShareError": "No QR codes to share",
+  "@noQRCodesToShareError": {
+    "description": "Error message if there are no QR codes to share"
+  },
+  "sharingError": "Error while sharing: {error}",
+  "@sharingError": {
+    "description": "Error message during content sharing",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "zipCreationError": "Error creating ZIP: {error}",
+  "@zipCreationError": {
+    "description": "Error message when ZIP file creation fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "scoreboardScreenTitle": "Scores - {scenarioName}",
+  "@scoreboardScreenTitle": {
+    "description": "Title for the scoreboard screen",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "errorLoadingScoreboard": "Error loading scoreboard: {error}",
+  "@errorLoadingScoreboard": {
+    "description": "Error message when scoreboard loading fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "scoreboardHeader": "Scoreboard - {scenarioName}",
+  "@scoreboardHeader": {
+    "description": "Header text for the scoreboard",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "scoresLockedLabel": "Scores locked",
+  "@scoresLockedLabel": {
+    "description": "Label indicating scores are locked"
+  },
+  "scoresUnlockedLabel": "Scores unlocked",
+  "@scoresUnlockedLabel": {
+    "description": "Label indicating scores are unlocked"
+  },
+  "unlockButton": "Unlock",
+  "@unlockButton": {
+    "description": "Button text to unlock scores"
+  },
+  "lockButton": "Lock",
+  "@lockButton": {
+    "description": "Button text to lock scores"
+  },
+  "resetButton": "Reset",
+  "@resetButton": {
+    "description": "Button text to reset scores"
+  },
+  "resetScoresTitle": "Reset Scores",
+  "@resetScoresTitle": {
+    "description": "Dialog title for reset scores confirmation"
+  },
+  "resetScoresConfirmationMessage": "Are you sure you want to reset all scores? This action is irreversible.",
+  "@resetScoresConfirmationMessage": {
+    "description": "Confirmation message for resetting scores"
+  },
+  "unknownTeamName": "Unknown Team",
+  "@unknownTeamName": {
+    "description": "Placeholder for an unknown team name"
+  },
+  "treasuresFoundCount": "{count} treasures found",
+  "@treasuresFoundCount": {
+    "description": "Label showing number of treasures found",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "pointsSuffix": "{score} pts",
+  "@pointsSuffix": {
+    "description": "Suffix for points display",
+    "placeholders": {
+      "score": {}
+    }
+  },
+  "unknownPlayerName": "Unknown Player",
+  "@unknownPlayerName": {
+    "description": "Placeholder for an unknown player name"
+  },
+  "editTreasureTitle": "Edit Treasure",
+  "@editTreasureTitle": {
+    "description": "Title for the edit treasure screen"
+  },
+  "errorUpdatingTreasure": "Error updating treasure: {error}",
+  "@errorUpdatingTreasure": {
+    "description": "Error message when updating treasure fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "treasureNameLabel": "Treasure Name",
+  "@treasureNameLabel": {
+    "description": "Label for treasure name input"
+  },
+  "nameRequiredError": "Please enter a name",
+  "@nameRequiredError": {
+    "description": "Error for required name field"
+  },
+  "valuePointsLabel": "Value (points)",
+  "@valuePointsLabel": {
+    "description": "Label for treasure value input"
+  },
+  "invalidNumberError": "Please enter a valid number",
+  "@invalidNumberError": {
+    "description": "Error for invalid number input"
+  },
+  "symbolLabel": "Symbol",
+  "@symbolLabel": {
+    "description": "Label for treasure symbol selection"
+  },
+  "saveChangesButton": "Save Changes",
+  "@saveChangesButton": {
+    "description": "Button text to save changes"
+  },
+  "treasureHuntConfigTitle": "Configuration - {scenarioName}",
+  "@treasureHuntConfigTitle": {
+    "description": "Title for treasure hunt configuration screen",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "errorLoadingTreasureHuntScenario": "Error loading Treasure Hunt scenario: {error}",
+  "@errorLoadingTreasureHuntScenario": {
+    "description": "Error loading treasure hunt scenario details",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "treasureHuntSetupTitle": "Treasure Hunt Setup",
+  "@treasureHuntSetupTitle": {
+    "description": "Section title for treasure hunt setup"
+  },
+  "numberOfQRCodesLabel": "Number of QR codes",
+  "@numberOfQRCodesLabel": {
+    "description": "Label for number of QR codes input"
+  },
+  "qrCodeCountHelperText": "Between 1 and 50",
+  "@qrCodeCountHelperText": {
+    "description": "Helper text for QR code count input"
+  },
+  "numberRequiredError": "Please enter a number",
+  "@numberRequiredError": {
+    "description": "Error for required number field"
+  },
+  "qrCodeCountRangeError": "Number must be between 1 and 50",
+  "@qrCodeCountRangeError": {
+    "description": "Error for QR code count out of range"
+  },
+  "defaultValuePointsLabel": "Default Value (points)",
+  "@defaultValuePointsLabel": {
+    "description": "Label for default treasure value input"
+  },
+  "defaultSymbolLabel": "Default Symbol",
+  "@defaultSymbolLabel": {
+    "description": "Label for default treasure symbol selection"
+  },
+  "generateQRCodesButton": "Generate QR Codes",
+  "@generateQRCodesButton": {
+    "description": "Button text to generate QR codes"
+  },
+  "errorCreatingTreasures": "Error creating treasures: {error}",
+  "@errorCreatingTreasures": {
+    "description": "Error message when treasure creation fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "viewExistingTreasuresButton": "View Existing Treasures ({count})",
+  "@viewExistingTreasuresButton": {
+    "description": "Button to view existing treasures, shows count",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "treasuresScreenTitle": "Treasures - {scenarioName}",
+  "@treasuresScreenTitle": {
+    "description": "Title for treasures list screen",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "errorLoadingTreasures": "Error loading treasures: {error}",
+  "@errorLoadingTreasures": {
+    "description": "Error message when loading treasures fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noTreasuresFoundForScenario": "No treasures found for this scenario",
+  "@noTreasuresFoundForScenario": {
+    "description": "Message when no treasures are found for a scenario"
+  },
+  "scenarioNameHeader": "Scenario: {scenarioName}",
+  "@scenarioNameHeader": {
+    "description": "Header showing the scenario name",
+    "placeholders": {
+      "scenarioName": {}
+    }
+  },
+  "numberOfTreasuresLabel": "Number of treasures: {count}",
+  "@numberOfTreasuresLabel": {
+    "description": "Label showing the number of treasures",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "treasureValueSubtitle": "Value: {points} points",
+  "@treasureValueSubtitle": {
+    "description": "Subtitle showing treasure value",
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "viewQRCodesButton": "View QR Codes",
+  "@viewQRCodesButton": {
+    "description": "Button text to view QR codes"
+  },
+  "confirmDeleteTreasureTitle": "Delete this treasure?",
+  "@confirmDeleteTreasureTitle": {
+    "description": "Dialog title for delete treasure confirmation"
+  },
+  "confirmDeleteTreasureMessage": "Are you sure you want to delete \"{treasureName}\"?",
+  "@confirmDeleteTreasureMessage": {
+    "description": "Confirmation message for deleting a treasure",
+    "placeholders": {
+      "treasureName": {}
+    }
+  },
+  "errorDeletingTreasure": "Error deleting treasure: {error}",
+  "@errorDeletingTreasure": {
+    "description": "Error message when deleting treasure fails",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "toggleFlash": "Toggle Flash",
+  "@toggleFlash": {
+    "description": "Tooltip for toggle flash button"
+  },
+  "switchCamera": "Switch Camera",
+  "@switchCamera": {
+    "description": "Tooltip for switch camera button"
+  },
+  "mapTab": "Map",
+  "scenariosTab": "Scenarios",
+  "nonInteractiveMapTitle": "Non-interactive map",
+  "nonInteractiveMapMessage": "This map does not have the interactive configuration required for the 'Bomb Operation' scenario.\n\nYou must first configure this map in the interactive map editor or select another map that is already configured.",
+  "backButton": "Back",
+  "configureBombOperation": "Configure Bomb Operation",
+  "bombOperationDescription": "Two teams face off:\n🔴 Terrorists – Their mission: activate the bomb in a designated area and start the countdown.\n🔵 Counter-Terrorists – Their goal: find and defuse the bomb before it explodes.\n\n🎯 If the timer reaches zero → imaginary explosion → terrorists win.\n🛡️ Bomb defused in time → counter-terrorists win.\n\n💣 Objective: speed, stealth, and precision. Good luck, soldiers!",
+  "bombSite": "Site"
 }

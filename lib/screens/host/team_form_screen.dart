@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/team.dart';
 import '../../services/api_service.dart';
 
 class TeamFormScreen extends StatefulWidget {
   final Team? team;
-  
+
   const TeamFormScreen({Key? key, this.team}) : super(key: key);
 
   @override
@@ -18,20 +19,22 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   String? _selectedColor;
-  
+
   bool _isLoading = false;
-  
-  final List<Map<String, dynamic>> _colorOptions = [
-    {'name': 'Rouge', 'value': '#FF0000'},
-    {'name': 'Bleu', 'value': '#0000FF'},
-    {'name': 'Vert', 'value': '#00FF00'},
-    {'name': 'Jaune', 'value': '#FFFF00'},
-    {'name': 'Orange', 'value': '#FFA500'},
-    {'name': 'Violet', 'value': '#800080'},
-    {'name': 'Noir', 'value': '#000000'},
-    {'name': 'Blanc', 'value': '#FFFFFF'},
-  ];
-  
+
+  List<Map<String, dynamic>> _getColorOptions(AppLocalizations l10n) {
+    return [
+      {'name': l10n.colorRed, 'value': '#FF0000'},
+      {'name': l10n.colorBlue, 'value': '#0000FF'},
+      {'name': l10n.colorGreen, 'value': '#00FF00'},
+      {'name': l10n.colorYellow, 'value': '#FFFF00'},
+      {'name': l10n.colorOrange, 'value': '#FFA500'},
+      {'name': l10n.colorPurple, 'value': '#800080'},
+      {'name': l10n.colorBlack, 'value': '#000000'},
+      {'name': l10n.colorWhite, 'value': '#FFFFFF'},
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,30 +44,31 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
       _selectedColor = widget.team!.color;
     }
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _saveTeam() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
         final apiService = GetIt.I<ApiService>();
-        
+
         final team = Team(
           id: widget.team!.id,
           name: _nameController.text,
           description: _descriptionController.text,
           color: _selectedColor,
         );
-        
+
         if (widget.team == null) {
           // Créer une nouvelle équipe
           await apiService.post('teams', team.toJson());
@@ -72,11 +76,11 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
           // Mettre à jour une équipe existante
           await apiService.put('teams/${widget.team!.id}', team.toJson());
         }
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Équipe sauvegardée avec succès'),
+            SnackBar(
+              content: Text(l10n.teamSavedSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -86,7 +90,7 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
+              content: Text(l10n.error + e.toString()),
               backgroundColor: Colors.red,
             ),
           );
@@ -103,9 +107,11 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorOptions = _getColorOptions(l10n);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.team == null ? 'Nouvelle équipe' : 'Modifier l\'équipe'),
+        title: Text(widget.team == null ? l10n.newTeamScreenTitle : l10n.editTeamTitle),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -118,13 +124,13 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nom de l\'équipe *',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.teamName,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer un nom pour l\'équipe';
+                          return l10n.teamNameRequiredError;
                         }
                         return null;
                       },
@@ -132,20 +138,20 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.fieldDescriptionLabel,
+                        border: const OutlineInputBorder(),
                       ),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: _selectedColor,
-                      decoration: const InputDecoration(
-                        labelText: 'Couleur de l\'équipe',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.teamColorLabel,
+                        border: const OutlineInputBorder(),
                       ),
-                      items: _colorOptions.map((color) {
+                      items: colorOptions.map((color) {
                         return DropdownMenuItem<String>(
                           value: color['value'],
                           child: Row(
@@ -178,7 +184,7 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: Text(
-                        widget.team == null ? 'Créer l\'équipe' : 'Mettre à jour l\'équipe',
+                        widget.team == null ? l10n.createTeam : l10n.updateTeamButton,
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -188,7 +194,7 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
             ),
     );
   }
-  
+
   Color _hexToColor(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');

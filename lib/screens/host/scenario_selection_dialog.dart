@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/scenario/scenario_dto.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_scenario.dart';
 import '../../services/api_service.dart';
@@ -141,6 +142,7 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -150,9 +152,9 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Sélectionner les scénarios',
-              style: TextStyle(
+            Text(
+              l10n.selectScenariosDialogTitle,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -171,13 +173,13 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _loadScenarios,
-                    child: const Text('Réessayer'),
+                    child: Text(l10n.retryButton),
                   ),
                 ],
               )
             else if (_scenarios.isEmpty)
-              const Text(
-                'Aucun scénario disponible.\nCréez un scénario d\'abord.',
+              Text(
+                l10n.noScenariosAvailableDialogMessage,
                 textAlign: TextAlign.center,
               )
             else
@@ -224,12 +226,12 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
                   onPressed: () {
                     Navigator.pop(context); // Annuler => rien ne retourne
                   },
-                  child: const Text('Annuler'),
+                  child: Text(l10n.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => _validateScenarioSelection(
                       context, _scenarios, _selectedScenarioIds),
-                  child: const Text('Valider'),
+                  child: Text(l10n.validateButton),
                 ),
               ],
             ),

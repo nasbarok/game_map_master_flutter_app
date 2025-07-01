@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/scenario.dart';
 import '../../models/game_map.dart';
 import '../../services/api_service.dart';
@@ -28,15 +30,18 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
   GameMap? _selectedMap;
   List<GameMap> _availableMaps = [];
   List<GameMap> _validMaps = []; // Cartes avec configuration interactive valide
+  bool _didLoadMaps = false; // Pour s'assurer de ne charger qu'une fois
 
   bool _isLoading = false;
   bool _isLoadingMaps = true;
 
-  final List<Map<String, dynamic>> _scenarioTypes = [
-    {'name': 'Chasse au trésor', 'value': 'treasure_hunt'},
-    {'name': 'Opération Bombe', 'value': 'bomb_operation'},
-    {'name': 'Domination', 'value': 'domination'},
-  ];
+  List<Map<String, dynamic>> _getScenarioTypes(AppLocalizations l10n) {
+    return [
+      {'name': l10n.treasureHunt, 'value': 'treasure_hunt'},
+      {'name': l10n.scenarioTypeBombOperation, 'value': 'bomb_operation'},
+      {'name': l10n.scenarioTypeDomination, 'value': 'domination'},
+    ];
+  }
 
   @override
   void initState() {
@@ -48,11 +53,19 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
     } else {
       _selectedType = null; //  Aucun type sélectionné au départ
     }
+  }
 
-    _loadMaps();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didLoadMaps) {
+      _didLoadMaps = true; // Pour éviter de recharger inutilement si rebuild
+      _loadMaps();
+    }
   }
 
   Future<void> _loadMaps() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoadingMaps = true;
     });
@@ -101,7 +114,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
-                Text('Erreur lors du chargement des cartes: ${e.toString()}'),
+                Text(l10n.errorLoadingMaps(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -117,11 +130,12 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
   }
 
   Future<void> _saveScenario() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       if (_selectedMap == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Veuillez sélectionner une carte'),
+          SnackBar(
+            content: Text(l10n.mapRequiredError),
             backgroundColor: Colors.red,
           ),
         );
@@ -133,9 +147,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
           (_selectedType == 'bomb_operation' ||
               _selectedType == 'treasure_hunt')) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Cette carte n\'a pas de configuration interactive. Veuillez sélectionner une autre carte ou configurer celle-ci dans l\'éditeur de carte.'),
+          SnackBar(
+            content: Text(l10n.interactiveMapRequiredError),
             backgroundColor: Colors.orange,
           ),
         );
@@ -170,8 +183,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Scénario sauvegardé avec succès'),
+            SnackBar(
+              content: Text(l10n.scenarioSavedSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -181,7 +194,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
+              content: Text(l10n.error + e.toString()),
               backgroundColor: Colors.red,
             ),
           );
@@ -198,11 +211,13 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scenarioTypes = _getScenarioTypes(l10n);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.scenario == null
-            ? 'Nouveau scénario'
-            : 'Modifier le scénario'),
+            ? l10n.newScenarioTitle
+            : l10n.editScenario),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -215,13 +230,13 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nom du scénario *',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.scenarioName,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer un nom pour le scénario';
+                          return l10n.scenarioNameRequiredError;
                         }
                         return null;
                       },
@@ -229,20 +244,23 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.scenarioDescription,
+                        border: const OutlineInputBorder(),
                       ),
                       maxLines: 3,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(500), // bloque au-delà de 500 caractères
+                      ],
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: _selectedType,
-                      decoration: const InputDecoration(
-                        labelText: 'Type de scénario *',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.scenarioTypeLabel,
+                        border: const OutlineInputBorder(),
                       ),
-                      items: _scenarioTypes.map((type) {
+                      items: scenarioTypes.map((type) {
                         return DropdownMenuItem<String>(
                           value: type['value'],
                           child: Text(type['name']),
@@ -260,9 +278,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                                   });
 
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          "Veuillez d'abord sélectionner une carte avant de choisir le type de scénario."),
+                                    SnackBar(
+                                      content: Text(l10n.selectMapFirstError),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
@@ -289,7 +306,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                             },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez sélectionner un type de scénario';
+                          return l10n.scenarioTypeRequiredError;
                         }
                         return null;
                       },
@@ -310,7 +327,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                           );
                         },
                         icon: const Icon(Icons.settings),
-                        label: const Text('Configurer la chasse au trésor'),
+                        label: Text(l10n.configureTreasureHuntButton),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           backgroundColor: Colors.blueGrey,
@@ -334,7 +351,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                           );
                         },
                         icon: const Icon(Icons.settings),
-                        label: const Text('Configurer l\'opération bombe'),
+                        label: Text(l10n.configureBombOperationButton),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           backgroundColor: Colors.blueGrey,
@@ -345,12 +362,12 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                     _isLoadingMaps
                         ? const Center(child: CircularProgressIndicator())
                         : _availableMaps.isEmpty
-                            ? const Card(
+                            ? Card(
                                 child: Padding(
-                                  padding: EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.all(16.0),
                                   child: Text(
-                                    'Aucune carte disponible. Veuillez d\'abord créer une carte.',
-                                    style: TextStyle(color: Colors.red),
+                                    l10n.noMapAvailableError,
+                                    style: const TextStyle(color: Colors.red),
                                   ),
                                 ),
                               )
@@ -365,16 +382,16 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                                           const EdgeInsets.only(bottom: 8.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          Icon(
+                                        children: [
+                                          const Icon(
                                             Icons.map,
                                             color: Colors.green,
                                             size: 16,
                                           ),
-                                          SizedBox(width: 4),
+                                          const SizedBox(width: 4),
                                           Text(
-                                            'Carte interactive disponible',
-                                            style: TextStyle(
+                                            l10n.interactiveMapAvailableLegend,
+                                            style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.grey,
                                             ),
@@ -384,9 +401,9 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                                     ),
                                   DropdownButtonFormField<GameMap>(
                                     value: _selectedMap,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Carte *',
-                                      border: OutlineInputBorder(),
+                                    decoration: InputDecoration(
+                                      labelText: l10n.mapName, // Assuming mapNameLabel can be reused or create a specific one like 'Map *'
+                                      border: const OutlineInputBorder(),
                                     ),
                                     items: _availableMaps.map((map) {
                                       final bool needsInteractiveMap =
@@ -437,7 +454,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                                     },
                                     validator: (value) {
                                       if (value == null) {
-                                        return 'Veuillez sélectionner une carte';
+                                        return l10n.mapRequiredError;
                                       }
                                       return null;
                                     },
@@ -452,8 +469,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                       ),
                       child: Text(
                         widget.scenario == null
-                            ? 'Créer le scénario'
-                            : 'Mettre à jour le scénario',
+                            ? l10n.createScenario
+                            : l10n.updateScenarioButton,
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -465,6 +482,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
   }
 
   Future<void> _handleTreasureHuntTypeSelected() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final scenarioService = context.read<ScenarioService>();
       final authService = GetIt.I<AuthService>();
@@ -474,7 +492,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
         id: widget.scenario?.id,
         name: _nameController.text.isNotEmpty
             ? _nameController.text
-            : 'Scénario de chasse au trésor',
+            : l10n.treasureHunt, // Default name if empty
         description: _descriptionController.text,
         type: 'treasure_hunt',
         gameMapId: _selectedMap?.id,
@@ -509,7 +527,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la création du scénario: $e'),
+            content: Text(l10n.error + e.toString()), // Assuming a general error key
             backgroundColor: Colors.red,
           ),
         );

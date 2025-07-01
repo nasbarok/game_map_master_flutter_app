@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:game_map_master_flutter_app/utils/app_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
 import '../../models/game_map.dart';
 import '../../models/game_session.dart';
@@ -32,6 +34,8 @@ class TerrainDashboardScreen extends StatefulWidget {
 class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   late WebSocketService _webSocketService;
 
+  late Locale flutterLocale;
+
   @override
   void initState() {
     super.initState();
@@ -40,7 +44,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
+    flutterLocale = Localizations.localeOf(context);
     // Initialisation sûre ici
     _webSocketService = context.read<WebSocketService>();
     _webSocketService.addListener(_updateConnectedPlayers);
@@ -69,12 +73,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _selectScenarios() async {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez d\'abord ouvrir une carte'),
+        SnackBar(
+          content: Text(l10n.selectMapError),
           backgroundColor: Colors.red,
         ),
       );
@@ -93,8 +98,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         gameStateService.setSelectedScenarios(selectedScenarios);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Scénarios sélectionnés'),
+          SnackBar(
+            content: Text(l10n.scenariosSelectedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -103,12 +108,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _setGameDuration() {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
 
     if (!gameStateService.isTerrainOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez d\'abord ouvrir une carte'),
+        SnackBar(
+          content: Text(l10n.selectMapError),
           backgroundColor: Colors.red,
         ),
       );
@@ -128,65 +134,64 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Durée définie: ${time.hour}h ${time.minute}min'),
+            content: Text(l10n.durationSetSuccess(time.hour.toString(), time.minute.toString())),
             backgroundColor: Colors.green,
           ),
         );
       },
       currentTime: DateTime(2022, 1, 1, 0, 0),
       // Commencer à 00:00
-      locale: LocaleType.fr,
+      locale: AppUtils.getDatePickerLocale(flutterLocale),
     );
   }
 
   void _startGame() async {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
 
     // Vérif : terrain ouvert ?
     if (!gameStateService.isTerrainOpen) {
-      _showError('Veuillez d\'abord ouvrir une carte');
+      _showError(l10n.selectMapError);
       return;
     }
 
     // Vérif : scénarios ?
     final selectedScenarios = gameStateService.selectedScenarios ?? [];
     if (selectedScenarios.isEmpty) {
-      _showError('Veuillez sélectionner au moins un scénario');
+      _showError(l10n.noScenarioSelected); // Assuming noScenarioSelected exists or create it
       return;
     }
 
     // Vérif : scénario bombe ?
     final hasBombScenario =
         selectedScenarios.any((s) => s.scenario.type == 'bomb_operation');
-    // 👉 On affiche un loader pour toute la phase d'initialisation + navigation
-    //await _showLoadingDialog('Lancement de la partie...');
+
     try {
       if (hasBombScenario) {
-        await _initBombOperationScenario(); // Config + valid // Cette méthode affiche son propre dialog pour la sélection des rôles
+        await _initBombOperationScenario();
       }
-      // Afficher le dialog de chargement APRÈS la configuration des rôles
-      _showLoadingDialog('Lancement de la partie...');
+      _showLoadingDialog(l10n.loadingDialogMessage);
       try {
         logger.d(
             '🚀 [TerrainDashboardScreen] [_startGame] Début de création de la session de jeu');
-        final gameSession = await _initGameSession(); // Création GameSession
+        final gameSession = await _initGameSession();
 
         logger.d(
             '✅ [TerrainDashboardScreen] [_startGame] Session créée, lancement de l\'écran de jeu');
-        await _launchGameScreen(gameSession); // Démarrage + navigation
-        _showSuccess('La partie a été lancée !');
+        await _launchGameScreen(gameSession);
+        _showSuccess(l10n.gameStartedSuccess);
       } catch (e) {
-        // Fermer le dialog de chargement en cas d'erreur
         Navigator.of(context).pop();
-        throw e; // Propager l'erreur pour le bloc catch externe
+        throw e;
       }
     } catch (e) {
       logger.e('❌ Erreur globale _startGame: $e');
-      _showError('Erreur lors du lancement de la partie : $e');
+      _showError(l10n.errorStartingGame(e.toString()));
     }
   }
 
   Future<void> _initBombOperationScenario() async {
+    final l10n = AppLocalizations.of(context)!;
     final teamService = context.read<TeamService>();
     final bombOperationService = context.read<BombOperationService>();
     final gameStateService = context.read<GameStateService>();
@@ -198,32 +203,30 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         scenarios.firstWhere((s) => s.scenario.type == 'bomb_operation');
 
     if (activeTeams.length != 2) {
-      throw Exception(
-          'Le scénario "Opération Bombe" nécessite exactement 2 équipes avec joueurs.');
+      throw Exception(l10n.bombScenarioRequiresTwoTeamsError);
     }
 
     final Map<int, BombOperationTeam>? assignedRoles =
         await showDialog<Map<int, BombOperationTeam>>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Configuration de l\'Opération Bombe'),
+        title: Text(l10n.bombConfigurationTitle),
         content: BombOperationTeamRoleSelector(
           teams: activeTeams,
           onRolesAssigned: (roles) => Navigator.of(context).pop(roles),
-          gameSessionId: 0, // pas encore créée
+          gameSessionId: 0,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(null),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
     );
 
-    if (assignedRoles == null) throw Exception('Configuration annulée.');
+    if (assignedRoles == null) throw Exception(l10n.bombConfigurationCancelled);
 
-    // 👉 On stocke pour usage après création session
     gameStateService.setBombOperationConfig(BombOperationScenarioConfig(
       roles: assignedRoles,
       scenarioId: bombScenario.scenario.id!,
@@ -277,10 +280,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     gameStateService.setGameRunning(true);
     gameStateService.setActiveGameSession(startedSession);
 
-    // ✅ Laisser la frame se terminer avant de fermer le dialog
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) {
-        Navigator.of(context).pop(); // ❗Ferme le dialog sans conflit visuel
+        Navigator.of(context).pop();
       }
 
       Navigator.push(
@@ -299,23 +301,23 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _stopGame() {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = GetIt.I<GameStateService>();
     gameStateService.stopGameLocally();
     gameStateService.stopGameRemotely();
 
-    // Logique pour arrêter la partie via WebSocket
     final webSocketService = GetIt.I<WebSocketService>();
-    // webSocketService.stopGame();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('La partie a été arrêtée'),
+      SnackBar(
+        content: Text(l10n.gameEndedMessage), // Assuming gameEndedMessage is appropriate
         backgroundColor: Colors.orange,
       ),
     );
   }
 
   void _selectMap() async {
+    final l10n = AppLocalizations.of(context)!;
     final apiService = context.read<ApiService>();
     final gameStateService = context.read<GameStateService>();
 
@@ -326,8 +328,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
       if (maps.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Aucune carte disponible'),
+          SnackBar(
+            content: Text(l10n.noMapAvailable),
             backgroundColor: Colors.orange,
           ),
         );
@@ -342,7 +344,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           return StatefulBuilder(
             builder: (context, setState) {
               return AlertDialog(
-                title: const Text('Sélectionner une carte'),
+                title: Text(l10n.selectMap),
                 content: DropdownButton<GameMap>(
                   isExpanded: true,
                   value: tempSelectedMap,
@@ -361,13 +363,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Annuler'),
+                    child: Text(l10n.cancel),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop(tempSelectedMap);
                     },
-                    child: const Text('Valider'),
+                    child: Text(l10n.validateButton),
                   ),
                 ],
               );
@@ -379,7 +381,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           gameStateService.selectMap(selectedMap);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Carte "${selectedMap.name}" sélectionnée'),
+              content: Text(l10n.mapSelectedSuccess(selectedMap.name)),
               backgroundColor: Colors.blue,
             ),
           );
@@ -388,7 +390,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors du chargement des cartes : $e'),
+          content: Text(l10n.errorLoadingMaps(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -396,13 +398,15 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _toggleTerrainOpen() async {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
     final apiService = context.read<ApiService>();
     final playerConnectionService = context.read<PlayerConnectionService>();
-    GameMap selectedMap = gameStateService.selectedMap!;
+    GameMap? selectedMap = gameStateService.selectedMap; // Make nullable
 
     if (selectedMap == null) {
-      logger.d('❌ Aucune carte sélectionnée.');
+      logger.d('❌ ${l10n.selectMapError}'); // Use a general "select map first" message
+      _showError(l10n.selectMapError);
       return;
     }
 
@@ -415,7 +419,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         if (field == null || field.closedAt != null) {
           logger.d('🛠 Création d’un terrain via POST /fields...');
           final fieldResponse = await apiService.post('fields', {
-            'name': 'Terrain de ${selectedMap.name}',
+            'name': l10n.fieldLabel(selectedMap.name), // Example of using a localized string for field name
             'description': selectedMap.description ?? '',
           });
           field = Field.fromJson(fieldResponse);
@@ -437,6 +441,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         });
         logger.d('✅ Terrain ouvert côté serveur : $response');
         gameStateService.setTerrainOpen(true);
+         _showSuccess(l10n.fieldOpenedSuccess(field.name));
+
 
         try {
           await gameStateService.connectHostToField();
@@ -468,6 +474,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         final fieldId = field?.id;
         if (fieldId == null) {
           logger.d('❌ Impossible de fermer : aucun terrain associé à la carte');
+           _showError(l10n.noAssociatedField);
           return;
         }
 
@@ -478,6 +485,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         });
         logger.d('✅ Terrain fermé côté serveur : $response');
         gameStateService.setTerrainOpen(false);
+        _showSuccess(l10n.fieldClosedSuccess);
 
         // 🔄 Dissocier le terrain de la carte
         final updatedMap = selectedMap.copyWith(field: null);
@@ -489,18 +497,24 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         gameStateService.selectMap(null);
       }
     } catch (e) {
-      logger.d('❌ Erreur lors de l’ouverture/fermeture du terrain : $e');
+      logger.d('❌ ${l10n.errorOpeningClosingField(e.toString())}');
+       _showError(l10n.errorOpeningClosingField(e.toString()));
     }
   }
 
   // méthode pour gérer l'hôte comme joueur
   void _toggleHostAsPlayer() async {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
     final authService = context.read<AuthService>();
     final playerConnectionService = context.read<PlayerConnectionService>();
 
     final user = authService.currentUser!;
-    final mapId = gameStateService.selectedMap!.id;
+    // Ensure selectedMap is not null before accessing its properties
+    if (gameStateService.selectedMap == null || gameStateService.selectedMap!.field == null) {
+        _showError(l10n.selectMapError); // Or a more specific error
+        return;
+    }
     final fieldId = gameStateService.selectedMap!.field?.id;
 
     // Vérifier si l'hôte est déjà dans la liste des joueurs
@@ -527,12 +541,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: ${e.toString()}')),
+        SnackBar(content: Text(l10n.error + e.toString())),
       );
     }
   }
 
   Widget _buildSelectedMapCard(GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedMap = gameStateService.selectedMap;
     if (selectedMap == null) return const SizedBox();
 
@@ -546,7 +561,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            selectedMap.name,
+            l10n.mapCardTitle(selectedMap.name),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
@@ -583,6 +598,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   Widget _buildInfoCards(GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 12,
       runSpacing: 12,
@@ -590,21 +606,21 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       children: [
         _buildInfoCard(
           icon: Icons.people,
-          title: 'Joueurs',
+          title: l10n.playersTab,
           value: '${gameStateService.connectedPlayersList.length}',
         ),
         _buildInfoCard(
           icon: Icons.videogame_asset,
-          title: 'Scénarios',
+          title: l10n.scenariosLabel,
           value: gameStateService.selectedScenarios?.isEmpty ?? true
-              ? 'Aucun'
+              ? l10n.noScenarioInfoCard
               : '${gameStateService.selectedScenarios!.length}',
         ),
         _buildInfoCard(
           icon: Icons.timer,
-          title: 'Durée',
+          title: l10n.duration,
           value: gameStateService.gameDuration == null
-              ? 'Illimitée'
+              ? l10n.unlimitedDurationInfoCard
               : '${gameStateService.gameDuration} min',
         ),
       ],
@@ -612,6 +628,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   Widget _buildFieldStatus(GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -624,7 +641,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Statut: ${gameStateService.isTerrainOpen ? "Terrain ouvert" : "Terrain fermé"}',
+            l10n.sessionStatusLabel(gameStateService.isTerrainOpen ? l10n.fieldStatusOpen : l10n.fieldStatusClosed),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: gameStateService.isTerrainOpen ? Colors.green : Colors.red,
@@ -637,8 +654,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                   ? Icons.close
                   : Icons.door_front_door),
               label: Text(gameStateService.isTerrainOpen
-                  ? 'Fermer le terrain'
-                  : 'Ouvrir le terrain'),
+                  ? l10n.closeField
+                  : l10n.openField),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     gameStateService.isTerrainOpen ? Colors.red : Colors.green,
@@ -651,10 +668,11 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   Widget _buildGameConfiguration(GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Text(
-          'Configuration de la partie',
+          l10n.gameConfigurationTitle,
           style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -664,8 +682,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           icon: const Icon(Icons.map),
           label: Text(
             gameStateService.selectedMap != null
-                ? 'Carte : ${gameStateService.selectedMap!.name}'
-                : 'Choisir une carte',
+                ? l10n.mapLabel(gameStateService.selectedMap!.name)
+                : l10n.selectMapButtonLabel,
           ),
         ),
         const SizedBox(height: 16),
@@ -676,7 +694,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 onPressed:
                     gameStateService.isTerrainOpen ? _selectScenarios : null,
                 icon: const Icon(Icons.videogame_asset),
-                label: const Text('Choisir scénarios'),
+                label: Text(l10n.selectScenariosButtonLabel),
               ),
             ),
             const SizedBox(width: 16),
@@ -685,7 +703,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 onPressed:
                     gameStateService.isTerrainOpen ? _setGameDuration : null,
                 icon: const Icon(Icons.timer),
-                label: const Text('Définir durée'),
+                label: Text(l10n.setDurationButtonLabel),
               ),
             ),
           ],
@@ -694,10 +712,10 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         if (gameStateService.selectedMap != null)
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Participer en tant que joueur :',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  l10n.participateAsPlayerLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               Switch(
@@ -737,7 +755,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                         );
                       },
                       icon: const Icon(Icons.login),
-                      label: const Text('Rejoindre'),
+                      label: Text(l10n.joinButton),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
@@ -750,7 +768,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _stopGame,
                       icon: const Icon(Icons.stop_circle_outlined),
-                      label: const Text('Arrêter'),
+                      label: Text(l10n.stopGame),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
@@ -769,7 +787,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                       ? _startGame
                       : null,
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('Lancer la partie'),
+                  label: Text(l10n.startGame),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
@@ -783,11 +801,12 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   Widget _buildConnectedPlayersList(
       GameStateService gameStateService, AuthService authService) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Joueurs connectés',
+          l10n.connectedPlayers,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
@@ -807,7 +826,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                       child: const Icon(Icons.person, color: Colors.white),
                     ),
                     title: Text(
-                      player['username'] ?? 'Joueur',
+                      player['username'] ?? l10n.playersTab, // Fallback
                       style: TextStyle(
                         fontWeight:
                             isHost ? FontWeight.bold : FontWeight.normal,
@@ -815,19 +834,19 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                     ),
                     subtitle: Text(
                       player['teamName'] != null
-                          ? 'Équipe: ${player['teamName']}'
-                          : 'Sans équipe',
+                          ? l10n.teamLabelPlayerList(player['teamName'])
+                          : l10n.noTeam,
                     ),
-                    trailing: isHost ? const Text('Vous (Hôte)') : null,
+                    trailing: isHost ? Text(l10n.youHostLabel) : null,
                   );
                 },
               )
-            : const Center(
+            : Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(
-                    'Aucun joueur connecté',
-                    style: TextStyle(color: Colors.grey),
+                    l10n.noPlayerConnected,
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ),
               ),
@@ -861,6 +880,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   Widget _buildSelectedScenarios(GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
     final scenarios = gameStateService.selectedScenarios ?? [];
 
     if (scenarios.isEmpty) {
@@ -876,7 +896,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Scénarios sélectionnés',
+          l10n.selectedScenariosLabel,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
@@ -892,6 +912,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   Widget _buildScenarioCard(ScenarioDTO scenarioDTO, {bool isBig = false}) {
+    final l10n = AppLocalizations.of(context)!;
     final name = scenarioDTO.scenario.name;
     final description = scenarioDTO.scenario.description;
     final treasureHuntData = scenarioDTO.treasureHuntScenario;
@@ -900,11 +921,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     if (treasureHuntData != null) {
       final totalTreasures = treasureHuntData.totalTreasures;
       final symbol = treasureHuntData.defaultSymbol;
-      subtitle =
-          'Chasse au trésor : $totalTreasures trésors à collecter ($symbol)';
+      subtitle = l10n.treasureHuntScenarioDetails(totalTreasures.toString(), symbol);
     } else if (description != null && description.isNotEmpty) {
       subtitle = description;
+    } else {
+      subtitle = l10n.noDescription;
     }
+
 
     return Card(
       color: isBig ? Colors.amber.shade100 : null,
@@ -938,7 +961,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   }
 
   void _showLoadingDialog(String message) async {
-    final currentContext = context;
+    final currentContext = context; // Capture context before async gap
+    final l10n = AppLocalizations.of(currentContext)!; // Use captured context
     return showDialog(
       context: currentContext,
       barrierDismissible: false,
@@ -951,7 +975,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text('Lancement de la partie...'),
+                Text(message), // Use the passed message directly
               ],
             ),
           ),
@@ -980,6 +1004,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
     final authService = context.watch<AuthService>();
 

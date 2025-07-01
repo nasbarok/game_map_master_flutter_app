@@ -2,6 +2,7 @@ import 'package:game_map_master_flutter_app/models/game_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../models/scenario/bomb_operation/bomb_site.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import 'bomb_site_edit_screen.dart';
@@ -60,10 +61,11 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du chargement des sites: $e'),
+            content: Text(l10n.errorLoadingSites(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -99,20 +101,20 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
 
   /// Supprime un site de bombe
   Future<void> _deleteSite(BombSite site) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
-        content:
-            Text('Êtes-vous sûr de vouloir supprimer le site "${site.name}" ?'),
+        title: Text(l10n.confirmDeleteTitle),
+        content: Text(l10n.confirmDeleteSiteMessage(site.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Supprimer'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -125,8 +127,8 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Site supprimé avec succès'),
+          SnackBar(
+            content: Text(l10n.siteDeletedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -137,7 +139,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la suppression: $e'),
+            content: Text(l10n.errorDeletingSite(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -147,14 +149,15 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context, _hasChanged); // renvoie `true` ou `false` au parent
-        return false; // empêche le pop automatique
+        Navigator.pop(context, _hasChanged);
+        return false;
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Sites de bombe: ${widget.scenarioName}'),
+          title: Text(l10n.bombSiteListScreenTitle(widget.scenarioName)),
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -163,7 +166,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
             : _buildSiteList(),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _navigateToEditSite(null),
-          tooltip: 'Ajouter un site',
+          tooltip: l10n.addSiteButton,
           child: const Icon(Icons.add),
         ),
       ),
@@ -173,6 +176,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
 
   /// Construit l'état vide (aucun site)
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -183,24 +187,24 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
             color: Colors.grey,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Aucun site de bombe défini',
-            style: TextStyle(
+          Text(
+            l10n.noBombSitesDefined,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Ajoutez des sites où les bombes pourront être posées et désamorcées',
+          Text(
+            l10n.addSitesInstruction,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => _navigateToEditSite(null),
             icon: const Icon(Icons.add),
-            label: const Text('Ajouter un site'),
+            label: Text(l10n.addSiteButton),
           ),
         ],
       ),
@@ -209,6 +213,7 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
 
   /// Construit la liste des sites
   Widget _buildSiteList() {
+    final l10n = AppLocalizations.of(context)!;
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _sites.length,
@@ -229,7 +234,11 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
             ),
             title: Text(site.name),
             subtitle: Text(
-              'Rayon: ${site.radius}m • Position: ${site.latitude.toStringAsFixed(6)}, ${site.longitude.toStringAsFixed(6)}',
+              l10n.siteDetailsSubtitle(
+                site.radius.toString(),
+                site.latitude.toStringAsFixed(6),
+                site.longitude.toStringAsFixed(6),
+              ),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -237,12 +246,12 @@ class _BombSiteListScreenState extends State<BombSiteListScreen> {
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _navigateToEditSite(site),
-                  tooltip: 'Modifier',
+                  tooltip: l10n.edit,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () => _deleteSite(site),
-                  tooltip: 'Supprimer',
+                  tooltip: l10n.delete,
                 ),
               ],
             ),

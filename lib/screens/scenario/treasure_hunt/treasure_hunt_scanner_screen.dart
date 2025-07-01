@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import ' treasure_popup.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../../services/api_service.dart';
 import '../../../services/game_state_service.dart';
 
@@ -108,9 +109,10 @@ class _TreasureHuntScannerScreenState extends State<TreasureHuntScannerScreen> {
           }
         }
       } catch (e) {
+          final l10n = AppLocalizations.of(context)!;
         if (mounted) {
           setState(() {
-            _errorMessage = 'Erreur de connexion';
+              _errorMessage = l10n.scanError(e.toString()); // Assumes a generic scan error or connection error
             _isProcessing = false;
           });
           _controller?.resumeCamera();
@@ -127,18 +129,21 @@ class _TreasureHuntScannerScreenState extends State<TreasureHuntScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+      final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scanner un QR code'),
+          title: Text(l10n.scanQRCodeTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.flash_on),
+              tooltip: l10n.toggleFlash, // Assuming 'toggleFlash' key exists
             onPressed: () async {
               await _controller?.toggleFlash();
             },
           ),
           IconButton(
             icon: const Icon(Icons.cameraswitch),
+              tooltip: l10n.switchCamera, // Assuming 'switchCamera' key exists
             onPressed: () async {
               await _controller?.flipCamera();
             },
@@ -198,7 +203,7 @@ class _TreasureHuntScannerScreenState extends State<TreasureHuntScannerScreen> {
                         });
                         _controller?.resumeCamera();
                       },
-                      child: const Text('Réessayer'),
+                        child: Text(l10n.retryButton),
                     ),
                   ],
                 ),

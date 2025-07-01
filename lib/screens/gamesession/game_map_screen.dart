@@ -9,6 +9,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/game_session_participant.dart';
 import '../../models/scenario/bomb_operation/bomb_operation_state.dart';
 import '../../services/scenario/bomb_operation/bomb_operation_service.dart';
@@ -133,14 +134,16 @@ class _GameMapScreenState extends State<GameMapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: _isFullScreen
           ? null
           : AppBar(
-              title: const Text('Carte de jeu'),
+              title: Text(l10n.gameMapScreenTitle),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.fullscreen),
+                  tooltip: l10n.fullscreenTooltip,
                   onPressed: () {
                     setState(() {
                       _isFullScreen = true;
@@ -154,8 +157,8 @@ class _GameMapScreenState extends State<GameMapScreen> {
                         : Icons.map,
                   ),
                   tooltip: _tileLayerType == TileLayerType.osm
-                      ? 'Vue satellite'
-                      : 'Vue standard',
+                      ? l10n.satelliteViewTooltip
+                      : l10n.standardViewTooltip,
                   onPressed: () {
                     setState(() {
                       _tileLayerType = _tileLayerType == TileLayerType.osm
@@ -318,6 +321,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
               child: SafeArea(
                 child: FloatingActionButton(
                   mini: true,
+                  tooltip: l10n.fullscreenTooltip, // Assuming exit fullscreen is similar enough
                   child: const Icon(Icons.fullscreen_exit),
                   onPressed: () {
                     setState(() {
@@ -333,6 +337,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
             bottom: 16,
             right: 16,
             child: FloatingActionButton(
+              tooltip: l10n.centerOnLocationTooltip,
               child: const Icon(Icons.my_location),
               onPressed: _centerOnCurrentPosition,
             ),
@@ -357,7 +362,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'BOMBE: ${_formatTime(_bombOperationService.bombTimeRemaining)}',
+                          l10n.bombTimeRemaining(_formatTime(_bombOperationService.bombTimeRemaining)),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -377,6 +382,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
   }
 
   void _centerOnCurrentPosition() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final positions = GetIt.I<PlayerLocationService>().currentPlayerPositions;
       if (positions.containsKey(widget.userId)) {
@@ -392,8 +398,9 @@ class _GameMapScreenState extends State<GameMapScreen> {
   }
 
   Widget _buildPlayerMarker(int userId, bool isCurrentUser) {
+    final l10n = AppLocalizations.of(context)!;
     final participant = _findParticipantByUserId(userId);
-    final String teamName = participant?.teamName ?? 'Aucune';
+    final String teamName = participant?.teamName ?? l10n.noTeam;
     final int? teamId = participant?.teamId;
     // Définir la couleur selon équipe
     Color markerColor = Colors.blue;
@@ -401,13 +408,6 @@ class _GameMapScreenState extends State<GameMapScreen> {
     final String playerName = _getPlayerName(userId);
     final double radius = 8;
     final double fontSize = math.max(8, radius);
-
-    /*logger.d(
-      '🎯 [GameMapScreen] [_buildPlayerMarker] '
-      '${isCurrentUser ? "Moi" : playerName} '
-      '(ID: $userId, équipe: $teamName, teamId: ${teamId ?? "N/A"}) '
-      '→ couleur: $markerColor',
-    );*/
 
     return Stack(
       clipBehavior: Clip.none,
@@ -450,12 +450,13 @@ class _GameMapScreenState extends State<GameMapScreen> {
 
 // Méthode pour récupérer le nom du joueur
   String _getPlayerName(int userId) {
+    final l10n = AppLocalizations.of(context)!;
     final participant = widget.participants
         .where((p) => p.userId == userId)
         .cast<GameSessionParticipant?>()
         .firstOrNull;
 
-    return participant?.username ?? 'Joueur $userId';
+    return participant?.username ?? l10n.playerMarkerLabel(userId.toString());
   }
 
   GameSessionParticipant? _findParticipantByUserId(int userId) {

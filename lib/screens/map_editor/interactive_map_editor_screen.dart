@@ -20,6 +20,8 @@ import "dart:convert";
 import "dart:typed_data";
 import "package:uuid/uuid.dart";
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+
+import "../../generated/l10n/app_localizations.dart";
 // Enum to manage editor modes
 enum MapEditorMode { view, drawBoundary, drawZone, placePoi }
 
@@ -48,7 +50,7 @@ class _InteractiveMapEditorScreenState
   late GeocodingService _geocodingService;
   var uuid = Uuid();
 
-  GameMap _currentMap = GameMap(name: "Nouvelle Carte Interactive");
+  GameMap _currentMap = GameMap(name: "Nouvelle Carte Interactive");//@todo Will be set in initState with l10n
   MapEditorMode _editorMode = MapEditorMode.view;
   TileLayerType _currentTileLayerType = TileLayerType.osm;
 
@@ -80,45 +82,33 @@ class _InteractiveMapEditorScreenState
   List<String> _activeTileSubdomains = [];
 
   // Available icons for POIs (mirrored from PoiEditDialog for now)
-  final List<Map<String, dynamic>> _availableIcons = [
-    {"identifier": "flag", "icon": Icons.flag, "label": "Drapeau"},
-    {"identifier": "bomb", "icon": Icons.dangerous, "label": "Bombe"},
-    {"identifier": "star", "icon": Icons.star, "label": "Étoile"},
-    {"identifier": "place", "icon": Icons.place, "label": "Lieu"},
-    {"identifier": "pin_drop", "icon": Icons.pin_drop, "label": "Repère"},
-    {"identifier": "house", "icon": Icons.house, "label": "Maison"},
-    {"identifier": "cabin", "icon": Icons.cabin, "label": "Cabane"},
-    {"identifier": "door", "icon": Icons.meeting_room, "label": "Porte"},
-    {
-      "identifier": "skull",
-      "icon": Icons.warning_amber_rounded,
-      "label": "Tête de Mort"
-    },
-    {
-      "identifier": "navigation",
-      "icon": Icons.navigation,
-      "label": "Navigation"
-    },
-    {"identifier": "target", "icon": Icons.gps_fixed, "label": "Cible"},
-    {"identifier": "ammo", "icon": Icons.local_mall, "label": "Munitions"},
-    {
-      "identifier": "medical",
-      "icon": Icons.medical_services,
-      "label": "Médical"
-    },
-    {"identifier": "radio", "icon": Icons.radio, "label": "Radio"},
-    {
-      "identifier": "default_poi_icon",
-      "icon": Icons.location_pin,
-      "label": "Par Défaut"
-    },
-  ];
+  List<Map<String, dynamic>> _getAvailableIcons(AppLocalizations l10n) {
+    return [
+      {"identifier": "flag", "icon": Icons.flag, "label": l10n.poiIconFlag},
+      {"identifier": "bomb", "icon": Icons.dangerous, "label": l10n.poiIconBomb},
+      {"identifier": "star", "icon": Icons.star, "label": l10n.poiIconStar},
+      {"identifier": "place", "icon": Icons.place, "label": l10n.poiIconPlace},
+      {"identifier": "pin_drop", "icon": Icons.pin_drop, "label": l10n.poiIconPinDrop},
+      {"identifier": "house", "icon": Icons.house, "label": l10n.poiIconHouse},
+      {"identifier": "cabin", "icon": Icons.cabin, "label": l10n.poiIconCabin},
+      {"identifier": "door", "icon": Icons.meeting_room, "label": l10n.poiIconDoor},
+      {"identifier": "skull", "icon": Icons.warning_amber_rounded, "label": l10n.poiIconSkull},
+      {"identifier": "navigation", "icon": Icons.navigation, "label": l10n.poiIconNavigation},
+      {"identifier": "target", "icon": Icons.gps_fixed, "label": l10n.poiIconTarget},
+      {"identifier": "ammo", "icon": Icons.local_mall, "label": l10n.poiIconAmmo},
+      {"identifier": "medical", "icon": Icons.medical_services, "label": l10n.poiIconMedical},
+      {"identifier": "radio", "icon": Icons.radio, "label": l10n.poiIconRadio},
+      {"identifier": "default_poi_icon", "icon": Icons.location_pin, "label": l10n.poiIconDefault},
+    ];
+  }
 
   IconData _getIconDataFromIdentifier(String identifier) {
-    final iconData = _availableIcons.firstWhere(
+    final l10n = AppLocalizations.of(context)!;
+    final icons = _getAvailableIcons(l10n);
+    final iconData = icons.firstWhere(
         (icon) => icon["identifier"] == identifier,
-        orElse: () => _availableIcons.firstWhere(
-            (icon) => icon["identifier"] == "default_poi_icon") // Fallback
+        orElse: () => icons.firstWhere(
+            (icon) => icon["identifier"] == "default_poi_icon")
         );
     return iconData["icon"] as IconData;
   }
@@ -131,34 +121,34 @@ class _InteractiveMapEditorScreenState
 
     _updateActiveTileLayer();
 
-    if (widget.initialMap != null) {
-      _currentMap = widget.initialMap!;
-      _mapNameController.text = _currentMap.name;
-      _mapDescriptionController.text = _currentMap.description ?? "";
-      _searchAddressController.text = _currentMap.sourceAddress ?? "";
-      if (_currentMap.centerLatitude != null &&
-          _currentMap.centerLongitude != null) {
-        _currentMapCenter =
-            LatLng(_currentMap.centerLatitude!, _currentMap.centerLongitude!);
-      }
-      if (_currentMap.initialZoom != null) {
-        _currentZoom = _currentMap.initialZoom!
-            .clamp(_minZoom, _maxZoom); // Clamp initial zoom too
-      }
-      // Pour centrer la carte sur l'adresse au chargement
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final l10n = AppLocalizations.of(context)!;
+      if (widget.initialMap != null) {
+        _currentMap = widget.initialMap!;
+        _mapNameController.text = _currentMap.name;
+        _mapDescriptionController.text = _currentMap.description ?? "";
+        _searchAddressController.text = _currentMap.sourceAddress ?? "";
+        if (_currentMap.centerLatitude != null &&
+            _currentMap.centerLongitude != null) {
+          _currentMapCenter =
+              LatLng(_currentMap.centerLatitude!, _currentMap.centerLongitude!);
+        }
+        if (_currentMap.initialZoom != null) {
+          _currentZoom = _currentMap.initialZoom!
+              .clamp(_minZoom, _maxZoom);
+        }
         if (_currentMap.centerLatitude != null &&
             _currentMap.centerLongitude != null) {
           _mapController.move(
               LatLng(_currentMap.centerLatitude!, _currentMap.centerLongitude!),
               _currentZoom);
         }
-      });
-
-      _loadMapDetails();
-    } else {
-      _mapNameController.text = _currentMap.name;
-    }
+        _loadMapDetails();
+      } else {
+        _currentMap = GameMap(name: l10n.interactiveMapEditorTitleCreate);
+        _mapNameController.text = _currentMap.name;
+      }
+    });
 
     _searchAddressController.addListener(() {
       if (_searchAddressController.text.isEmpty) {
@@ -272,8 +262,9 @@ class _InteractiveMapEditorScreenState
         _showGeocodingResults = results.isNotEmpty;
       });
     } catch (e) {
+        final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Erreur de géocodage: $e")));
+            .showSnackBar(SnackBar(content: Text(l10n.errorGeocodingSnackbar(e.toString()))));
       setState(() {
         _geocodingResults.clear();
         _showGeocodingResults = false;
@@ -294,6 +285,7 @@ class _InteractiveMapEditorScreenState
   }
 
   void _onMapTap(fm.TapPosition tapPosition, LatLng point) async {
+      // final l10n = AppLocalizations.of(context)!; // Removed, as it's not used in this specific block after changes
     if (_showGeocodingResults) {
       setState(() {
         _showGeocodingResults = false;
@@ -334,9 +326,10 @@ class _InteractiveMapEditorScreenState
   }
 
   void _addCurrentZone() async {
+      final l10n = AppLocalizations.of(context)!;
     if (_currentZonePoints.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Une zone doit avoir au moins 3 points.")));
+            SnackBar(content: Text(l10n.zoneMinPointsError)));
       return;
     }
 
@@ -432,6 +425,7 @@ class _InteractiveMapEditorScreenState
   }
 
   void _editPoi(MapPointOfInterest poiToEdit) async {
+      final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (BuildContext context) {
@@ -758,6 +752,7 @@ class _InteractiveMapEditorScreenState
   }
 
   fm.LatLngBounds _expandBoundsByKm(fm.LatLngBounds original, double km) {
+      final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
     const double degreesPerKm = 1 / 111.0; // approximation (valable en France)
     final delta = km * degreesPerKm;
 
@@ -774,24 +769,25 @@ class _InteractiveMapEditorScreenState
   }
 
   Widget _buildModeSelector() {
+      final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
     return SegmentedButton<MapEditorMode>(
-      segments: const <ButtonSegment<MapEditorMode>>[
+      segments: <ButtonSegment<MapEditorMode>>[
         ButtonSegment<MapEditorMode>(
             value: MapEditorMode.view,
-            label: Text("Vue"),
-            icon: Icon(Icons.visibility)),
+            label: Text(l10n.viewModeLabel),
+            icon: const Icon(Icons.visibility)),
         ButtonSegment<MapEditorMode>(
             value: MapEditorMode.drawBoundary,
-            label: Text("Terrain"),
-            icon: Icon(Icons.hexagon_outlined)),
+            label: Text(l10n.drawBoundaryModeLabel),
+            icon: const Icon(Icons.hexagon_outlined)),
         ButtonSegment<MapEditorMode>(
             value: MapEditorMode.drawZone,
-            label: Text("Zone"),
-            icon: Icon(Icons.layers)),
+            label: Text(l10n.drawZoneModeLabel),
+            icon: const Icon(Icons.layers)),
         ButtonSegment<MapEditorMode>(
             value: MapEditorMode.placePoi,
-            label: Text("Points"),
-            icon: Icon(Icons.place)),
+            label: Text(l10n.placePOIModeLabel),
+            icon: const Icon(Icons.place)),
       ],
       selected: <MapEditorMode>{_editorMode},
       onSelectionChanged: (Set<MapEditorMode> newSelection) {
@@ -813,6 +809,7 @@ class _InteractiveMapEditorScreenState
   }
 
   Widget _buildActionButtons() {
+      final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
     if (_editorMode == MapEditorMode.drawBoundary) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -822,15 +819,15 @@ class _InteractiveMapEditorScreenState
           runSpacing: 4.0,
           children: [
             ElevatedButton.icon(
-              icon: Icon(Icons.check),
-              label: Text("Définir Limites"),
+              icon: const Icon(Icons.check),
+              label: Text(l10n.defineBoundariesButton),
               onPressed: _defineFieldBoundary,
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, foregroundColor: Colors.white),
             ),
             ElevatedButton.icon(
-              icon: Icon(Icons.undo),
-              label: Text("Annuler Point"),
+              icon: const Icon(Icons.undo),
+              label: Text(l10n.undoPointButton),
               onPressed: () {
                 if (_currentBoundaryPoints.isNotEmpty) {
                   setState(() {
@@ -840,8 +837,8 @@ class _InteractiveMapEditorScreenState
               },
             ),
             ElevatedButton.icon(
-              icon: Icon(Icons.delete_sweep),
-              label: Text("Tout Effacer"),
+              icon: const Icon(Icons.delete_sweep),
+              label: Text(l10n.clearAllButton),
               onPressed: () {
                 setState(() {
                   _currentBoundaryPoints.clear();
@@ -863,15 +860,15 @@ class _InteractiveMapEditorScreenState
           runSpacing: 4.0,
           children: [
             ElevatedButton.icon(
-              icon: Icon(Icons.add_location_alt),
-              label: Text("Ajouter Zone"),
+              icon: const Icon(Icons.add_location_alt),
+              label: Text(l10n.addZoneButton),
               onPressed: _addCurrentZone,
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, foregroundColor: Colors.white),
             ),
             ElevatedButton.icon(
-              icon: Icon(Icons.undo),
-              label: Text("Annuler Point"),
+              icon: const Icon(Icons.undo),
+              label: Text(l10n.undoPointButton),
               onPressed: () {
                 if (_currentZonePoints.isNotEmpty) {
                   setState(() {
@@ -881,8 +878,8 @@ class _InteractiveMapEditorScreenState
               },
             ),
             ElevatedButton.icon(
-              icon: Icon(Icons.clear_all),
-              label: Text("Effacer Zone Actuelle"),
+              icon: const Icon(Icons.clear_all),
+              label: Text(l10n.clearCurrentZoneButton),
               onPressed: () {
                 setState(() {
                   _currentZonePoints.clear();
@@ -896,12 +893,13 @@ class _InteractiveMapEditorScreenState
         ),
       );
     }
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   Widget _buildZoneManagementPanel() {
+    final l10n = AppLocalizations.of(context)!;
     if (_mapZones.isEmpty) {
-      return Center(child: Text("Aucune zone définie."));
+      return Center(child: Text(l10n.noZoneDefined));
     }
     return ListView.builder(
       itemCount: _mapZones.length,
@@ -909,7 +907,7 @@ class _InteractiveMapEditorScreenState
         final zone = _mapZones[index];
         Color displayColor = _parseColor(zone.color);
         return Card(
-          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: ListTile(
             leading: Icon(Icons.layers, color: displayColor.withOpacity(1)),
             title: Text(zone.name),
@@ -919,17 +917,17 @@ class _InteractiveMapEditorScreenState
                 IconButton(
                   icon: Icon(
                       zone.visible ? Icons.visibility : Icons.visibility_off),
-                  tooltip: zone.visible ? "Masquer" : "Afficher",
+                  tooltip: zone.visible ? l10n.hideTooltip : l10n.showTooltip,
                   onPressed: () => _toggleZoneVisibility(zone),
                 ),
                 IconButton(
-                  icon: Icon(Icons.edit),
-                  tooltip: "Modifier",
+                  icon: const Icon(Icons.edit),
+                  tooltip: l10n.edit,
                   onPressed: () => _editZone(zone),
                 ),
                 IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  tooltip: "Supprimer",
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  tooltip: l10n.delete,
                   onPressed: () => _deleteZone(zone),
                 ),
               ],
@@ -941,15 +939,16 @@ class _InteractiveMapEditorScreenState
   }
 
   Widget _buildPoiManagementPanel() {
+    final l10n = AppLocalizations.of(context)!;
     if (_mapPois.isEmpty) {
-      return Center(child: Text("Aucun point stratégique défini."));
+      return Center(child: Text(l10n.noPOIDefined));
     }
     return ListView.builder(
       itemCount: _mapPois.length,
       itemBuilder: (context, index) {
         final poi = _mapPois[index];
         return Card(
-          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: ListTile(
             leading: Icon(_getIconDataFromIdentifier(poi.iconIdentifier)),
             title: Text(poi.name),
@@ -959,17 +958,17 @@ class _InteractiveMapEditorScreenState
                 IconButton(
                   icon: Icon(
                       poi.visible ? Icons.visibility : Icons.visibility_off),
-                  tooltip: poi.visible ? "Masquer" : "Afficher",
+                  tooltip: poi.visible ? l10n.hideTooltip : l10n.showTooltip,
                   onPressed: () => _togglePoiVisibility(poi),
                 ),
                 IconButton(
-                  icon: Icon(Icons.edit),
-                  tooltip: "Modifier",
+                  icon: const Icon(Icons.edit),
+                  tooltip: l10n.edit,
                   onPressed: () => _editPoi(poi),
                 ),
                 IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  tooltip: "Supprimer",
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  tooltip: l10n.delete,
                   onPressed: () => _deletePoi(poi),
                 ),
               ],
