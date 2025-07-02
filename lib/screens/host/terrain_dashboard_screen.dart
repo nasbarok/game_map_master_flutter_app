@@ -134,7 +134,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.durationSetSuccess(time.hour.toString(), time.minute.toString())),
+            content: Text(l10n.durationSetSuccess(
+                time.hour.toString(), time.minute.toString())),
             backgroundColor: Colors.green,
           ),
         );
@@ -158,7 +159,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     // Vérif : scénarios ?
     final selectedScenarios = gameStateService.selectedScenarios ?? [];
     if (selectedScenarios.isEmpty) {
-      _showError(l10n.noScenarioSelected); // Assuming noScenarioSelected exists or create it
+      _showError(l10n
+          .noScenarioSelected); // Assuming noScenarioSelected exists or create it
       return;
     }
 
@@ -310,7 +312,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.gameEndedMessage), // Assuming gameEndedMessage is appropriate
+        content: Text(l10n.gameEndedMessage),
+        // Assuming gameEndedMessage is appropriate
         backgroundColor: Colors.orange,
       ),
     );
@@ -405,7 +408,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     GameMap? selectedMap = gameStateService.selectedMap; // Make nullable
 
     if (selectedMap == null) {
-      logger.d('❌ ${l10n.selectMapError}'); // Use a general "select map first" message
+      logger.d(
+          '❌ ${l10n.selectMapError}'); // Use a general "select map first" message
       _showError(l10n.selectMapError);
       return;
     }
@@ -419,7 +423,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         if (field == null || field.closedAt != null) {
           logger.d('🛠 Création d’un terrain via POST /fields...');
           final fieldResponse = await apiService.post('fields', {
-            'name': l10n.fieldLabel(selectedMap.name), // Example of using a localized string for field name
+            'name': l10n.fieldLabel(selectedMap.name),
+            // Example of using a localized string for field name
             'description': selectedMap.description ?? '',
           });
           field = Field.fromJson(fieldResponse);
@@ -441,8 +446,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         });
         logger.d('✅ Terrain ouvert côté serveur : $response');
         gameStateService.setTerrainOpen(true);
-         _showSuccess(l10n.fieldOpenedSuccess(field.name));
-
+        _showSuccess(l10n.fieldOpenedSuccess(field.name));
 
         try {
           await gameStateService.connectHostToField();
@@ -474,7 +478,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         final fieldId = field?.id;
         if (fieldId == null) {
           logger.d('❌ Impossible de fermer : aucun terrain associé à la carte');
-           _showError(l10n.noAssociatedField);
+          _showError(l10n.noAssociatedField);
           return;
         }
 
@@ -498,7 +502,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       }
     } catch (e) {
       logger.d('❌ ${l10n.errorOpeningClosingField(e.toString())}');
-       _showError(l10n.errorOpeningClosingField(e.toString()));
+      _showError(l10n.errorOpeningClosingField(e.toString()));
     }
   }
 
@@ -511,9 +515,10 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     final user = authService.currentUser!;
     // Ensure selectedMap is not null before accessing its properties
-    if (gameStateService.selectedMap == null || gameStateService.selectedMap!.field == null) {
-        _showError(l10n.selectMapError); // Or a more specific error
-        return;
+    if (gameStateService.selectedMap == null ||
+        gameStateService.selectedMap!.field == null) {
+      _showError(l10n.selectMapError); // Or a more specific error
+      return;
     }
     final fieldId = gameStateService.selectedMap!.field?.id;
 
@@ -641,7 +646,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            l10n.sessionStatusLabel(gameStateService.isTerrainOpen ? l10n.fieldStatusOpen : l10n.fieldStatusClosed),
+            l10n.sessionStatusLabel(gameStateService.isTerrainOpen
+                ? l10n.fieldStatusOpen
+                : l10n.fieldStatusClosed),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: gameStateService.isTerrainOpen ? Colors.green : Colors.red,
@@ -662,6 +669,42 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 foregroundColor: Colors.white,
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFieldStatusOnlyView(GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: gameStateService.isTerrainOpen
+            ? Colors.green.withOpacity(0.2)
+            : Colors.red.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              l10n.sessionStatusLabel(
+                gameStateService.isTerrainOpen
+                    ? l10n.fieldStatusOpen
+                    : l10n.fieldStatusClosed,
+              ),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color:
+                    gameStateService.isTerrainOpen ? Colors.green : Colors.red,
+              ),
+            ),
+          ),
+          const Icon(
+            Icons.lock_outline,
+            color: Colors.grey,
+          ),
         ],
       ),
     );
@@ -799,6 +842,55 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     );
   }
 
+  Widget _buildGameConfigurationOnlyView(GameStateService gameStateService) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (!gameStateService.isGameRunning) {
+      return const SizedBox(); // Pas de partie en cours, on n'affiche rien
+    }
+
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  final user = context.read<AuthService>().currentUser!;
+                  final teamId = context.read<TeamService>().myTeamId;
+                  final field = gameStateService.selectedMap!.field;
+                  final isHost =
+                      user.hasRole('HOST') && field!.owner!.id! == user.id;
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GameSessionScreen(
+                        gameSession: gameStateService.activeGameSession!,
+                        userId: user.id!,
+                        teamId: teamId,
+                        isHost: isHost,
+                        fieldId: field?.id!,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.login),
+                label: Text(l10n.joinButton),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildConnectedPlayersList(
       GameStateService gameStateService, AuthService authService) {
     final l10n = AppLocalizations.of(context)!;
@@ -921,13 +1013,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     if (treasureHuntData != null) {
       final totalTreasures = treasureHuntData.totalTreasures;
       final symbol = treasureHuntData.defaultSymbol;
-      subtitle = l10n.treasureHuntScenarioDetails(totalTreasures.toString(), symbol);
+      subtitle =
+          l10n.treasureHuntScenarioDetails(totalTreasures.toString(), symbol);
     } else if (description != null && description.isNotEmpty) {
       subtitle = description;
     } else {
       subtitle = l10n.noDescription;
     }
-
 
     return Card(
       color: isBig ? Colors.amber.shade100 : null,
@@ -1002,6 +1094,42 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     );
   }
 
+  bool get isMapOwner {
+    final authService = context.read<AuthService>();
+    final gameStateService = context.read<GameStateService>();
+
+    final currentUser = authService.currentUser;
+    final selectedMap = gameStateService.selectedMap;
+
+    logger.d('🔎 Vérification isMapOwner...');
+    logger.d(
+        '👤 Utilisateur courant : ${currentUser?.id} (${currentUser?.username})');
+    logger.d(
+        '🗺️ Carte sélectionnée : ${selectedMap?.id} (${selectedMap?.name})');
+    logger.d('👤 Owner de la carte : ${selectedMap?.owner?.id}');
+
+    if (currentUser == null) {
+      logger.d('❗ currentUser est nul → isMapOwner=false');
+      return false;
+    }
+
+    if (selectedMap == null) {
+      logger.d('❗ selectedMap est nul → isMapOwner=false');
+      return false;
+    }
+
+    if (selectedMap.owner == null) {
+      logger.d('❗ selectedMap.owner est nul → isMapOwner=false');
+      return false;
+    }
+
+    final isOwner = currentUser.id == selectedMap.owner!.id;
+    logger.d(
+        '✅ Résultat comparaison : currentUser.id (${currentUser.id}) == selectedMap.owner.id (${selectedMap.owner!.id}) → $isOwner');
+
+    return isOwner;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -1020,9 +1148,13 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             const SizedBox(height: 16),
             _buildSelectedScenarios(gameStateService),
             const SizedBox(height: 16),
-            _buildFieldStatus(gameStateService),
+            isMapOwner
+                ? _buildFieldStatus(gameStateService)
+                : _buildFieldStatusOnlyView(gameStateService),
             const SizedBox(height: 16),
-            _buildGameConfiguration(gameStateService),
+            isMapOwner
+                ? _buildGameConfiguration(gameStateService)
+                : _buildGameConfigurationOnlyView(gameStateService),
             const SizedBox(height: 32),
             _buildConnectedPlayersList(gameStateService, authService),
           ],
