@@ -10,6 +10,7 @@ import '../../services/team_service.dart';
 import '../../services/api_service.dart';
 import '../../services/websocket_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({Key? key}) : super(key: key);
 
@@ -21,7 +22,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
   final TextEditingController _searchController = TextEditingController();
   late TeamService teamService;
   late GameStateService gameStateService;
-
 
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
@@ -47,7 +47,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
       }
     });
   }
-
 
   @override
   void dispose() {
@@ -165,6 +164,18 @@ class _PlayersScreenState extends State<PlayersScreen> {
         ),
       );
     }
+  }
+
+  bool get isMapOwner {
+    final authService = context.read<AuthService>();
+    final gameStateService = context.read<GameStateService>();
+
+    final currentUser = authService.currentUser;
+    final selectedMap = gameStateService.selectedMap;
+
+    if (currentUser == null || selectedMap == null) return false;
+
+    return currentUser.id == selectedMap.owner?.id;
   }
 
   @override
@@ -330,7 +341,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       final invitation = pendingInvitations[index];
                       final invitationToJson = invitation.toJson();
                       final payload = invitationToJson['payload'] ?? {};
-                      final fromUsername = payload['fromUsername'] ?? l10n.unknownPlayerName;
+                      final fromUsername =
+                          payload['fromUsername'] ?? l10n.unknownPlayerName;
                       final mapName = payload['mapName'] ?? l10n.unknownMap;
                       return Card(
                         child: ListTile(
@@ -382,7 +394,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       final invitationToJson = invitation.toJson();
                       final payload = invitationToJson['payload'] ?? {};
                       final status = invitationToJson['status'] ?? 'pending';
-                      final toUsername = payload['toUsername'] ?? l10n.unknownPlayerName;
+                      final toUsername =
+                          payload['toUsername'] ?? l10n.unknownPlayerName;
 
                       String statusText;
                       if (status == 'pending') {
@@ -415,6 +428,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
   Widget _buildUnassignedPlayerTile(Map<String, dynamic> player,
       List<dynamic> teams, TeamService teamService, int? mapId) {
     final l10n = AppLocalizations.of(context)!;
+    final authService = context.read<AuthService>();
+    final isCurrentUser = authService.currentUser?.id == player['id'];
     return ListTile(
       leading: const CircleAvatar(
         backgroundColor: Colors.grey,
@@ -422,31 +437,35 @@ class _PlayersScreenState extends State<PlayersScreen> {
       ),
       title: Text(player['username'] ?? l10n.unknownPlayerName),
       subtitle: Text(l10n.noTeam),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DropdownButton<int>(
-            hint: Text(l10n.assignTeamHint),
-            onChanged: (teamId) {
-              if (teamId != null && mapId != null) {
-                teamService.assignPlayerToTeam(player['id'], teamId, mapId);
-              }
-            },
-            items: [
-              for (var team in teams)
-                DropdownMenuItem(
-                  value: team.id,
-                  child: Text(team.name),
+      trailing: (isMapOwner || isCurrentUser)
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButton<int>(
+                  hint: Text(l10n.assignTeamHint),
+                  onChanged: (teamId) {
+                    if (teamId != null && mapId != null) {
+                      teamService.assignPlayerToTeam(
+                          player['id'], teamId, mapId);
+                    }
+                  },
+                  items: [
+                    for (var team in teams)
+                      DropdownMenuItem(
+                        value: team.id,
+                        child: Text(team.name),
+                      ),
+                  ],
                 ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app, color: Colors.red),
-            tooltip: l10n.kickPlayerTooltip,
-            onPressed: () => kickPlayer(player['id'], player['username']),
-          ),
-        ],
-      ),
+                if (isMapOwner && !isCurrentUser)
+                IconButton(
+                  icon: const Icon(Icons.exit_to_app, color: Colors.red),
+                  tooltip: l10n.kickPlayerTooltip,
+                  onPressed: () => kickPlayer(player['id'], player['username']),
+                ),
+              ],
+            )
+          : const SizedBox.shrink(),
     );
   }
 
@@ -458,31 +477,36 @@ class _PlayersScreenState extends State<PlayersScreen> {
       int? mapId,
       List<dynamic> teams) {
     final l10n = AppLocalizations.of(context)!;
+    final authService = context.read<AuthService>();
+    final isCurrentUser = authService.currentUser?.id == player['id'];
     return ListTile(
       leading: const CircleAvatar(
         backgroundColor: Colors.blue,
         child: Icon(Icons.person, color: Colors.white),
       ),
       title: Text(player['username'] ?? l10n.unknownPlayerName),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.group_remove),
-            tooltip: l10n.removeFromTeamTooltip,
-            onPressed: () {
-              if (mapId != null) {
-                teamService.removePlayerFromTeam(player['id'], mapId);
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app, color: Colors.red),
-            tooltip: l10n.kickPlayerTooltip,
-            onPressed: () => kickPlayer(player['id'], player['username']),
-          ),
-        ],
-      ),
+      trailing: (isMapOwner || isCurrentUser)
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.group_remove),
+                  tooltip: l10n.removeFromTeamTooltip,
+                  onPressed: () {
+                    if (mapId != null) {
+                      teamService.removePlayerFromTeam(player['id'], mapId);
+                    }
+                  },
+                ),
+                if (isMapOwner && !isCurrentUser)
+                IconButton(
+                  icon: const Icon(Icons.exit_to_app, color: Colors.red),
+                  tooltip: l10n.kickPlayerTooltip,
+                  onPressed: () => kickPlayer(player['id'], player['username']),
+                ),
+              ],
+            )
+          : const SizedBox.shrink(),
     );
   }
 
@@ -513,39 +537,39 @@ class _PlayersScreenState extends State<PlayersScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(l10n.teams, style: Theme.of(context).textTheme.titleLarge),
-              ElevatedButton.icon(
-                onPressed: () {
-                  final nameController = TextEditingController();
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(l10n.createTeam),
-                      content: TextField(
-                        controller: nameController,
-                        decoration: InputDecoration(
-                            labelText: l10n.teamName),
+              if (isMapOwner)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final nameController = TextEditingController();
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(l10n.createTeam),
+                        content: TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(labelText: l10n.teamName),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(l10n.cancel),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (nameController.text.isNotEmpty) {
+                                teamService.createTeam(nameController.text);
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: Text(l10n.create),
+                          ),
+                        ],
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(l10n.cancel),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (nameController.text.isNotEmpty) {
-                              teamService.createTeam(nameController.text);
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          child: Text(l10n.create),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: Text(l10n.newTeamButton),
-              ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n.newTeamButton),
+                ),
             ],
           ),
           const SizedBox(height: 16),
@@ -644,47 +668,49 @@ class _PlayersScreenState extends State<PlayersScreen> {
           children: [
             Text(team.name),
             const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.edit, size: 16),
-              tooltip: l10n.edit,
-              onPressed: () {
-                final nameController = TextEditingController(text: team.name);
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(l10n.renameTeamDialogTitle),
-                    content: TextField(
-                      controller: nameController,
-                      decoration:
-                          InputDecoration(labelText: l10n.newTeamNameLabel),
+            if (isMapOwner) ...[
+              IconButton(
+                icon: const Icon(Icons.edit, size: 16),
+                tooltip: l10n.edit,
+                onPressed: () {
+                  final nameController = TextEditingController(text: team.name);
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(l10n.renameTeamDialogTitle),
+                      content: TextField(
+                        controller: nameController,
+                        decoration:
+                            InputDecoration(labelText: l10n.newTeamNameLabel),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.cancel),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (nameController.text.isNotEmpty) {
+                              teamService.renameTeam(
+                                  team.id, nameController.text);
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: Text(l10n.renameButton),
+                        ),
+                      ],
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(l10n.cancel),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (nameController.text.isNotEmpty) {
-                            teamService.renameTeam(
-                                team.id, nameController.text);
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: Text(l10n.renameButton),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, size: 16),
-              tooltip: l10n.delete,
-              onPressed: () {
-                teamService.deleteTeam(team.id);
-              },
-            ),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, size: 16),
+                tooltip: l10n.delete,
+                onPressed: () {
+                  teamService.deleteTeam(team.id);
+                },
+              ),
+            ],
           ],
         ),
         subtitle: Text(l10n.playersCountSuffix(team.players.length)),
@@ -694,58 +720,60 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 player, team.id, team.name, teamService, mapId, allTeams),
           ),
           const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(l10n.addPlayersToTeamDialogTitle),
-                    content: SizedBox(
-                      width: double.maxFinite,
-                      height: 300,
-                      child: ListView.builder(
-                        itemCount: connectedPlayers.length,
-                        itemBuilder: (context, index) {
-                          final player = connectedPlayers[index];
-                          bool isInTeam = allTeams.any((t) =>
-                              t.players.any((p) => p['id'] == player['id']));
+          if (isMapOwner)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(l10n.addPlayersToTeamDialogTitle),
+                      content: SizedBox(
+                        width: double.maxFinite,
+                        height: 300,
+                        child: ListView.builder(
+                          itemCount: connectedPlayers.length,
+                          itemBuilder: (context, index) {
+                            final player = connectedPlayers[index];
+                            bool isInTeam = allTeams.any((t) =>
+                                t.players.any((p) => p['id'] == player['id']));
 
-                          return ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.person),
-                            ),
-                            title: Text(player['username'] ?? l10n.unknownPlayerName),
-                            trailing: isInTeam
-                                ? Text(l10n.alreadyInTeamLabel)
-                                : ElevatedButton(
-                                    onPressed: () {
-                                      if (mapId != null) {
-                                        teamService.assignPlayerToTeam(
-                                            player['id'], team.id, mapId);
-                                        Navigator.of(context).pop();
-                                      }
-                                    },
-                                    child: Text(l10n.addButton),
-                                  ),
-                          );
-                        },
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.person),
+                              ),
+                              title: Text(
+                                  player['username'] ?? l10n.unknownPlayerName),
+                              trailing: isInTeam
+                                  ? Text(l10n.alreadyInTeamLabel)
+                                  : ElevatedButton(
+                                      onPressed: () {
+                                        if (mapId != null) {
+                                          teamService.assignPlayerToTeam(
+                                              player['id'], team.id, mapId);
+                                          Navigator.of(context).pop();
+                                        }
+                                      },
+                                      child: Text(l10n.addButton),
+                                    ),
+                            );
+                          },
+                        ),
                       ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.ok), // ou l10n.closeButton si créé
+                        ),
+                      ],
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(l10n.ok), // ou l10n.closeButton si créé
-                      ),
-                    ],
-                  ),
-                );
-              },
-              icon: const Icon(Icons.person_add),
-              label: Text(l10n.addPlayersToTeamDialogTitle),
+                  );
+                },
+                icon: const Icon(Icons.person_add),
+                label: Text(l10n.addPlayersToTeamDialogTitle),
+              ),
             ),
-          ),
         ],
       ),
     );
