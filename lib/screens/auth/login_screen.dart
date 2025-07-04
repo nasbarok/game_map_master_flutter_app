@@ -108,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
