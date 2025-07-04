@@ -674,6 +674,41 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     );
   }
 
+  void _showLeaveConfirmationDialog() {
+    final playerConnectionService = context.read<PlayerConnectionService>();
+    final gameStateService = context.read<GameStateService>();
+    final field = gameStateService.selectedMap?.field;
+    final l10n = AppLocalizations.of(context)!;
+    if (field == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.leaveFieldButton),
+        content: Text(l10n.leaveFieldConfirmationMessage),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Ferme le dialog
+              playerConnectionService.leaveField(field.id!);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(l10n.leaveButton),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFieldStatusOnlyView(GameStateService gameStateService) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
@@ -701,9 +736,14 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
               ),
             ),
           ),
-          const Icon(
-            Icons.lock_outline,
-            color: Colors.grey,
+          ElevatedButton.icon(
+            onPressed: _showLeaveConfirmationDialog,
+            icon: const Icon(Icons.logout),
+            label: Text(l10n.leaveFieldButton),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
           ),
         ],
       ),
@@ -1115,7 +1155,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
     if (selectedMap == null) {
       logger.d('❗ selectedMap est nul → isMapOwner=false');
-      return false;
+      return true;
     }
 
     if (selectedMap.owner == null) {
