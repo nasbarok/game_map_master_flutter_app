@@ -14,6 +14,8 @@ import '../screens/host/host_dashboard_screen.dart';
 import '../screens/gamer/game_lobby_screen.dart';
 import 'config/app_config.dart';
 import 'generated/l10n/app_localizations.dart';
+import '../theme/global_theme.dart';
+
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
 
@@ -104,11 +106,7 @@ class App extends StatelessWidget {
                 return AppConfig.fallbackLocale;
               },
 
-              theme: ThemeData(
-                primarySwatch: Colors.blue,
-                visualDensity: VisualDensity.adaptivePlatformDensity,
-                useMaterial3: true,
-              ),
+              theme: GlobalMilitaryTheme.themeData,
               routerConfig: router, // Votre configuration GoRouter
             );
           },

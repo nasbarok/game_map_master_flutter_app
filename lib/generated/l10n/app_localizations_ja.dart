@@ -436,7 +436,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gameInProgressTitle => 'ゲーム進行中';
 
   @override
-  String get gameInProgressInstructions => 'ホストの指示に従い、チームと協力してシナリオの目標を達成してください。';
+  String get gameInProgressInstructions =>
+      'ホストの指示に従い、チームと協力してシナリオの目標を達成してください。';
 
   @override
   String get joinGameButton => 'ゲームに参加';
@@ -445,7 +446,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get waitingForGameStartTitle => 'ゲーム開始待ち';
 
   @override
-  String get waitingForGameStartInstructions => 'ホストがまだゲームを開始していません。準備を整え、チームに参加してお待ちください。';
+  String get waitingForGameStartInstructions =>
+      'ホストがまだゲームを開始していません。準備を整え、チームに参加してお待ちください。';
 
   @override
   String get leaveFieldButton => 'フィールドを退出';
@@ -692,12 +694,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noScoresYet => 'スコアはまだありません';
 
   @override
-  String treasureFoundNotification(Object username, Object teamName, Object points, Object symbol) {
+  String treasureFoundNotification(
+      Object username, Object teamName, Object points, Object symbol) {
     return '$username (チーム $teamName) が$pointsポイントの宝物を見つけました！ ($symbol)';
   }
 
   @override
-  String treasureFoundNotificationNoTeam(Object username, Object points, Object symbol) {
+  String treasureFoundNotificationNoTeam(
+      Object username, Object points, Object symbol) {
     return '$username が$pointsポイントの宝物を見つけました！ ($symbol)';
   }
 
@@ -1189,7 +1193,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mapRequiredError => 'マップを選択してください';
 
   @override
-  String get interactiveMapRequiredError => 'このマップはインタラクティブ構成がありません。別のマップを選択するか、エディターで設定してください。';
+  String get interactiveMapRequiredError =>
+      'このマップはインタラクティブ構成がありません。別のマップを選択するか、エディターで設定してください。';
 
   @override
   String get scenarioSavedSuccess => 'シナリオが保存されました';
@@ -1216,7 +1221,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get selectScenariosDialogTitle => 'シナリオを選択';
 
   @override
-  String get noScenariosAvailableDialogMessage => '利用可能なシナリオがありません。\nまずシナリオを作成してください。';
+  String get noScenariosAvailableDialogMessage =>
+      '利用可能なシナリオがありません。\nまずシナリオを作成してください。';
 
   @override
   String get validateButton => '確認';
@@ -1439,7 +1445,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get defineBoundaryFirstSnackbar => '背景をキャプチャする前に、まずフィールド境界（3点以上）を定義してください。';
+  String get defineBoundaryFirstSnackbar =>
+      '背景をキャプチャする前に、まずフィールド境界（3点以上）を定義してください。';
 
   @override
   String get boundaryMinPointsError => 'フィールド境界は少なくとも3点が必要です。';
@@ -1451,13 +1458,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get redefineBoundaryWarningTitle => '境界の再定義';
 
   @override
-  String get redefineBoundaryWarningMessage => 'フィールド境界を再定義すると、既存のゾーンや戦略ポイントがすべて削除されます。続行しますか？';
+  String get redefineBoundaryWarningMessage =>
+      'フィールド境界を再定義すると、既存のゾーンや戦略ポイントがすべて削除されます。続行しますか？';
 
   @override
   String get continueButton => '続行';
 
   @override
-  String get boundariesDefinedAndBackgroundsCapturedSnackbar => 'フィールド境界を定義し、マップ背景をキャプチャしました。';
+  String get boundariesDefinedAndBackgroundsCapturedSnackbar =>
+      'フィールド境界を定義し、マップ背景をキャプチャしました。';
 
   @override
   String errorGeocodingSnackbar(Object error) {
@@ -1794,7 +1803,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get resetScoresTitle => 'スコアをリセット';
 
   @override
-  String get resetScoresConfirmationMessage => 'すべてのスコアをリセットしてもよろしいですか？この操作は取り消せません。';
+  String get resetScoresConfirmationMessage =>
+      'すべてのスコアをリセットしてもよろしいですか？この操作は取り消せません。';
 
   @override
   String get unknownTeamName => '不明なチーム';
@@ -1942,7 +1952,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nonInteractiveMapTitle => 'インタラクティブではないマップ';
 
   @override
-  String get nonInteractiveMapMessage => 'このマップは「爆弾作戦」シナリオに必要なインタラクティブ設定がされていません。\n\nまず、インタラクティブマップエディターでこのマップを設定するか、すでに設定済みの他のマップを選択してください。';
+  String get nonInteractiveMapMessage =>
+      'このマップは「爆弾作戦」シナリオに必要なインタラクティブ設定がされていません。\n\nまず、インタラクティブマップエディターでこのマップを設定するか、すでに設定済みの他のマップを選択してください。';
 
   @override
   String get backButton => '戻る';
@@ -1951,7 +1962,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get configureBombOperation => '爆弾作戦を設定';
 
   @override
-  String get bombOperationDescription => '2チームが対決します：\n🔴 テロリスト – 任務：指定エリアで爆弾を起動し、カウントダウンを開始する。\n🔵 対テロ部隊 – 目的：爆発前に爆弾を見つけて解除する。\n\n🎯 タイマーがゼロになると → 仮想爆発 → テロリストの勝利。\n🛡️ 爆弾が時間内に解除されると → 対テロ部隊の勝利。\n\n💣 目標：スピード、ステルス、正確さ。幸運を祈る、兵士諸君！';
+  String get bombOperationDescription =>
+      '2チームが対決します：\n🔴 テロリスト – 任務：指定エリアで爆弾を起動し、カウントダウンを開始する。\n🔵 対テロ部隊 – 目的：爆発前に爆弾を見つけて解除する。\n\n🎯 タイマーがゼロになると → 仮想爆発 → テロリストの勝利。\n🛡️ 爆弾が時間内に解除されると → 対テロ部隊の勝利。\n\n💣 目標：スピード、ステルス、正確さ。幸運を祈る、兵士諸君！';
 
   @override
   String get bombSite => 'サイト';

@@ -35,7 +35,7 @@ dependencies:
   flutter_map: ^6.1.0 # Ajout de flutter_map pour OpenStreetMap
   latlong2: ^0.9.0 # Dépendance pour flutter_map
   # Autres
-  intl: ^0.19.0
+  intl: 0.20.2
   uuid: 4.5.1
   logger: ^2.0.1
   flutter_datetime_picker_plus: ^2.1.0

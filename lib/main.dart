@@ -19,6 +19,7 @@ import 'package:game_map_master_flutter_app/services/websocket/web_socket_game_s
 import 'package:game_map_master_flutter_app/services/websocket/websocket_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:game_map_master_flutter_app/theme/global_theme.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -35,6 +36,7 @@ import 'package:game_map_master_flutter_app/utils/logger.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   logger.d('⚡️ Starting app...');
+  GlobalMilitaryTheme.configureSystemUI();
   await notifications.initNotifications();
 
   const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');

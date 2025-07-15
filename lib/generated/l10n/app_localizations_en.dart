@@ -60,16 +60,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendingCredentials => 'Sending credentials to AuthService...';
 
   @override
-  String get connectionSuccessful => 'Connection successful. Starting session restoration...';
+  String get connectionSuccessful =>
+      'Connection successful. Starting session restoration...';
 
   @override
-  String get sessionPotentiallyRestored => 'Field session potentially restored.';
+  String get sessionPotentiallyRestored =>
+      'Field session potentially restored.';
 
   @override
   String get automaticReconnection => 'Automatic user reconnection to field...';
 
   @override
-  String get rejoinedFieldSuccessfully => 'Rejoined field successfully. Reloading session...';
+  String get rejoinedFieldSuccessfully =>
+      'Rejoined field successfully. Reloading session...';
 
   @override
   String get userAlreadyConnected => 'User already connected to field.';
@@ -78,7 +81,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noActiveFieldOrUser => 'No active field or user not defined.';
 
   @override
-  String get automaticReconnectionError => 'Error during automatic reconnection attempt';
+  String get automaticReconnectionError =>
+      'Error during automatic reconnection attempt';
 
   @override
   String get username => 'Username';
@@ -387,7 +391,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alreadyRegistered => 'Already registered? Log in';
 
   @override
-  String get registrationSuccess => 'Registration successful! You can now log in.';
+  String get registrationSuccess =>
+      'Registration successful! You can now log in.';
 
   @override
   String get registrationFailure => 'Registration failed. Please try again.';
@@ -436,7 +441,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gameInProgressTitle => 'Game in progress';
 
   @override
-  String get gameInProgressInstructions => 'Follow the host\'s instructions and collaborate with your team to achieve the scenario objectives.';
+  String get gameInProgressInstructions =>
+      'Follow the host\'s instructions and collaborate with your team to achieve the scenario objectives.';
 
   @override
   String get joinGameButton => 'Join Game';
@@ -445,7 +451,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get waitingForGameStartTitle => 'Waiting for game to start';
 
   @override
-  String get waitingForGameStartInstructions => 'The host has not started the game yet. Prepare your gear and join a team while you wait.';
+  String get waitingForGameStartInstructions =>
+      'The host has not started the game yet. Prepare your gear and join a team while you wait.';
 
   @override
   String get leaveFieldButton => 'Leave Field';
@@ -559,7 +566,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaveFieldConfirmationTitle => 'Leave field?';
 
   @override
-  String get leaveFieldConfirmationMessage => 'Are you sure you want to leave this field? You will not be able to rejoin if it is closed.';
+  String get leaveFieldConfirmationMessage =>
+      'Are you sure you want to leave this field? You will not be able to rejoin if it is closed.';
 
   @override
   String get leaveButton => 'Leave';
@@ -568,7 +576,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteFieldHistoryTitle => 'Delete this field?';
 
   @override
-  String get deleteFieldHistoryMessage => 'Are you sure you want to delete this field from your history?';
+  String get deleteFieldHistoryMessage =>
+      'Are you sure you want to delete this field from your history?';
 
   @override
   String get fieldDeletedFromHistory => 'Field deleted from history';
@@ -692,12 +701,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noScoresYet => 'No scores to display yet';
 
   @override
-  String treasureFoundNotification(Object username, Object teamName, Object points, Object symbol) {
+  String treasureFoundNotification(
+      Object username, Object teamName, Object points, Object symbol) {
     return '$username from team $teamName found a treasure worth $points points! ($symbol)';
   }
 
   @override
-  String treasureFoundNotificationNoTeam(Object username, Object points, Object symbol) {
+  String treasureFoundNotificationNoTeam(
+      Object username, Object points, Object symbol) {
     return '$username found a treasure worth $points points! ($symbol)';
   }
 
@@ -718,7 +729,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noGameSessionsForField => 'No game sessions available for this field';
+  String get noGameSessionsForField =>
+      'No game sessions available for this field';
 
   @override
   String sessionListItemTitle(Object index) {
@@ -747,7 +759,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmation => 'Confirmation';
 
   @override
-  String get deleteSessionConfirmationMessage => 'Are you sure you want to delete this game session?';
+  String get deleteSessionConfirmationMessage =>
+      'Are you sure you want to delete this game session?';
 
   @override
   String get replayScreenTitle => 'Session Replay';
@@ -981,7 +994,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noActionForFieldTabSnackbar => 'Use the Maps tab to create or modify maps';
+  String get noActionForFieldTabSnackbar =>
+      'Use the Maps tab to create or modify maps';
 
   @override
   String get openFieldFirstSnackbar => 'Please open a field first';
@@ -1005,7 +1019,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDeleteTitle => 'Confirm Deletion';
 
   @override
-  String get confirmDeleteMapMessage => 'Are you sure you want to delete this map?';
+  String get confirmDeleteMapMessage =>
+      'Are you sure you want to delete this map?';
 
   @override
   String get mapDeletedSuccess => 'Map deleted successfully';
@@ -1016,7 +1031,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get confirmDeleteScenarioMessage => 'Are you sure you want to delete this scenario?';
+  String get confirmDeleteScenarioMessage =>
+      'Are you sure you want to delete this scenario?';
 
   @override
   String get scenarioDeletedSuccess => 'Scenario deleted';
@@ -1108,7 +1124,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get playerManagementUnavailableTitle => 'Player management unavailable';
+  String get playerManagementUnavailableTitle =>
+      'Player management unavailable';
 
   @override
   String get newTeamButton => 'New Team';
@@ -1180,7 +1197,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scenarioTypeDomination => 'Domination';
 
   @override
-  String get scenarioNameRequiredError => 'Please enter a name for the scenario';
+  String get scenarioNameRequiredError =>
+      'Please enter a name for the scenario';
 
   @override
   String get scenarioTypeRequiredError => 'Please select a scenario type';
@@ -1189,7 +1207,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapRequiredError => 'Please select a map';
 
   @override
-  String get interactiveMapRequiredError => 'This map does not have an interactive configuration. Please select another map or configure this one in the map editor.';
+  String get interactiveMapRequiredError =>
+      'This map does not have an interactive configuration. Please select another map or configure this one in the map editor.';
 
   @override
   String get scenarioSavedSuccess => 'Scenario saved successfully';
@@ -1204,19 +1223,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configureBombOperationButton => 'Configure Bomb Operation';
 
   @override
-  String get noMapAvailableError => 'No map available. Please create a map first.';
+  String get noMapAvailableError =>
+      'No map available. Please create a map first.';
 
   @override
   String get interactiveMapAvailableLegend => 'Interactive map available';
 
   @override
-  String get selectMapFirstError => 'Please select a map before choosing the scenario type.';
+  String get selectMapFirstError =>
+      'Please select a map before choosing the scenario type.';
 
   @override
   String get selectScenariosDialogTitle => 'Select Scenarios';
 
   @override
-  String get noScenariosAvailableDialogMessage => 'No scenarios available.\nCreate a scenario first.';
+  String get noScenariosAvailableDialogMessage =>
+      'No scenarios available.\nCreate a scenario first.';
 
   @override
   String get validateButton => 'Validate';
@@ -1283,7 +1305,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gameStartedSuccess => 'The game has started!';
 
   @override
-  String get bombScenarioRequiresTwoTeamsError => 'Bomb Operation scenario requires exactly 2 teams with players.';
+  String get bombScenarioRequiresTwoTeamsError =>
+      'Bomb Operation scenario requires exactly 2 teams with players.';
 
   @override
   String get bombConfigurationCancelled => 'Configuration cancelled.';
@@ -1439,10 +1462,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get defineBoundaryFirstSnackbar => 'Please define a field boundary (at least 3 points) before capturing the background.';
+  String get defineBoundaryFirstSnackbar =>
+      'Please define a field boundary (at least 3 points) before capturing the background.';
 
   @override
-  String get boundaryMinPointsError => 'The field boundary must have at least 3 points.';
+  String get boundaryMinPointsError =>
+      'The field boundary must have at least 3 points.';
 
   @override
   String get zoneMinPointsError => 'A zone must have at least 3 points.';
@@ -1451,13 +1476,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get redefineBoundaryWarningTitle => 'Redefine Boundaries';
 
   @override
-  String get redefineBoundaryWarningMessage => 'Redefining the field boundaries will erase all existing zones and strategic points. Do you want to continue?';
+  String get redefineBoundaryWarningMessage =>
+      'Redefining the field boundaries will erase all existing zones and strategic points. Do you want to continue?';
 
   @override
   String get continueButton => 'Continue';
 
   @override
-  String get boundariesDefinedAndBackgroundsCapturedSnackbar => 'Field boundaries defined and map backgrounds captured.';
+  String get boundariesDefinedAndBackgroundsCapturedSnackbar =>
+      'Field boundaries defined and map backgrounds captured.';
 
   @override
   String errorGeocodingSnackbar(Object error) {
@@ -1465,7 +1492,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get tapToDefinePositionInstruction => 'Tap on the map to define the position';
+  String get tapToDefinePositionInstruction =>
+      'Tap on the map to define the position';
 
   @override
   String get poiIconFlag => 'Flag';
@@ -1533,7 +1561,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalInformationLabel => 'General Information';
 
   @override
-  String get bombConfigGeneralInfoSubtitle => 'Configure the basic information for the Bomb Operation scenario.';
+  String get bombConfigGeneralInfoSubtitle =>
+      'Configure the basic information for the Bomb Operation scenario.';
 
   @override
   String get fieldMapLabel => 'Field Map';
@@ -1554,7 +1583,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gameSettingsLabel => 'Game Settings';
 
   @override
-  String get bombConfigSettingsSubtitle => 'Configure the rules and settings for the Bomb Operation scenario.';
+  String get bombConfigSettingsSubtitle =>
+      'Configure the rules and settings for the Bomb Operation scenario.';
 
   @override
   String get bombTimerLabel => 'Bomb Timer (seconds) *';
@@ -1580,7 +1610,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activeSitesPerRoundLabel => 'Active Sites per Round *';
 
   @override
-  String get activeSitesHelperText => 'Number of randomly active bomb sites per round';
+  String get activeSitesHelperText =>
+      'Number of randomly active bomb sites per round';
 
   @override
   String minCountError(Object value) {
@@ -1591,7 +1622,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bombSitesSectionTitle => 'Bomb Sites';
 
   @override
-  String get bombSitesSectionSubtitle => 'Manage the sites where bombs can be planted and defused.';
+  String get bombSitesSectionSubtitle =>
+      'Manage the sites where bombs can be planted and defused.';
 
   @override
   String get manageBombSitesButton => 'Manage Bomb Sites';
@@ -1620,7 +1652,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get radiusMetersLabel => 'Radius (meters) *';
 
   @override
-  String get radiusHelperText => 'Radius of the zone where the bomb can be planted/defused';
+  String get radiusHelperText =>
+      'Radius of the zone where the bomb can be planted/defused';
 
   @override
   String get radiusRequiredError => 'Please enter a radius';
@@ -1667,7 +1700,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBombSitesDefined => 'No bomb sites defined';
 
   @override
-  String get addSitesInstruction => 'Add sites where bombs can be planted and defused.';
+  String get addSitesInstruction =>
+      'Add sites where bombs can be planted and defused.';
 
   @override
   String siteDetailsSubtitle(Object radius, Object lat, Object long) {
@@ -1723,7 +1757,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get printButton => 'Print';
 
   @override
-  String get printingNotAvailableError => 'Printing not available on this platform';
+  String get printingNotAvailableError =>
+      'Printing not available on this platform';
 
   @override
   String get directPrintButton => 'Direct Print';
@@ -1740,7 +1775,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get qrCodesDisplayInstructions => 'Print, download, or share these QR codes for your treasure hunt.';
+  String get qrCodesDisplayInstructions =>
+      'Print, download, or share these QR codes for your treasure hunt.';
 
   @override
   String defaultTreasureNameIndexed(Object index) {
@@ -1794,7 +1830,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetScoresTitle => 'Reset Scores';
 
   @override
-  String get resetScoresConfirmationMessage => 'Are you sure you want to reset all scores? This action is irreversible.';
+  String get resetScoresConfirmationMessage =>
+      'Are you sure you want to reset all scores? This action is irreversible.';
 
   @override
   String get unknownTeamName => 'Unknown Team';
@@ -1893,7 +1930,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noTreasuresFoundForScenario => 'No treasures found for this scenario';
+  String get noTreasuresFoundForScenario =>
+      'No treasures found for this scenario';
 
   @override
   String scenarioNameHeader(Object scenarioName) {
@@ -1942,7 +1980,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nonInteractiveMapTitle => 'Non-interactive map';
 
   @override
-  String get nonInteractiveMapMessage => 'This map does not have the interactive configuration required for the \'Bomb Operation\' scenario.\n\nYou must first configure this map in the interactive map editor or select another map that is already configured.';
+  String get nonInteractiveMapMessage =>
+      'This map does not have the interactive configuration required for the \'Bomb Operation\' scenario.\n\nYou must first configure this map in the interactive map editor or select another map that is already configured.';
 
   @override
   String get backButton => 'Back';
@@ -1951,7 +1990,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get configureBombOperation => 'Configure Bomb Operation';
 
   @override
-  String get bombOperationDescription => 'Two teams face off:\n🔴 Terrorists – Their mission: activate the bomb in a designated area and start the countdown.\n🔵 Counter-Terrorists – Their goal: find and defuse the bomb before it explodes.\n\n🎯 If the timer reaches zero → imaginary explosion → terrorists win.\n🛡️ Bomb defused in time → counter-terrorists win.\n\n💣 Objective: speed, stealth, and precision. Good luck, soldiers!';
+  String get bombOperationDescription =>
+      'Two teams face off:\n🔴 Terrorists – Their mission: activate the bomb in a designated area and start the countdown.\n🔵 Counter-Terrorists – Their goal: find and defuse the bomb before it explodes.\n\n🎯 If the timer reaches zero → imaginary explosion → terrorists win.\n🛡️ Bomb defused in time → counter-terrorists win.\n\n💣 Objective: speed, stealth, and precision. Good luck, soldiers!';
 
   @override
   String get bombSite => 'Site';

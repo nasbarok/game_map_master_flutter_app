@@ -57,28 +57,34 @@ class AppLocalizationsNl extends AppLocalizations {
   String get connectionInProgress => 'Verbinding bezig...';
 
   @override
-  String get sendingCredentials => 'Inloggegevens verzenden naar AuthService...';
+  String get sendingCredentials =>
+      'Inloggegevens verzenden naar AuthService...';
 
   @override
-  String get connectionSuccessful => 'Verbinding succesvol. Sessie herstel starten...';
+  String get connectionSuccessful =>
+      'Verbinding succesvol. Sessie herstel starten...';
 
   @override
   String get sessionPotentiallyRestored => 'Veldsessie mogelijk hersteld.';
 
   @override
-  String get automaticReconnection => 'Automatische gebruiker herverbinding naar veld...';
+  String get automaticReconnection =>
+      'Automatische gebruiker herverbinding naar veld...';
 
   @override
-  String get rejoinedFieldSuccessfully => 'Succesvol weer toegetreden tot veld. Sessie herladen...';
+  String get rejoinedFieldSuccessfully =>
+      'Succesvol weer toegetreden tot veld. Sessie herladen...';
 
   @override
   String get userAlreadyConnected => 'Gebruiker al verbonden met veld.';
 
   @override
-  String get noActiveFieldOrUser => 'Geen actief veld of gebruiker niet gedefinieerd.';
+  String get noActiveFieldOrUser =>
+      'Geen actief veld of gebruiker niet gedefinieerd.';
 
   @override
-  String get automaticReconnectionError => 'Fout tijdens automatische herverbindingspoging';
+  String get automaticReconnectionError =>
+      'Fout tijdens automatische herverbindingspoging';
 
   @override
   String get username => 'Gebruikersnaam';
@@ -387,7 +393,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get alreadyRegistered => 'Al geregistreerd? Inloggen';
 
   @override
-  String get registrationSuccess => 'Registratie succesvol! U kunt nu inloggen.';
+  String get registrationSuccess =>
+      'Registratie succesvol! U kunt nu inloggen.';
 
   @override
   String get registrationFailure => 'Registratie mislukt. Probeer het opnieuw.';
@@ -436,7 +443,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get gameInProgressTitle => 'Spel bezig';
 
   @override
-  String get gameInProgressInstructions => 'Volg de instructies van de host en werk samen met je team om de scenario-doelen te behalen.';
+  String get gameInProgressInstructions =>
+      'Volg de instructies van de host en werk samen met je team om de scenario-doelen te behalen.';
 
   @override
   String get joinGameButton => 'Deelnemen aan spel';
@@ -445,7 +453,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get waitingForGameStartTitle => 'Wachten op start van het spel';
 
   @override
-  String get waitingForGameStartInstructions => 'De host heeft het spel nog niet gestart. Bereid je uitrusting voor en sluit je aan bij een team terwijl je wacht.';
+  String get waitingForGameStartInstructions =>
+      'De host heeft het spel nog niet gestart. Bereid je uitrusting voor en sluit je aan bij een team terwijl je wacht.';
 
   @override
   String get leaveFieldButton => 'Veld verlaten';
@@ -473,7 +482,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get noFieldsVisited => 'Geen bezochte velden';
 
   @override
-  String get waitForInvitation => 'Wacht op een uitnodiging om deel te nemen aan een veld';
+  String get waitForInvitation =>
+      'Wacht op een uitnodiging om deel te nemen aan een veld';
 
   @override
   String fieldOpenedOn(Object date) {
@@ -512,7 +522,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get deleteFromHistoryTooltip => 'Verwijderen uit geschiedenis';
 
   @override
-  String get youJoinedFieldSuccess => 'Je bent succesvol toegetreden tot het veld';
+  String get youJoinedFieldSuccess =>
+      'Je bent succesvol toegetreden tot het veld';
 
   @override
   String get youLeftField => 'Je hebt het veld verlaten';
@@ -559,7 +570,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get leaveFieldConfirmationTitle => 'Veld verlaten?';
 
   @override
-  String get leaveFieldConfirmationMessage => 'Weet je zeker dat je dit veld wilt verlaten? Je kunt niet opnieuw deelnemen als het is gesloten.';
+  String get leaveFieldConfirmationMessage =>
+      'Weet je zeker dat je dit veld wilt verlaten? Je kunt niet opnieuw deelnemen als het is gesloten.';
 
   @override
   String get leaveButton => 'Verlaten';
@@ -568,7 +580,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get deleteFieldHistoryTitle => 'Dit veld verwijderen?';
 
   @override
-  String get deleteFieldHistoryMessage => 'Weet je zeker dat je dit veld uit je geschiedenis wilt verwijderen?';
+  String get deleteFieldHistoryMessage =>
+      'Weet je zeker dat je dit veld uit je geschiedenis wilt verwijderen?';
 
   @override
   String get fieldDeletedFromHistory => 'Veld uit geschiedenis verwijderd';
@@ -594,7 +607,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get noTeamsAvailableTitle => 'Geen teams beschikbaar';
 
   @override
-  String get noTeamsAvailableMessage => 'Vraag een organisator om een team aan te maken';
+  String get noTeamsAvailableMessage =>
+      'Vraag een organisator om een team aan te maken';
 
   @override
   String get refreshButton => 'Vernieuwen';
@@ -692,12 +706,14 @@ class AppLocalizationsNl extends AppLocalizations {
   String get noScoresYet => 'Nog geen scores beschikbaar';
 
   @override
-  String treasureFoundNotification(Object username, Object teamName, Object points, Object symbol) {
+  String treasureFoundNotification(
+      Object username, Object teamName, Object points, Object symbol) {
     return '$username van team $teamName vond een schat ter waarde van $points punten! ($symbol)';
   }
 
   @override
-  String treasureFoundNotificationNoTeam(Object username, Object points, Object symbol) {
+  String treasureFoundNotificationNoTeam(
+      Object username, Object points, Object symbol) {
     return '$username vond een schat ter waarde van $points punten! ($symbol)';
   }
 
@@ -718,7 +734,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get noGameSessionsForField => 'Geen spelsessies beschikbaar voor dit veld';
+  String get noGameSessionsForField =>
+      'Geen spelsessies beschikbaar voor dit veld';
 
   @override
   String sessionListItemTitle(Object index) {
@@ -747,7 +764,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get confirmation => 'Bevestiging';
 
   @override
-  String get deleteSessionConfirmationMessage => 'Weet je zeker dat je deze spelsessie wilt verwijderen?';
+  String get deleteSessionConfirmationMessage =>
+      'Weet je zeker dat je deze spelsessie wilt verwijderen?';
 
   @override
   String get replayScreenTitle => 'Sessie Replay';
@@ -981,7 +999,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get noActionForFieldTabSnackbar => 'Gebruik de Kaarten-tab om kaarten te maken of te bewerken';
+  String get noActionForFieldTabSnackbar =>
+      'Gebruik de Kaarten-tab om kaarten te maken of te bewerken';
 
   @override
   String get openFieldFirstSnackbar => 'Open eerst een veld';
@@ -1005,7 +1024,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get confirmDeleteTitle => 'Verwijdering bevestigen';
 
   @override
-  String get confirmDeleteMapMessage => 'Weet je zeker dat je deze kaart wilt verwijderen?';
+  String get confirmDeleteMapMessage =>
+      'Weet je zeker dat je deze kaart wilt verwijderen?';
 
   @override
   String get mapDeletedSuccess => 'Kaart succesvol verwijderd';
@@ -1016,7 +1036,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get confirmDeleteScenarioMessage => 'Weet je zeker dat je dit scenario wilt verwijderen?';
+  String get confirmDeleteScenarioMessage =>
+      'Weet je zeker dat je dit scenario wilt verwijderen?';
 
   @override
   String get scenarioDeletedSuccess => 'Scenario verwijderd';
@@ -1050,7 +1071,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get searchPlayersHint => 'Voer een gebruikersnaam in';
 
   @override
-  String get noResultsFound => 'Geen resultaten. Probeer een andere zoekopdracht.';
+  String get noResultsFound =>
+      'Geen resultaten. Probeer een andere zoekopdracht.';
 
   @override
   String get inviteButton => 'Uitnodigen';
@@ -1108,7 +1130,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get playerManagementUnavailableTitle => 'Spelersbeheer niet beschikbaar';
+  String get playerManagementUnavailableTitle =>
+      'Spelersbeheer niet beschikbaar';
 
   @override
   String get newTeamButton => 'Nieuw team';
@@ -1154,7 +1177,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get scanToJoinMessage => 'Scan deze QR-code om deel te nemen aan het spel';
+  String get scanToJoinMessage =>
+      'Scan deze QR-code om deel te nemen aan het spel';
 
   @override
   String invitationCodeLabel(Object code) {
@@ -1189,7 +1213,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get mapRequiredError => 'Selecteer een kaart';
 
   @override
-  String get interactiveMapRequiredError => 'Deze kaart heeft geen interactieve configuratie. Kies een andere kaart of configureer deze in de kaarteditor.';
+  String get interactiveMapRequiredError =>
+      'Deze kaart heeft geen interactieve configuratie. Kies een andere kaart of configureer deze in de kaarteditor.';
 
   @override
   String get scenarioSavedSuccess => 'Scenario succesvol opgeslagen';
@@ -1204,19 +1229,22 @@ class AppLocalizationsNl extends AppLocalizations {
   String get configureBombOperationButton => 'Bommenactie configureren';
 
   @override
-  String get noMapAvailableError => 'Geen kaart beschikbaar. Maak eerst een kaart aan.';
+  String get noMapAvailableError =>
+      'Geen kaart beschikbaar. Maak eerst een kaart aan.';
 
   @override
   String get interactiveMapAvailableLegend => 'Interactieve kaart beschikbaar';
 
   @override
-  String get selectMapFirstError => 'Selecteer eerst een kaart voordat je het scenariotype kiest.';
+  String get selectMapFirstError =>
+      'Selecteer eerst een kaart voordat je het scenariotype kiest.';
 
   @override
   String get selectScenariosDialogTitle => 'Selecteer scenario\'s';
 
   @override
-  String get noScenariosAvailableDialogMessage => 'Geen scenario\'s beschikbaar.\nMaak eerst een scenario aan.';
+  String get noScenariosAvailableDialogMessage =>
+      'Geen scenario\'s beschikbaar.\nMaak eerst een scenario aan.';
 
   @override
   String get validateButton => 'Valideren';
@@ -1283,7 +1311,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get gameStartedSuccess => 'Het spel is gestart!';
 
   @override
-  String get bombScenarioRequiresTwoTeamsError => 'Het bomscenario vereist precies 2 teams met spelers.';
+  String get bombScenarioRequiresTwoTeamsError =>
+      'Het bomscenario vereist precies 2 teams met spelers.';
 
   @override
   String get bombConfigurationCancelled => 'Configuratie geannuleerd.';
@@ -1439,10 +1468,12 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get defineBoundaryFirstSnackbar => 'Definieer eerst de veldgrens (minstens 3 punten) voordat je de achtergrond vastlegt.';
+  String get defineBoundaryFirstSnackbar =>
+      'Definieer eerst de veldgrens (minstens 3 punten) voordat je de achtergrond vastlegt.';
 
   @override
-  String get boundaryMinPointsError => 'De veldgrens moet minimaal 3 punten bevatten.';
+  String get boundaryMinPointsError =>
+      'De veldgrens moet minimaal 3 punten bevatten.';
 
   @override
   String get zoneMinPointsError => 'Een zone moet minimaal 3 punten bevatten.';
@@ -1451,13 +1482,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get redefineBoundaryWarningTitle => 'Herdefinieer Grenzen';
 
   @override
-  String get redefineBoundaryWarningMessage => 'Het herdefiniëren van de veldgrenzen zal alle bestaande zones en strategische punten wissen. Wil je doorgaan?';
+  String get redefineBoundaryWarningMessage =>
+      'Het herdefiniëren van de veldgrenzen zal alle bestaande zones en strategische punten wissen. Wil je doorgaan?';
 
   @override
   String get continueButton => 'Doorgaan';
 
   @override
-  String get boundariesDefinedAndBackgroundsCapturedSnackbar => 'Veldgrenzen gedefinieerd en kaartachtergronden vastgelegd.';
+  String get boundariesDefinedAndBackgroundsCapturedSnackbar =>
+      'Veldgrenzen gedefinieerd en kaartachtergronden vastgelegd.';
 
   @override
   String errorGeocodingSnackbar(Object error) {
@@ -1465,7 +1498,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get tapToDefinePositionInstruction => 'Tik op de kaart om de positie te bepalen';
+  String get tapToDefinePositionInstruction =>
+      'Tik op de kaart om de positie te bepalen';
 
   @override
   String get poiIconFlag => 'Vlag';
@@ -1533,7 +1567,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get generalInformationLabel => 'Algemene informatie';
 
   @override
-  String get bombConfigGeneralInfoSubtitle => 'Configureer de basisinformatie voor het Bomb Operation-scenario.';
+  String get bombConfigGeneralInfoSubtitle =>
+      'Configureer de basisinformatie voor het Bomb Operation-scenario.';
 
   @override
   String get fieldMapLabel => 'Veldkaart';
@@ -1554,7 +1589,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get gameSettingsLabel => 'Spelinstellingen';
 
   @override
-  String get bombConfigSettingsSubtitle => 'Configureer de regels en instellingen voor het Bomb Operation-scenario.';
+  String get bombConfigSettingsSubtitle =>
+      'Configureer de regels en instellingen voor het Bomb Operation-scenario.';
 
   @override
   String get bombTimerLabel => 'Bomtimer (seconden) *';
@@ -1580,7 +1616,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get activeSitesPerRoundLabel => 'Actieve locaties per ronde *';
 
   @override
-  String get activeSitesHelperText => 'Aantal willekeurig actieve bomlocaties per ronde';
+  String get activeSitesHelperText =>
+      'Aantal willekeurig actieve bomlocaties per ronde';
 
   @override
   String minCountError(Object value) {
@@ -1591,7 +1628,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get bombSitesSectionTitle => 'Bombsites';
 
   @override
-  String get bombSitesSectionSubtitle => 'Beheer de locaties waar bommen kunnen worden geplant en onschadelijk gemaakt.';
+  String get bombSitesSectionSubtitle =>
+      'Beheer de locaties waar bommen kunnen worden geplant en onschadelijk gemaakt.';
 
   @override
   String get manageBombSitesButton => 'Beheer bombsites';
@@ -1620,7 +1658,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get radiusMetersLabel => 'Straal (meters) *';
 
   @override
-  String get radiusHelperText => 'Straal van de zone waar de bom kan worden geplaatst/ongedaan gemaakt';
+  String get radiusHelperText =>
+      'Straal van de zone waar de bom kan worden geplaatst/ongedaan gemaakt';
 
   @override
   String get radiusRequiredError => 'Voer een straal in';
@@ -1667,7 +1706,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get noBombSitesDefined => 'Geen bomlocaties gedefinieerd';
 
   @override
-  String get addSitesInstruction => 'Voeg locaties toe waar bommen kunnen worden geplaatst en onschadelijk gemaakt.';
+  String get addSitesInstruction =>
+      'Voeg locaties toe waar bommen kunnen worden geplaatst en onschadelijk gemaakt.';
 
   @override
   String siteDetailsSubtitle(Object radius, Object lat, Object long) {
@@ -1723,7 +1763,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get printButton => 'Afdrukken';
 
   @override
-  String get printingNotAvailableError => 'Afdrukken niet beschikbaar op dit platform';
+  String get printingNotAvailableError =>
+      'Afdrukken niet beschikbaar op dit platform';
 
   @override
   String get directPrintButton => 'Direct afdrukken';
@@ -1740,7 +1781,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get qrCodesDisplayInstructions => 'Druk deze QR-codes af, download ze of deel ze voor je speurtocht.';
+  String get qrCodesDisplayInstructions =>
+      'Druk deze QR-codes af, download ze of deel ze voor je speurtocht.';
 
   @override
   String defaultTreasureNameIndexed(Object index) {
@@ -1794,7 +1836,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get resetScoresTitle => 'Scores resetten';
 
   @override
-  String get resetScoresConfirmationMessage => 'Weet je zeker dat je alle scores wilt resetten? Deze actie kan niet ongedaan worden gemaakt.';
+  String get resetScoresConfirmationMessage =>
+      'Weet je zeker dat je alle scores wilt resetten? Deze actie kan niet ongedaan worden gemaakt.';
 
   @override
   String get unknownTeamName => 'Onbekend team';
@@ -1893,7 +1936,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get noTreasuresFoundForScenario => 'Geen schatten gevonden voor dit scenario';
+  String get noTreasuresFoundForScenario =>
+      'Geen schatten gevonden voor dit scenario';
 
   @override
   String scenarioNameHeader(Object scenarioName) {
@@ -1942,7 +1986,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get nonInteractiveMapTitle => 'Niet-interactieve kaart';
 
   @override
-  String get nonInteractiveMapMessage => 'Deze kaart heeft niet de interactieve configuratie die nodig is voor het scenario \"Bomoperatie\".\n\nConfigureer deze kaart eerst in de interactieve kaarteditor of selecteer een andere kaart die al is geconfigureerd.';
+  String get nonInteractiveMapMessage =>
+      'Deze kaart heeft niet de interactieve configuratie die nodig is voor het scenario \"Bomoperatie\".\n\nConfigureer deze kaart eerst in de interactieve kaarteditor of selecteer een andere kaart die al is geconfigureerd.';
 
   @override
   String get backButton => 'Terug';
@@ -1951,7 +1996,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get configureBombOperation => 'Configureer Bomoperatie';
 
   @override
-  String get bombOperationDescription => 'Twee teams strijden tegen elkaar:\n🔴 Terroristen – Hun missie: activeer de bom in een aangewezen gebied en start de timer.\n🔵 Antiterreurteam – Hun doel: vind en ontmantel de bom voordat deze ontploft.\n\n🎯 Als de timer op nul komt → denkbeeldige explosie → winst voor de terroristen.\n🛡️ Bom op tijd ontmanteld → winst voor het antiterreurteam.\n\n💣 Doel: snelheid, stealth en precisie. Succes, soldaten!';
+  String get bombOperationDescription =>
+      'Twee teams strijden tegen elkaar:\n🔴 Terroristen – Hun missie: activeer de bom in een aangewezen gebied en start de timer.\n🔵 Antiterreurteam – Hun doel: vind en ontmantel de bom voordat deze ontploft.\n\n🎯 Als de timer op nul komt → denkbeeldige explosie → winst voor de terroristen.\n🛡️ Bom op tijd ontmanteld → winst voor het antiterreurteam.\n\n💣 Doel: snelheid, stealth en precisie. Succes, soldaten!';
 
   @override
   String get bombSite => 'Locatie';

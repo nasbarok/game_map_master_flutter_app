@@ -60,25 +60,30 @@ class AppLocalizationsNo extends AppLocalizations {
   String get sendingCredentials => 'Sender påloggingsdata til AuthService...';
 
   @override
-  String get connectionSuccessful => 'Tilkobling vellykket. Starter øktgjenoppretting...';
+  String get connectionSuccessful =>
+      'Tilkobling vellykket. Starter øktgjenoppretting...';
 
   @override
   String get sessionPotentiallyRestored => 'Feltøkt potensielt gjenopprettet.';
 
   @override
-  String get automaticReconnection => 'Automatisk bruker-gjenkobling til felt...';
+  String get automaticReconnection =>
+      'Automatisk bruker-gjenkobling til felt...';
 
   @override
-  String get rejoinedFieldSuccessfully => 'Koblet til felt igjen vellykket. Laster økt på nytt...';
+  String get rejoinedFieldSuccessfully =>
+      'Koblet til felt igjen vellykket. Laster økt på nytt...';
 
   @override
   String get userAlreadyConnected => 'Bruker allerede koblet til felt.';
 
   @override
-  String get noActiveFieldOrUser => 'Ingen aktivt felt eller bruker ikke definert.';
+  String get noActiveFieldOrUser =>
+      'Ingen aktivt felt eller bruker ikke definert.';
 
   @override
-  String get automaticReconnectionError => 'Feil under automatisk gjenkobling forsøk';
+  String get automaticReconnectionError =>
+      'Feil under automatisk gjenkobling forsøk';
 
   @override
   String get username => 'Brukernavn';
@@ -387,10 +392,12 @@ class AppLocalizationsNo extends AppLocalizations {
   String get alreadyRegistered => 'Allerede registrert? Logg inn';
 
   @override
-  String get registrationSuccess => 'Registrering vellykket! Du kan nå logge inn.';
+  String get registrationSuccess =>
+      'Registrering vellykket! Du kan nå logge inn.';
 
   @override
-  String get registrationFailure => 'Registrering mislyktes. Vennligst prøv igjen.';
+  String get registrationFailure =>
+      'Registrering mislyktes. Vennligst prøv igjen.';
 
   @override
   String get loginFailed => 'Innlogging mislyktes. Sjekk legitimasjonen din.';
@@ -436,7 +443,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get gameInProgressTitle => 'Spill pågår';
 
   @override
-  String get gameInProgressInstructions => 'Følg vertens instruksjoner og samarbeid med laget ditt for å nå scenariomålene.';
+  String get gameInProgressInstructions =>
+      'Følg vertens instruksjoner og samarbeid med laget ditt for å nå scenariomålene.';
 
   @override
   String get joinGameButton => 'Bli med i spillet';
@@ -445,7 +453,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get waitingForGameStartTitle => 'Venter på at spillet skal starte';
 
   @override
-  String get waitingForGameStartInstructions => 'Verten har ikke startet spillet ennå. Gjør deg klar og bli med i et lag mens du venter.';
+  String get waitingForGameStartInstructions =>
+      'Verten har ikke startet spillet ennå. Gjør deg klar og bli med i et lag mens du venter.';
 
   @override
   String get leaveFieldButton => 'Forlat feltet';
@@ -473,7 +482,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get noFieldsVisited => 'Ingen besøkte felt';
 
   @override
-  String get waitForInvitation => 'Vent på en invitasjon for å bli med på et felt';
+  String get waitForInvitation =>
+      'Vent på en invitasjon for å bli med på et felt';
 
   @override
   String fieldOpenedOn(Object date) {
@@ -559,7 +569,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get leaveFieldConfirmationTitle => 'Forlat feltet?';
 
   @override
-  String get leaveFieldConfirmationMessage => 'Er du sikker på at du vil forlate dette feltet? Du kan ikke bli med igjen hvis det er stengt.';
+  String get leaveFieldConfirmationMessage =>
+      'Er du sikker på at du vil forlate dette feltet? Du kan ikke bli med igjen hvis det er stengt.';
 
   @override
   String get leaveButton => 'Forlat';
@@ -568,7 +579,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get deleteFieldHistoryTitle => 'Slett dette feltet?';
 
   @override
-  String get deleteFieldHistoryMessage => 'Er du sikker på at du vil slette dette feltet fra historikken?';
+  String get deleteFieldHistoryMessage =>
+      'Er du sikker på at du vil slette dette feltet fra historikken?';
 
   @override
   String get fieldDeletedFromHistory => 'Felt slettet fra historikken';
@@ -692,12 +704,14 @@ class AppLocalizationsNo extends AppLocalizations {
   String get noScoresYet => 'Ingen poeng ennå';
 
   @override
-  String treasureFoundNotification(Object username, Object teamName, Object points, Object symbol) {
+  String treasureFoundNotification(
+      Object username, Object teamName, Object points, Object symbol) {
     return '$username fra lag $teamName fant en skatt verdt $points poeng! ($symbol)';
   }
 
   @override
-  String treasureFoundNotificationNoTeam(Object username, Object points, Object symbol) {
+  String treasureFoundNotificationNoTeam(
+      Object username, Object points, Object symbol) {
     return '$username fant en skatt verdt $points poeng! ($symbol)';
   }
 
@@ -718,7 +732,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get noGameSessionsForField => 'Ingen spilløkter tilgjengelig for denne banen';
+  String get noGameSessionsForField =>
+      'Ingen spilløkter tilgjengelig for denne banen';
 
   @override
   String sessionListItemTitle(Object index) {
@@ -747,7 +762,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get confirmation => 'Bekreftelse';
 
   @override
-  String get deleteSessionConfirmationMessage => 'Er du sikker på at du vil slette denne spilløkten?';
+  String get deleteSessionConfirmationMessage =>
+      'Er du sikker på at du vil slette denne spilløkten?';
 
   @override
   String get replayScreenTitle => 'Øktavspilling';
@@ -981,7 +997,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get noActionForFieldTabSnackbar => 'Bruk Kart-fanen for å lage eller redigere kart';
+  String get noActionForFieldTabSnackbar =>
+      'Bruk Kart-fanen for å lage eller redigere kart';
 
   @override
   String get openFieldFirstSnackbar => 'Åpne et bane først';
@@ -1005,7 +1022,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get confirmDeleteTitle => 'Bekreft sletting';
 
   @override
-  String get confirmDeleteMapMessage => 'Er du sikker på at du vil slette dette kartet?';
+  String get confirmDeleteMapMessage =>
+      'Er du sikker på at du vil slette dette kartet?';
 
   @override
   String get mapDeletedSuccess => 'Kart slettet';
@@ -1016,7 +1034,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get confirmDeleteScenarioMessage => 'Er du sikker på at du vil slette dette scenariet?';
+  String get confirmDeleteScenarioMessage =>
+      'Er du sikker på at du vil slette dette scenariet?';
 
   @override
   String get scenarioDeletedSuccess => 'Scenario slettet';
@@ -1108,7 +1127,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get playerManagementUnavailableTitle => 'Spilleradministrasjon utilgjengelig';
+  String get playerManagementUnavailableTitle =>
+      'Spilleradministrasjon utilgjengelig';
 
   @override
   String get newTeamButton => 'Nytt lag';
@@ -1154,7 +1174,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get scanToJoinMessage => 'Skann denne QR-koden for å bli med i spillet';
+  String get scanToJoinMessage =>
+      'Skann denne QR-koden for å bli med i spillet';
 
   @override
   String invitationCodeLabel(Object code) {
@@ -1189,7 +1210,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get mapRequiredError => 'Velg et kart';
 
   @override
-  String get interactiveMapRequiredError => 'Dette kartet har ingen interaktiv konfigurasjon. Velg et annet kart eller konfigurer dette i kartredigereren.';
+  String get interactiveMapRequiredError =>
+      'Dette kartet har ingen interaktiv konfigurasjon. Velg et annet kart eller konfigurer dette i kartredigereren.';
 
   @override
   String get scenarioSavedSuccess => 'Scenario lagret';
@@ -1204,7 +1226,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get configureBombOperationButton => 'Konfigurer bombeoppdrag';
 
   @override
-  String get noMapAvailableError => 'Ingen kart tilgjengelig. Opprett et kart først.';
+  String get noMapAvailableError =>
+      'Ingen kart tilgjengelig. Opprett et kart først.';
 
   @override
   String get interactiveMapAvailableLegend => 'Interaktivt kart tilgjengelig';
@@ -1216,7 +1239,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get selectScenariosDialogTitle => 'Velg scenarioer';
 
   @override
-  String get noScenariosAvailableDialogMessage => 'Ingen scenarioer tilgjengelige.\nOpprett et scenario først.';
+  String get noScenariosAvailableDialogMessage =>
+      'Ingen scenarioer tilgjengelige.\nOpprett et scenario først.';
 
   @override
   String get validateButton => 'Bekreft';
@@ -1283,7 +1307,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get gameStartedSuccess => 'Spillet har startet!';
 
   @override
-  String get bombScenarioRequiresTwoTeamsError => 'Bombescenario krever nøyaktig 2 lag med spillere.';
+  String get bombScenarioRequiresTwoTeamsError =>
+      'Bombescenario krever nøyaktig 2 lag med spillere.';
 
   @override
   String get bombConfigurationCancelled => 'Konfigurasjon avbrutt.';
@@ -1425,7 +1450,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get mapNameRequiredSnackbar => 'Vennligst skriv inn et navn for kartet.';
+  String get mapNameRequiredSnackbar =>
+      'Vennligst skriv inn et navn for kartet.';
 
   @override
   String get mapCreatedSuccessSnackbar => 'Kart opprettet!';
@@ -1439,7 +1465,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get defineBoundaryFirstSnackbar => 'Definer feltets grenser (minst 3 punkter) før du fanger bakgrunnen.';
+  String get defineBoundaryFirstSnackbar =>
+      'Definer feltets grenser (minst 3 punkter) før du fanger bakgrunnen.';
 
   @override
   String get boundaryMinPointsError => 'Feltets grense må ha minst 3 punkter.';
@@ -1451,13 +1478,15 @@ class AppLocalizationsNo extends AppLocalizations {
   String get redefineBoundaryWarningTitle => 'Omdefiner Grenser';
 
   @override
-  String get redefineBoundaryWarningMessage => 'Omdefinering av grenser vil slette alle eksisterende soner og strategiske punkter. Vil du fortsette?';
+  String get redefineBoundaryWarningMessage =>
+      'Omdefinering av grenser vil slette alle eksisterende soner og strategiske punkter. Vil du fortsette?';
 
   @override
   String get continueButton => 'Fortsett';
 
   @override
-  String get boundariesDefinedAndBackgroundsCapturedSnackbar => 'Feltsgrenser definert og kartbakgrunner lagret.';
+  String get boundariesDefinedAndBackgroundsCapturedSnackbar =>
+      'Feltsgrenser definert og kartbakgrunner lagret.';
 
   @override
   String errorGeocodingSnackbar(Object error) {
@@ -1465,7 +1494,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get tapToDefinePositionInstruction => 'Trykk på kartet for å definere posisjonen';
+  String get tapToDefinePositionInstruction =>
+      'Trykk på kartet for å definere posisjonen';
 
   @override
   String get poiIconFlag => 'Flagg';
@@ -1533,7 +1563,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get generalInformationLabel => 'Generell informasjon';
 
   @override
-  String get bombConfigGeneralInfoSubtitle => 'Konfigurer grunnleggende informasjon for bombescenarioet.';
+  String get bombConfigGeneralInfoSubtitle =>
+      'Konfigurer grunnleggende informasjon for bombescenarioet.';
 
   @override
   String get fieldMapLabel => 'Feltkart';
@@ -1554,7 +1585,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get gameSettingsLabel => 'Spillinnstillinger';
 
   @override
-  String get bombConfigSettingsSubtitle => 'Konfigurer regler og innstillinger for bombescenarioet.';
+  String get bombConfigSettingsSubtitle =>
+      'Konfigurer regler og innstillinger for bombescenarioet.';
 
   @override
   String get bombTimerLabel => 'Bombetid (sekunder) *';
@@ -1580,7 +1612,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get activeSitesPerRoundLabel => 'Aktive steder per runde *';
 
   @override
-  String get activeSitesHelperText => 'Antall tilfeldige aktive bombesteder per runde';
+  String get activeSitesHelperText =>
+      'Antall tilfeldige aktive bombesteder per runde';
 
   @override
   String minCountError(Object value) {
@@ -1591,7 +1624,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get bombSitesSectionTitle => 'Bombesteder';
 
   @override
-  String get bombSitesSectionSubtitle => 'Administrer stedene der bomber kan plantes og desarmeres.';
+  String get bombSitesSectionSubtitle =>
+      'Administrer stedene der bomber kan plantes og desarmeres.';
 
   @override
   String get manageBombSitesButton => 'Administrer bombesteder';
@@ -1620,7 +1654,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get radiusMetersLabel => 'Radius (meter) *';
 
   @override
-  String get radiusHelperText => 'Radius for området hvor bomben kan plantes/desarmeres';
+  String get radiusHelperText =>
+      'Radius for området hvor bomben kan plantes/desarmeres';
 
   @override
   String get radiusRequiredError => 'Vennligst skriv inn en radius';
@@ -1667,7 +1702,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get noBombSitesDefined => 'Ingen bombesteder definert';
 
   @override
-  String get addSitesInstruction => 'Legg til steder hvor bomber kan plantes og desarmeres.';
+  String get addSitesInstruction =>
+      'Legg til steder hvor bomber kan plantes og desarmeres.';
 
   @override
   String siteDetailsSubtitle(Object radius, Object lat, Object long) {
@@ -1723,7 +1759,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get printButton => 'Skriv ut';
 
   @override
-  String get printingNotAvailableError => 'Utskrift er ikke tilgjengelig på denne plattformen';
+  String get printingNotAvailableError =>
+      'Utskrift er ikke tilgjengelig på denne plattformen';
 
   @override
   String get directPrintButton => 'Direkte utskrift';
@@ -1740,7 +1777,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get qrCodesDisplayInstructions => 'Skriv ut, last ned eller del disse QR-kodene til skattejakten din.';
+  String get qrCodesDisplayInstructions =>
+      'Skriv ut, last ned eller del disse QR-kodene til skattejakten din.';
 
   @override
   String defaultTreasureNameIndexed(Object index) {
@@ -1794,7 +1832,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get resetScoresTitle => 'Tilbakestill poeng';
 
   @override
-  String get resetScoresConfirmationMessage => 'Er du sikker på at du vil tilbakestille alle poeng? Denne handlingen kan ikke angres.';
+  String get resetScoresConfirmationMessage =>
+      'Er du sikker på at du vil tilbakestille alle poeng? Denne handlingen kan ikke angres.';
 
   @override
   String get unknownTeamName => 'Ukjent lag';
@@ -1893,7 +1932,8 @@ class AppLocalizationsNo extends AppLocalizations {
   }
 
   @override
-  String get noTreasuresFoundForScenario => 'Ingen skatter funnet for dette scenariet';
+  String get noTreasuresFoundForScenario =>
+      'Ingen skatter funnet for dette scenariet';
 
   @override
   String scenarioNameHeader(Object scenarioName) {
@@ -1942,7 +1982,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get nonInteractiveMapTitle => 'Ikke-interaktivt kart';
 
   @override
-  String get nonInteractiveMapMessage => 'Dette kartet har ikke den interaktive konfigurasjonen som kreves for scenariet \"Bomboperasjon\".\n\nDu må først konfigurere dette kartet i den interaktive kartredigereren eller velge et annet kart som allerede er konfigurert.';
+  String get nonInteractiveMapMessage =>
+      'Dette kartet har ikke den interaktive konfigurasjonen som kreves for scenariet \"Bomboperasjon\".\n\nDu må først konfigurere dette kartet i den interaktive kartredigereren eller velge et annet kart som allerede er konfigurert.';
 
   @override
   String get backButton => 'Tilbake';
@@ -1951,7 +1992,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get configureBombOperation => 'Konfigurer Bomboperasjon';
 
   @override
-  String get bombOperationDescription => 'To lag konkurrerer:\n🔴 Terrorister – Deres oppdrag: aktivere bomben i et angitt område og starte nedtellingen.\n🔵 Antiterror – Deres mål: finne og desarmere bomben før den eksploderer.\n\n🎯 Hvis timeren når null → tenkt eksplosjon → seier til terroristene.\n🛡️ Bombe desarmert i tide → seier til antiterrorlaget.\n\n💣 Mål: hastighet, diskresjon og presisjon. Lykke til, soldater!';
+  String get bombOperationDescription =>
+      'To lag konkurrerer:\n🔴 Terrorister – Deres oppdrag: aktivere bomben i et angitt område og starte nedtellingen.\n🔵 Antiterror – Deres mål: finne og desarmere bomben før den eksploderer.\n\n🎯 Hvis timeren når null → tenkt eksplosjon → seier til terroristene.\n🛡️ Bombe desarmert i tide → seier til antiterrorlaget.\n\n💣 Mål: hastighet, diskresjon og presisjon. Lykke til, soldater!';
 
   @override
   String get bombSite => 'Sted';
