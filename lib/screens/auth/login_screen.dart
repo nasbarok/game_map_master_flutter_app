@@ -10,8 +10,8 @@ import '../../services/game_state_service.dart';
 import '../../services/player_connection_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
-// 🎨 AJOUT : Import du background adaptatif
 import '../../widgets/adaptive_background.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -116,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // 🎨 MODIFICATION : Utilisation d'AdaptiveScaffold avec background
+    // 🎨 Utilisation d'AdaptiveScaffold avec background
     return AdaptiveScaffold(
       gameBackgroundType: GameBackgroundType.home,
       enableParallax: true,
@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Container(
-                  // 🎨 AJOUT : Container semi-transparent pour améliorer la lisibilité
+                  // 🎨  Container semi-transparent pour améliorer la lisibilité
                   padding: const EdgeInsets.all(24.0),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.3),
@@ -144,22 +144,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // 🎨 MODIFICATION : Logo avec style militaire
+                        // Logo avec style militaire
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 120,
+                          height: 120,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Theme.of(context).primaryColor.withOpacity(0.2),
-                            border: Border.all(
-                              color: Theme.of(context).primaryColor,
-                              width: 2,
-                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 15,
+                                offset: Offset(0, 8),
+                              ),
+                            ],
                           ),
-                          child: const Icon(
-                            Icons.map,
-                            size: 40,
-                            color: Colors.white,
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/images/theme/logo_military.png',
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -188,11 +193,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _usernameController,
                           decoration: InputDecoration(
                             labelText: l10n.username,
+                            labelStyle: const TextStyle(color: Colors.black87),
                             prefixIcon: const Icon(Icons.person),
                             border: const OutlineInputBorder(),
                             // 🎨 AJOUT : Style adapté au background sombre
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.9),
+                            fillColor: Colors.white54.withOpacity(0.9),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -208,6 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           obscureText: !_isPasswordVisible,
                           decoration: InputDecoration(
                             labelText: l10n.password,
+                            labelStyle: const TextStyle(color: Colors.black87),
                             prefixIcon: const Icon(Icons.lock),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -224,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             border: const OutlineInputBorder(),
                             // 🎨 AJOUT : Style adapté au background sombre
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.9),
+                            fillColor: Colors.white54.withOpacity(0.9),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
