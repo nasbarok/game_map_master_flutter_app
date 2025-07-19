@@ -42,7 +42,7 @@ class GlobalMilitaryTheme {
       ),
       
       // AppBar theme
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: primaryMetal,
         foregroundColor: textLight,
         elevation: 4,
@@ -66,11 +66,11 @@ class GlobalMilitaryTheme {
           backgroundColor: primaryMetal,
           foregroundColor: textLight,
           elevation: 4,
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
@@ -86,7 +86,7 @@ class GlobalMilitaryTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
@@ -97,8 +97,8 @@ class GlobalMilitaryTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: accentGreen,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          textStyle: TextStyle(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
@@ -110,7 +110,7 @@ class GlobalMilitaryTheme {
       cardTheme: CardThemeData(
         color: darkMetal,
         elevation: 6,
-        margin: EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(color: primaryMetal.withOpacity(0.3), width: 1),
@@ -141,70 +141,72 @@ class GlobalMilitaryTheme {
         hintStyle: TextStyle(color: textLight.withOpacity(0.6)),
         prefixIconColor: accentGreen,
         suffixIconColor: lightMetal,
+        floatingLabelStyle: const TextStyle(color: textLight),
+        // C’est le label quand il “flotte” au-dessus du champ
       ),
       
       // Typographie
       textTheme: TextTheme(
-        displayLarge: TextStyle(
+        displayLarge: const TextStyle(
           color: textLight,
           fontSize: 32,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.5,
         ),
-        displayMedium: TextStyle(
+        displayMedium: const TextStyle(
           color: textLight,
           fontSize: 28,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
         ),
-        displaySmall: TextStyle(
+        displaySmall: const TextStyle(
           color: textLight,
           fontSize: 24,
           fontWeight: FontWeight.bold,
           letterSpacing: 1,
         ),
-        headlineLarge: TextStyle(
+        headlineLarge: const TextStyle(
           color: textLight,
           fontSize: 22,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.8,
         ),
-        headlineMedium: TextStyle(
+        headlineMedium: const TextStyle(
           color: textLight,
           fontSize: 20,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.6,
         ),
-        headlineSmall: TextStyle(
+        headlineSmall: const TextStyle(
           color: textLight,
           fontSize: 18,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.4,
         ),
-        titleLarge: TextStyle(
+        titleLarge: const TextStyle(
           color: textLight,
           fontSize: 16,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.3,
         ),
-        titleMedium: TextStyle(
+        titleMedium: const TextStyle(
           color: textLight,
           fontSize: 14,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.2,
         ),
-        titleSmall: TextStyle(
+        titleSmall: const TextStyle(
           color: textLight,
           fontSize: 12,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.1,
         ),
-        bodyLarge: TextStyle(
+        bodyLarge: const TextStyle(
           color: textLight,
           fontSize: 16,
           fontWeight: FontWeight.normal,
         ),
-        bodyMedium: TextStyle(
+        bodyMedium: const TextStyle(
           color: textLight,
           fontSize: 14,
           fontWeight: FontWeight.normal,
@@ -214,13 +216,13 @@ class GlobalMilitaryTheme {
           fontSize: 12,
           fontWeight: FontWeight.normal,
         ),
-        labelLarge: TextStyle(
+        labelLarge: const TextStyle(
           color: textLight,
           fontSize: 14,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
         ),
-        labelMedium: TextStyle(
+        labelMedium: const TextStyle(
           color: textLight,
           fontSize: 12,
           fontWeight: FontWeight.w500,
@@ -242,20 +244,20 @@ class GlobalMilitaryTheme {
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: primaryMetal, width: 2),
         ),
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           color: textLight,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
         ),
-        contentTextStyle: TextStyle(
+        contentTextStyle: const TextStyle(
           color: textLight,
           fontSize: 16,
         ),
       ),
       
       // Bottom Navigation
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: darkMetal,
         selectedItemColor: accentGreen,
         unselectedItemColor: lightMetal,
@@ -272,7 +274,7 @@ class GlobalMilitaryTheme {
       ),
       
       // Tab Bar
-      tabBarTheme: TabBarThemeData(
+      tabBarTheme: const TabBarThemeData(
         labelColor: accentGreen,
         unselectedLabelColor: lightMetal,
         indicator: UnderlineTabIndicator(
@@ -322,7 +324,7 @@ class GlobalMilitaryTheme {
           return Colors.transparent;
         }),
         checkColor: MaterialStateProperty.all(textLight),
-        side: BorderSide(color: primaryMetal, width: 2),
+        side: const BorderSide(color: primaryMetal, width: 2),
       ),
       
       // Progress Indicators
@@ -355,8 +357,8 @@ class GlobalMilitaryTheme {
   /// Précharge les assets du thème
   static Future<void> precacheAssets(BuildContext context) async {
     await Future.wait([
-      precacheImage(AssetImage(backgroundHome), context),
-      precacheImage(AssetImage(logoMilitary), context),
+      precacheImage(const AssetImage(backgroundHome), context),
+      precacheImage(const AssetImage(logoMilitary), context),
     ]);
   }
   

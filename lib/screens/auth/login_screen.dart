@@ -10,6 +10,8 @@ import '../../services/game_state_service.dart';
 import '../../services/player_connection_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import '../../theme/global_theme.dart';
+import '../../theme/themed_text_form_field.dart';
 import '../../widgets/adaptive_background.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -188,18 +190,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 32),
 
-                        // ✅ VOS CHAMPS INCHANGÉS (le thème s'applique automatiquement)
-                        TextFormField(
+                        // ✅  CHAMPS
+                        ThemedTextFormField(
                           controller: _usernameController,
-                          decoration: InputDecoration(
-                            labelText: l10n.username,
-                            labelStyle: const TextStyle(color: Colors.black87),
-                            prefixIcon: const Icon(Icons.person),
-                            border: const OutlineInputBorder(),
-                            // 🎨 AJOUT : Style adapté au background sombre
-                            filled: true,
-                            fillColor: Colors.white54.withOpacity(0.9),
-                          ),
+                          label: l10n.username,
+                          prefixIcon: const Icon(Icons.person),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return l10n.promptUsername;
@@ -209,29 +204,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        TextFormField(
+                        ThemedTextFormField(
                           controller: _passwordController,
+                          label: l10n.password,
                           obscureText: !_isPasswordVisible,
-                          decoration: InputDecoration(
-                            labelText: l10n.password,
-                            labelStyle: const TextStyle(color: Colors.black87),
-                            prefixIcon: const Icon(Icons.lock),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordVisible
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordVisible = !_isPasswordVisible;
-                                });
-                              },
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                              color: GlobalMilitaryTheme.lightMetal,
                             ),
-                            border: const OutlineInputBorder(),
-                            // 🎨 AJOUT : Style adapté au background sombre
-                            filled: true,
-                            fillColor: Colors.white54.withOpacity(0.9),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
