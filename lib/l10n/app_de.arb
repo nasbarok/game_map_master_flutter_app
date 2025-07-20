@@ -593,5 +593,7 @@
   "backButton": "Zurück",
   "configureBombOperation": "Bombenoperation konfigurieren",
   "bombOperationDescription": "Zwei Teams treten gegeneinander an:\n🔴 Terroristen – Ihre Mission: die Bombe in einem festgelegten Bereich aktivieren und den Countdown starten.\n🔵 Antiterror-Einheit – Ihr Ziel: die Bombe finden und entschärfen, bevor sie explodiert.\n\n🎯 Wenn der Timer auf Null geht → imaginäre Explosion → Sieg der Terroristen.\n🛡️ Bombe rechtzeitig entschärft → Sieg der Antiterror-Einheit.\n\n💣 Ziel: Geschwindigkeit, Heimlichkeit und Präzision. Viel Glück, Soldaten!",
-  "bombSite": "Standort"
+  "bombSite": "Standort",
+  "recruitmentTitle": "REKRUTIERUNG",
+  "recruitmentSubtitle": "Kein Spam. Keine Verpflichtung. Eine E-Mail zur Wiederherstellung, ein Benutzername zum Spielen. Mission erfüllt."
 }

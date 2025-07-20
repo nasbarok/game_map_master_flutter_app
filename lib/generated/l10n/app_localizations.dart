@@ -3627,6 +3627,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Site'**
   String get bombSite;
+
+  /// No description provided for @recruitmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'RECRUITMENT'**
+  String get recruitmentTitle;
+
+  /// No description provided for @recruitmentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No spam. No commitment. One email for recovery, one username to join a game and play. Mission complete.'**
+  String get recruitmentSubtitle;
 }
 
 class _AppLocalizationsDelegate

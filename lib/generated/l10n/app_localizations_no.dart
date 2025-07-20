@@ -1997,4 +1997,11 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get bombSite => 'Sted';
+
+  @override
+  String get recruitmentTitle => 'REKRUTERING';
+
+  @override
+  String get recruitmentSubtitle =>
+      'Ingen spam. Ingen ansvar. En e-post for gjenopprettelse, et brukernavn for spilling. Mission fullført.';
 }

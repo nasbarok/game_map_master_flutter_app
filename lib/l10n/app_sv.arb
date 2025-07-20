@@ -593,5 +593,7 @@
   "backButton": "Tillbaka",
   "configureBombOperation": "Konfigurera Bomboperation",
   "bombOperationDescription": "Två lag möts:\n🔴 Terrorister – Deras uppdrag: aktivera bomben i ett utsett område och starta nedräkningen.\n🔵 Antiterrorister – Deras mål: hitta och desarmera bomben innan den exploderar.\n\n🎯 Om timern når noll → tänkt explosion → seger för terroristerna.\n🛡️ Bomben desarmeras i tid → seger för antiterroristerna.\n\n💣 Mål: snabbhet, smygande och precision. Lycka till, soldater!",
-  "bombSite": "Plats"
+  "bombSite": "Plats",
+  "recruitmentTitle": "REKRUTERING",
+  "recruitmentSubtitle": "Ingen spam. Ingen ansvar. En e-post for gånger, et brukernavn for spilling. Mission fullført."
 }

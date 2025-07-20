@@ -2002,4 +2002,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get bombSite => 'Sito';
+
+  @override
+  String get recruitmentTitle => 'RECLUTAMENTO';
+
+  @override
+  String get recruitmentSubtitle =>
+      'Niente spam. Nessun impegno. Una email per il recupero, un username per giocare. Missione compiuta.';
 }

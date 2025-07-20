@@ -1995,4 +1995,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bombSite => 'Site';
+
+  @override
+  String get recruitmentTitle => 'RECRUITMENT';
+
+  @override
+  String get recruitmentSubtitle =>
+      'No spam. No commitment. One email for recovery, one username to join a game and play. Mission complete.';
 }

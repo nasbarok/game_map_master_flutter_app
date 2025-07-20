@@ -2001,4 +2001,11 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get bombSite => 'Locatie';
+
+  @override
+  String get recruitmentTitle => 'REKRUTERING';
+
+  @override
+  String get recruitmentSubtitle =>
+      'Geen spam. Geen verplichtingen. Eén email voor herstel, een gebruikersnaam om te spelen. Missie voltooid.';
 }

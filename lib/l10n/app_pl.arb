@@ -593,5 +593,7 @@
   "backButton": "Wstecz",
   "configureBombOperation": "Skonfiguruj Operację Bomby",
   "bombOperationDescription": "Dwie drużyny stają do walki:\n🔴 Terroryści – Ich misja: aktywować bombę w wyznaczonym miejscu i rozpocząć odliczanie.\n🔵 Antyterroryści – Ich cel: znaleźć i rozbroić bombę, zanim wybuchnie.\n\n🎯 Gdy timer dojdzie do zera → wyimaginowany wybuch → zwycięstwo terrorystów.\n🛡️ Bomba rozbrojona na czas → zwycięstwo antyterrorystów.\n\n💣 Cel: szybkość, dyskrecja i precyzja. Powodzenia, żołnierze!",
-  "bombSite": "Miejsce"
+  "bombSite": "Miejsce",
+  "recruitmentTitle": "REKRUTACJA",
+  "recruitmentSubtitle": "Brak spamowania. Brak obowiązek. Jedna e-mail dla odzyskania, jeden login do gry i rozgrywki. Misja zakonczona."
 }

@@ -591,6 +591,8 @@
   "backButton": "Retour",
   "configureBombOperation": "Configurer l'opération Bombe",
   "bombOperationDescription": "Deux équipes s’affrontent :\n🔴 Terroristes – Leur mission : activer la bombe dans une zone désignée et lancer le compte à rebours.\n🔵 Antiterroristes – Leur objectif : trouver et désamorcer la bombe avant qu’elle n’explose.\n\n🎯 Si le timer arrive à zéro → explosion imaginaire → victoire des terroristes.\n🛡️ Bombe désamorcée à temps → victoire des antiterroristes.\n\n💣 Objectif : vitesse, discrétion et précision. Bonne chance, soldats !",
-  "bombSite": "Site"
+  "bombSite": "Site",
+  "recruitmentTitle": "RECRUTEMENT",
+    "recruitmentSubtitle": "Pas de spam. Pas d'engagement. Un mail pour la récup, un pseudo pour rejoindre une partie et jouer. Mission terminée."
 
 }

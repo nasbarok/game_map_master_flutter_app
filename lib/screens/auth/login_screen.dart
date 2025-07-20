@@ -229,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 24),
 
-                        // ✅ VOS BOUTONS INCHANGÉS (le thème s'applique automatiquement)
+                        // BOUTONS
                         ElevatedButton(
                           onPressed: _isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(

@@ -1967,4 +1967,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get bombSite => 'サイト';
+
+  @override
+  String get recruitmentTitle => '募集';
+
+  @override
+  String get recruitmentSubtitle =>
+      'スパムなし。義務なし。回復用のメール1つ、ゲーム参加用のユーザー名1つ。ミッション完了。';
 }

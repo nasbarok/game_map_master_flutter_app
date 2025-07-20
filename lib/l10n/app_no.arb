@@ -593,5 +593,7 @@
   "backButton": "Tilbake",
   "configureBombOperation": "Konfigurer Bomboperasjon",
   "bombOperationDescription": "To lag konkurrerer:\n🔴 Terrorister – Deres oppdrag: aktivere bomben i et angitt område og starte nedtellingen.\n🔵 Antiterror – Deres mål: finne og desarmere bomben før den eksploderer.\n\n🎯 Hvis timeren når null → tenkt eksplosjon → seier til terroristene.\n🛡️ Bombe desarmert i tide → seier til antiterrorlaget.\n\n💣 Mål: hastighet, diskresjon og presisjon. Lykke til, soldater!",
-  "bombSite": "Sted"
+  "bombSite": "Sted",
+  "recruitmentTitle": "REKRUTERING",
+  "recruitmentSubtitle": "Ingen spam. Ingen ansvar. En e-post for gjenopprettelse, et brukernavn for spilling. Mission fullført."
 }

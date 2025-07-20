@@ -2010,4 +2010,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bombSite => 'Sitio';
+
+  @override
+  String get recruitmentTitle => 'RECLUTAMIENTO';
+
+  @override
+  String get recruitmentSubtitle =>
+      'Sin spam. Sin compromiso. Un email para recuperación, un usuario para unirse a una partida y jugar. Misión completada.';
 }

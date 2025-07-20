@@ -2000,4 +2000,11 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get bombSite => 'Plats';
+
+  @override
+  String get recruitmentTitle => 'REKRUTERING';
+
+  @override
+  String get recruitmentSubtitle =>
+      'Ingen spam. Ingen ansvar. En e-post for gånger, et brukernavn for spilling. Mission fullført.';
 }

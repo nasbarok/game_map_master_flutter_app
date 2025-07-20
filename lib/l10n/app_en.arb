@@ -2562,5 +2562,7 @@
   "backButton": "Back",
   "configureBombOperation": "Configure Bomb Operation",
   "bombOperationDescription": "Two teams face off:\n🔴 Terrorists – Their mission: activate the bomb in a designated area and start the countdown.\n🔵 Counter-Terrorists – Their goal: find and defuse the bomb before it explodes.\n\n🎯 If the timer reaches zero → imaginary explosion → terrorists win.\n🛡️ Bomb defused in time → counter-terrorists win.\n\n💣 Objective: speed, stealth, and precision. Good luck, soldiers!",
-  "bombSite": "Site"
-}
+  "bombSite": "Site",
+  "recruitmentTitle": "RECRUITMENT",
+  "recruitmentSubtitle": "No spam. No commitment. One email for recovery, one username to join a game and play. Mission complete."
+  }

@@ -2009,4 +2009,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get bombSite => 'Site';
+
+  @override
+  String get recruitmentTitle => 'RECRUTEMENT';
+
+  @override
+  String get recruitmentSubtitle =>
+      'Pas de spam. Pas d\'engagement. Un mail pour la récup, un pseudo pour rejoindre une partie et jouer. Mission terminée.';
 }

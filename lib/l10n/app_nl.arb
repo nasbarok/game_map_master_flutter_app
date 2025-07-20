@@ -593,5 +593,7 @@
   "backButton": "Terug",
   "configureBombOperation": "Configureer Bomoperatie",
   "bombOperationDescription": "Twee teams strijden tegen elkaar:\n🔴 Terroristen – Hun missie: activeer de bom in een aangewezen gebied en start de timer.\n🔵 Antiterreurteam – Hun doel: vind en ontmantel de bom voordat deze ontploft.\n\n🎯 Als de timer op nul komt → denkbeeldige explosie → winst voor de terroristen.\n🛡️ Bom op tijd ontmanteld → winst voor het antiterreurteam.\n\n💣 Doel: snelheid, stealth en precisie. Succes, soldaten!",
-  "bombSite": "Locatie"
+  "bombSite": "Locatie",
+  "recruitmentTitle": "REKRUTERING",
+  "recruitmentSubtitle": "Geen spam. Geen verplichtingen. Eén email voor herstel, een gebruikersnaam om te spelen. Missie voltooid."
 }
