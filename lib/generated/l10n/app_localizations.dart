@@ -3639,6 +3639,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No spam. No commitment. One email for recovery, one username to join a game and play. Mission complete.'**
   String get recruitmentSubtitle;
+
+  /// No description provided for @hostSectionCommandCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'COMMAND CENTER'**
+  String get hostSectionCommandCenterTitle;
+
+  /// No description provided for @hostSectionMapManagementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MAP MANAGEMENT'**
+  String get hostSectionMapManagementTitle;
+
+  /// No description provided for @hostSectionMissionScenariosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MISSION SCENARIOS'**
+  String get hostSectionMissionScenariosTitle;
+
+  /// No description provided for @hostSectionTeamsPlayersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'TEAMS & PLAYERS'**
+  String get hostSectionTeamsPlayersTitle;
+
+  /// No description provided for @hostSectionGameHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GAME HISTORY'**
+  String get hostSectionGameHistoryTitle;
+
+  /// No description provided for @hostSectionCommandCenterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Deploy your HQ, open the field and welcome players. Prepare your saved scenarios, launch games with precise countdown and keep control of real-time progress.'**
+  String get hostSectionCommandCenterDescription;
+
+  /// No description provided for @hostSectionMapManagementDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your playing field, zone by zone. Navigate the map, define boundaries, name key areas and place your strategic points of interest. Your battlefield takes shape, as you imagine it.'**
+  String get hostSectionMapManagementDescription;
+
+  /// No description provided for @hostSectionMissionScenariosDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your mission scenarios and define each key parameter: objective type, number of targets, duration, activation zones... Whether it\'s a treasure hunt or an explosive operation, you prepare the ground for a custom game.'**
+  String get hostSectionMissionScenariosDescription;
+
+  /// No description provided for @hostSectionTeamsPlayersDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your teams, manage numbers and assign roles for each player. Good balance guarantees dynamic and fun games, with missions where everyone has their place.'**
+  String get hostSectionTeamsPlayersDescription;
+
+  /// No description provided for @hostSectionGameHistoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your game history: scores, stats, key moments. Relive your past sessions, spot what went well (or less well), and adjust your next scenarios for even more fun.'**
+  String get hostSectionGameHistoryDescription;
+
+  /// No description provided for @hostSectionCommandCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your connected base camp – everything goes through you, chief.'**
+  String get hostSectionCommandCenterSubtitle;
+
+  /// No description provided for @hostSectionMapManagementSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cartographic arsenal – Draw, name, control.'**
+  String get hostSectionMapManagementSubtitle;
+
+  /// No description provided for @hostSectionMissionScenariosSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Imagination is the weapon – create custom challenges.'**
+  String get hostSectionMissionScenariosSubtitle;
+
+  /// No description provided for @hostSectionTeamsPlayersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tactical distribution – create balanced and intense matches.'**
+  String get hostSectionTeamsPlayersSubtitle;
+
+  /// No description provided for @hostSectionGameHistorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the field – your games, your data.'**
+  String get hostSectionGameHistorySubtitle;
 }
 
 class _AppLocalizationsDelegate

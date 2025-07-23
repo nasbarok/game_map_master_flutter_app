@@ -1,7 +1,6 @@
 {
   "@@locale": "es",
   "@@last_modified": "2025-06-27T23:00:00.000Z",
-
   "appTitle": "Game Map Master",
   "selectLanguage": "Seleccionar idioma",
   "cancel": "Cancelar",
@@ -570,7 +569,6 @@
   "colorPurple": "Púrpura",
   "colorBlack": "Negro",
   "colorWhite": "Blanco",
-
   "poiIconFlag": "Bandera",
   "poiIconBomb": "Bomba",
   "poiIconStar": "Estrella",
@@ -595,5 +593,20 @@
   "bombOperationDescription": "Dos equipos se enfrentan:\n🔴 Terroristas – Su misión: activar la bomba en una zona designada y comenzar la cuenta atrás.\n🔵 Antiterroristas – Su objetivo: encontrar y desactivar la bomba antes de que explote.\n\n🎯 Si el temporizador llega a cero → explosión imaginaria → victoria de los terroristas.\n🛡️ Bomba desactivada a tiempo → victoria de los antiterroristas.\n\n💣 Objetivo: velocidad, sigilo y precisión. ¡Buena suerte, soldados!",
   "bombSite": "Sitio",
   "recruitmentTitle": "RECLUTAMIENTO",
-  "recruitmentSubtitle": "Sin spam. Sin compromiso. Un email para recuperación, un usuario para unirse a una partida y jugar. Misión completada."
+  "recruitmentSubtitle": "Sin spam. Sin compromiso. Un email para recuperación, un usuario para unirse a una partida y jugar. Misión completada.",
+  "hostSectionCommandCenterTitle": "CENTRO DE COMANDO",
+  "hostSectionMapManagementTitle": "GESTIÓN DE MAPAS",
+  "hostSectionMissionScenariosTitle": "ESCENARIOS DE MISIÓN",
+  "hostSectionTeamsPlayersTitle": "EQUIPOS Y JUGADORES",
+  "hostSectionGameHistoryTitle": "HISTORIAL DE PARTIDAS",
+  "hostSectionCommandCenterDescription": "Despliega tu cuartel general, abre el terreno y recibe a los jugadores. Prepara tus escenarios guardados, lanza partidas con cuenta regresiva precisa y mantén el control del desarrollo en tiempo real.",
+  "hostSectionMapManagementDescription": "Crea tu campo de juego, zona por zona. Navega por el mapa, define límites, nombra áreas clave y coloca tus puntos de interés estratégicos. Tu campo de batalla toma forma, como lo imaginas.",
+  "hostSectionMissionScenariosDescription": "Crea tus escenarios de misión y define cada parámetro clave: tipo de objetivo, número de blancos, duración, zonas de activación... Ya sea una búsqueda del tesoro o una operación explosiva, preparas el terreno para una partida personalizada.",
+  "hostSectionTeamsPlayersDescription": "Crea tus equipos, gestiona los efectivos y asigna roles para cada jugador. Un buen equilibrio garantiza partidas dinámicas y divertidas, con misiones donde cada uno tiene su lugar.",
+  "hostSectionGameHistoryDescription": "Consulta el historial de tus partidas: puntuaciones, estadísticas, momentos clave. Revive tus sesiones pasadas, identifica qué funcionó bien (o menos bien), y ajusta tus próximos escenarios para aún más diversión.",
+  "hostSectionCommandCenterSubtitle": "Tu campamento base conectado – todo pasa por ti, jefe.",
+  "hostSectionMapManagementSubtitle": "Tu arsenal cartográfico – Traza, nombra, controla.",
+  "hostSectionMissionScenariosSubtitle": "La imaginación es el arma – crea desafíos personalizados.",
+  "hostSectionTeamsPlayersSubtitle": "Distribución táctica – crea partidas equilibradas e intensas.",
+  "hostSectionGameHistorySubtitle": "De vuelta al terreno – tus partidas, tus datos."
 }

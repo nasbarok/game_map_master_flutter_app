@@ -593,6 +593,21 @@
   "bombOperationDescription": "Deux équipes s’affrontent :\n🔴 Terroristes – Leur mission : activer la bombe dans une zone désignée et lancer le compte à rebours.\n🔵 Antiterroristes – Leur objectif : trouver et désamorcer la bombe avant qu’elle n’explose.\n\n🎯 Si le timer arrive à zéro → explosion imaginaire → victoire des terroristes.\n🛡️ Bombe désamorcée à temps → victoire des antiterroristes.\n\n💣 Objectif : vitesse, discrétion et précision. Bonne chance, soldats !",
   "bombSite": "Site",
   "recruitmentTitle": "RECRUTEMENT",
-    "recruitmentSubtitle": "Pas de spam. Pas d'engagement. Un mail pour la récup, un pseudo pour rejoindre une partie et jouer. Mission terminée."
+  "recruitmentSubtitle": "Pas de spam. Pas d'engagement. Un mail pour la récup, un pseudo pour rejoindre une partie et jouer. Mission terminée.",
 
+  "hostSectionCommandCenterTitle": "CENTRE DE COMMANDEMENT",
+  "hostSectionMapManagementTitle": "GESTION DES CARTES",
+  "hostSectionMissionScenariosTitle": "SCÉNARIOS DE MISSION",
+  "hostSectionTeamsPlayersTitle": "ÉQUIPES & JOUEURS",
+  "hostSectionGameHistoryTitle": "HISTORIQUE DES PARTIES",
+  "hostSectionCommandCenterDescription": "Déployez votre QG, ouvrez le terrain et accueillez les joueurs. Préparez vos scénarios enregistrés, lancez les parties avec un décompte précis et gardez le contrôle du déroulement en temps réel.",
+  "hostSectionMapManagementDescription": "Créez votre terrain de jeu, zone par zone. Naviguez sur la carte, définissez les limites, nommez les zones clés et placez vos points d'intérêt stratégiques. Votre champ de bataille prend forme, comme vous l'imaginez.",
+  "hostSectionMissionScenariosDescription": "Créez vos scénarios de mission et définissez chaque paramètre clé : type d'objectif, nombre de cibles, durée, zones d'activation… Que ce soit une chasse au trésor ou une opération explosive, vous préparez le terrain pour une partie sur mesure.",
+  "hostSectionTeamsPlayersDescription": "Créez vos équipes, gérez les effectifs et attribuez les rôles pour chaque joueur. Un bon équilibre garantit des parties dynamiques et pleines de fun, avec des missions où chacun a sa place.",
+  "hostSectionGameHistoryDescription": "Consultez l'historique de vos parties : scores, stats, moments clés. Revivez vos sessions passées, repérez ce qui a bien tourné (ou moins bien), et ajustez vos prochains scénarios pour encore plus de fun.",
+  "hostSectionCommandCenterSubtitle": "Votre camp de base connecté – tout passe par vous, chef.",
+  "hostSectionMapManagementSubtitle": "Votre arsenal cartographique – Tracez, nommez, contrôlez.",
+  "hostSectionMissionScenariosSubtitle": "L'imagination est l'arme – créez des défis sur mesure.",
+  "hostSectionTeamsPlayersSubtitle": "Répartition tactique – créez des matchs équilibrés et intenses.",
+  "hostSectionGameHistorySubtitle": "Retour sur le terrain – vos parties, vos données."
 }

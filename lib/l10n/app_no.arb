@@ -595,5 +595,22 @@
   "bombOperationDescription": "To lag konkurrerer:\n🔴 Terrorister – Deres oppdrag: aktivere bomben i et angitt område og starte nedtellingen.\n🔵 Antiterror – Deres mål: finne og desarmere bomben før den eksploderer.\n\n🎯 Hvis timeren når null → tenkt eksplosjon → seier til terroristene.\n🛡️ Bombe desarmert i tide → seier til antiterrorlaget.\n\n💣 Mål: hastighet, diskresjon og presisjon. Lykke til, soldater!",
   "bombSite": "Sted",
   "recruitmentTitle": "REKRUTERING",
-  "recruitmentSubtitle": "Ingen spam. Ingen ansvar. En e-post for gjenopprettelse, et brukernavn for spilling. Mission fullført."
+  "recruitmentSubtitle": "Ingen spam. Ingen ansvar. En e-post for gjenopprettelse, et brukernavn for spilling. Mission fullført.",
+  "hostSectionCommandCenterTitle": "KOMMANDOSENTER",
+  "hostSectionMapManagementTitle": "KARTBEHANDLING",
+  "hostSectionMissionScenariosTitle": "OPPDRAGSSCENARIER",
+  "hostSectionTeamsPlayersTitle": "LAG & SPILLERE",
+  "hostSectionGameHistoryTitle": "SPILLHISTORIKK",
+
+  "hostSectionCommandCenterDescription": "Sett opp hovedkvarteret ditt, åpne feltet og ønsk spillere velkommen. Forbered dine lagrede scenarier, start spill med nøyaktig nedtelling og behold kontroll over sanntidsfremdrift.",
+  "hostSectionMapManagementDescription": "Lag spillfeltet ditt, sone for sone. Naviger kartet, definer grenser, navngi nøkkelområder og plasser dine strategiske interessepunkter. Slagmarken din tar form, som du forestiller deg det.",
+  "hostSectionMissionScenariosDescription": "Lag oppdragsscenarier og definer hver nøkkelparameter: måltype, antall mål, varighet, aktiveringssoner... Enten det er en skattejakt eller en eksplosiv operasjon, forbereder du grunnen for et tilpasset spill.",
+  "hostSectionTeamsPlayersDescription": "Lag lagene dine, administrer antall og tildel roller til hver spiller. God balanse garanterer dynamiske og morsomme spill, med oppdrag hvor alle har sin plass.",
+  "hostSectionGameHistoryDescription": "Sjekk spillhistorikken din: poeng, statistikk, nøkkelmomenter. Gjenopplev dine tidligere økter, finn ut hva som gikk bra (eller mindre bra), og juster dine neste scenarier for enda mer moro.",
+
+  "hostSectionCommandCenterSubtitle": "Din tilkoblede basecamp – alt går gjennom deg, sjef.",
+  "hostSectionMapManagementSubtitle": "Ditt kartografiske arsenal – Tegn, navngi, kontroller.",
+  "hostSectionMissionScenariosSubtitle": "Fantasi er våpenet – lag tilpassede utfordringer.",
+  "hostSectionTeamsPlayersSubtitle": "Taktisk fordeling – lag balanserte og intense kamper.",
+  "hostSectionGameHistorySubtitle": "Tilbake til feltet – dine spill, dine data."
 }

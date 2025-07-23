@@ -2004,4 +2004,59 @@ class AppLocalizationsNo extends AppLocalizations {
   @override
   String get recruitmentSubtitle =>
       'Ingen spam. Ingen ansvar. En e-post for gjenopprettelse, et brukernavn for spilling. Mission fullført.';
+
+  @override
+  String get hostSectionCommandCenterTitle => 'KOMMANDOSENTER';
+
+  @override
+  String get hostSectionMapManagementTitle => 'KARTBEHANDLING';
+
+  @override
+  String get hostSectionMissionScenariosTitle => 'OPPDRAGSSCENARIER';
+
+  @override
+  String get hostSectionTeamsPlayersTitle => 'LAG & SPILLERE';
+
+  @override
+  String get hostSectionGameHistoryTitle => 'SPILLHISTORIKK';
+
+  @override
+  String get hostSectionCommandCenterDescription =>
+      'Sett opp hovedkvarteret ditt, åpne feltet og ønsk spillere velkommen. Forbered dine lagrede scenarier, start spill med nøyaktig nedtelling og behold kontroll over sanntidsfremdrift.';
+
+  @override
+  String get hostSectionMapManagementDescription =>
+      'Lag spillfeltet ditt, sone for sone. Naviger kartet, definer grenser, navngi nøkkelområder og plasser dine strategiske interessepunkter. Slagmarken din tar form, som du forestiller deg det.';
+
+  @override
+  String get hostSectionMissionScenariosDescription =>
+      'Lag oppdragsscenarier og definer hver nøkkelparameter: måltype, antall mål, varighet, aktiveringssoner... Enten det er en skattejakt eller en eksplosiv operasjon, forbereder du grunnen for et tilpasset spill.';
+
+  @override
+  String get hostSectionTeamsPlayersDescription =>
+      'Lag lagene dine, administrer antall og tildel roller til hver spiller. God balanse garanterer dynamiske og morsomme spill, med oppdrag hvor alle har sin plass.';
+
+  @override
+  String get hostSectionGameHistoryDescription =>
+      'Sjekk spillhistorikken din: poeng, statistikk, nøkkelmomenter. Gjenopplev dine tidligere økter, finn ut hva som gikk bra (eller mindre bra), og juster dine neste scenarier for enda mer moro.';
+
+  @override
+  String get hostSectionCommandCenterSubtitle =>
+      'Din tilkoblede basecamp – alt går gjennom deg, sjef.';
+
+  @override
+  String get hostSectionMapManagementSubtitle =>
+      'Ditt kartografiske arsenal – Tegn, navngi, kontroller.';
+
+  @override
+  String get hostSectionMissionScenariosSubtitle =>
+      'Fantasi er våpenet – lag tilpassede utfordringer.';
+
+  @override
+  String get hostSectionTeamsPlayersSubtitle =>
+      'Taktisk fordeling – lag balanserte og intense kamper.';
+
+  @override
+  String get hostSectionGameHistorySubtitle =>
+      'Tilbake til feltet – dine spill, dine data.';
 }

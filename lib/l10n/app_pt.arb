@@ -595,5 +595,22 @@
   "bombOperationDescription": "Duas equipes se enfrentam:\n🔴 Terroristas – Missão: ativar a bomba em uma área designada e iniciar a contagem regressiva.\n🔵 Antiterroristas – Objetivo: encontrar e desarmar a bomba antes que ela exploda.\n\n🎯 Se o cronômetro chegar a zero → explosão imaginária → vitória dos terroristas.\n🛡️ Bomba desarmada a tempo → vitória dos antiterroristas.\n\n💣 Objetivo: velocidade, discrição e precisão. Boa sorte, soldados!",
   "bombSite": "Local",
   "recruitmentTitle": "RECRUTAMENTO",
-  "recruitmentSubtitle": "Sem spam. Sem compromisso. Um email para recuperação, um usuário para jogar. Missão cumprida."
+  "recruitmentSubtitle": "Sem spam. Sem compromisso. Um email para recuperação, um usuário para jogar. Missão cumprida.",
+  "hostSectionCommandCenterTitle": "CENTRO DE COMANDO",
+  "hostSectionMapManagementTitle": "GESTÃO DE MAPAS",
+  "hostSectionMissionScenariosTitle": "CENÁRIOS DE MISSÃO",
+  "hostSectionTeamsPlayersTitle": "EQUIPES E JOGADORES",
+  "hostSectionGameHistoryTitle": "HISTÓRICO DE JOGOS",
+
+  "hostSectionCommandCenterDescription": "Implante seu QG, abra o campo e receba os jogadores. Prepare seus cenários salvos, inicie jogos com contagem regressiva precisa e mantenha controle do progresso em tempo real.",
+  "hostSectionMapManagementDescription": "Crie seu campo de jogo, zona por zona. Navegue pelo mapa, defina limites, nomeie áreas-chave e coloque seus pontos de interesse estratégicos. Seu campo de batalha ganha forma, como você imagina.",
+  "hostSectionMissionScenariosDescription": "Crie seus cenários de missão e defina cada parâmetro-chave: tipo de objetivo, número de alvos, duração, zonas de ativação... Seja uma caça ao tesouro ou uma operação explosiva, você prepara o terreno para um jogo personalizado.",
+  "hostSectionTeamsPlayersDescription": "Crie suas equipes, gerencie números e atribua papéis para cada jogador. Um bom equilíbrio garante jogos dinâmicos e divertidos, com missões onde todos têm seu lugar.",
+  "hostSectionGameHistoryDescription": "Verifique seu histórico de jogos: pontuações, estatísticas, momentos-chave. Reviva suas sessões passadas, identifique o que deu certo (ou menos certo), e ajuste seus próximos cenários para ainda mais diversão.",
+
+  "hostSectionCommandCenterSubtitle": "Seu acampamento base conectado – tudo passa por você, chefe.",
+  "hostSectionMapManagementSubtitle": "Seu arsenal cartográfico – Desenhe, nomeie, controle.",
+  "hostSectionMissionScenariosSubtitle": "Imaginação é a arma – crie desafios personalizados.",
+  "hostSectionTeamsPlayersSubtitle": "Distribuição tática – crie partidas equilibradas e intensas.",
+  "hostSectionGameHistorySubtitle": "De volta ao campo – seus jogos, seus dados."
 }

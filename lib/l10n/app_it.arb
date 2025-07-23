@@ -595,5 +595,22 @@
   "bombOperationDescription": "Due squadre si affrontano:\n🔴 Terroristi – La loro missione: attivare la bomba in un’area designata e avviare il conto alla rovescia.\n🔵 Antiterroristi – Il loro obiettivo: trovare e disinnescare la bomba prima che esploda.\n\n🎯 Se il timer arriva a zero → esplosione immaginaria → vittoria dei terroristi.\n🛡️ Bomba disinnescata in tempo → vittoria degli antiterroristi.\n\n💣 Obiettivo: velocità, furtività e precisione. Buona fortuna, soldati!",
   "bombSite": "Sito",
   "recruitmentTitle": "RECLUTAMENTO",
-  "recruitmentSubtitle": "Niente spam. Nessun impegno. Una email per il recupero, un username per giocare. Missione compiuta."
+  "recruitmentSubtitle": "Niente spam. Nessun impegno. Una email per il recupero, un username per giocare. Missione compiuta.",
+  "hostSectionCommandCenterTitle": "CENTRO DI COMANDO",
+  "hostSectionMapManagementTitle": "GESTIONE MAPPE",
+  "hostSectionMissionScenariosTitle": "SCENARI DI MISSIONE",
+  "hostSectionTeamsPlayersTitle": "SQUADRE E GIOCATORI",
+  "hostSectionGameHistoryTitle": "CRONOLOGIA PARTITE",
+
+  "hostSectionCommandCenterDescription": "Schiera il tuo quartier generale, apri il terreno e accogli i giocatori. Prepara i tuoi scenari salvati, lancia partite con conto alla rovescia preciso e mantieni il controllo dello svolgimento in tempo reale.",
+  "hostSectionMapManagementDescription": "Crea il tuo campo di gioco, zona per zona. Naviga sulla mappa, definisci i confini, nomina le aree chiave e posiziona i tuoi punti di interesse strategici. Il tuo campo di battaglia prende forma, come lo immagini.",
+  "hostSectionMissionScenariosDescription": "Crea i tuoi scenari di missione e definisci ogni parametro chiave: tipo di obiettivo, numero di bersagli, durata, zone di attivazione... Che sia una caccia al tesoro o un'operazione esplosiva, prepari il terreno per una partita su misura.",
+  "hostSectionTeamsPlayersDescription": "Crea le tue squadre, gestisci gli effettivi e assegna ruoli per ogni giocatore. Un buon equilibrio garantisce partite dinamiche e divertenti, con missioni dove ognuno ha il suo posto.",
+  "hostSectionGameHistoryDescription": "Consulta la cronologia delle tue partite: punteggi, statistiche, momenti chiave. Rivivi le tue sessioni passate, individua cosa è andato bene (o meno bene), e aggiusta i tuoi prossimi scenari per ancora più divertimento.",
+
+  "hostSectionCommandCenterSubtitle": "Il tuo campo base connesso – tutto passa da te, capo.",
+  "hostSectionMapManagementSubtitle": "Il tuo arsenale cartografico – Traccia, nomina, controlla.",
+  "hostSectionMissionScenariosSubtitle": "L'immaginazione è l'arma – crea sfide su misura.",
+  "hostSectionTeamsPlayersSubtitle": "Distribuzione tattica – crea partite equilibrate e intense.",
+  "hostSectionGameHistorySubtitle": "Ritorno sul campo – le tue partite, i tuoi dati."
 }

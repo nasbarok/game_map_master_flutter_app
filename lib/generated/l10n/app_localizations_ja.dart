@@ -1974,4 +1974,55 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get recruitmentSubtitle =>
       'スパムなし。義務なし。回復用のメール1つ、ゲーム参加用のユーザー名1つ。ミッション完了。';
+
+  @override
+  String get hostSectionCommandCenterTitle => '司令センター';
+
+  @override
+  String get hostSectionMapManagementTitle => 'マップ管理';
+
+  @override
+  String get hostSectionMissionScenariosTitle => 'ミッションシナリオ';
+
+  @override
+  String get hostSectionTeamsPlayersTitle => 'チーム＆プレイヤー';
+
+  @override
+  String get hostSectionGameHistoryTitle => 'ゲーム履歴';
+
+  @override
+  String get hostSectionCommandCenterDescription =>
+      '本部を展開し、フィールドを開いてプレイヤーを迎え入れましょう。保存されたシナリオを準備し、正確なカウントダウンでゲームを開始し、リアルタイムの進行をコントロールしましょう。';
+
+  @override
+  String get hostSectionMapManagementDescription =>
+      'ゾーンごとにプレイフィールドを作成します。マップをナビゲートし、境界を定義し、重要なエリアに名前を付け、戦略的な関心ポイントを配置します。あなたの戦場が、想像通りに形作られます。';
+
+  @override
+  String get hostSectionMissionScenariosDescription =>
+      'ミッションシナリオを作成し、各重要パラメータを定義します：目標タイプ、ターゲット数、持続時間、アクティベーションゾーン...宝探しでも爆発的な作戦でも、カスタムゲームの土台を準備します。';
+
+  @override
+  String get hostSectionTeamsPlayersDescription =>
+      'チームを作成し、人数を管理し、各プレイヤーに役割を割り当てます。良いバランスは、全員が自分の場所を持つミッションで、ダイナミックで楽しいゲームを保証します。';
+
+  @override
+  String get hostSectionGameHistoryDescription =>
+      'ゲーム履歴を確認：スコア、統計、重要な瞬間。過去のセッションを追体験し、うまくいったこと（またはそうでなかったこと）を見つけ、さらに楽しくするために次のシナリオを調整します。';
+
+  @override
+  String get hostSectionCommandCenterSubtitle =>
+      '接続されたベースキャンプ - すべてはあなたを通る、チーフ。';
+
+  @override
+  String get hostSectionMapManagementSubtitle => 'あなたの地図作成兵器庫 - 描き、名前を付け、制御する。';
+
+  @override
+  String get hostSectionMissionScenariosSubtitle => '想像力が武器 - カスタムチャレンジを作成する。';
+
+  @override
+  String get hostSectionTeamsPlayersSubtitle => '戦術的配分 - バランスの取れた激しいマッチを作成する。';
+
+  @override
+  String get hostSectionGameHistorySubtitle => 'フィールドに戻る - あなたのゲーム、あなたのデータ。';
 }

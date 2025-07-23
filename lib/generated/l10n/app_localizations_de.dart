@@ -2023,4 +2023,59 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get recruitmentSubtitle =>
       'Kein Spam. Keine Verpflichtung. Eine E-Mail zur Wiederherstellung, ein Benutzername zum Spielen. Mission erfüllt.';
+
+  @override
+  String get hostSectionCommandCenterTitle => 'KOMMANDOZENTRALE';
+
+  @override
+  String get hostSectionMapManagementTitle => 'KARTENVERWALTUNG';
+
+  @override
+  String get hostSectionMissionScenariosTitle => 'MISSIONS-SZENARIEN';
+
+  @override
+  String get hostSectionTeamsPlayersTitle => 'TEAMS & SPIELER';
+
+  @override
+  String get hostSectionGameHistoryTitle => 'SPIELVERLAUF';
+
+  @override
+  String get hostSectionCommandCenterDescription =>
+      'Errichten Sie Ihr Hauptquartier, öffnen Sie das Gelände und empfangen Sie Spieler. Bereiten Sie Ihre gespeicherten Szenarien vor, starten Sie Spiele mit präzisem Countdown und behalten Sie die Kontrolle über den Echtzeit-Fortschritt.';
+
+  @override
+  String get hostSectionMapManagementDescription =>
+      'Erstellen Sie Ihr Spielfeld, Zone für Zone. Navigieren Sie auf der Karte, definieren Sie Grenzen, benennen Sie Schlüsselbereiche und platzieren Sie Ihre strategischen Interessenspunkte. Ihr Schlachtfeld nimmt Gestalt an, wie Sie es sich vorstellen.';
+
+  @override
+  String get hostSectionMissionScenariosDescription =>
+      'Erstellen Sie Ihre Missions-Szenarien und definieren Sie jeden Schlüsselparameter: Zieltyp, Anzahl der Ziele, Dauer, Aktivierungszonen... Ob Schatzsuche oder explosive Operation, Sie bereiten den Boden für ein maßgeschneidertes Spiel vor.';
+
+  @override
+  String get hostSectionTeamsPlayersDescription =>
+      'Erstellen Sie Ihre Teams, verwalten Sie die Mannschaftsstärke und weisen Sie jedem Spieler Rollen zu. Eine gute Balance garantiert dynamische und spaßige Spiele mit Missionen, in denen jeder seinen Platz hat.';
+
+  @override
+  String get hostSectionGameHistoryDescription =>
+      'Überprüfen Sie Ihre Spielhistorie: Punkte, Statistiken, Schlüsselmomente. Erleben Sie Ihre vergangenen Sessions noch einmal, erkennen Sie was gut lief (oder weniger gut), und passen Sie Ihre nächsten Szenarien für noch mehr Spaß an.';
+
+  @override
+  String get hostSectionCommandCenterSubtitle =>
+      'Ihr vernetztes Basislager – alles läuft über Sie, Chef.';
+
+  @override
+  String get hostSectionMapManagementSubtitle =>
+      'Ihr kartographisches Arsenal – Zeichnen, benennen, kontrollieren.';
+
+  @override
+  String get hostSectionMissionScenariosSubtitle =>
+      'Fantasie ist die Waffe – erstellen Sie maßgeschneiderte Herausforderungen.';
+
+  @override
+  String get hostSectionTeamsPlayersSubtitle =>
+      'Taktische Verteilung – erstellen Sie ausgewogene und intensive Matches.';
+
+  @override
+  String get hostSectionGameHistorySubtitle =>
+      'Zurück ins Feld – Ihre Spiele, Ihre Daten.';
 }

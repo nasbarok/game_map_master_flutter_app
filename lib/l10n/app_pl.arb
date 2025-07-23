@@ -595,5 +595,22 @@
   "bombOperationDescription": "Dwie drużyny stają do walki:\n🔴 Terroryści – Ich misja: aktywować bombę w wyznaczonym miejscu i rozpocząć odliczanie.\n🔵 Antyterroryści – Ich cel: znaleźć i rozbroić bombę, zanim wybuchnie.\n\n🎯 Gdy timer dojdzie do zera → wyimaginowany wybuch → zwycięstwo terrorystów.\n🛡️ Bomba rozbrojona na czas → zwycięstwo antyterrorystów.\n\n💣 Cel: szybkość, dyskrecja i precyzja. Powodzenia, żołnierze!",
   "bombSite": "Miejsce",
   "recruitmentTitle": "REKRUTACJA",
-  "recruitmentSubtitle": "Brak spamowania. Brak obowiązek. Jedna e-mail dla odzyskania, jeden login do gry i rozgrywki. Misja zakonczona."
+  "recruitmentSubtitle": "Brak spamowania. Brak obowiązek. Jedna e-mail dla odzyskania, jeden login do gry i rozgrywki. Misja zakonczona.",
+  "hostSectionCommandCenterTitle": "CENTRUM DOWODZENIA",
+  "hostSectionMapManagementTitle": "ZARZĄDZANIE MAPAMI",
+  "hostSectionMissionScenariosTitle": "SCENARIUSZE MISJI",
+  "hostSectionTeamsPlayersTitle": "ZESPOŁY I GRACZE",
+  "hostSectionGameHistoryTitle": "HISTORIA GIER",
+
+  "hostSectionCommandCenterDescription": "Rozstaw swoją kwaterę główną, otwórz pole i powitaj graczy. Przygotuj zapisane scenariusze, rozpocznij gry z precyzyjnym odliczaniem i zachowaj kontrolę nad postępem w czasie rzeczywistym.",
+  "hostSectionMapManagementDescription": "Stwórz swoje pole gry, strefa po strefie. Nawiguj po mapie, zdefiniuj granice, nazwij kluczowe obszary i umieść swoje strategiczne punkty zainteresowania. Twoje pole bitwy nabiera kształtu, tak jak to sobie wyobrażasz.",
+  "hostSectionMissionScenariosDescription": "Twórz scenariusze misji i definiuj każdy kluczowy parametr: typ celu, liczbę celów, czas trwania, strefy aktywacji... Czy to poszukiwanie skarbów, czy wybuchowa operacja, przygotowujesz grunt pod grę na miarę.",
+  "hostSectionTeamsPlayersDescription": "Twórz swoje zespoły, zarządzaj liczbami i przydzielaj role każdemu graczowi. Dobra równowaga gwarantuje dynamiczne i zabawne gry, z misjami gdzie każdy ma swoje miejsce.",
+  "hostSectionGameHistoryDescription": "Sprawdź historię swoich gier: wyniki, statystyki, kluczowe momenty. Przeżyj ponownie swoje poprzednie sesje, znajdź to co poszło dobrze (lub mniej dobrze), i dostosuj swoje następne scenariusze dla jeszcze większej zabawy.",
+
+  "hostSectionCommandCenterSubtitle": "Twój połączony obóz bazowy – wszystko przechodzi przez ciebie, szefie.",
+  "hostSectionMapManagementSubtitle": "Twój arsenał kartograficzny – Rysuj, nazywaj, kontroluj.",
+  "hostSectionMissionScenariosSubtitle": "Wyobraźnia to broń – twórz niestandardowe wyzwania.",
+  "hostSectionTeamsPlayersSubtitle": "Taktyczna dystrybucja – twórz zrównoważone i intensywne mecze.",
+  "hostSectionGameHistorySubtitle": "Powrót na pole – twoje gry, twoje dane."
 }

@@ -2002,4 +2002,59 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recruitmentSubtitle =>
       'No spam. No commitment. One email for recovery, one username to join a game and play. Mission complete.';
+
+  @override
+  String get hostSectionCommandCenterTitle => 'COMMAND CENTER';
+
+  @override
+  String get hostSectionMapManagementTitle => 'MAP MANAGEMENT';
+
+  @override
+  String get hostSectionMissionScenariosTitle => 'MISSION SCENARIOS';
+
+  @override
+  String get hostSectionTeamsPlayersTitle => 'TEAMS & PLAYERS';
+
+  @override
+  String get hostSectionGameHistoryTitle => 'GAME HISTORY';
+
+  @override
+  String get hostSectionCommandCenterDescription =>
+      'Deploy your HQ, open the field and welcome players. Prepare your saved scenarios, launch games with precise countdown and keep control of real-time progress.';
+
+  @override
+  String get hostSectionMapManagementDescription =>
+      'Create your playing field, zone by zone. Navigate the map, define boundaries, name key areas and place your strategic points of interest. Your battlefield takes shape, as you imagine it.';
+
+  @override
+  String get hostSectionMissionScenariosDescription =>
+      'Create your mission scenarios and define each key parameter: objective type, number of targets, duration, activation zones... Whether it\'s a treasure hunt or an explosive operation, you prepare the ground for a custom game.';
+
+  @override
+  String get hostSectionTeamsPlayersDescription =>
+      'Create your teams, manage numbers and assign roles for each player. Good balance guarantees dynamic and fun games, with missions where everyone has their place.';
+
+  @override
+  String get hostSectionGameHistoryDescription =>
+      'Check your game history: scores, stats, key moments. Relive your past sessions, spot what went well (or less well), and adjust your next scenarios for even more fun.';
+
+  @override
+  String get hostSectionCommandCenterSubtitle =>
+      'Your connected base camp – everything goes through you, chief.';
+
+  @override
+  String get hostSectionMapManagementSubtitle =>
+      'Your cartographic arsenal – Draw, name, control.';
+
+  @override
+  String get hostSectionMissionScenariosSubtitle =>
+      'Imagination is the weapon – create custom challenges.';
+
+  @override
+  String get hostSectionTeamsPlayersSubtitle =>
+      'Tactical distribution – create balanced and intense matches.';
+
+  @override
+  String get hostSectionGameHistorySubtitle =>
+      'Back to the field – your games, your data.';
 }

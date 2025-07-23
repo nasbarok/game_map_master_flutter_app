@@ -2008,4 +2008,59 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get recruitmentSubtitle =>
       'Geen spam. Geen verplichtingen. Eén email voor herstel, een gebruikersnaam om te spelen. Missie voltooid.';
+
+  @override
+  String get hostSectionCommandCenterTitle => 'COMMANDOCENTRUM';
+
+  @override
+  String get hostSectionMapManagementTitle => 'KAARTBEHEER';
+
+  @override
+  String get hostSectionMissionScenariosTitle => 'MISSIESCENARIO\'S';
+
+  @override
+  String get hostSectionTeamsPlayersTitle => 'TEAMS & SPELERS';
+
+  @override
+  String get hostSectionGameHistoryTitle => 'SPELGESCHIEDENIS';
+
+  @override
+  String get hostSectionCommandCenterDescription =>
+      'Zet je hoofdkwartier op, open het veld en verwelkom spelers. Bereid je opgeslagen scenario\'s voor, start spellen met precieze aftelling en behoud controle over de real-time voortgang.';
+
+  @override
+  String get hostSectionMapManagementDescription =>
+      'Creëer je speelveld, zone voor zone. Navigeer door de kaart, definieer grenzen, benoem belangrijke gebieden en plaats je strategische interessepunten. Je slagveld krijgt vorm, zoals je het je voorstelt.';
+
+  @override
+  String get hostSectionMissionScenariosDescription =>
+      'Creëer je missiescenario\'s en definieer elke belangrijke parameter: doeltype, aantal doelen, duur, activatiezones... Of het nu een schattenjacht of een explosieve operatie is, je bereidt de grond voor voor een aangepast spel.';
+
+  @override
+  String get hostSectionTeamsPlayersDescription =>
+      'Creëer je teams, beheer aantallen en wijs rollen toe aan elke speler. Een goede balans garandeert dynamische en leuke spellen, met missies waar iedereen zijn plaats heeft.';
+
+  @override
+  String get hostSectionGameHistoryDescription =>
+      'Bekijk je spelgeschiedenis: scores, statistieken, belangrijke momenten. Herbeleef je vorige sessies, ontdek wat goed ging (of minder goed), en pas je volgende scenario\'s aan voor nog meer plezier.';
+
+  @override
+  String get hostSectionCommandCenterSubtitle =>
+      'Je verbonden basiskamp – alles gaat via jou, chef.';
+
+  @override
+  String get hostSectionMapManagementSubtitle =>
+      'Je cartografische arsenaal – Teken, benoem, beheers.';
+
+  @override
+  String get hostSectionMissionScenariosSubtitle =>
+      'Verbeelding is het wapen – creëer aangepaste uitdagingen.';
+
+  @override
+  String get hostSectionTeamsPlayersSubtitle =>
+      'Tactische verdeling – creëer gebalanceerde en intense wedstrijden.';
+
+  @override
+  String get hostSectionGameHistorySubtitle =>
+      'Terug naar het veld – jouw spellen, jouw data.';
 }

@@ -2009,4 +2009,59 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get recruitmentSubtitle =>
       'Niente spam. Nessun impegno. Una email per il recupero, un username per giocare. Missione compiuta.';
+
+  @override
+  String get hostSectionCommandCenterTitle => 'CENTRO DI COMANDO';
+
+  @override
+  String get hostSectionMapManagementTitle => 'GESTIONE MAPPE';
+
+  @override
+  String get hostSectionMissionScenariosTitle => 'SCENARI DI MISSIONE';
+
+  @override
+  String get hostSectionTeamsPlayersTitle => 'SQUADRE E GIOCATORI';
+
+  @override
+  String get hostSectionGameHistoryTitle => 'CRONOLOGIA PARTITE';
+
+  @override
+  String get hostSectionCommandCenterDescription =>
+      'Schiera il tuo quartier generale, apri il terreno e accogli i giocatori. Prepara i tuoi scenari salvati, lancia partite con conto alla rovescia preciso e mantieni il controllo dello svolgimento in tempo reale.';
+
+  @override
+  String get hostSectionMapManagementDescription =>
+      'Crea il tuo campo di gioco, zona per zona. Naviga sulla mappa, definisci i confini, nomina le aree chiave e posiziona i tuoi punti di interesse strategici. Il tuo campo di battaglia prende forma, come lo immagini.';
+
+  @override
+  String get hostSectionMissionScenariosDescription =>
+      'Crea i tuoi scenari di missione e definisci ogni parametro chiave: tipo di obiettivo, numero di bersagli, durata, zone di attivazione... Che sia una caccia al tesoro o un\'operazione esplosiva, prepari il terreno per una partita su misura.';
+
+  @override
+  String get hostSectionTeamsPlayersDescription =>
+      'Crea le tue squadre, gestisci gli effettivi e assegna ruoli per ogni giocatore. Un buon equilibrio garantisce partite dinamiche e divertenti, con missioni dove ognuno ha il suo posto.';
+
+  @override
+  String get hostSectionGameHistoryDescription =>
+      'Consulta la cronologia delle tue partite: punteggi, statistiche, momenti chiave. Rivivi le tue sessioni passate, individua cosa è andato bene (o meno bene), e aggiusta i tuoi prossimi scenari per ancora più divertimento.';
+
+  @override
+  String get hostSectionCommandCenterSubtitle =>
+      'Il tuo campo base connesso – tutto passa da te, capo.';
+
+  @override
+  String get hostSectionMapManagementSubtitle =>
+      'Il tuo arsenale cartografico – Traccia, nomina, controlla.';
+
+  @override
+  String get hostSectionMissionScenariosSubtitle =>
+      'L\'immaginazione è l\'arma – crea sfide su misura.';
+
+  @override
+  String get hostSectionTeamsPlayersSubtitle =>
+      'Distribuzione tattica – crea partite equilibrate e intense.';
+
+  @override
+  String get hostSectionGameHistorySubtitle =>
+      'Ritorno sul campo – le tue partite, i tuoi dati.';
 }

@@ -2007,4 +2007,59 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get recruitmentSubtitle =>
       'Ingen spam. Ingen ansvar. En e-post for gånger, et brukernavn for spilling. Mission fullført.';
+
+  @override
+  String get hostSectionCommandCenterTitle => 'KOMMANDOCENTRAL';
+
+  @override
+  String get hostSectionMapManagementTitle => 'KARTHANTERING';
+
+  @override
+  String get hostSectionMissionScenariosTitle => 'UPPDRAGSSCENARIER';
+
+  @override
+  String get hostSectionTeamsPlayersTitle => 'LAG & SPELARE';
+
+  @override
+  String get hostSectionGameHistoryTitle => 'SPELHISTORIK';
+
+  @override
+  String get hostSectionCommandCenterDescription =>
+      'Sätt upp ditt högkvarter, öppna fältet och välkomna spelare. Förbered dina sparade scenarier, starta spel med exakt nedräkning och behåll kontroll över realtidsframsteg.';
+
+  @override
+  String get hostSectionMapManagementDescription =>
+      'Skapa ditt spelplan, zon för zon. Navigera kartan, definiera gränser, namnge nyckelområden och placera dina strategiska intressepunkter. Ditt slagfält tar form, som du föreställer dig det.';
+
+  @override
+  String get hostSectionMissionScenariosDescription =>
+      'Skapa dina uppdragsscenarier och definiera varje nyckelparameter: måltyp, antal mål, varaktighet, aktiveringszoner... Oavsett om det är en skattjakt eller en explosiv operation, förbereder du marken för ett anpassat spel.';
+
+  @override
+  String get hostSectionTeamsPlayersDescription =>
+      'Skapa dina lag, hantera antal och tilldela roller till varje spelare. En bra balans garanterar dynamiska och roliga spel, med uppdrag där alla har sin plats.';
+
+  @override
+  String get hostSectionGameHistoryDescription =>
+      'Kontrollera din spelhistorik: poäng, statistik, nyckelmoment. Återupplev dina tidigare sessioner, upptäck vad som gick bra (eller mindre bra), och justera dina nästa scenarier för ännu mer kul.';
+
+  @override
+  String get hostSectionCommandCenterSubtitle =>
+      'Ditt anslutna basläger – allt går genom dig, chef.';
+
+  @override
+  String get hostSectionMapManagementSubtitle =>
+      'Din kartografiska arsenal – Rita, namnge, kontrollera.';
+
+  @override
+  String get hostSectionMissionScenariosSubtitle =>
+      'Fantasi är vapnet – skapa anpassade utmaningar.';
+
+  @override
+  String get hostSectionTeamsPlayersSubtitle =>
+      'Taktisk fördelning – skapa balanserade och intensiva matcher.';
+
+  @override
+  String get hostSectionGameHistorySubtitle =>
+      'Tillbaka till fältet – dina spel, din data.';
 }

@@ -595,5 +595,22 @@
   "bombOperationDescription": "2チームが対決します：\n🔴 テロリスト – 任務：指定エリアで爆弾を起動し、カウントダウンを開始する。\n🔵 対テロ部隊 – 目的：爆発前に爆弾を見つけて解除する。\n\n🎯 タイマーがゼロになると → 仮想爆発 → テロリストの勝利。\n🛡️ 爆弾が時間内に解除されると → 対テロ部隊の勝利。\n\n💣 目標：スピード、ステルス、正確さ。幸運を祈る、兵士諸君！",
   "bombSite": "サイト",
   "recruitmentTitle": "募集",
-  "recruitmentSubtitle": "スパムなし。義務なし。回復用のメール1つ、ゲーム参加用のユーザー名1つ。ミッション完了。"
+  "recruitmentSubtitle": "スパムなし。義務なし。回復用のメール1つ、ゲーム参加用のユーザー名1つ。ミッション完了。",
+  "hostSectionCommandCenterTitle": "司令センター",
+  "hostSectionMapManagementTitle": "マップ管理",
+  "hostSectionMissionScenariosTitle": "ミッションシナリオ",
+  "hostSectionTeamsPlayersTitle": "チーム＆プレイヤー",
+  "hostSectionGameHistoryTitle": "ゲーム履歴",
+
+  "hostSectionCommandCenterDescription": "本部を展開し、フィールドを開いてプレイヤーを迎え入れましょう。保存されたシナリオを準備し、正確なカウントダウンでゲームを開始し、リアルタイムの進行をコントロールしましょう。",
+  "hostSectionMapManagementDescription": "ゾーンごとにプレイフィールドを作成します。マップをナビゲートし、境界を定義し、重要なエリアに名前を付け、戦略的な関心ポイントを配置します。あなたの戦場が、想像通りに形作られます。",
+  "hostSectionMissionScenariosDescription": "ミッションシナリオを作成し、各重要パラメータを定義します：目標タイプ、ターゲット数、持続時間、アクティベーションゾーン...宝探しでも爆発的な作戦でも、カスタムゲームの土台を準備します。",
+  "hostSectionTeamsPlayersDescription": "チームを作成し、人数を管理し、各プレイヤーに役割を割り当てます。良いバランスは、全員が自分の場所を持つミッションで、ダイナミックで楽しいゲームを保証します。",
+  "hostSectionGameHistoryDescription": "ゲーム履歴を確認：スコア、統計、重要な瞬間。過去のセッションを追体験し、うまくいったこと（またはそうでなかったこと）を見つけ、さらに楽しくするために次のシナリオを調整します。",
+
+  "hostSectionCommandCenterSubtitle": "接続されたベースキャンプ - すべてはあなたを通る、チーフ。",
+  "hostSectionMapManagementSubtitle": "あなたの地図作成兵器庫 - 描き、名前を付け、制御する。",
+  "hostSectionMissionScenariosSubtitle": "想像力が武器 - カスタムチャレンジを作成する。",
+  "hostSectionTeamsPlayersSubtitle": "戦術的配分 - バランスの取れた激しいマッチを作成する。",
+  "hostSectionGameHistorySubtitle": "フィールドに戻る - あなたのゲーム、あなたのデータ。"
 }

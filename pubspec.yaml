@@ -64,7 +64,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/theme/
-    - assets/icons/
+    - assets/images/theme/logos/
     - assets/fonts/NotoSansSymbols2-Regular.ttf
 
 dependency_overrides:

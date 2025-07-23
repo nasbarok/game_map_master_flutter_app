@@ -10,6 +10,7 @@ import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+
 class GameMapFormScreen extends StatefulWidget {
   final GameMap? gameMap;
 
@@ -156,14 +157,18 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
         );
 
         final gameMapService = context.read<GameMapService>();
+        logger.d(
+            '[GameMapFormScreen] widget.gameMap?.id: ${widget.gameMap?.id}, _localGameMap?.id: ${_localGameMap?.id}');
 
-        if (_localGameMap?.id != null || widget.gameMap?.id != null) {
+        if (_localGameMap?.id == null && widget.gameMap?.id == null) {
           logger.d('📤 [GameMapFormScreen] Données envoyées pour création :');
-          logger.d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
+          logger
+              .d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
           _localGameMap = await gameMapService.addGameMap(gameMap);
         } else {
           logger.d('📤 [GameMapFormScreen] Données envoyées pour update :');
-          logger.d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
+          logger
+              .d(const JsonEncoder.withIndent('  ').convert(gameMap.toJson()));
           await gameMapService.updateGameMap(gameMap);
         }
 
@@ -201,8 +206,7 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            widget.gameMap == null ? l10n.newMapTitle : l10n.editMap),
+        title: Text(widget.gameMap == null ? l10n.newMapTitle : l10n.editMap),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -234,24 +238,6 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                         border: const OutlineInputBorder(),
                       ),
                       maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _scaleController,
-                      decoration: InputDecoration(
-                        labelText: l10n.scaleLabel,
-                        border: const OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          final scale = double.tryParse(value);
-                          if (scale == null || scale <= 0) {
-                            return l10n.invalidScaleError;
-                          }
-                        }
-                        return null;
-                      },
                     ),
                     const SizedBox(height: 16),
                     if (_sourceAddress != null && _sourceAddress!.isNotEmpty)
@@ -311,7 +297,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: Text(
-                        (_localGameMap?.id != null || widget.gameMap?.id != null)
+                        (_localGameMap?.id != null ||
+                                widget.gameMap?.id != null)
                             ? l10n.updateMapButton
                             : l10n.createMap,
                         style: const TextStyle(fontSize: 16),

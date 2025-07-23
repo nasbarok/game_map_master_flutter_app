@@ -2564,5 +2564,22 @@
   "bombOperationDescription": "Two teams face off:\n🔴 Terrorists – Their mission: activate the bomb in a designated area and start the countdown.\n🔵 Counter-Terrorists – Their goal: find and defuse the bomb before it explodes.\n\n🎯 If the timer reaches zero → imaginary explosion → terrorists win.\n🛡️ Bomb defused in time → counter-terrorists win.\n\n💣 Objective: speed, stealth, and precision. Good luck, soldiers!",
   "bombSite": "Site",
   "recruitmentTitle": "RECRUITMENT",
-  "recruitmentSubtitle": "No spam. No commitment. One email for recovery, one username to join a game and play. Mission complete."
-  }
+  "recruitmentSubtitle": "No spam. No commitment. One email for recovery, one username to join a game and play. Mission complete.",
+
+  "hostSectionCommandCenterTitle": "COMMAND CENTER",
+  "hostSectionMapManagementTitle": "MAP MANAGEMENT",
+  "hostSectionMissionScenariosTitle": "MISSION SCENARIOS",
+  "hostSectionTeamsPlayersTitle": "TEAMS & PLAYERS",
+  "hostSectionGameHistoryTitle": "GAME HISTORY",
+  "hostSectionCommandCenterDescription": "Deploy your HQ, open the field and welcome players. Prepare your saved scenarios, launch games with precise countdown and keep control of real-time progress.",
+  "hostSectionMapManagementDescription": "Create your playing field, zone by zone. Navigate the map, define boundaries, name key areas and place your strategic points of interest. Your battlefield takes shape, as you imagine it.",
+  "hostSectionMissionScenariosDescription": "Create your mission scenarios and define each key parameter: objective type, number of targets, duration, activation zones... Whether it's a treasure hunt or an explosive operation, you prepare the ground for a custom game.",
+  "hostSectionTeamsPlayersDescription": "Create your teams, manage numbers and assign roles for each player. Good balance guarantees dynamic and fun games, with missions where everyone has their place.",
+  "hostSectionGameHistoryDescription": "Check your game history: scores, stats, key moments. Relive your past sessions, spot what went well (or less well), and adjust your next scenarios for even more fun.",
+  "hostSectionCommandCenterSubtitle": "Your connected base camp – everything goes through you, chief.",
+  "hostSectionMapManagementSubtitle": "Your cartographic arsenal – Draw, name, control.",
+  "hostSectionMissionScenariosSubtitle": "Imagination is the weapon – create custom challenges.",
+  "hostSectionTeamsPlayersSubtitle": "Tactical distribution – create balanced and intense matches.",
+  "hostSectionGameHistorySubtitle": "Back to the field – your games, your data."
+
+}

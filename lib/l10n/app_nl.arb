@@ -595,5 +595,22 @@
   "bombOperationDescription": "Twee teams strijden tegen elkaar:\n🔴 Terroristen – Hun missie: activeer de bom in een aangewezen gebied en start de timer.\n🔵 Antiterreurteam – Hun doel: vind en ontmantel de bom voordat deze ontploft.\n\n🎯 Als de timer op nul komt → denkbeeldige explosie → winst voor de terroristen.\n🛡️ Bom op tijd ontmanteld → winst voor het antiterreurteam.\n\n💣 Doel: snelheid, stealth en precisie. Succes, soldaten!",
   "bombSite": "Locatie",
   "recruitmentTitle": "REKRUTERING",
-  "recruitmentSubtitle": "Geen spam. Geen verplichtingen. Eén email voor herstel, een gebruikersnaam om te spelen. Missie voltooid."
+  "recruitmentSubtitle": "Geen spam. Geen verplichtingen. Eén email voor herstel, een gebruikersnaam om te spelen. Missie voltooid.",
+  "hostSectionCommandCenterTitle": "COMMANDOCENTRUM",
+  "hostSectionMapManagementTitle": "KAARTBEHEER",
+  "hostSectionMissionScenariosTitle": "MISSIESCENARIO'S",
+  "hostSectionTeamsPlayersTitle": "TEAMS & SPELERS",
+  "hostSectionGameHistoryTitle": "SPELGESCHIEDENIS",
+
+  "hostSectionCommandCenterDescription": "Zet je hoofdkwartier op, open het veld en verwelkom spelers. Bereid je opgeslagen scenario's voor, start spellen met precieze aftelling en behoud controle over de real-time voortgang.",
+  "hostSectionMapManagementDescription": "Creëer je speelveld, zone voor zone. Navigeer door de kaart, definieer grenzen, benoem belangrijke gebieden en plaats je strategische interessepunten. Je slagveld krijgt vorm, zoals je het je voorstelt.",
+  "hostSectionMissionScenariosDescription": "Creëer je missiescenario's en definieer elke belangrijke parameter: doeltype, aantal doelen, duur, activatiezones... Of het nu een schattenjacht of een explosieve operatie is, je bereidt de grond voor voor een aangepast spel.",
+  "hostSectionTeamsPlayersDescription": "Creëer je teams, beheer aantallen en wijs rollen toe aan elke speler. Een goede balans garandeert dynamische en leuke spellen, met missies waar iedereen zijn plaats heeft.",
+  "hostSectionGameHistoryDescription": "Bekijk je spelgeschiedenis: scores, statistieken, belangrijke momenten. Herbeleef je vorige sessies, ontdek wat goed ging (of minder goed), en pas je volgende scenario's aan voor nog meer plezier.",
+
+  "hostSectionCommandCenterSubtitle": "Je verbonden basiskamp – alles gaat via jou, chef.",
+  "hostSectionMapManagementSubtitle": "Je cartografische arsenaal – Teken, benoem, beheers.",
+  "hostSectionMissionScenariosSubtitle": "Verbeelding is het wapen – creëer aangepaste uitdagingen.",
+  "hostSectionTeamsPlayersSubtitle": "Tactische verdeling – creëer gebalanceerde en intense wedstrijden.",
+  "hostSectionGameHistorySubtitle": "Terug naar het veld – jouw spellen, jouw data."
 }
