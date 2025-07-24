@@ -334,8 +334,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   /// 🆕 BOUTON POINT D'INTERROGATION POUR RÉAFFICHER
   Widget _buildShowButton() {
     return Positioned(
-      top: 20,
-      left: 20,
+      top: 15,
+      left: 15,
       child: GestureDetector(
         onTap: () {
           setState(() {
@@ -345,8 +345,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          width: 50,
-          height: 50,
+          width: 30,
+          height: 30,
           decoration: BoxDecoration(
             color: _getSectionAccentColor(),
             borderRadius: BorderRadius.circular(25),
@@ -550,7 +550,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
   String _getFABText(AppLocalizations l10n, GameStateService gameStateService) {
     switch (_tabController.index) {
-      case 0: return l10n.noActionForFieldTabSnackbar;
+      case 0: return "";
       case 1: return l10n.createMap;
       case 2: return l10n.createScenario;
       case 3: return gameStateService.isTerrainOpen ? l10n.createTeam : l10n.openFieldFirstSnackbar;
