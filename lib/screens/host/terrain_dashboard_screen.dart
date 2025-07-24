@@ -59,7 +59,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final webSocketService = context.read<WebSocketService>();
 
     if (gameStateService.isTerrainOpen) {
-      gameStateService.updateConnectedPlayers(gameStateService.connectedPlayers);
+      gameStateService
+          .updateConnectedPlayers(gameStateService.connectedPlayers);
     }
   }
 
@@ -148,7 +149,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     }
 
     final hasBombScenario =
-    selectedScenarios.any((s) => s.scenario.type == 'bomb_operation');
+        selectedScenarios.any((s) => s.scenario.type == 'bomb_operation');
 
     try {
       if (hasBombScenario) {
@@ -188,9 +189,11 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       throw Exception(l10n.bombScenarioRequiresTwoTeamsError);
     }
 
-    final bombScenario = scenarios.firstWhere((s) => s.scenario.type == 'bomb_operation');
+    final bombScenario =
+        scenarios.firstWhere((s) => s.scenario.type == 'bomb_operation');
 
-    final Map<int, BombOperationTeam>? assignedRoles = await showDialog<Map<int, BombOperationTeam>>(
+    final Map<int, BombOperationTeam>? assignedRoles =
+        await showDialog<Map<int, BombOperationTeam>>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.bombConfigurationTitle),
@@ -227,13 +230,16 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final field = gameMap.field!;
     final duration = gameStateService.gameDuration ?? 0;
 
-    final gameSession = await gameSessionService.createGameSession(gameMap.id!, field, duration);
+    final gameSession = await gameSessionService.createGameSession(
+        gameMap.id!, field, duration);
     logger.d('✅ GameSession créée : ID = ${gameSession.id}');
 
     final bombConfig = gameStateService.bombOperationConfig;
     if (bombConfig != null) {
-      await bombOperationService.saveTeamRoles(gameSession.id!, bombConfig.roles);
-      final bombOperationSession = await bombOperationService.createBombOperationSession(
+      await bombOperationService.saveTeamRoles(
+          gameSession.id!, bombConfig.roles);
+      final bombOperationSession =
+          await bombOperationService.createBombOperationSession(
         gameSessionId: gameSession.id!,
         scenarioId: bombConfig.scenarioId,
       );
@@ -250,8 +256,10 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final authService = context.read<AuthService>();
     final teamService = context.read<TeamService>();
 
-    final startedSession = await gameSessionService.startGameSession(session.id!);
-    logger.d('✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
+    final startedSession =
+        await gameSessionService.startGameSession(session.id!);
+    logger.d(
+        '✅ Partie démarrée : ID = ${startedSession.id}, active=${startedSession.active}');
 
     final user = authService.currentUser!;
     final teamId = teamService.myTeamId;
@@ -295,7 +303,6 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       ),
     );
   }
-
 
   void _selectMap() async {
     final l10n = AppLocalizations.of(context)!;
@@ -376,7 +383,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           logger.d('✅ Terrain créé avec ID: ${field.id}');
 
           final updatedMap = selectedMap.copyWith(field: field);
-          final mapResponse = await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
+          final mapResponse = await apiService.put(
+              'maps/${selectedMap.id}', updatedMap.toJson());
           selectedMap = GameMap.fromJson(mapResponse);
           gameStateService.selectMap(selectedMap);
         }
@@ -393,13 +401,16 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
         try {
           await gameStateService.connectHostToField();
-          final players = await playerConnectionService.getConnectedPlayers(fieldId);
-          final playersList = players.map((player) => {
-            'id': player.user.id,
-            'username': player.user.username,
-            'teamId': player.team?.id,
-            'teamName': player.team?.name,
-          }).toList();
+          final players =
+              await playerConnectionService.getConnectedPlayers(fieldId);
+          final playersList = players
+              .map((player) => {
+                    'id': player.user.id,
+                    'username': player.user.username,
+                    'teamId': player.team?.id,
+                    'teamName': player.team?.name,
+                  })
+              .toList();
 
           for (var player in playersList) {
             gameStateService.addConnectedPlayer(player);
@@ -407,7 +418,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
 
           logger.d('✅ Joueurs connectés récupérés : ${playersList.length}');
         } catch (e) {
-          logger.d('ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
+          logger.d(
+              'ℹ️ Aucun joueur connecté pour le moment (ou erreur mineure) : $e');
         }
 
         _webSocketService.subscribeToField(fieldId);
@@ -429,7 +441,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         _showSuccess(l10n.fieldClosedSuccess);
 
         final updatedMap = selectedMap.copyWith(field: null);
-        final mapResponse = await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
+        final mapResponse =
+            await apiService.put('maps/${selectedMap.id}', updatedMap.toJson());
         logger.d('🧹 Terrain dissocié de la carte');
 
         gameStateService.selectMap(null);
@@ -447,7 +460,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final playerConnectionService = context.read<PlayerConnectionService>();
 
     final user = authService.currentUser!;
-    if (gameStateService.selectedMap == null || gameStateService.selectedMap!.field == null) {
+    if (gameStateService.selectedMap == null ||
+        gameStateService.selectedMap!.field == null) {
       _showError(l10n.selectMapError);
       return;
     }
@@ -522,9 +536,12 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
               const SizedBox(height: 8),
               Text(
                 l10n.mapCardTitle(
-                  (selectedMap!=null && selectedMap.name.isNotEmpty) ? selectedMap.name : '',
+                  (selectedMap != null && selectedMap.name.isNotEmpty)
+                      ? selectedMap.name
+                      : '',
                 ),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
@@ -615,7 +632,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   Widget _buildFieldStatus(GameStateService gameStateService) {
     final l10n = AppLocalizations.of(context)!;
     return Card(
-      color: gameStateService.isTerrainOpen ? Colors.green.shade100 : Colors.red.shade100,
+      color: gameStateService.isTerrainOpen
+          ? Colors.green.shade100
+          : Colors.red.shade100,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -623,8 +642,12 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             Row(
               children: [
                 Icon(
-                  gameStateService.isTerrainOpen ? Icons.check_circle : Icons.cancel,
-                  color: gameStateService.isTerrainOpen ? Colors.green : Colors.red,
+                  gameStateService.isTerrainOpen
+                      ? Icons.check_circle
+                      : Icons.cancel,
+                  color: gameStateService.isTerrainOpen
+                      ? Colors.green
+                      : Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -638,10 +661,14 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 ElevatedButton(
                   onPressed: _toggleTerrainOpen,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: gameStateService.isTerrainOpen ? Colors.red : Colors.green,
+                    backgroundColor: gameStateService.isTerrainOpen
+                        ? Colors.red
+                        : Colors.green,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text(gameStateService.isTerrainOpen ? l10n.closeField : l10n.openField),
+                  child: Text(gameStateService.isTerrainOpen
+                      ? l10n.closeField
+                      : l10n.openField),
                 ),
               ],
             ),
@@ -654,7 +681,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
   Widget _buildFieldStatusOnlyView(GameStateService gameStateService) {
     final l10n = AppLocalizations.of(context)!;
     return Card(
-      color: gameStateService.isTerrainOpen ? Colors.green.shade100 : Colors.red.shade100,
+      color: gameStateService.isTerrainOpen
+          ? Colors.green.shade100
+          : Colors.red.shade100,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -662,8 +691,12 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             Row(
               children: [
                 Icon(
-                  gameStateService.isTerrainOpen ? Icons.check_circle : Icons.cancel,
-                  color: gameStateService.isTerrainOpen ? Colors.green : Colors.red,
+                  gameStateService.isTerrainOpen
+                      ? Icons.check_circle
+                      : Icons.cancel,
+                  color: gameStateService.isTerrainOpen
+                      ? Colors.green
+                      : Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -704,7 +737,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: gameStateService.isTerrainOpen ? _selectScenarios : null,
+                onPressed:
+                    gameStateService.isTerrainOpen ? _selectScenarios : null,
                 icon: const Icon(Icons.videogame_asset),
                 label: Text(l10n.selectScenariosButtonLabel),
               ),
@@ -712,7 +746,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: gameStateService.isTerrainOpen ? _setGameDuration : null,
+                onPressed:
+                    gameStateService.isTerrainOpen ? _setGameDuration : null,
                 icon: const Icon(Icons.timer),
                 label: Text(l10n.setDurationButtonLabel),
               ),
@@ -743,70 +778,70 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         const SizedBox(height: 24),
         gameStateService.isGameRunning
             ? Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  final user = context.read<AuthService>().currentUser!;
-                  final teamId = context.read<TeamService>().myTeamId;
-                  final field = gameStateService.selectedMap!.field;
-                  final isHost = user.hasRole('HOST') &&
-                      field!.owner!.id! == user.id;
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        final user = context.read<AuthService>().currentUser!;
+                        final teamId = context.read<TeamService>().myTeamId;
+                        final field = gameStateService.selectedMap!.field;
+                        final isHost = user.hasRole('HOST') &&
+                            field!.owner!.id! == user.id;
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GameSessionScreen(
-                        gameSession: gameStateService.activeGameSession!,
-                        userId: user.id!,
-                        teamId: teamId,
-                        isHost: isHost,
-                        fieldId: field?.id!,
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GameSessionScreen(
+                              gameSession: gameStateService.activeGameSession!,
+                              userId: user.id!,
+                              teamId: teamId,
+                              isHost: isHost,
+                              fieldId: field?.id!,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.login),
+                      label: Text(l10n.joinButton),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.login),
-                label: Text(l10n.joinButton),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _stopGame,
-                icon: const Icon(Icons.stop_circle_outlined),
-                label: Text(l10n.stopGame),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-          ],
-        )
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _stopGame,
+                      icon: const Icon(Icons.stop_circle_outlined),
+                      label: Text(l10n.stopGame),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             : SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: gameStateService.isTerrainOpen &&
-                (gameStateService.selectedScenarios?.isNotEmpty ??
-                    false)
-                ? _startGame
-                : null,
-            icon: const Icon(Icons.play_arrow),
-            label: Text(l10n.startGame),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-        ),
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: gameStateService.isTerrainOpen &&
+                          (gameStateService.selectedScenarios?.isNotEmpty ??
+                              false)
+                      ? _startGame
+                      : null,
+                  icon: const Icon(Icons.play_arrow),
+                  label: Text(l10n.startGame),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
       ],
     );
   }
@@ -867,7 +902,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 🆕 "Participer en tant que joueur" AU-DESSUS de la liste
-        if (gameStateService.selectedMap != null && gameStateService.isTerrainOpen && isMapOwner) ...[
+        if (gameStateService.selectedMap != null &&
+            gameStateService.isTerrainOpen &&
+            isMapOwner) ...[
           Row(
             children: [
               const Icon(Icons.person_add),
@@ -879,8 +916,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 ),
               ),
               Switch(
-                value: gameStateService.isPlayerConnected(
-                    authService.currentUser!.id!),
+                value: gameStateService
+                    .isPlayerConnected(authService.currentUser!.id!),
                 onChanged: (value) => _toggleHostAsPlayer(),
                 activeColor: Theme.of(context).primaryColor,
               ),
@@ -896,44 +933,44 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         const SizedBox(height: 8),
         gameStateService.connectedPlayersList.isNotEmpty
             ? ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: gameStateService.connectedPlayersList.length,
-          itemBuilder: (context, index) {
-            final player = gameStateService.connectedPlayersList[index];
-            final isHost = player['id'] == authService.currentUser!.id;
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: isHost
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey.shade400,
-                child: const Icon(Icons.person, color: Colors.white),
-              ),
-              title: Text(
-                player['username'] ?? l10n.playersTab,
-                style: TextStyle(
-                  fontWeight:
-                  isHost ? FontWeight.bold : FontWeight.normal,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: gameStateService.connectedPlayersList.length,
+                itemBuilder: (context, index) {
+                  final player = gameStateService.connectedPlayersList[index];
+                  final isHost = player['id'] == authService.currentUser!.id;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isHost
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.shade400,
+                      child: const Icon(Icons.person, color: Colors.white),
+                    ),
+                    title: Text(
+                      player['username'] ?? l10n.playersTab,
+                      style: TextStyle(
+                        fontWeight:
+                            isHost ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    subtitle: Text(
+                      player['teamName'] != null
+                          ? l10n.teamLabelPlayerList(player['teamName'])
+                          : l10n.noTeam,
+                    ),
+                    trailing: isHost ? Text(l10n.youHostLabel) : null,
+                  );
+                },
+              )
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    l10n.noPlayerConnected,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ),
               ),
-              subtitle: Text(
-                player['teamName'] != null
-                    ? l10n.teamLabelPlayerList(player['teamName'])
-                    : l10n.noTeam,
-              ),
-              trailing: isHost ? Text(l10n.youHostLabel) : null,
-            );
-          },
-        )
-            : Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Text(
-              l10n.noPlayerConnected,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -972,9 +1009,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     }
 
     final bigScenarios =
-    scenarios.where((s) => s.treasureHuntScenario?.size == 'BIG').toList();
+        scenarios.where((s) => s.treasureHuntScenario?.size == 'BIG').toList();
     final smallScenarios =
-    scenarios.where((s) => s.treasureHuntScenario?.size != 'BIG').toList();
+        scenarios.where((s) => s.treasureHuntScenario?.size != 'BIG').toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1017,7 +1054,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       margin: const EdgeInsets.only(bottom: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: isBig ? Colors.amber.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
+        color: isBig
+            ? Colors.amber.withOpacity(0.2)
+            : Colors.grey.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -1122,7 +1161,6 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     return isOwner;
   }
 
-
   Widget _buildUnifiedTerrainCard(GameStateService gameStateService) {
     final l10n = AppLocalizations.of(context)!;
     final selectedMap = gameStateService.selectedMap;
@@ -1205,7 +1243,6 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                   ),
                 ),
               ),
-              // ✅ Seulement si terrain FERMÉ et propriétaire
               if (isMapOwner && !gameStateService.isTerrainOpen)
                 IconButton(
                   onPressed: _selectMap,
@@ -1256,50 +1293,11 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             ],
           ),
 
-          // 🆕 BOUTONS DE CONFIGURATION (si terrain ouvert et propriétaire)
-          if (gameStateService.isTerrainOpen && isMapOwner) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _selectScenarios,
-                    icon: const Icon(Icons.videogame_asset),
-                    label: Text(l10n.selectScenariosButtonLabel),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade700,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _setGameDuration,
-                    icon: const Icon(Icons.timer),
-                    label: Text(l10n.setDurationButtonLabel),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange.shade700,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-
-          // Scénarios sélectionnés (si existants)
-          if (gameStateService.selectedScenarios?.isNotEmpty ?? false) ...[
-            const SizedBox(height: 16),
-            _buildSelectedScenarios(gameStateService),
-          ],
-
-          // Boutons de jeu
+          // 🆕 BOUTONS DE JEU (AVANT LES BOUTONS DE CONFIGURATION)
           if (gameStateService.isTerrainOpen) ...[
             const SizedBox(height: 16),
             if (gameStateService.isGameRunning)
+            // BOUTONS PENDANT LA PARTIE (Join + Stop si propriétaire)
               Row(
                 children: [
                   Expanded(
@@ -1351,6 +1349,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                 ],
               )
             else
+            // BOUTON START GAME (quand pas de partie en cours)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -1367,6 +1366,50 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                   ),
                 ),
               ),
+          ],
+
+          // ✅ BOUTONS DE CONFIGURATION (GRISÉS SI PARTIE EN COURS)
+          if (gameStateService.isTerrainOpen && isMapOwner) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: gameStateService.isGameRunning ? null : _selectScenarios,
+                    icon: const Icon(Icons.videogame_asset),
+                    label: Text(l10n.selectScenariosButtonLabel),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: gameStateService.isGameRunning
+                          ? Colors.grey.shade600
+                          : Colors.blue.shade700,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: gameStateService.isGameRunning ? null : _setGameDuration,
+                    icon: const Icon(Icons.timer),
+                    label: Text(l10n.setDurationButtonLabel),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: gameStateService.isGameRunning
+                          ? Colors.grey.shade600
+                          : Colors.orange.shade700,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          // Scénarios sélectionnés (si existants)
+          if (gameStateService.selectedScenarios?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 16),
+            _buildSelectedScenarios(gameStateService),
           ],
         ],
       ),
@@ -1385,13 +1428,10 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 🆕 ENCADRÉ PRINCIPAL UNIFIÉ (avec boutons de config intégrés)
+            // ENCADRÉ PRINCIPAL UNIFIÉ (sans boutons de jeu)
             _buildUnifiedTerrainCard(gameStateService),
 
-            // ❌ SUPPRIMÉ : Configuration en double
-            // Plus besoin de la section configuration séparée car elle est maintenant dans l'encadré
-
-            // Gestion des joueurs (avec "Participer" au-dessus si propriétaire)
+            // GESTION DES JOUEURS (avec "Participer" au-dessus)
             if (gameStateService.selectedMap != null)
               _buildConnectedPlayersList(gameStateService, authService),
           ],
@@ -1399,6 +1439,4 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       ),
     );
   }
-
 }
-

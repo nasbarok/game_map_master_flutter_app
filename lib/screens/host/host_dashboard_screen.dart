@@ -536,9 +536,14 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   }
 
   /// ✅ FLOATING ACTION BUTTON CONTEXTUEL
-  Widget _buildContextualFAB() {
+  Widget? _buildContextualFAB() {
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
+
+    // ✅ RETOURNER null POUR L'ONGLET FIELD (index 0)
+    if (_tabController.index == 0) {
+      return null;  // Pas de FAB sur l'onglet Field
+    }
 
     return _buildMilitaryButton(
       text: _getFABText(l10n, gameStateService),
