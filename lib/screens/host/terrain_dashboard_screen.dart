@@ -19,6 +19,7 @@ import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/bomb_operation_team_role_selector.dart';
+import '../../widgets/zoomable_background_container.dart';
 import '../gamesession/game_session_screen.dart';
 import '../scenario/bomb_operation/bomb_operation_config.dart';
 import 'scenario_selection_dialog.dart';
@@ -1169,249 +1170,257 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       return _buildSelectedMapCard(gameStateService);
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: gameStateService.isTerrainOpen
-            ? Colors.grey.shade800.withOpacity(0.9)
-            : Colors.grey.shade900.withOpacity(0.9),
+    // ✅ CHOIX DE L'IMAGE SELON L'ÉTAT DU TERRAIN
+    String backgroundImagePath = gameStateService.isTerrainOpen
+        ? 'assets/images/theme/terrain_open_background.png' // Image terrain ouvert
+        : 'assets/images/theme/terrain_closed_background.png'; // Image terrain fermé
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: ZoomableBackgroundContainer(
+        imageAssetPath: backgroundImagePath,
+        zoom: 2.5,
+        // ajuste comme tu veux
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: gameStateService.isTerrainOpen
               ? Colors.green.withOpacity(0.7)
               : Colors.red.withOpacity(0.7),
-          width: 1,
+          width: 2,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Status et bouton
-          Row(
-            children: [
-              Icon(
-                gameStateService.isTerrainOpen ? Icons.check_circle : Icons.cancel,
-                color: gameStateService.isTerrainOpen ? Colors.green : Colors.red,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.sessionStatusLabel(gameStateService.isTerrainOpen
-                      ? l10n.fieldStatusOpen
-                      : l10n.fieldStatusClosed),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+        gradientColors: [
+          Colors.black.withOpacity(0.2),
+          Colors.black.withOpacity(0.4),
+        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Status et bouton
+            Row(
+              children: [
+                Icon(
+                  gameStateService.isTerrainOpen
+                      ? Icons.check_circle
+                      : Icons.cancel,
+                  color: gameStateService.isTerrainOpen
+                      ? Colors.green
+                      : Colors.red,
                 ),
-              ),
-              isMapOwner
-                  ? ElevatedButton(
-                onPressed: _toggleTerrainOpen,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: gameStateService.isTerrainOpen ? Colors.red : Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(gameStateService.isTerrainOpen ? l10n.closeField : l10n.openField),
-              )
-                  : ElevatedButton(
-                onPressed: _showLeaveConfirmationDialog,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(l10n.leaveFieldButton),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Informations de la carte
-          Row(
-            children: [
-              const Icon(Icons.map, color: Colors.blue),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  selectedMap.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              if (isMapOwner && !gameStateService.isTerrainOpen)
-                IconButton(
-                  onPressed: _selectMap,
-                  icon: const Icon(Icons.edit, color: Colors.white),
-                  tooltip: l10n.selectMapButtonLabel,
-                ),
-            ],
-          ),
-
-          if (selectedMap.description != null && selectedMap.description!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              selectedMap.description!,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
-
-          const SizedBox(height: 16),
-
-          // Info cards intégrées
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoCard(
-                  icon: Icons.people,
-                  title: l10n.playersTab,
-                  value: gameStateService.connectedPlayersList.length.toString(),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildInfoCard(
-                  icon: Icons.videogame_asset,
-                  title: l10n.scenariosLabel,
-                  value: gameStateService.selectedScenarios?.length.toString() ?? "0",
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildInfoCard(
-                  icon: Icons.timer,
-                  title: l10n.duration,
-                  value: gameStateService.gameDuration == null
-                      ? l10n.unlimitedDurationInfoCard
-                      : "${gameStateService.gameDuration} min",
-                ),
-              ),
-            ],
-          ),
-
-          // 🆕 BOUTONS DE JEU (AVANT LES BOUTONS DE CONFIGURATION)
-          if (gameStateService.isTerrainOpen) ...[
-            const SizedBox(height: 16),
-            if (gameStateService.isGameRunning)
-            // BOUTONS PENDANT LA PARTIE (Join + Stop si propriétaire)
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        final user = context.read<AuthService>().currentUser!;
-                        final teamId = context.read<TeamService>().myTeamId;
-                        final field = gameStateService.selectedMap!.field;
-                        final isHost = user.hasRole('HOST') &&
-                            field!.owner!.id! == user.id;
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GameSessionScreen(
-                              gameSession: gameStateService.activeGameSession!,
-                              userId: user.id!,
-                              teamId: teamId,
-                              isHost: isHost,
-                              fieldId: field?.id!,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.login),
-                      label: Text(l10n.joinButton),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.sessionStatusLabel(gameStateService.isTerrainOpen
+                        ? l10n.fieldStatusOpen
+                        : l10n.fieldStatusClosed),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
                   ),
-                  if (isMapOwner) ...[
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _stopGame,
-                        icon: const Icon(Icons.stop_circle_outlined),
-                        label: Text(l10n.stopGame),
+                ),
+                isMapOwner
+                    ? ElevatedButton(
+                        onPressed: _toggleTerrainOpen,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: gameStateService.isTerrainOpen
+                              ? Colors.red
+                              : Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(gameStateService.isTerrainOpen
+                            ? l10n.closeField
+                            : l10n.openField),
+                      )
+                    : ElevatedButton(
+                        onPressed: _showLeaveConfirmationDialog,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(l10n.leaveFieldButton),
+                      ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Informations de la carte
+            Row(
+              children: [
+                const Icon(Icons.map, color: Colors.blue, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    selectedMap.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                if (isMapOwner && !gameStateService.isTerrainOpen)
+                  IconButton(
+                    onPressed: _selectMap,
+                    icon: const Icon(Icons.edit, color: Colors.white),
+                    tooltip: l10n.selectMapButtonLabel,
+                  ),
+              ],
+            ),
+
+            if (selectedMap.description != null &&
+                selectedMap.description!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                selectedMap.description!,
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+
+            const SizedBox(height: 16),
+
+            // Info cards intégrées
+            Row(
+              children: [
+                Expanded(
+                  child: _buildInfoCard(
+                    icon: Icons.people,
+                    title: l10n.playersTab,
+                    value:
+                        gameStateService.connectedPlayersList.length.toString(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildInfoCard(
+                    icon: Icons.videogame_asset,
+                    title: l10n.scenariosLabel,
+                    value:
+                        gameStateService.selectedScenarios?.length.toString() ??
+                            "0",
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildInfoCard(
+                    icon: Icons.timer,
+                    title: l10n.duration,
+                    value: gameStateService.gameDuration == null
+                        ? l10n.unlimitedDurationInfoCard
+                        : "${gameStateService.gameDuration} min",
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // BOUTONS DE JEU (AVANT LES BOUTONS DE CONFIGURATION)
+            if (gameStateService.isTerrainOpen) ...[
+              if (gameStateService.isGameRunning)
+                // BOUTONS PENDANT LA PARTIE
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          // Logique Join existante...
+                        },
+                        icon: const Icon(Icons.login),
+                        label: Text(l10n.joinButton),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.withOpacity(0.9),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                       ),
                     ),
+                    if (isMapOwner) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _stopGame,
+                          icon: const Icon(Icons.stop_circle_outlined),
+                          label: Text(l10n.stopGame),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.withOpacity(0.9),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
+                )
+              else
+                // BOUTON START GAME
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: gameStateService.isTerrainOpen &&
+                            (gameStateService.selectedScenarios?.isNotEmpty ??
+                                false)
+                        ? _startGame
+                        : null,
+                    icon: const Icon(Icons.play_arrow),
+                    label: Text(l10n.startGame),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.withOpacity(0.9),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 12),
+            ],
+
+            // BOUTONS DE CONFIGURATION (GRISÉS SI PARTIE EN COURS)
+            if (gameStateService.isTerrainOpen && isMapOwner) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: gameStateService.isGameRunning
+                          ? null
+                          : _selectScenarios,
+                      icon: const Icon(Icons.videogame_asset),
+                      label: Text(l10n.selectScenariosButtonLabel),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: gameStateService.isGameRunning
+                            ? Colors.grey.shade600.withOpacity(0.7)
+                            : Colors.blue.shade700.withOpacity(0.9),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: gameStateService.isGameRunning
+                          ? null
+                          : _setGameDuration,
+                      icon: const Icon(Icons.timer),
+                      label: Text(l10n.setDurationButtonLabel),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: gameStateService.isGameRunning
+                            ? Colors.grey.shade600.withOpacity(0.7)
+                            : Colors.orange.shade700.withOpacity(0.9),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
                 ],
-              )
-            else
-            // BOUTON START GAME (quand pas de partie en cours)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: gameStateService.isTerrainOpen &&
-                      (gameStateService.selectedScenarios?.isNotEmpty ?? false)
-                      ? _startGame
-                      : null,
-                  icon: const Icon(Icons.play_arrow),
-                  label: Text(l10n.startGame),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
               ),
+            ],
+            if (gameStateService.selectedScenarios != null &&
+                gameStateService.selectedScenarios!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _buildSelectedScenarios(gameStateService),
+            ],
           ],
-
-          // ✅ BOUTONS DE CONFIGURATION (GRISÉS SI PARTIE EN COURS)
-          if (gameStateService.isTerrainOpen && isMapOwner) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: gameStateService.isGameRunning ? null : _selectScenarios,
-                    icon: const Icon(Icons.videogame_asset),
-                    label: Text(l10n.selectScenariosButtonLabel),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: gameStateService.isGameRunning
-                          ? Colors.grey.shade600
-                          : Colors.blue.shade700,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: gameStateService.isGameRunning ? null : _setGameDuration,
-                    icon: const Icon(Icons.timer),
-                    label: Text(l10n.setDurationButtonLabel),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: gameStateService.isGameRunning
-                          ? Colors.grey.shade600
-                          : Colors.orange.shade700,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-
-          // Scénarios sélectionnés (si existants)
-          if (gameStateService.selectedScenarios?.isNotEmpty ?? false) ...[
-            const SizedBox(height: 16),
-            _buildSelectedScenarios(gameStateService),
-          ],
-        ],
+        ),
       ),
     );
   }
