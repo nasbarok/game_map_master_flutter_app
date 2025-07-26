@@ -1183,13 +1183,14 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: gameStateService.isTerrainOpen
-              ? Colors.green.withOpacity(0.7)
-              : Colors.red.withOpacity(0.7),
+              ? const Color(0xFF6B8E23).withOpacity(0.6) // Kaki métallisé
+              : const Color(0xFF8B0000).withOpacity(0.6),
+          // Rouge foncé/gris métallisé
           width: 2,
         ),
         gradientColors: [
-          Colors.black.withOpacity(0.2),
-          Colors.black.withOpacity(0.4),
+          Colors.black.withOpacity(0.3),
+          Colors.black.withOpacity(0.5),
         ],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1391,6 +1392,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                             : Colors.blue.shade700.withOpacity(0.9),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        minimumSize: const Size.fromHeight(56),
                       ),
                     ),
                   ),
@@ -1408,6 +1410,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                             : Colors.orange.shade700.withOpacity(0.9),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        minimumSize: const Size.fromHeight(56),
                       ),
                     ),
                   ),
@@ -1432,6 +1435,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final authService = context.watch<AuthService>();
 
     return Scaffold(
+      // Rendre le fond transparent pour voir l’arrière‑plan du HostDashboard
+      backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

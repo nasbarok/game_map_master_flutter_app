@@ -216,14 +216,16 @@ class _PlayersScreenState extends State<PlayersScreen> {
     }
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(l10n.playersManagement),
+          title: null,
+          toolbarHeight: 0,
+          // supprime l’espace du titre
           bottom: TabBar(
             tabs: [
               Tab(text: l10n.searchTab),
-              Tab(text: l10n.invitations),
               Tab(text: l10n.teams),
             ],
           ),
@@ -232,9 +234,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
           children: [
             // Onglet Recherche
             _buildSearchTab(),
-
-            // Onglet Invitations
-            _buildInvitationsTab(invitationService),
 
             // Onglet Équipes
             _buildTeamsTab(teamService, gameStateService),
@@ -458,11 +457,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   ],
                 ),
                 if (isMapOwner && !isCurrentUser)
-                IconButton(
-                  icon: const Icon(Icons.exit_to_app, color: Colors.red),
-                  tooltip: l10n.kickPlayerTooltip,
-                  onPressed: () => kickPlayer(player['id'], player['username']),
-                ),
+                  IconButton(
+                    icon: const Icon(Icons.exit_to_app, color: Colors.red),
+                    tooltip: l10n.kickPlayerTooltip,
+                    onPressed: () =>
+                        kickPlayer(player['id'], player['username']),
+                  ),
               ],
             )
           : const SizedBox.shrink(),
@@ -499,11 +499,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   },
                 ),
                 if (isMapOwner && !isCurrentUser)
-                IconButton(
-                  icon: const Icon(Icons.exit_to_app, color: Colors.red),
-                  tooltip: l10n.kickPlayerTooltip,
-                  onPressed: () => kickPlayer(player['id'], player['username']),
-                ),
+                  IconButton(
+                    icon: const Icon(Icons.exit_to_app, color: Colors.red),
+                    tooltip: l10n.kickPlayerTooltip,
+                    onPressed: () =>
+                        kickPlayer(player['id'], player['username']),
+                  ),
               ],
             )
           : const SizedBox.shrink(),

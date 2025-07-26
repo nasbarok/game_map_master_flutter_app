@@ -33,7 +33,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
 
     try {
-      final historyService = Provider.of<HistoryService>(context, listen: false);
+      final historyService =
+          Provider.of<HistoryService>(context, listen: false);
 
       List<Field> fields;
 
@@ -79,7 +80,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (confirm == true) {
       try {
-        final historyService = Provider.of<HistoryService>(context, listen: false);
+        final historyService =
+            Provider.of<HistoryService>(context, listen: false);
         await historyService.deleteField(field.id!);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -89,76 +91,81 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _loadFields(); // Rafraîchir la liste
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.error +e.toString())),
+          SnackBar(content: Text(l10n.error + e.toString())),
         );
       }
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fieldId != null ? l10n.historyScreenTitleField : l10n.historyScreenTitleGeneric),
-      ),
+      backgroundColor: Colors.transparent,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-          ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
-          : _fields.isEmpty
-          ? Center(child: Text(l10n.noFieldsAvailable))
-          : ListView.builder(
-        itemCount: _fields.length,
-        itemBuilder: (context, index) {
-          final field = _fields[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListTile(
-              title: Text(field.name),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.fieldOpenedOn(_formatDate(field.openedAt!))),
-                  if (field.closedAt != null)
-                    Text(l10n.fieldClosedOn(_formatDate(field.closedAt!)))
-                  else
-                    Text(l10n.fieldStatusOpen, style: const TextStyle(color: Colors.green)),
-                ],
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (field.closedAt != null)
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    tooltip: l10n.deleteFieldTooltip,
-                    onPressed: () => _confirmDeleteField(field),
-                  ),
-                  const Icon(Icons.arrow_forward_ios),
-                ],
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        FieldSessionsScreen(fieldId: field.id!),
-                  ),
-                ).then((_) => _loadFields());
-              },
-            ),
-          );
-        },
-      ),
+              ? Center(
+                  child: Text(_errorMessage!,
+                      style: const TextStyle(color: Colors.red)))
+              : _fields.isEmpty
+                  ? Center(child: Text(l10n.noFieldsAvailable))
+                  : ListView.builder(
+                      itemCount: _fields.length,
+                      itemBuilder: (context, index) {
+                        final field = _fields[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: ListTile(
+                            title: Text(field.name),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.fieldOpenedOn(
+                                    _formatDate(field.openedAt!))),
+                                if (field.closedAt != null)
+                                  Text(l10n.fieldClosedOn(
+                                      _formatDate(field.closedAt!)))
+                                else
+                                  Text(l10n.fieldStatusOpen,
+                                      style:
+                                          const TextStyle(color: Colors.green)),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (field.closedAt != null)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    tooltip: l10n.deleteFieldTooltip,
+                                    onPressed: () => _confirmDeleteField(field),
+                                  ),
+                                const Icon(Icons.arrow_forward_ios),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      FieldSessionsScreen(fieldId: field.id!),
+                                ),
+                              ).then((_) => _loadFields());
+                            },
+                          ),
+                        );
+                      },
+                    ),
       floatingActionButton: widget.fieldId == null
           ? FloatingActionButton(
-        heroTag: 'history_fab',
-        onPressed: _loadFields,
-        tooltip: l10n.refreshTooltip,
-        child: const Icon(Icons.refresh),
-      )
+              heroTag: 'history_fab',
+              onPressed: _loadFields,
+              tooltip: l10n.refreshTooltip,
+              child: const Icon(Icons.refresh),
+            )
           : null,
     );
   }
