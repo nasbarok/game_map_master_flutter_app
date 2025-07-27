@@ -22,6 +22,8 @@ import "package:uuid/uuid.dart";
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 import "../../generated/l10n/app_localizations.dart";
+import "../../widgets/adaptive_background.dart";
+
 // Enum to manage editor modes
 enum MapEditorMode { view, drawBoundary, drawZone, placePoi }
 
@@ -50,7 +52,9 @@ class _InteractiveMapEditorScreenState
   late GeocodingService _geocodingService;
   var uuid = Uuid();
 
-  GameMap _currentMap = GameMap(name: "Nouvelle Carte Interactive");//@todo Will be set in initState with l10n
+  GameMap _currentMap = GameMap(
+      name:
+          "Nouvelle Carte Interactive"); //@todo Will be set in initState with l10n
   MapEditorMode _editorMode = MapEditorMode.view;
   TileLayerType _currentTileLayerType = TileLayerType.osm;
 
@@ -85,20 +89,56 @@ class _InteractiveMapEditorScreenState
   List<Map<String, dynamic>> _getAvailableIcons(AppLocalizations l10n) {
     return [
       {"identifier": "flag", "icon": Icons.flag, "label": l10n.poiIconFlag},
-      {"identifier": "bomb", "icon": Icons.dangerous, "label": l10n.poiIconBomb},
+      {
+        "identifier": "bomb",
+        "icon": Icons.dangerous,
+        "label": l10n.poiIconBomb
+      },
       {"identifier": "star", "icon": Icons.star, "label": l10n.poiIconStar},
       {"identifier": "place", "icon": Icons.place, "label": l10n.poiIconPlace},
-      {"identifier": "pin_drop", "icon": Icons.pin_drop, "label": l10n.poiIconPinDrop},
+      {
+        "identifier": "pin_drop",
+        "icon": Icons.pin_drop,
+        "label": l10n.poiIconPinDrop
+      },
       {"identifier": "house", "icon": Icons.house, "label": l10n.poiIconHouse},
       {"identifier": "cabin", "icon": Icons.cabin, "label": l10n.poiIconCabin},
-      {"identifier": "door", "icon": Icons.meeting_room, "label": l10n.poiIconDoor},
-      {"identifier": "skull", "icon": Icons.warning_amber_rounded, "label": l10n.poiIconSkull},
-      {"identifier": "navigation", "icon": Icons.navigation, "label": l10n.poiIconNavigation},
-      {"identifier": "target", "icon": Icons.gps_fixed, "label": l10n.poiIconTarget},
-      {"identifier": "ammo", "icon": Icons.local_mall, "label": l10n.poiIconAmmo},
-      {"identifier": "medical", "icon": Icons.medical_services, "label": l10n.poiIconMedical},
+      {
+        "identifier": "door",
+        "icon": Icons.meeting_room,
+        "label": l10n.poiIconDoor
+      },
+      {
+        "identifier": "skull",
+        "icon": Icons.warning_amber_rounded,
+        "label": l10n.poiIconSkull
+      },
+      {
+        "identifier": "navigation",
+        "icon": Icons.navigation,
+        "label": l10n.poiIconNavigation
+      },
+      {
+        "identifier": "target",
+        "icon": Icons.gps_fixed,
+        "label": l10n.poiIconTarget
+      },
+      {
+        "identifier": "ammo",
+        "icon": Icons.local_mall,
+        "label": l10n.poiIconAmmo
+      },
+      {
+        "identifier": "medical",
+        "icon": Icons.medical_services,
+        "label": l10n.poiIconMedical
+      },
       {"identifier": "radio", "icon": Icons.radio, "label": l10n.poiIconRadio},
-      {"identifier": "default_poi_icon", "icon": Icons.location_pin, "label": l10n.poiIconDefault},
+      {
+        "identifier": "default_poi_icon",
+        "icon": Icons.location_pin,
+        "label": l10n.poiIconDefault
+      },
     ];
   }
 
@@ -107,9 +147,8 @@ class _InteractiveMapEditorScreenState
     final icons = _getAvailableIcons(l10n);
     final iconData = icons.firstWhere(
         (icon) => icon["identifier"] == identifier,
-        orElse: () => icons.firstWhere(
-            (icon) => icon["identifier"] == "default_poi_icon")
-        );
+        orElse: () => icons
+            .firstWhere((icon) => icon["identifier"] == "default_poi_icon"));
     return iconData["icon"] as IconData;
   }
 
@@ -134,8 +173,7 @@ class _InteractiveMapEditorScreenState
               LatLng(_currentMap.centerLatitude!, _currentMap.centerLongitude!);
         }
         if (_currentMap.initialZoom != null) {
-          _currentZoom = _currentMap.initialZoom!
-              .clamp(_minZoom, _maxZoom);
+          _currentZoom = _currentMap.initialZoom!.clamp(_minZoom, _maxZoom);
         }
         if (_currentMap.centerLatitude != null &&
             _currentMap.centerLongitude != null) {
@@ -262,9 +300,9 @@ class _InteractiveMapEditorScreenState
         _showGeocodingResults = results.isNotEmpty;
       });
     } catch (e) {
-        final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorGeocodingSnackbar(e.toString()))));
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorGeocodingSnackbar(e.toString()))));
       setState(() {
         _geocodingResults.clear();
         _showGeocodingResults = false;
@@ -285,7 +323,7 @@ class _InteractiveMapEditorScreenState
   }
 
   void _onMapTap(fm.TapPosition tapPosition, LatLng point) async {
-      // final l10n = AppLocalizations.of(context)!; // Removed, as it's not used in this specific block after changes
+    // final l10n = AppLocalizations.of(context)!; // Removed, as it's not used in this specific block after changes
     if (_showGeocodingResults) {
       setState(() {
         _showGeocodingResults = false;
@@ -326,10 +364,10 @@ class _InteractiveMapEditorScreenState
   }
 
   void _addCurrentZone() async {
-      final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     if (_currentZonePoints.length < 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.zoneMinPointsError)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.zoneMinPointsError)));
       return;
     }
 
@@ -425,7 +463,7 @@ class _InteractiveMapEditorScreenState
   }
 
   void _editPoi(MapPointOfInterest poiToEdit) async {
-      final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (BuildContext context) {
@@ -528,7 +566,8 @@ class _InteractiveMapEditorScreenState
         case 'blue':
           return Colors.blue;
         default:
-          logger.d("Couleur non reconnue '$cs', utilisation du gris par défaut.");
+          logger
+              .d("Couleur non reconnue '$cs', utilisation du gris par défaut.");
           return Colors.grey.withOpacity(0.5);
       }
     } catch (e) {
@@ -704,7 +743,7 @@ class _InteractiveMapEditorScreenState
       _editorMode = MapEditorMode.view;
     });
 
-  /*  await _captureAndStoreMapBackground(TileLayerType.osm, false);
+    /*  await _captureAndStoreMapBackground(TileLayerType.osm, false);
     await _captureAndStoreMapBackground(TileLayerType.satellite, true);
 */
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -732,7 +771,6 @@ class _InteractiveMapEditorScreenState
         jsonEncode(_mapPois.map((p) => p.toJson()).toList());
 
     try {
-
       if (_currentMap.id == null) {
         _currentMap = await _gameMapService.addGameMap(_currentMap);
         ScaffoldMessenger.of(context)
@@ -752,7 +790,7 @@ class _InteractiveMapEditorScreenState
   }
 
   fm.LatLngBounds _expandBoundsByKm(fm.LatLngBounds original, double km) {
-      final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
+    final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
     const double degreesPerKm = 1 / 111.0; // approximation (valable en France)
     final delta = km * degreesPerKm;
 
@@ -769,7 +807,7 @@ class _InteractiveMapEditorScreenState
   }
 
   Widget _buildModeSelector() {
-      final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
+    final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
     return SegmentedButton<MapEditorMode>(
       segments: <ButtonSegment<MapEditorMode>>[
         ButtonSegment<MapEditorMode>(
@@ -809,7 +847,7 @@ class _InteractiveMapEditorScreenState
   }
 
   Widget _buildActionButtons() {
-      final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
+    final l10n = AppLocalizations.of(context)!; // Ensure l10n is available
     if (_editorMode == MapEditorMode.drawBoundary) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -998,7 +1036,6 @@ class _InteractiveMapEditorScreenState
     return fm.LatLngBounds.fromPoints([newNE, newSW]);
   }
 
-
   // Fonctions pour le zoom
   void _zoomIn() {
     double newZoom =
@@ -1092,14 +1129,16 @@ class _InteractiveMapEditorScreenState
         ),
     ];
 
-    return Scaffold(
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.menu,
+      backgroundOpacity: 0.9,
       appBar: AppBar(
         title: Text(widget.initialMap == null
             ? "Créer Carte Interactive"
             : "Modifier: ${_currentMap.name}"),
         actions: [
           IconButton(
-            icon: Icon(Icons.save),
+            icon: const Icon(Icons.save),
             tooltip: "Sauvegarder la Carte",
             onPressed: _saveMap,
           ),

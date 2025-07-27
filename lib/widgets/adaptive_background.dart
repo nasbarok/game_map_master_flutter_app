@@ -214,9 +214,9 @@ class GameBackground extends StatelessWidget {
       case GameBackgroundType.home:
         return 'assets/images/theme/background_home.png';
       case GameBackgroundType.game:
-        return 'assets/images/theme/background_home.png'; // Même image pour l'instant
+        return 'assets/images/theme/background_game.png';
       case GameBackgroundType.menu:
-        return 'assets/images/theme/background_home.png'; // Même image pour l'instant
+        return 'assets/images/theme/background_menu.png';
     }
   }
 

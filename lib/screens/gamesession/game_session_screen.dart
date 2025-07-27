@@ -21,6 +21,7 @@ import '../../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket/bomb_operation_web_socket_handler.dart';
 import '../../services/websocket/web_socket_game_session_handler.dart';
+import '../../widgets/adaptive_background.dart';
 import '../../widgets/bomb_operation_info_card.dart';
 import '../../widgets/game_map_widget.dart';
 import '../../widgets/participants_card.dart';
@@ -474,7 +475,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
-      return Scaffold(
+      return AdaptiveScaffold(
+        gameBackgroundType: GameBackgroundType.game,
+        backgroundOpacity: 0.9,
         appBar: AppBar(
           title: Text(l10n.gameSessionScreenTitle),
         ),
@@ -485,7 +488,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
 
     if (_errorMessage != null) {
-      return Scaffold(
+      return AdaptiveScaffold(
+        gameBackgroundType: GameBackgroundType.game,
+        backgroundOpacity: 0.9,
         appBar: AppBar(
           title: Text(l10n.gameSessionScreenTitle),
         ),
@@ -512,9 +517,9 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
 
     final bool isActive = _gameSession?.active == true;
-    final bool bombActive =
-        _scenarios.any((s) => s.scenarioType == 'bomb_operation');
-    return Scaffold(
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.game,
+      backgroundOpacity: 0.9,
       appBar: AppBar(
         title: Text(l10n.gameSessionScreenTitle),
         actions: [

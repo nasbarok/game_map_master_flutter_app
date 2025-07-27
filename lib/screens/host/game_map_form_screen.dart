@@ -11,6 +11,8 @@ import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import '../../widgets/adaptive_background.dart';
+
 class GameMapFormScreen extends StatefulWidget {
   final GameMap? gameMap;
 
@@ -204,7 +206,10 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
+    return AdaptiveScaffold(
+      // Fond de type “menu” avec légère transparence pour voir l’image en arrière‑plan
+      gameBackgroundType: GameBackgroundType.menu,
+      backgroundOpacity: 0.9,
       appBar: AppBar(
         title: Text(widget.gameMap == null ? l10n.newMapTitle : l10n.editMap),
       ),
