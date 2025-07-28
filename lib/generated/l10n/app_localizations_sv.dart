@@ -2062,4 +2062,10 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get hostSectionGameHistorySubtitle =>
       'Tillbaka till fältet – dina spel, din data.';
+
+  @override
+  String get audioGameStarted => 'Game started. Good luck everyone.';
+
+  @override
+  String get audioGameEnded => 'Game ended. Thank you for playing.';
 }

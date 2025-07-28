@@ -11,6 +11,7 @@ import '../models/game_session.dart';
 import '../models/scenario/scenario_dto.dart';
 import '../screens/scenario/bomb_operation/bomb_operation_config.dart';
 import 'api_service.dart';
+import 'audio/simple_voice_service.dart';
 import 'game_session_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
@@ -274,6 +275,8 @@ class GameStateService extends ChangeNotifier {
           if (difference.isNegative) {
             newDisplay = "00:00:00";
             stopGameLocally();
+            // Audio de fin de partie automatique
+            _playGameEndedAudioAuto();
             return;
           }
 
@@ -294,6 +297,16 @@ class GameStateService extends ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+
+  Future<void> _playGameEndedAudioAuto() async {
+    try {
+      final voiceService = GetIt.I<SimpleVoiceService>();
+      await voiceService.playMessage('game_ended');
+      logger.d('🔊 Audio fin de partie automatique joué');
+    } catch (e) {
+      logger.e('❌ Erreur audio fin de partie auto: $e');
+    }
   }
 
   void stopGameLocally() {

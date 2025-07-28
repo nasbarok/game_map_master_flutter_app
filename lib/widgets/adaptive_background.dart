@@ -87,6 +87,16 @@ class AdaptiveBackground extends StatelessWidget {
       imageWidget = _wrapWithParallax(imageWidget, screenType);
     }
 
+    // 🆕 Agrandir l'image en paysage pour qu'elle soit plus recadrée
+    final isLandscape = screenWidth > screenHeight;
+    if (isLandscape) {
+      // Le facteur de zoom 1.3 peut être ajusté selon vos préférences
+      imageWidget = Transform.scale(
+        scale: 1.5,
+        child: imageWidget,
+      );
+    }
+
     return imageWidget;
   }
 

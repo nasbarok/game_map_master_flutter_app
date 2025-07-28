@@ -9,6 +9,7 @@ import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import '../../services/scenario_service.dart';
+import '../../widgets/adaptive_background.dart';
 import '../scenario/bomb_operation/bomb_operation_config_screen.dart';
 import '../scenario/bomb_operation/bomb_operation_integration.dart';
 import '../scenario/treasure_hunt/treasure_hunt_config_screen.dart';
@@ -113,8 +114,7 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(l10n.errorLoadingMaps(e.toString())),
+            content: Text(l10n.errorLoadingMaps(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -213,7 +213,9 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final scenarioTypes = _getScenarioTypes(l10n);
-    return Scaffold(
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.menu,
+      backgroundOpacity: 0.9,
       appBar: AppBar(
         title: Text(widget.scenario == null
             ? l10n.newScenarioTitle
@@ -250,7 +252,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                       ),
                       maxLines: 3,
                       inputFormatters: [
-                        LengthLimitingTextInputFormatter(500), // bloque au-delà de 500 caractères
+                        LengthLimitingTextInputFormatter(500),
+                        // bloque au-delà de 500 caractères
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -402,7 +405,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
                                   DropdownButtonFormField<GameMap>(
                                     value: _selectedMap,
                                     decoration: InputDecoration(
-                                      labelText: l10n.mapName, // Assuming mapNameLabel can be reused or create a specific one like 'Map *'
+                                      labelText: l10n.mapName,
+                                      // Assuming mapNameLabel can be reused or create a specific one like 'Map *'
                                       border: const OutlineInputBorder(),
                                     ),
                                     items: _availableMaps.map((map) {
@@ -492,7 +496,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
         id: widget.scenario?.id,
         name: _nameController.text.isNotEmpty
             ? _nameController.text
-            : l10n.treasureHunt, // Default name if empty
+            : l10n.treasureHunt,
+        // Default name if empty
         description: _descriptionController.text,
         type: 'treasure_hunt',
         gameMapId: _selectedMap?.id,
@@ -527,7 +532,8 @@ class _ScenarioFormScreenState extends State<ScenarioFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.error + e.toString()), // Assuming a general error key
+            content: Text(l10n.error + e.toString()),
+            // Assuming a general error key
             backgroundColor: Colors.red,
           ),
         );

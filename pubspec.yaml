@@ -17,6 +17,7 @@ dependencies:
   # HTTP et WebSocket
   http: ^1.3.0
   web_socket_channel: ^2.3.0
+  flutter_tts: ^3.8.4
   # Stockage local
   shared_preferences: ^2.1.0
   # Scanner QR code

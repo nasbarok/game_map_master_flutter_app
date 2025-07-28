@@ -11,6 +11,7 @@ import '../../models/game_session.dart';
 import '../../models/scenario/bomb_operation/bomb_operation_team.dart';
 import '../../models/scenario/scenario_dto.dart';
 import '../../services/api_service.dart';
+import '../../services/audio/simple_voice_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_session_service.dart';
 import '../../services/player_connection_service.dart';
@@ -156,6 +157,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       if (hasBombScenario) {
         await _initBombOperationScenario();
       }
+      // Audio de début de partie côté HOST
+      await _playGameStartedAudioHost();
+
       _showLoadingDialog(l10n.loadingDialogMessage);
       try {
         logger.d(
@@ -173,6 +177,18 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     } catch (e) {
       logger.e('❌ Erreur globale _startGame: $e');
       _showError(l10n.errorStartingGame(e.toString()));
+    }
+  }
+
+  //Audio côté host
+  Future<void> _playGameStartedAudioHost() async {
+    try {
+      final voiceService = GetIt.I<SimpleVoiceService>();
+      await voiceService.initialize();
+      await voiceService.playMessage('game_started');
+      logger.d('🔊 Audio début de partie joué côté HOST');
+    } catch (e) {
+      logger.e('❌ Erreur audio début de partie HOST: $e');
     }
   }
 
@@ -1325,7 +1341,25 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          // Logique Join existante...
+                          final user = context.read<AuthService>().currentUser!;
+                          final teamId = context.read<TeamService>().myTeamId;
+                          final field = gameStateService.selectedMap!.field;
+                          final isHost = user.hasRole('HOST') &&
+                              field!.owner!.id! == user.id;
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GameSessionScreen(
+                                gameSession:
+                                    gameStateService.activeGameSession!,
+                                userId: user.id!,
+                                teamId: teamId,
+                                isHost: isHost,
+                                fieldId: field?.id!,
+                              ),
+                            ),
+                          );
                         },
                         icon: const Icon(Icons.login),
                         label: Text(l10n.joinButton),

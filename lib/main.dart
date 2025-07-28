@@ -1,3 +1,4 @@
+import 'package:game_map_master_flutter_app/services/audio/simple_voice_service.dart';
 import 'package:game_map_master_flutter_app/services/game_map_service.dart';
 import 'package:game_map_master_flutter_app/services/game_session_service.dart';
 import 'package:game_map_master_flutter_app/services/game_state_service.dart';
@@ -40,42 +41,72 @@ void main() async {
   await notifications.initNotifications();
 
   const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-  const initializationSettings = InitializationSettings(android: androidSettings);
+  const initializationSettings =
+      InitializationSettings(android: androidSettings);
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   // ⚙️ Setup GetIt une seule fois ici
   setupServiceLocator();
 
+  // 🆕 Initialisation du service audio (catcher les erreurs éventuelles)
+  try {
+    final audioService = GetIt.I<SimpleVoiceService>();
+    await audioService.initialize();
+    logger.d('✅ Service audio initialisé');
+  } catch (e) {
+    logger.e('❌ Erreur initialisation service audio: $e');
+  }
+
   // 📦 Wrapping App with MultiProvider
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthService>.value(value: GetIt.I<AuthService>()),
+        ChangeNotifierProvider<AuthService>.value(
+            value: GetIt.I<AuthService>()),
         Provider<ApiService>.value(value: GetIt.I<ApiService>()),
-        ChangeNotifierProvider<GameStateService>.value(value: GetIt.I<GameStateService>()),
-        ChangeNotifierProvider<TeamService>.value(value: GetIt.I<TeamService>()),
-        ChangeNotifierProvider<WebSocketService>.value(value: GetIt.I<WebSocketService>()),
-        ChangeNotifierProvider<InvitationService>.value(value: GetIt.I<InvitationService>()),
+        ChangeNotifierProvider<GameStateService>.value(
+            value: GetIt.I<GameStateService>()),
+        ChangeNotifierProvider<TeamService>.value(
+            value: GetIt.I<TeamService>()),
+        ChangeNotifierProvider<WebSocketService>.value(
+            value: GetIt.I<WebSocketService>()),
+        ChangeNotifierProvider<InvitationService>.value(
+            value: GetIt.I<InvitationService>()),
         Provider<NavigationService>.value(value: GetIt.I<NavigationService>()),
         Provider<WebSocketManager>.value(value: GetIt.I<WebSocketManager>()),
-        Provider<PlayerConnectionService>.value(value: GetIt.I<PlayerConnectionService>()),
-        Provider<TreasureHuntService>.value(value: GetIt.I<TreasureHuntService>()),
-        Provider<TreasureHuntService>.value(value: GetIt.I<TreasureHuntService>()),
-        Provider<BombOperationService>.value(value: GetIt.I<BombOperationService>()),
-        Provider<BombOperationScenarioService>.value(value: GetIt.I<BombOperationScenarioService>()),
-        Provider<TreasureHuntWebSocketHandler>.value(value: GetIt.I<TreasureHuntWebSocketHandler>()),
-        ChangeNotifierProvider<GameMapService>.value(value: GetIt.I<GameMapService>()),
-        ChangeNotifierProvider<ScenarioService>.value(value: GetIt.I<ScenarioService>()),
-        Provider<GameSessionService>.value(value: GetIt.I<GameSessionService>()),
-        Provider<TreasureHuntScoreService>.value(value: GetIt.I<TreasureHuntScoreService>()),
-        Provider<WebSocketGameSessionHandler>.value(value: GetIt.I<WebSocketGameSessionHandler>()),
-        Provider<BombOperationWebSocketHandler>.value(value: GetIt.I<BombOperationWebSocketHandler>()),
+        Provider<PlayerConnectionService>.value(
+            value: GetIt.I<PlayerConnectionService>()),
+        Provider<TreasureHuntService>.value(
+            value: GetIt.I<TreasureHuntService>()),
+        Provider<TreasureHuntService>.value(
+            value: GetIt.I<TreasureHuntService>()),
+        Provider<BombOperationService>.value(
+            value: GetIt.I<BombOperationService>()),
+        Provider<BombOperationScenarioService>.value(
+            value: GetIt.I<BombOperationScenarioService>()),
+        Provider<TreasureHuntWebSocketHandler>.value(
+            value: GetIt.I<TreasureHuntWebSocketHandler>()),
+        ChangeNotifierProvider<GameMapService>.value(
+            value: GetIt.I<GameMapService>()),
+        ChangeNotifierProvider<ScenarioService>.value(
+            value: GetIt.I<ScenarioService>()),
+        Provider<GameSessionService>.value(
+            value: GetIt.I<GameSessionService>()),
+        Provider<TreasureHuntScoreService>.value(
+            value: GetIt.I<TreasureHuntScoreService>()),
+        Provider<WebSocketGameSessionHandler>.value(
+            value: GetIt.I<WebSocketGameSessionHandler>()),
+        Provider<BombOperationWebSocketHandler>.value(
+            value: GetIt.I<BombOperationWebSocketHandler>()),
         Provider<HistoryService>.value(value: GetIt.I<HistoryService>()),
         Provider<GeocodingService>.value(value: GetIt.I<GeocodingService>()),
-        Provider<PlayerLocationService>.value(value: GetIt.I<PlayerLocationService>()),
-        Provider<AdvancedLocationService>.value(value: GetIt.I<AdvancedLocationService>()),
-        ChangeNotifierProvider<LocaleService>.value(value: GetIt.I<LocaleService>()),
+        Provider<PlayerLocationService>.value(
+            value: GetIt.I<PlayerLocationService>()),
+        Provider<AdvancedLocationService>.value(
+            value: GetIt.I<AdvancedLocationService>()),
+        ChangeNotifierProvider<LocaleService>.value(
+            value: GetIt.I<LocaleService>()),
         // Ajouter obligatoirement les nouveaux services ici
       ],
       child: App(),

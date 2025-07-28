@@ -17,6 +17,7 @@ import '../../models/websocket/scenario_added_message.dart';
 import '../../models/websocket/scenario_deactivated_message.dart';
 import '../../models/websocket/treasure_found_message.dart';
 import '../../screens/gamesession/game_session_screen.dart';
+import '../audio/simple_voice_service.dart';
 import '../auth_service.dart';
 import '../game_session_service.dart';
 import '../game_state_service.dart';
@@ -63,6 +64,9 @@ class WebSocketGameSessionHandler {
       logger.d("❌ Erreur parsing GameSessionStartedMessage : $e");
       logger.d("📌 Stacktrace : $stack");
     }
+
+    // Déclencher l'audio de début de partie
+    _playGameStartedAudio();
 
     final gameStateService = context.read<GameStateService>();
     final authService = GetIt.I<AuthService>();
@@ -112,8 +116,24 @@ class WebSocketGameSessionHandler {
     }
   }
 
+  // Jouer l'audio de début de partie
+  Future<void> _playGameStartedAudio() async {
+    try {
+      final voiceService = GetIt.I<SimpleVoiceService>();
+      await voiceService.initialize();
+      await voiceService.playMessage('game_started');
+      logger.d('🔊 Audio début de partie joué');
+    } catch (e) {
+      logger.e('❌ Erreur audio début de partie: $e');
+      // Ne pas faire planter l'app si l'audio échoue
+    }
+  }
+
 
   void handleGameSessionEnded(Map<String, dynamic> message, BuildContext context) {
+    //  Déclencher l'audio de fin de partie
+    _playGameEndedAudio();
+
     final gameStateService = GetIt.I<GameStateService>();
 
     // Stopper le timer de temps restant si utilisé
@@ -154,6 +174,15 @@ class WebSocketGameSessionHandler {
     }
   }
 
+  Future<void> _playGameEndedAudio() async {
+    try {
+      final voiceService = GetIt.I<SimpleVoiceService>();
+      await voiceService.playMessage('game_ended');
+      logger.d('🔊 Audio fin de partie joué');
+    } catch (e) {
+      logger.e('❌ Erreur audio fin de partie: $e');
+    }
+  }
 
   void handleParticipantJoined(Map<String, dynamic> message, BuildContext context) {
     final msg = ParticipantJoinedMessage.fromJson(message);

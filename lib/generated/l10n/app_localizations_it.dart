@@ -2064,4 +2064,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get hostSectionGameHistorySubtitle =>
       'Ritorno sul campo – le tue partite, i tuoi dati.';
+
+  @override
+  String get audioGameStarted => 'Game started. Good luck everyone.';
+
+  @override
+  String get audioGameEnded => 'Game ended. Thank you for playing.';
 }

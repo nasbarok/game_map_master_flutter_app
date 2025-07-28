@@ -7,6 +7,7 @@ import 'package:http/http.dart' as Http;
 
 import '../config/environment_config.dart';
 import '../services/api_service.dart';
+import '../services/audio/simple_voice_service.dart';
 import '../services/auth_service.dart';
 import '../services/game_map_service.dart';
 import '../services/game_session_service.dart';
@@ -109,7 +110,12 @@ void setupServiceLocator() {
     fieldHandler,
   );
 
-
+  // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
+  final invitationService = InvitationService(
+    webSocketService,
+    authService,
+    gameStateService,
+  );
 
 
   // ✅ 6. ENREGISTREMENTS dans GetIt (dans cet ordre)
@@ -138,13 +144,9 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<LocationFilter>(locationFilter);
   GetIt.I.registerSingleton<MovementDetector>(movementDetector);
   GetIt.I.registerSingleton<AdvancedLocationService>(advancedLocationService);
-
-  // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
-  final invitationService = InvitationService(
-    webSocketService,
-    authService,
-    gameStateService,
-  );
   GetIt.I.registerSingleton<InvitationService>(invitationService);
+
+  // ✅ 8. ENREGISTRER LE SERVICE AUDIO (lazy → créé à la première utilisation)
+  GetIt.I.registerLazySingleton<SimpleVoiceService>(() => SimpleVoiceService());
 }
 

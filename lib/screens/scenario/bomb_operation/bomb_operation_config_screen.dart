@@ -15,6 +15,7 @@ import '../../../services/game_map_service.dart';
 import '../../../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../../../services/scenario_service.dart';
 import '../../../utils/app_utils.dart';
+import '../../../widgets/adaptive_background.dart';
 import 'bomb_site_list_screen.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
@@ -508,10 +509,12 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.menu,
+      backgroundOpacity: 0.9,
       appBar: AppBar(
         title: Text(l10n.bombConfigScreenTitle(widget.scenarioName)),
-        actions: [
+        actions:  [
           if (!_isLoading && !_isSaving)
             IconButton(
               icon: const Icon(Icons.save),

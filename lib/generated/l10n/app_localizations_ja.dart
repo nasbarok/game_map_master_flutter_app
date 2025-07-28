@@ -2025,4 +2025,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get hostSectionGameHistorySubtitle => 'フィールドに戻る - あなたのゲーム、あなたのデータ。';
+
+  @override
+  String get audioGameStarted => 'Game started. Good luck everyone.';
+
+  @override
+  String get audioGameEnded => 'Game ended. Thank you for playing.';
 }

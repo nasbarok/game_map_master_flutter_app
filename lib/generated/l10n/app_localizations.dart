@@ -3729,6 +3729,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to the field – your games, your data.'**
   String get hostSectionGameHistorySubtitle;
+
+  /// No description provided for @audioGameStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Game started. Good luck everyone.'**
+  String get audioGameStarted;
+
+  /// No description provided for @audioGameEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Game ended. Thank you for playing.'**
+  String get audioGameEnded;
 }
 
 class _AppLocalizationsDelegate
