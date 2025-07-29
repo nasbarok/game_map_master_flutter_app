@@ -302,7 +302,7 @@ class GameStateService extends ChangeNotifier {
   Future<void> _playGameEndedAudioAuto() async {
     try {
       final voiceService = GetIt.I<SimpleVoiceService>();
-      await voiceService.playMessage('game_ended');
+      await voiceService.playMessage('audioGameEnded');
       logger.d('🔊 Audio fin de partie automatique joué');
     } catch (e) {
       logger.e('❌ Erreur audio fin de partie auto: $e');

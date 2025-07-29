@@ -610,6 +610,6 @@
   "hostSectionMissionScenariosSubtitle": "L'imagination est l'arme – créez des défis sur mesure.",
   "hostSectionTeamsPlayersSubtitle": "Répartition tactique – créez des matchs équilibrés et intenses.",
   "hostSectionGameHistorySubtitle": "Retour sur le terrain – vos parties, vos données.",
-  "audioGameStarted": "Partie lancée. Bonne chance à tous.",
-  "audioGameEnded": "Fin de partie. Merci d'avoir joué."
+  "audioGameStarted": "Partie lancée.",
+  "audioGameEnded": "Fin de partie."
 }

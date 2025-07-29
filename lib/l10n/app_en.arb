@@ -2581,7 +2581,7 @@
   "hostSectionMissionScenariosSubtitle": "Imagination is the weapon – create custom challenges.",
   "hostSectionTeamsPlayersSubtitle": "Tactical distribution – create balanced and intense matches.",
   "hostSectionGameHistorySubtitle": "Back to the field – your games, your data.",
-  "audioGameStarted": "Game started. Good luck everyone.",
-  "audioGameEnded": "Game ended. Thank you for playing."
+  "audioGameStarted": "Game started.",
+  "audioGameEnded": "Game ended."
 
 }

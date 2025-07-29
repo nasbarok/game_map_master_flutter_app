@@ -121,7 +121,7 @@ class WebSocketGameSessionHandler {
     try {
       final voiceService = GetIt.I<SimpleVoiceService>();
       await voiceService.initialize();
-      await voiceService.playMessage('game_started');
+      await voiceService.playMessage('audioGameStarted');
       logger.d('🔊 Audio début de partie joué');
     } catch (e) {
       logger.e('❌ Erreur audio début de partie: $e');
@@ -177,7 +177,7 @@ class WebSocketGameSessionHandler {
   Future<void> _playGameEndedAudio() async {
     try {
       final voiceService = GetIt.I<SimpleVoiceService>();
-      await voiceService.playMessage('game_ended');
+      await voiceService.playMessage('audioGameEnded');
       logger.d('🔊 Audio fin de partie joué');
     } catch (e) {
       logger.e('❌ Erreur audio fin de partie: $e');

@@ -185,7 +185,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     try {
       final voiceService = GetIt.I<SimpleVoiceService>();
       await voiceService.initialize();
-      await voiceService.playMessage('game_started');
+      await voiceService.playMessage('audioGameStarted');
       logger.d('🔊 Audio début de partie joué côté HOST');
     } catch (e) {
       logger.e('❌ Erreur audio début de partie HOST: $e');

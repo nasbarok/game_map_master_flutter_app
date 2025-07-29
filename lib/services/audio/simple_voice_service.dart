@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -162,6 +163,12 @@ class SimpleVoiceService extends ChangeNotifier {
 
   /// S'assure que les fichiers audio sont générés pour une langue
   Future<void> _ensureAudioFilesGenerated(String language) async {
+    // Si le cache existe déjà, vérifier que toutes les clés sont présentes
+    final existingKeys = _audioCache[language]?.keys ?? const Iterable.empty();
+    final requiredKeys = (await _getAudioMessages(language)).keys;
+
+    final missingKeys = requiredKeys.where((k) => !existingKeys.contains(k)).toList();
+
     if (_generatedLanguages.contains(language)) {
       logger.d('✅ [SimpleVoiceService] Fichiers audio déjà générés pour: $language');
       return;
@@ -169,7 +176,7 @@ class SimpleVoiceService extends ChangeNotifier {
 
     logger.d('🎵 [SimpleVoiceService] Génération des fichiers audio pour: $language');
     await _generateAudioFiles(language);
-    
+
     _generatedLanguages.add(language);
     await _savePreferences();
   }
@@ -177,24 +184,21 @@ class SimpleVoiceService extends ChangeNotifier {
   /// Génère tous les fichiers audio pour une langue
   Future<void> _generateAudioFiles(String language) async {
     try {
+      // … configuration TTS …
       // Définir la langue TTS
       final ttsLanguage = _getTTSLanguageCode(language);
       await _flutterTts.setLanguage(ttsLanguage);
 
-      // Messages à générer
-      final messages = _getAudioMessages(language);
-      
-      // Créer le cache pour cette langue
+      // 🔄 Charger dynamiquement les textes depuis les fichiers .arb
+      final messages = await _getAudioMessages(language);
+
       _audioCache[language] = {};
 
-      // Générer chaque message (simulation - en réalité on utiliserait TTS en temps réel)
       for (final entry in messages.entries) {
         final messageKey = entry.key;
         final messageText = entry.value;
-        
-        // Stocker le texte dans le cache (en production, on stockerait le chemin du fichier audio)
+
         _audioCache[language]![messageKey] = messageText;
-        
         logger.d('🎵 [SimpleVoiceService] Message généré: $messageKey -> $messageText');
       }
 
@@ -203,6 +207,7 @@ class SimpleVoiceService extends ChangeNotifier {
       logger.e('❌ [SimpleVoiceService] Erreur génération audio pour $language: $e');
     }
   }
+
 
   /// Obtient le code langue pour TTS
   String _getTTSLanguageCode(String language) {
@@ -223,51 +228,20 @@ class SimpleVoiceService extends ChangeNotifier {
   }
 
   /// Obtient les messages audio pour une langue
-  Map<String, String> _getAudioMessages(String language) {
-    // Messages de base pour bomb operation
-    switch (language) {
-      case 'fr':
-        return {
-          'round_start': 'Début du round {roundNumber}. Bonne chance.',
-          'bomb_planted': 'Bombe armée en zone {siteName}. Compte à rebours: {timer} secondes.',
-          'bomb_defused': 'Bombe désamorcée en zone {siteName}. Zone sécurisée.',
-          'bomb_exploded': 'Explosion en zone {siteName}. Mission échouée.',
-          'round_end_attack': 'Fin du round. Victoire de l\'équipe d\'attaque.',
-          'round_end_defense': 'Fin du round. Victoire de l\'équipe de défense.',
-          'countdown_30': 'Trente secondes restantes.',
-          'countdown_20': 'Vingt secondes restantes.',
-          'countdown_10': 'Dix secondes restantes.',
-          'countdown_5': 'Cinq',
-          'countdown_4': 'Quatre',
-          'countdown_3': 'Trois',
-          'countdown_2': 'Deux',
-          'countdown_1': 'Un',
-          'zone_entry_attack': 'Entrée en zone {siteName}. Objectif: armer la bombe.',
-          'zone_entry_defense': 'Alerte! Zone {siteName} compromise. Sécurisez la zone.',
-        };
-      case 'en':
-        return {
-          'round_start': 'Round {roundNumber} starting. Good luck.',
-          'bomb_planted': 'Bomb planted in zone {siteName}. Countdown: {timer} seconds.',
-          'bomb_defused': 'Bomb defused in zone {siteName}. Area secured.',
-          'bomb_exploded': 'Explosion in zone {siteName}. Mission failed.',
-          'round_end_attack': 'Round ended. Attack team wins.',
-          'round_end_defense': 'Round ended. Defense team wins.',
-          'countdown_30': 'Thirty seconds remaining.',
-          'countdown_20': 'Twenty seconds remaining.',
-          'countdown_10': 'Ten seconds remaining.',
-          'countdown_5': 'Five',
-          'countdown_4': 'Four',
-          'countdown_3': 'Three',
-          'countdown_2': 'Two',
-          'countdown_1': 'One',
-          'zone_entry_attack': 'Entering zone {siteName}. Objective: plant the bomb.',
-          'zone_entry_defense': 'Alert! Zone {siteName} compromised. Secure the area.',
-        };
-      default:
-        // Fallback en anglais
-        return _getAudioMessages('en');
-    }
+  Future<Map<String, String>> _getAudioMessages(String language) async {
+    // Créer un objet Locale à partir du code langue (ex. 'fr' → Locale('fr'))
+    final locale = Locale(language);
+
+    // Charger la localisation correspondante sans passer par un BuildContext
+    final l10n = await AppLocalizations.delegate.load(locale);
+
+    // Retourner un dictionnaire où les clés sont vos identifiants de messages
+    // et les valeurs les textes localisés provenant des .arb
+    return {
+      'audioGameStarted': l10n.audioGameStarted,
+      'audioGameEnded': l10n.audioGameEnded,
+      // Ajoutez ici d'autres entrées si vous étendez l'audio à d'autres événements.
+    };
   }
 
   /// Joue un message audio
