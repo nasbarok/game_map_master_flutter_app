@@ -15,6 +15,8 @@ import '../../services/invitation_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/team.dart';
 import '../../widgets/gamer_history_button.dart';
+import '../../widgets/options/audio_options_menu.dart';
+import '../../widgets/options/cropped_logo_button.dart';
 import '../gamesession/game_session_screen.dart';
 import '../history/field_sessions_screen.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
@@ -82,6 +84,18 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CroppedLogoButtonAnimated(
+            size: 35.0,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AudioOptionsMenu()),
+              );
+            },
+          ),
+        ),
         title: Text(l10n.mapLabel(selectedMap?.name ?? l10n.unknownMap)),
         actions: [
           IconButton(
@@ -141,7 +155,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          l10n.mapLabel(gameState.selectedMap?.name ?? l10n.unknownMap),
+                          l10n.mapLabel(
+                              gameState.selectedMap?.name ?? l10n.unknownMap),
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         IconButton(
@@ -159,9 +174,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content:
-                                    Text(l10n.noAssociatedField)),
+                                SnackBar(content: Text(l10n.noAssociatedField)),
                               );
                             }
                           },
@@ -184,7 +197,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                             const Icon(Icons.timer, color: Colors.blue),
                             const SizedBox(width: 8),
                             Text(
-                              l10n.remainingTimeLabel(gameState.timeLeftDisplay),
+                              l10n.remainingTimeLabel(
+                                  gameState.timeLeftDisplay),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue,
@@ -301,7 +315,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           final String name = scenario.scenario.name;
           final treasure = scenario.treasureHuntScenario;
           final String description = treasure != null
-              ? l10n.treasureHuntScenarioDetails(treasure.totalTreasures.toString(), treasure.defaultSymbol)
+              ? l10n.treasureHuntScenarioDetails(
+                  treasure.totalTreasures.toString(), treasure.defaultSymbol)
               : (scenario.scenario.description ?? l10n.noDescription);
 
           return Card(
@@ -345,7 +360,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 const SizedBox(height: 16),
                 Text(
                   l10n.noFieldsVisited,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -388,7 +404,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(isOpen ? l10n.fieldStatusOpen : l10n.fieldStatusClosed),
+                        Text(isOpen
+                            ? l10n.fieldStatusOpen
+                            : l10n.fieldStatusClosed),
                         Text(openedAtStr),
                         Text(closedAtStr),
                         Text(ownerName),
@@ -474,7 +492,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
       if (response != null) {
         // Mettre à jour l'état du jeu
-        await gameStateService.restoreSessionIfNeeded(apiService,fieldId);
+        await gameStateService.restoreSessionIfNeeded(apiService, fieldId);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -557,7 +575,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.connectedPlayersCount(connectedPlayers.length.toString()),
+                  l10n.connectedPlayersCount(
+                      connectedPlayers.length.toString()),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -601,7 +620,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                           child: const Icon(Icons.person, color: Colors.white),
                         ),
                         title: Text(
-                          player['username'] ?? l10n.playersTab, // Fallback, should not happen
+                          player['username'] ?? l10n.playersTab,
+                          // Fallback, should not happen
                           style: TextStyle(
                             fontWeight: isCurrentUser
                                 ? FontWeight.bold
@@ -616,7 +636,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                             ? Chip(
                                 label: Text(l10n.youLabel),
                                 backgroundColor: Colors.amber,
-                                labelStyle: const TextStyle(color: Colors.white),
+                                labelStyle:
+                                    const TextStyle(color: Colors.white),
                               )
                             : null,
                       );
@@ -725,8 +746,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
               return ListTile(
                 title: Text(team.name),
-                subtitle: Text(
-                    l10n.playersCountSuffix(team.players.length)),
+                subtitle: Text(l10n.playersCountSuffix(team.players.length)),
                 trailing: isCurrentTeam
                     ? const Icon(Icons.check_circle, color: Colors.green)
                     : null,

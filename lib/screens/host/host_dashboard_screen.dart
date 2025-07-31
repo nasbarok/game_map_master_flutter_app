@@ -12,6 +12,8 @@ import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/host_history_tab.dart';
 import '../../widgets/adaptive_background.dart';
+import '../../widgets/options/audio_options_menu.dart';
+import '../../widgets/options/cropped_logo_button.dart';
 import '../scenario/treasure_hunt/scoreboard_screen.dart';
 import 'team_form_screen.dart';
 import 'scenario_form_screen.dart';
@@ -84,7 +86,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             _buildMilitaryButton(
               text: l10n.declineInvitation,
               onPressed: () {
-                _invitationService.respondToInvitation(context, invitation, false);
+                _invitationService.respondToInvitation(
+                    context, invitation, false);
                 Navigator.of(context).pop();
               },
               style: _MilitaryButtonStyle.secondary,
@@ -92,7 +95,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             _buildMilitaryButton(
               text: l10n.acceptInvitation,
               onPressed: () {
-                _invitationService.respondToInvitation(context, invitation, true);
+                _invitationService.respondToInvitation(
+                    context, invitation, true);
                 Navigator.of(context).pop();
               },
               style: _MilitaryButtonStyle.primary,
@@ -306,21 +310,28 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                   width: 20, // ✅ MODIFIÉ : Plus petite (20x20 au lieu de 30x30)
                   height: 20, // ✅ MODIFIÉ : Plus petite
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6), // ✅ MODIFIÉ : Noir semi-transparent
-                    borderRadius: BorderRadius.circular(10), // ✅ MODIFIÉ : Coins arrondis discrets
+                    color: Colors.black.withOpacity(0.6),
+                    // ✅ MODIFIÉ : Noir semi-transparent
+                    borderRadius: BorderRadius.circular(10),
+                    // ✅ MODIFIÉ : Coins arrondis discrets
                     // ✅ SUPPRIMÉ : border blanche
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2), // ✅ MODIFIÉ : Ombre plus discrète
-                        blurRadius: 2, // ✅ MODIFIÉ : Ombre plus petite
-                        offset: const Offset(0, 1), // ✅ MODIFIÉ : Ombre plus subtile
+                        color: Colors.black.withOpacity(0.2),
+                        // ✅ MODIFIÉ : Ombre plus discrète
+                        blurRadius: 2,
+                        // ✅ MODIFIÉ : Ombre plus petite
+                        offset: const Offset(
+                            0, 1), // ✅ MODIFIÉ : Ombre plus subtile
                       ),
                     ],
                   ),
                   child: const Icon(
                     Icons.close,
-                    color: Colors.white, // ✅ GARDÉ : Icône blanche pour contraste
-                    size: 12, // ✅ MODIFIÉ : Icône plus petite (12 au lieu de 18)
+                    color: Colors.white,
+                    // ✅ GARDÉ : Icône blanche pour contraste
+                    size:
+                        12, // ✅ MODIFIÉ : Icône plus petite (12 au lieu de 18)
                   ),
                 ),
               ),
@@ -381,6 +392,21 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   /// 🆕 APPBAR MILITAIRE PERSONNALISÉE
   PreferredSizeWidget _buildMilitaryAppBar(AppLocalizations l10n) {
     return AppBar(
+      leading: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CroppedLogoButtonAnimated(
+          size: 35.0,
+          onPressed: () {
+            // Par exemple : ouvrir un menu audio ou un écran d’options
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AudioOptionsMenu(),
+              ),
+            );
+          },
+        ),
+      ),
       title: Text(
         l10n.hostDashboardTitle,
         style: const TextStyle(
@@ -420,9 +446,12 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
       ],
       bottom: TabBar(
         controller: _tabController,
-        indicatorColor: const Color(0xFF48BB78), // accentGreen
-        labelColor: const Color(0xFFF7FAFC), // textLight
-        unselectedLabelColor: const Color(0xFF718096), // lightMetal
+        indicatorColor: const Color(0xFF48BB78),
+        // accentGreen
+        labelColor: const Color(0xFFF7FAFC),
+        // textLight
+        unselectedLabelColor: const Color(0xFF718096),
+        // lightMetal
         indicatorWeight: 3,
         tabs: [
           Tab(icon: const Icon(Icons.dashboard), text: l10n.terrainTab),
@@ -466,72 +495,108 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   /// 🆕 CHEMINS DES LOGOS
   String _getSectionLogoPath() {
     switch (_tabController.index) {
-      case 0: return 'assets/images/theme/logos/logo_command_center.png';
-      case 1: return 'assets/images/theme/logos/logo_map_room.png';
-      case 2: return 'assets/images/theme/logos/logo_mission_briefing.png';
-      case 3: return 'assets/images/theme/logos/logo_squad_management.png';
-      case 4: return 'assets/images/theme/logos/logo_after_action.png';
-      default: return 'assets/images/theme/logos/logo_command_center.png';
+      case 0:
+        return 'assets/images/theme/logos/logo_command_center.png';
+      case 1:
+        return 'assets/images/theme/logos/logo_map_room.png';
+      case 2:
+        return 'assets/images/theme/logos/logo_mission_briefing.png';
+      case 3:
+        return 'assets/images/theme/logos/logo_squad_management.png';
+      case 4:
+        return 'assets/images/theme/logos/logo_after_action.png';
+      default:
+        return 'assets/images/theme/logos/logo_command_center.png';
     }
   }
 
   /// 🆕 COULEUR D'ACCENT PAR SECTION
   Color _getSectionAccentColor() {
     switch (_tabController.index) {
-      case 0: return const Color(0xFF4A5568); // Gris métallique
-      case 1: return const Color(0xFF48BB78); // Vert militaire
-      case 2: return const Color(0xFFED8936); // Orange tactique
-      case 3: return const Color(0xFF9F7AEA); // Violet commandement
-      case 4: return const Color(0xFF718096); // Gris archives
-      default: return const Color(0xFF4A5568);
+      case 0:
+        return const Color(0xFF4A5568); // Gris métallique
+      case 1:
+        return const Color(0xFF48BB78); // Vert militaire
+      case 2:
+        return const Color(0xFFED8936); // Orange tactique
+      case 3:
+        return const Color(0xFF9F7AEA); // Violet commandement
+      case 4:
+        return const Color(0xFF718096); // Gris archives
+      default:
+        return const Color(0xFF4A5568);
     }
   }
 
   /// 🆕 ICÔNE DE SECTION (FALLBACK)
   IconData _getSectionIcon() {
     switch (_tabController.index) {
-      case 0: return Icons.dashboard;
-      case 1: return Icons.map;
-      case 2: return Icons.videogame_asset;
-      case 3: return Icons.people;
-      case 4: return Icons.history;
-      default: return Icons.dashboard;
+      case 0:
+        return Icons.dashboard;
+      case 1:
+        return Icons.map;
+      case 2:
+        return Icons.videogame_asset;
+      case 3:
+        return Icons.people;
+      case 4:
+        return Icons.history;
+      default:
+        return Icons.dashboard;
     }
   }
 
   /// 🆕 TITRE DE SECTION
   String _getSectionTitle(AppLocalizations l10n) {
     switch (_tabController.index) {
-      case 0: return l10n.hostSectionCommandCenterTitle;
-      case 1: return l10n.hostSectionMapManagementTitle;
-      case 2: return l10n.hostSectionMissionScenariosTitle;
-      case 3: return l10n.hostSectionTeamsPlayersTitle;
-      case 4: return l10n.hostSectionGameHistoryTitle;
-      default: return l10n.hostSectionCommandCenterTitle;
+      case 0:
+        return l10n.hostSectionCommandCenterTitle;
+      case 1:
+        return l10n.hostSectionMapManagementTitle;
+      case 2:
+        return l10n.hostSectionMissionScenariosTitle;
+      case 3:
+        return l10n.hostSectionTeamsPlayersTitle;
+      case 4:
+        return l10n.hostSectionGameHistoryTitle;
+      default:
+        return l10n.hostSectionCommandCenterTitle;
     }
   }
 
   /// 🆕 DESCRIPTION DE SECTION
   String _getSectionDescription(AppLocalizations l10n) {
     switch (_tabController.index) {
-      case 0: return l10n.hostSectionCommandCenterDescription;
-    case 1: return l10n.hostSectionMapManagementDescription;
-    case 2: return l10n.hostSectionMissionScenariosDescription;
-    case 3: return l10n.hostSectionTeamsPlayersDescription;
-    case 4: return l10n.hostSectionGameHistoryDescription;
-    default: return l10n.hostSectionCommandCenterDescription;
+      case 0:
+        return l10n.hostSectionCommandCenterDescription;
+      case 1:
+        return l10n.hostSectionMapManagementDescription;
+      case 2:
+        return l10n.hostSectionMissionScenariosDescription;
+      case 3:
+        return l10n.hostSectionTeamsPlayersDescription;
+      case 4:
+        return l10n.hostSectionGameHistoryDescription;
+      default:
+        return l10n.hostSectionCommandCenterDescription;
     }
   }
 
   /// 🆕 SOUS-TITRE DE SECTION
   String _getSectionSubtitle(AppLocalizations l10n) {
     switch (_tabController.index) {
-      case 0: return l10n.hostSectionCommandCenterSubtitle;
-      case 1: return l10n.hostSectionMapManagementSubtitle;
-      case 2: return l10n.hostSectionMissionScenariosSubtitle;
-      case 3: return l10n.hostSectionTeamsPlayersSubtitle;
-      case 4: return l10n.hostSectionGameHistorySubtitle;
-      default: return l10n.hostSectionCommandCenterSubtitle;
+      case 0:
+        return l10n.hostSectionCommandCenterSubtitle;
+      case 1:
+        return l10n.hostSectionMapManagementSubtitle;
+      case 2:
+        return l10n.hostSectionMissionScenariosSubtitle;
+      case 3:
+        return l10n.hostSectionTeamsPlayersSubtitle;
+      case 4:
+        return l10n.hostSectionGameHistorySubtitle;
+      default:
+        return l10n.hostSectionCommandCenterSubtitle;
     }
   }
 
@@ -542,7 +607,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
     // ✅ RETOURNER null POUR L'ONGLET FIELD (index 0)
     if (_tabController.index == 0) {
-      return null;  // Pas de FAB sur l'onglet Field
+      return null; // Pas de FAB sur l'onglet Field
     }
 
     return _buildMilitaryButton(
@@ -555,27 +620,42 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
   String _getFABText(AppLocalizations l10n, GameStateService gameStateService) {
     switch (_tabController.index) {
-      case 0: return "";
-      case 1: return l10n.createMap;
-      case 2: return l10n.createScenario;
-      case 3: return gameStateService.isTerrainOpen ? l10n.createTeam : l10n.openFieldFirstSnackbar;
-      case 4: return "Exporter";
-      default: return l10n.noActionForFieldTabSnackbar;
+      case 0:
+        return "";
+      case 1:
+        return l10n.createMap;
+      case 2:
+        return l10n.createScenario;
+      case 3:
+        return gameStateService.isTerrainOpen
+            ? l10n.createTeam
+            : l10n.openFieldFirstSnackbar;
+      case 4:
+        return "Exporter";
+      default:
+        return l10n.noActionForFieldTabSnackbar;
     }
   }
 
   IconData _getFABIcon() {
     switch (_tabController.index) {
-      case 0: return Icons.info;
-      case 1: return Icons.add;
-      case 2: return Icons.add;
-      case 3: return Icons.add;
-      case 4: return Icons.download;
-      default: return Icons.add;
+      case 0:
+        return Icons.info;
+      case 1:
+        return Icons.add;
+      case 2:
+        return Icons.add;
+      case 3:
+        return Icons.add;
+      case 4:
+        return Icons.download;
+      default:
+        return Icons.add;
     }
   }
 
-  VoidCallback? _getFABAction(AppLocalizations l10n, GameStateService gameStateService) {
+  VoidCallback? _getFABAction(
+      AppLocalizations l10n, GameStateService gameStateService) {
     switch (_tabController.index) {
       case 0:
         return () {
@@ -603,24 +683,26 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
       case 3:
         return gameStateService.isTerrainOpen
             ? () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TeamFormScreen()),
-          );
-        }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const TeamFormScreen()),
+                );
+              }
             : () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.openFieldFirstSnackbar),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        };
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.openFieldFirstSnackbar),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              };
       case 4:
         return () {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Fonctionnalité d'export en cours de développement"),
+              content:
+                  Text("Fonctionnalité d'export en cours de développement"),
               backgroundColor: Colors.blue,
             ),
           );
@@ -701,9 +783,10 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     final gameStateService = context.watch<GameStateService>();
     final scenarioService = context.watch<ScenarioService>();
 
-    final activeScenario = gameStateService.selectedScenarios?.isNotEmpty == true
-        ? gameStateService.selectedScenarios!.first
-        : null;
+    final activeScenario =
+        gameStateService.selectedScenarios?.isNotEmpty == true
+            ? gameStateService.selectedScenarios!.first
+            : null;
 
     if (scenarioService.scenarios.isEmpty) {
       return _buildEmptyState(
@@ -717,23 +800,24 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             MaterialPageRoute(builder: (context) => const ScenarioFormScreen()),
           );
         },
-        extraWidget: activeScenario != null && activeScenario.scenario.type == 'treasure_hunt'
+        extraWidget: activeScenario != null &&
+                activeScenario.scenario.type == 'treasure_hunt'
             ? _buildMilitaryButton(
-          text: l10n.scoreboardButton,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ScoreboardScreen(
-                  treasureHuntId: activeScenario.scenario.id,
-                  scenarioName: activeScenario.scenario.name,
-                  isHost: true,
-                ),
-              ),
-            );
-          },
-          style: _MilitaryButtonStyle.secondary,
-        )
+                text: l10n.scoreboardButton,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ScoreboardScreen(
+                        treasureHuntId: activeScenario.scenario.id,
+                        scenarioName: activeScenario.scenario.name,
+                        isHost: true,
+                      ),
+                    ),
+                  );
+                },
+                style: _MilitaryButtonStyle.secondary,
+              )
             : null,
       );
     }
@@ -767,7 +851,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ScenarioFormScreen(scenario: scenario),
+                        builder: (context) =>
+                            ScenarioFormScreen(scenario: scenario),
                       ),
                     );
                   },
@@ -959,10 +1044,12 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: actions.map((action) => Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: action,
-              )).toList(),
+              children: actions
+                  .map((action) => Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: action,
+                      ))
+                  .toList(),
             ),
           ],
         ),
@@ -1089,4 +1176,3 @@ enum _MilitaryButtonStyle {
   secondary,
   danger,
 }
-
