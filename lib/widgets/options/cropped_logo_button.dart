@@ -196,12 +196,6 @@ class _CroppedLogoButtonAnimatedState extends State<CroppedLogoButtonAnimated>
                               stops: [0.6, 1.0],
                             ),
                           ),
-                          child: Icon(
-                            Icons.settings,
-                            color: Colors.white
-                                .withOpacity(_isPressed ? 1.0 : 0.8),
-                            size: widget.size * 0.4,
-                          ),
                         ),
                       ),
                     ],
