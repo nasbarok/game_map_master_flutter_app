@@ -15,7 +15,7 @@ import '../../services/invitation_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/team.dart';
 import '../../widgets/gamer_history_button.dart';
-import '../../widgets/options/audio_options_menu.dart';
+import '../../widgets/options/user_options_menu.dart';
 import '../../widgets/options/cropped_logo_button.dart';
 import '../gamesession/game_session_screen.dart';
 import '../history/field_sessions_screen.dart';
@@ -91,7 +91,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => AudioOptionsMenu()),
+                MaterialPageRoute(builder: (_) => UserOptionsMenu()),
               );
             },
           ),

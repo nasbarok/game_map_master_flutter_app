@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'audio_options_menu.dart';
+import 'user_options_menu.dart';
 
 /// Bouton logo croppé sur la tête du personnage pour accéder aux options
 class CroppedLogoButton extends StatelessWidget {
@@ -78,7 +78,7 @@ class CroppedLogoButton extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AudioOptionsMenu(),
+        builder: (context) => UserOptionsMenu(),
       ),
     );
   }
@@ -213,7 +213,7 @@ class _CroppedLogoButtonAnimatedState extends State<CroppedLogoButtonAnimated>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AudioOptionsMenu(),
+        builder: (context) => UserOptionsMenu(),
       ),
     );
   }

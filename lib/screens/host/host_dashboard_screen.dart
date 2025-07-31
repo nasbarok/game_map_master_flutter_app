@@ -12,7 +12,7 @@ import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/host_history_tab.dart';
 import '../../widgets/adaptive_background.dart';
-import '../../widgets/options/audio_options_menu.dart';
+import '../../widgets/options/user_options_menu.dart';
 import '../../widgets/options/cropped_logo_button.dart';
 import '../scenario/treasure_hunt/scoreboard_screen.dart';
 import 'team_form_screen.dart';
@@ -401,7 +401,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => AudioOptionsMenu(),
+                builder: (_) => UserOptionsMenu(),
               ),
             );
           },
