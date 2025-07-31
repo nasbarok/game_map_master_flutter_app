@@ -295,7 +295,7 @@ class _AudioOptionsMenuState extends State<AudioOptionsMenu> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: voiceService.isEnabled && !voiceService.isPlaying ? () async {
-                      await voiceService.playMessage('game_started');
+                      await voiceService.playMessage('audioGameStarted');
                     } : null,
                     icon: Icon(Icons.play_arrow),
                     label: Text('Début de Partie'),
@@ -309,7 +309,7 @@ class _AudioOptionsMenuState extends State<AudioOptionsMenu> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: voiceService.isEnabled && !voiceService.isPlaying ? () async {
-                      await voiceService.playMessage('game_ended');
+                      await voiceService.playMessage('audioGameEnded');
                     } : null,
                     icon: Icon(Icons.stop),
                     label: Text('Fin de Partie'),

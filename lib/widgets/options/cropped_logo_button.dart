@@ -64,11 +64,6 @@ class CroppedLogoButton extends StatelessWidget {
                         stops: [0.6, 1.0],
                       ),
                     ),
-                    child: Icon(
-                      Icons.settings,
-                      color: Colors.white.withOpacity(0.8),
-                      size: size * 0.4,
-                    ),
                   ),
                 ),
               ],
@@ -174,12 +169,7 @@ class _CroppedLogoButtonAnimatedState extends State<CroppedLogoButtonAnimated>
               child: ClipOval(
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.green[700]!,
-                        Colors.green[900]!,
-                      ],
-                    ),
+                    color: Colors.black.withOpacity(0.05), // optionnel
                   ),
                   child: Stack(
                     children: [
@@ -189,7 +179,7 @@ class _CroppedLogoButtonAnimatedState extends State<CroppedLogoButtonAnimated>
                           child: Image.asset(
                             'assets/images/theme/logo_military.png',
                             fit: BoxFit.cover,
-                            alignment: Alignment(0, -0.3),
+                            alignment: Alignment(0, -0.45),
                           ),
                         ),
                       ),
