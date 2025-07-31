@@ -2073,8 +2073,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Retour sur le terrain – vos parties, vos données.';
 
   @override
-  String get audioGameStarted => 'Partie lancée. Bonne chance à tous.';
+  String get audioGameStarted => 'Partie lancée.';
 
   @override
-  String get audioGameEnded => 'Fin de partie. Merci d\'avoir joué.';
+  String get audioGameEnded => 'Fin de partie.';
 }

@@ -2065,8 +2065,8 @@ class AppLocalizationsNl extends AppLocalizations {
       'Terug naar het veld – jouw spellen, jouw data.';
 
   @override
-  String get audioGameStarted => 'Game started. Good luck everyone.';
+  String get audioGameStarted => 'Game started.';
 
   @override
-  String get audioGameEnded => 'Game ended. Thank you for playing.';
+  String get audioGameEnded => 'Game ended.';
 }

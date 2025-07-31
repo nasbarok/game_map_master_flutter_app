@@ -22,7 +22,7 @@ class SimpleVoiceService extends ChangeNotifier {
   // Paramètres utilisateur
   double _volume = 0.8;
   bool _isEnabled = true;
-  String _audioLanguage = 'fr'; // Langue audio séparée de la langue de l'app
+  String _audioLanguage = ''; // Langue audio séparée de la langue de l'app
   Set<String> _generatedLanguages = {}; // Langues pour lesquelles les fichiers sont générés
 
   // Cache des messages audio par langue
@@ -163,20 +163,18 @@ class SimpleVoiceService extends ChangeNotifier {
 
   /// S'assure que les fichiers audio sont générés pour une langue
   Future<void> _ensureAudioFilesGenerated(String language) async {
-    // Si le cache existe déjà, vérifier que toutes les clés sont présentes
-    final existingKeys = _audioCache[language]?.keys ?? const Iterable.empty();
-    final requiredKeys = (await _getAudioMessages(language)).keys;
+    final messages = await _getAudioMessages(language);
+    _audioCache[language] = Map<String, String>.from(messages);
 
-    final missingKeys = requiredKeys.where((k) => !existingKeys.contains(k)).toList();
-
+    // Si les fichiers audio ont déjà été générés, on n’a pas besoin
+    // de les régénérer, mais on remplit le cache.
     if (_generatedLanguages.contains(language)) {
-      logger.d('✅ [SimpleVoiceService] Fichiers audio déjà générés pour: $language');
+      logger.d('[SimpleVoiceService] 🔊 Messages chargés depuis les .arb pour $language');
       return;
     }
 
-    logger.d('🎵 [SimpleVoiceService] Génération des fichiers audio pour: $language');
+    logger.d('[SimpleVoiceService] 🔊 Génération des fichiers audio pour: $language');
     await _generateAudioFiles(language);
-
     _generatedLanguages.add(language);
     await _savePreferences();
   }

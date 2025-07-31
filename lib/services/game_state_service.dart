@@ -309,11 +309,15 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
-  void stopGameLocally() {
+  Future<void> stopGameLocally() async {
     _isGameRunning = false;
     _gameTimer?.cancel();
     _gameEndTime = null;
     _timeLeftDisplay = "00:00:00";
+    final voiceService = GetIt.I<SimpleVoiceService>();
+    await voiceService.initialize();
+    await voiceService.playMessage('audioGameEnded');
+
     logger.d('[GameStateService] ⏹️ Partie arrêtée localement');
     notifyListeners();
   }

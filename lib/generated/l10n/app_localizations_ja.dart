@@ -2027,8 +2027,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get hostSectionGameHistorySubtitle => 'フィールドに戻る - あなたのゲーム、あなたのデータ。';
 
   @override
-  String get audioGameStarted => 'Game started. Good luck everyone.';
+  String get audioGameStarted => 'Game started.';
 
   @override
-  String get audioGameEnded => 'Game ended. Thank you for playing.';
+  String get audioGameEnded => 'Game ended.';
 }

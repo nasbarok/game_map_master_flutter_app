@@ -3733,13 +3733,13 @@ abstract class AppLocalizations {
   /// No description provided for @audioGameStarted.
   ///
   /// In en, this message translates to:
-  /// **'Game started. Good luck everyone.'**
+  /// **'Game started.'**
   String get audioGameStarted;
 
   /// No description provided for @audioGameEnded.
   ///
   /// In en, this message translates to:
-  /// **'Game ended. Thank you for playing.'**
+  /// **'Game ended.'**
   String get audioGameEnded;
 }
 

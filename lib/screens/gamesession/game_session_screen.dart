@@ -11,6 +11,7 @@ import '../../models/game_session_participant.dart';
 import '../../models/game_session_scenario.dart';
 import '../../models/scenario/bomb_operation/bomb_operation_session.dart';
 import '../../models/scenario/treasure_hunt/treasure_hunt_score.dart';
+import '../../services/audio/simple_voice_service.dart';
 import '../../services/game_session_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/player_location_service.dart';
@@ -435,6 +436,10 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
       setState(() {
         _gameSession = updatedSession;
       });
+
+      final voiceService = GetIt.I<SimpleVoiceService>();
+      await voiceService.initialize();
+      await voiceService.playMessage('audioGameEnded');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
