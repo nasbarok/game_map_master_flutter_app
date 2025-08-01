@@ -327,7 +327,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     final apiService = context.read<ApiService>();
 
     try {
-      final response = await apiService.get('maps');
+      final response = await apiService.get('maps/owner/self');
       final List<dynamic> mapsJson = response;
       final maps = mapsJson.map((json) => GameMap.fromJson(json)).toList();
 
