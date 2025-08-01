@@ -612,5 +612,20 @@
   "hostSectionMapManagementSubtitle": "あなたの地図作成兵器庫 - 描き、名前を付け、制御する。",
   "hostSectionMissionScenariosSubtitle": "想像力が武器 - カスタムチャレンジを作成する。",
   "hostSectionTeamsPlayersSubtitle": "戦術的配分 - バランスの取れた激しいマッチを作成する。",
-  "hostSectionGameHistorySubtitle": "フィールドに戻る - あなたのゲーム、あなたのデータ。"
+  "hostSectionGameHistorySubtitle": "フィールドに戻る - あなたのゲーム、あなたのデータ。",
+  "audioGameStarted": "ゲーム開始",
+  "audioGameEnded": "ゲーム終了",
+  "optionsTitle": "オプション",
+  "userNotConnected": "ユーザーが接続されていません",
+  "appLanguageTitle": "アプリケーション言語",
+  "interfaceLanguageLabel": "インターフェース言語",
+  "audioNotificationsTitle": "音声通知",
+  "enableAudioNotifications": "音声通知を有効にする",
+  "volumeLabel": "音量",
+  "audioLanguageLabel": "音声通知の言語",
+  "audioTestsTitle": "テスト",
+  "testStartButton": "開始テスト",
+  "testEndButton": "終了テスト",
+  "playingStatus": "再生中...",
+  "stopButton": "停止"
 }

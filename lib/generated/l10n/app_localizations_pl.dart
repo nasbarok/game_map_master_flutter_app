@@ -2065,8 +2065,47 @@ class AppLocalizationsPl extends AppLocalizations {
       'Powrót na pole – twoje gry, twoje dane.';
 
   @override
-  String get audioGameStarted => 'Game started.';
+  String get audioGameStarted => 'Gra rozpoczęta';
 
   @override
-  String get audioGameEnded => 'Game ended.';
+  String get audioGameEnded => 'Gra zakończona';
+
+  @override
+  String get optionsTitle => 'Opcje';
+
+  @override
+  String get userNotConnected => 'Użytkownik nie połączony';
+
+  @override
+  String get appLanguageTitle => 'Język aplikacji';
+
+  @override
+  String get interfaceLanguageLabel => 'Język interfejsu';
+
+  @override
+  String get audioNotificationsTitle => 'Powiadomienia dźwiękowe';
+
+  @override
+  String get enableAudioNotifications => 'Włącz powiadomienia dźwiękowe';
+
+  @override
+  String get volumeLabel => 'Głośność';
+
+  @override
+  String get audioLanguageLabel => 'Język powiadomień dźwiękowych';
+
+  @override
+  String get audioTestsTitle => 'Testy';
+
+  @override
+  String get testStartButton => 'Test start';
+
+  @override
+  String get testEndButton => 'Test koniec';
+
+  @override
+  String get playingStatus => 'Odtwarzanie...';
+
+  @override
+  String get stopButton => 'Stop';
 }

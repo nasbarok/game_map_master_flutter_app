@@ -2067,8 +2067,47 @@ class AppLocalizationsPt extends AppLocalizations {
       'De volta ao campo – seus jogos, seus dados.';
 
   @override
-  String get audioGameStarted => 'Game started.';
+  String get audioGameStarted => 'Jogo iniciado';
 
   @override
-  String get audioGameEnded => 'Game ended.';
+  String get audioGameEnded => 'Jogo terminado';
+
+  @override
+  String get optionsTitle => 'Opções';
+
+  @override
+  String get userNotConnected => 'Usuário não conectado';
+
+  @override
+  String get appLanguageTitle => 'Idioma da aplicação';
+
+  @override
+  String get interfaceLanguageLabel => 'Idioma da interface';
+
+  @override
+  String get audioNotificationsTitle => 'Notificações de áudio';
+
+  @override
+  String get enableAudioNotifications => 'Ativar notificações de áudio';
+
+  @override
+  String get volumeLabel => 'Volume';
+
+  @override
+  String get audioLanguageLabel => 'Idioma das notificações de áudio';
+
+  @override
+  String get audioTestsTitle => 'Testes';
+
+  @override
+  String get testStartButton => 'Teste início';
+
+  @override
+  String get testEndButton => 'Teste fim';
+
+  @override
+  String get playingStatus => 'Reproduzindo...';
+
+  @override
+  String get stopButton => 'Parar';
 }

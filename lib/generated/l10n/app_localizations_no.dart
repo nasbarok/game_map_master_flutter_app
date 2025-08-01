@@ -2061,8 +2061,47 @@ class AppLocalizationsNo extends AppLocalizations {
       'Tilbake til feltet – dine spill, dine data.';
 
   @override
-  String get audioGameStarted => 'Game started.';
+  String get audioGameStarted => 'Spill startet';
 
   @override
-  String get audioGameEnded => 'Game ended.';
+  String get audioGameEnded => 'Spill avsluttet';
+
+  @override
+  String get optionsTitle => 'Alternativer';
+
+  @override
+  String get userNotConnected => 'Bruker ikke tilkoblet';
+
+  @override
+  String get appLanguageTitle => 'Applikasjonsspråk';
+
+  @override
+  String get interfaceLanguageLabel => 'Grensesnittspråk';
+
+  @override
+  String get audioNotificationsTitle => 'Lydvarsler';
+
+  @override
+  String get enableAudioNotifications => 'Aktiver lydvarsler';
+
+  @override
+  String get volumeLabel => 'Volum';
+
+  @override
+  String get audioLanguageLabel => 'Språk for lydvarsler';
+
+  @override
+  String get audioTestsTitle => 'Tester';
+
+  @override
+  String get testStartButton => 'Test start';
+
+  @override
+  String get testEndButton => 'Test slutt';
+
+  @override
+  String get playingStatus => 'Spiller...';
+
+  @override
+  String get stopButton => 'Stopp';
 }

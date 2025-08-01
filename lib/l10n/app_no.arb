@@ -612,5 +612,20 @@
   "hostSectionMapManagementSubtitle": "Ditt kartografiske arsenal – Tegn, navngi, kontroller.",
   "hostSectionMissionScenariosSubtitle": "Fantasi er våpenet – lag tilpassede utfordringer.",
   "hostSectionTeamsPlayersSubtitle": "Taktisk fordeling – lag balanserte og intense kamper.",
-  "hostSectionGameHistorySubtitle": "Tilbake til feltet – dine spill, dine data."
+  "hostSectionGameHistorySubtitle": "Tilbake til feltet – dine spill, dine data.",
+  "audioGameStarted": "Spill startet",
+  "audioGameEnded": "Spill avsluttet",
+  "optionsTitle": "Alternativer",
+  "userNotConnected": "Bruker ikke tilkoblet",
+  "appLanguageTitle": "Applikasjonsspråk",
+  "interfaceLanguageLabel": "Grensesnittspråk",
+  "audioNotificationsTitle": "Lydvarsler",
+  "enableAudioNotifications": "Aktiver lydvarsler",
+  "volumeLabel": "Volum",
+  "audioLanguageLabel": "Språk for lydvarsler",
+  "audioTestsTitle": "Tester",
+  "testStartButton": "Test start",
+  "testEndButton": "Test slutt",
+  "playingStatus": "Spiller...",
+  "stopButton": "Stopp"
 }

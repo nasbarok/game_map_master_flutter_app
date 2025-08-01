@@ -3741,6 +3741,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Game ended.'**
   String get audioGameEnded;
+
+  /// No description provided for @optionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get optionsTitle;
+
+  /// No description provided for @userNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'User not connected'**
+  String get userNotConnected;
+
+  /// No description provided for @appLanguageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application language'**
+  String get appLanguageTitle;
+
+  /// No description provided for @interfaceLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface language'**
+  String get interfaceLanguageLabel;
+
+  /// No description provided for @audioNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio notifications'**
+  String get audioNotificationsTitle;
+
+  /// No description provided for @enableAudioNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable audio notifications'**
+  String get enableAudioNotifications;
+
+  /// No description provided for @volumeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get volumeLabel;
+
+  /// No description provided for @audioLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio notifications language'**
+  String get audioLanguageLabel;
+
+  /// No description provided for @audioTestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests'**
+  String get audioTestsTitle;
+
+  /// No description provided for @testStartButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Test start'**
+  String get testStartButton;
+
+  /// No description provided for @testEndButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Test end'**
+  String get testEndButton;
+
+  /// No description provided for @playingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing...'**
+  String get playingStatus;
+
+  /// No description provided for @stopButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stopButton;
 }
 
 class _AppLocalizationsDelegate

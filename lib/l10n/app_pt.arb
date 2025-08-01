@@ -612,5 +612,20 @@
   "hostSectionMapManagementSubtitle": "Seu arsenal cartográfico – Desenhe, nomeie, controle.",
   "hostSectionMissionScenariosSubtitle": "Imaginação é a arma – crie desafios personalizados.",
   "hostSectionTeamsPlayersSubtitle": "Distribuição tática – crie partidas equilibradas e intensas.",
-  "hostSectionGameHistorySubtitle": "De volta ao campo – seus jogos, seus dados."
+  "hostSectionGameHistorySubtitle": "De volta ao campo – seus jogos, seus dados.",
+  "audioGameStarted": "Jogo iniciado",
+  "audioGameEnded": "Jogo terminado",
+  "optionsTitle": "Opções",
+  "userNotConnected": "Usuário não conectado",
+  "appLanguageTitle": "Idioma da aplicação",
+  "interfaceLanguageLabel": "Idioma da interface",
+  "audioNotificationsTitle": "Notificações de áudio",
+  "enableAudioNotifications": "Ativar notificações de áudio",
+  "volumeLabel": "Volume",
+  "audioLanguageLabel": "Idioma das notificações de áudio",
+  "audioTestsTitle": "Testes",
+  "testStartButton": "Teste início",
+  "testEndButton": "Teste fim",
+  "playingStatus": "Reproduzindo...",
+  "stopButton": "Parar"
 }

@@ -2582,6 +2582,19 @@
   "hostSectionTeamsPlayersSubtitle": "Tactical distribution – create balanced and intense matches.",
   "hostSectionGameHistorySubtitle": "Back to the field – your games, your data.",
   "audioGameStarted": "Game started.",
-  "audioGameEnded": "Game ended."
+  "audioGameEnded": "Game ended.",
+  "optionsTitle": "Options",
+  "userNotConnected": "User not connected",
+  "appLanguageTitle": "Application language",
+  "interfaceLanguageLabel": "Interface language",
+  "audioNotificationsTitle": "Audio notifications",
+  "enableAudioNotifications": "Enable audio notifications",
+  "volumeLabel": "Volume",
+  "audioLanguageLabel": "Audio notifications language",
+  "audioTestsTitle": "Tests",
+  "testStartButton": "Test start",
+  "testEndButton": "Test end",
+  "playingStatus": "Playing...",
+  "stopButton": "Stop"
 
 }

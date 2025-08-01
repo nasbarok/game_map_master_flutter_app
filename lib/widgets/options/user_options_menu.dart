@@ -47,7 +47,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
             Icon(Icons.settings, color: Colors.white),
             SizedBox(width: 8),
             Text(
-              'Options',
+              l10n.optionsTitle,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -64,25 +64,25 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Section Carte utilisateur
-            _buildUserCard(context),
+            _buildUserCard(context, l10n),
 
             SizedBox(height: 20),
 
             // Section Langue de l'application
-            _buildAppLanguageCard(context),
+            _buildAppLanguageCard(context, l10n),
 
             SizedBox(height: 20),
 
             // Section Audio
             if (_isInitialized && _voiceService != null)
-              _buildAudioCard(context),
+              _buildAudioCard(context, l10n),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildUserCard(BuildContext context) {
+  Widget _buildUserCard(BuildContext context, AppLocalizations l10n) {
     return Consumer<AuthService>(
       builder: (context, authService, child) {
         final user = authService.currentUser;
@@ -97,7 +97,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                   Icon(Icons.account_circle, size: 50, color: Colors.grey),
                   SizedBox(width: 16),
                   Text(
-                    'Utilisateur non connecté',
+                    l10n.userNotConnected,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ],
@@ -141,7 +141,8 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                           ),
                           if (user.firstName != null || user.lastName != null)
                             Text(
-                              '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
+                              '${user.firstName ?? ''} ${user.lastName ?? ''}'
+                                  .trim(),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[600],
@@ -159,7 +160,6 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                     ),
                   ],
                 ),
-
                 if (user.phoneNumber != null) ...[
                   SizedBox(height: 12),
                   Row(
@@ -173,7 +173,6 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                     ],
                   ),
                 ],
-
                 if (user.roles.isNotEmpty) ...[
                   SizedBox(height: 12),
                   Wrap(
@@ -184,7 +183,8 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                           _formatRole(role),
                           style: TextStyle(fontSize: 12),
                         ),
-                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                        backgroundColor:
+                            Theme.of(context).primaryColor.withOpacity(0.1),
                         side: BorderSide(color: Theme.of(context).primaryColor),
                       );
                     }).toList(),
@@ -198,7 +198,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
     );
   }
 
-  Widget _buildAppLanguageCard(BuildContext context) {
+  Widget _buildAppLanguageCard(BuildContext context, AppLocalizations l10n) {
     return Consumer<LocaleService>(
       builder: (context, localeService, child) {
         return Card(
@@ -209,18 +209,17 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Langue de l\'application',
+                  l10n.appLanguageTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 SizedBox(height: 16),
-
                 DropdownButtonFormField<Locale>(
                   value: localeService.currentLocale,
                   decoration: InputDecoration(
-                    labelText: 'Langue de l\'interface',
+                    labelText: l10n.interfaceLanguageLabel,
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.language),
                   ),
@@ -250,7 +249,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
     );
   }
 
-  Widget _buildAudioCard(BuildContext context) {
+  Widget _buildAudioCard(BuildContext context, AppLocalizations l10n) {
     return ChangeNotifierProvider.value(
       value: _voiceService!,
       child: Consumer<SimpleVoiceService>(
@@ -263,7 +262,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Notifications audio',
+                    l10n.audioNotificationsTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -273,7 +272,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
 
                   // Activation/Désactivation
                   SwitchListTile(
-                    title: Text('Activer les notifications audio'),
+                    title: Text(l10n.enableAudioNotifications),
                     value: voiceService.isEnabled,
                     onChanged: (value) async {
                       await voiceService.setEnabled(value);
@@ -287,7 +286,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
 
                     // Volume
                     Text(
-                      'Volume',
+                      l10n.volumeLabel,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -319,11 +318,12 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                     DropdownButtonFormField<String>(
                       value: voiceService.audioLanguage,
                       decoration: InputDecoration(
-                        labelText: 'Langue des notifications audio',
+                        labelText: l10n.audioLanguageLabel,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.record_voice_over),
                       ),
-                      items: voiceService.getAvailableLanguages().map((language) {
+                      items:
+                          voiceService.getAvailableLanguages().map((language) {
                         return DropdownMenuItem(
                           value: language,
                           child: Row(
@@ -344,16 +344,29 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
 
                     SizedBox(height: 16),
 
+                    // Titre des tests
+                    Text(
+                      l10n.audioTestsTitle,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+
                     // Tests
                     Row(
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: !voiceService.isPlaying ? () async {
-                              await voiceService.playMessage('game_started');
-                            } : null,
+                            onPressed: !voiceService.isPlaying
+                                ? () async {
+                                    await voiceService
+                                        .playMessage('audioGameStarted');
+                                  }
+                                : null,
                             icon: Icon(Icons.play_arrow),
-                            label: Text('Test début'),
+                            label: Text(l10n.testStartButton),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
@@ -363,11 +376,14 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                         SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: !voiceService.isPlaying ? () async {
-                              await voiceService.playMessage('game_ended');
-                            } : null,
+                            onPressed: !voiceService.isPlaying
+                                ? () async {
+                                    await voiceService
+                                        .playMessage('audioGameEnded');
+                                  }
+                                : null,
                             icon: Icon(Icons.stop),
-                            label: Text('Test fin'),
+                            label: Text(l10n.testEndButton),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
@@ -387,13 +403,13 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                           SizedBox(width: 8),
-                          Text('Lecture en cours...'),
+                          Text(l10n.playingStatus),
                           Spacer(),
                           TextButton(
                             onPressed: () async {
                               await voiceService.stop();
                             },
-                            child: Text('Arrêter'),
+                            child: Text(l10n.stopButton),
                           ),
                         ],
                       ),
@@ -463,4 +479,3 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
     return languageFlags[languageCode] ?? '🌐';
   }
 }
-

@@ -612,5 +612,20 @@
   "hostSectionMapManagementSubtitle": "Ihr kartographisches Arsenal – Zeichnen, benennen, kontrollieren.",
   "hostSectionMissionScenariosSubtitle": "Fantasie ist die Waffe – erstellen Sie maßgeschneiderte Herausforderungen.",
   "hostSectionTeamsPlayersSubtitle": "Taktische Verteilung – erstellen Sie ausgewogene und intensive Matches.",
-  "hostSectionGameHistorySubtitle": "Zurück ins Feld – Ihre Spiele, Ihre Daten."
+  "hostSectionGameHistorySubtitle": "Zurück ins Feld – Ihre Spiele, Ihre Daten.",
+  "audioGameStarted": "Spiel gestartet",
+  "audioGameEnded": "Spiel beendet",
+  "optionsTitle": "Optionen",
+  "userNotConnected": "Benutzer nicht verbunden",
+  "appLanguageTitle": "Anwendungssprache",
+  "interfaceLanguageLabel": "Oberflächensprache",
+  "audioNotificationsTitle": "Audio-Benachrichtigungen",
+  "enableAudioNotifications": "Audio-Benachrichtigungen aktivieren",
+  "volumeLabel": "Lautstärke",
+  "audioLanguageLabel": "Sprache der Audio-Benachrichtigungen",
+  "audioTestsTitle": "Tests",
+  "testStartButton": "Test Start",
+  "testEndButton": "Test Ende",
+  "playingStatus": "Wiedergabe läuft...",
+  "stopButton": "Stoppen"
 }

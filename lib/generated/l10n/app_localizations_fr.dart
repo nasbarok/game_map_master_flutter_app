@@ -2077,4 +2077,43 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get audioGameEnded => 'Fin de partie.';
+
+  @override
+  String get optionsTitle => 'Options';
+
+  @override
+  String get userNotConnected => 'Utilisateur non connecté';
+
+  @override
+  String get appLanguageTitle => 'Langue de l\'application';
+
+  @override
+  String get interfaceLanguageLabel => 'Langue de l\'interface';
+
+  @override
+  String get audioNotificationsTitle => 'Notifications audio';
+
+  @override
+  String get enableAudioNotifications => 'Activer les notifications audio';
+
+  @override
+  String get volumeLabel => 'Volume';
+
+  @override
+  String get audioLanguageLabel => 'Langue des notifications audio';
+
+  @override
+  String get audioTestsTitle => 'Tests';
+
+  @override
+  String get testStartButton => 'Test début';
+
+  @override
+  String get testEndButton => 'Test fin';
+
+  @override
+  String get playingStatus => 'Lecture en cours...';
+
+  @override
+  String get stopButton => 'Arrêter';
 }

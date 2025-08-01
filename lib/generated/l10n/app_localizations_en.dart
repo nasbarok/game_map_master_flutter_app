@@ -2063,4 +2063,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get audioGameEnded => 'Game ended.';
+
+  @override
+  String get optionsTitle => 'Options';
+
+  @override
+  String get userNotConnected => 'User not connected';
+
+  @override
+  String get appLanguageTitle => 'Application language';
+
+  @override
+  String get interfaceLanguageLabel => 'Interface language';
+
+  @override
+  String get audioNotificationsTitle => 'Audio notifications';
+
+  @override
+  String get enableAudioNotifications => 'Enable audio notifications';
+
+  @override
+  String get volumeLabel => 'Volume';
+
+  @override
+  String get audioLanguageLabel => 'Audio notifications language';
+
+  @override
+  String get audioTestsTitle => 'Tests';
+
+  @override
+  String get testStartButton => 'Test start';
+
+  @override
+  String get testEndButton => 'Test end';
+
+  @override
+  String get playingStatus => 'Playing...';
+
+  @override
+  String get stopButton => 'Stop';
 }

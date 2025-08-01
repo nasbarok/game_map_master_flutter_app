@@ -608,5 +608,20 @@
   "hostSectionMapManagementSubtitle": "Din kartografiska arsenal – Rita, namnge, kontrollera.",
   "hostSectionMissionScenariosSubtitle": "Fantasi är vapnet – skapa anpassade utmaningar.",
   "hostSectionTeamsPlayersSubtitle": "Taktisk fördelning – skapa balanserade och intensiva matcher.",
-  "hostSectionGameHistorySubtitle": "Tillbaka till fältet – dina spel, din data."
+  "hostSectionGameHistorySubtitle": "Tillbaka till fältet – dina spel, din data.",
+  "audioGameStarted": "Spel startat",
+  "audioGameEnded": "Spel avslutat",
+  "optionsTitle": "Alternativ",
+  "userNotConnected": "Användare inte ansluten",
+  "appLanguageTitle": "Applikationsspråk",
+  "interfaceLanguageLabel": "Gränssnittsspråk",
+  "audioNotificationsTitle": "Ljudaviseringar",
+  "enableAudioNotifications": "Aktivera ljudaviseringar",
+  "volumeLabel": "Volym",
+  "audioLanguageLabel": "Språk för ljudaviseringar",
+  "audioTestsTitle": "Tester",
+  "testStartButton": "Test start",
+  "testEndButton": "Test slut",
+  "playingStatus": "Spelar...",
+  "stopButton": "Stoppa"
 }

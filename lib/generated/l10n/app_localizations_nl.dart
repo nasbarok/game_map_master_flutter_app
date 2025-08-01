@@ -2065,8 +2065,47 @@ class AppLocalizationsNl extends AppLocalizations {
       'Terug naar het veld – jouw spellen, jouw data.';
 
   @override
-  String get audioGameStarted => 'Game started.';
+  String get audioGameStarted => 'Spel gestart';
 
   @override
-  String get audioGameEnded => 'Game ended.';
+  String get audioGameEnded => 'Spel beëindigd';
+
+  @override
+  String get optionsTitle => 'Opties';
+
+  @override
+  String get userNotConnected => 'Gebruiker niet verbonden';
+
+  @override
+  String get appLanguageTitle => 'Applicatietaal';
+
+  @override
+  String get interfaceLanguageLabel => 'Interface taal';
+
+  @override
+  String get audioNotificationsTitle => 'Audio meldingen';
+
+  @override
+  String get enableAudioNotifications => 'Audio meldingen inschakelen';
+
+  @override
+  String get volumeLabel => 'Volume';
+
+  @override
+  String get audioLanguageLabel => 'Taal van audio meldingen';
+
+  @override
+  String get audioTestsTitle => 'Tests';
+
+  @override
+  String get testStartButton => 'Test start';
+
+  @override
+  String get testEndButton => 'Test einde';
+
+  @override
+  String get playingStatus => 'Afspelen...';
+
+  @override
+  String get stopButton => 'Stop';
 }

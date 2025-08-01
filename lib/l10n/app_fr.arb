@@ -611,5 +611,18 @@
   "hostSectionTeamsPlayersSubtitle": "Répartition tactique – créez des matchs équilibrés et intenses.",
   "hostSectionGameHistorySubtitle": "Retour sur le terrain – vos parties, vos données.",
   "audioGameStarted": "Partie lancée.",
-  "audioGameEnded": "Fin de partie."
+  "audioGameEnded": "Fin de partie.",
+  "optionsTitle": "Options",
+  "userNotConnected": "Utilisateur non connecté",
+  "appLanguageTitle": "Langue de l'application",
+  "interfaceLanguageLabel": "Langue de l'interface",
+  "audioNotificationsTitle": "Notifications audio",
+  "enableAudioNotifications": "Activer les notifications audio",
+  "volumeLabel": "Volume",
+  "audioLanguageLabel": "Langue des notifications audio",
+  "audioTestsTitle": "Tests",
+  "testStartButton": "Test début",
+  "testEndButton": "Test fin",
+  "playingStatus": "Lecture en cours...",
+  "stopButton": "Arrêter"
 }

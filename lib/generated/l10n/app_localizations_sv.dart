@@ -2064,8 +2064,47 @@ class AppLocalizationsSv extends AppLocalizations {
       'Tillbaka till fältet – dina spel, din data.';
 
   @override
-  String get audioGameStarted => 'Game started.';
+  String get audioGameStarted => 'Spel startat';
 
   @override
-  String get audioGameEnded => 'Game ended.';
+  String get audioGameEnded => 'Spel avslutat';
+
+  @override
+  String get optionsTitle => 'Alternativ';
+
+  @override
+  String get userNotConnected => 'Användare inte ansluten';
+
+  @override
+  String get appLanguageTitle => 'Applikationsspråk';
+
+  @override
+  String get interfaceLanguageLabel => 'Gränssnittsspråk';
+
+  @override
+  String get audioNotificationsTitle => 'Ljudaviseringar';
+
+  @override
+  String get enableAudioNotifications => 'Aktivera ljudaviseringar';
+
+  @override
+  String get volumeLabel => 'Volym';
+
+  @override
+  String get audioLanguageLabel => 'Språk för ljudaviseringar';
+
+  @override
+  String get audioTestsTitle => 'Tester';
+
+  @override
+  String get testStartButton => 'Test start';
+
+  @override
+  String get testEndButton => 'Test slut';
+
+  @override
+  String get playingStatus => 'Spelar...';
+
+  @override
+  String get stopButton => 'Stoppa';
 }

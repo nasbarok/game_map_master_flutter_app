@@ -612,5 +612,20 @@
   "hostSectionMapManagementSubtitle": "Twój arsenał kartograficzny – Rysuj, nazywaj, kontroluj.",
   "hostSectionMissionScenariosSubtitle": "Wyobraźnia to broń – twórz niestandardowe wyzwania.",
   "hostSectionTeamsPlayersSubtitle": "Taktyczna dystrybucja – twórz zrównoważone i intensywne mecze.",
-  "hostSectionGameHistorySubtitle": "Powrót na pole – twoje gry, twoje dane."
+  "hostSectionGameHistorySubtitle": "Powrót na pole – twoje gry, twoje dane.",
+  "audioGameStarted": "Gra rozpoczęta",
+  "audioGameEnded": "Gra zakończona",
+  "optionsTitle": "Opcje",
+  "userNotConnected": "Użytkownik nie połączony",
+  "appLanguageTitle": "Język aplikacji",
+  "interfaceLanguageLabel": "Język interfejsu",
+  "audioNotificationsTitle": "Powiadomienia dźwiękowe",
+  "enableAudioNotifications": "Włącz powiadomienia dźwiękowe",
+  "volumeLabel": "Głośność",
+  "audioLanguageLabel": "Język powiadomień dźwiękowych",
+  "audioTestsTitle": "Testy",
+  "testStartButton": "Test start",
+  "testEndButton": "Test koniec",
+  "playingStatus": "Odtwarzanie...",
+  "stopButton": "Stop"
 }

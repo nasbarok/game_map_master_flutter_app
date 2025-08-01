@@ -612,5 +612,20 @@
   "hostSectionMapManagementSubtitle": "Je cartografische arsenaal – Teken, benoem, beheers.",
   "hostSectionMissionScenariosSubtitle": "Verbeelding is het wapen – creëer aangepaste uitdagingen.",
   "hostSectionTeamsPlayersSubtitle": "Tactische verdeling – creëer gebalanceerde en intense wedstrijden.",
-  "hostSectionGameHistorySubtitle": "Terug naar het veld – jouw spellen, jouw data."
+  "hostSectionGameHistorySubtitle": "Terug naar het veld – jouw spellen, jouw data.",
+  "audioGameStarted": "Spel gestart",
+  "audioGameEnded": "Spel beëindigd",
+  "optionsTitle": "Opties",
+  "userNotConnected": "Gebruiker niet verbonden",
+  "appLanguageTitle": "Applicatietaal",
+  "interfaceLanguageLabel": "Interface taal",
+  "audioNotificationsTitle": "Audio meldingen",
+  "enableAudioNotifications": "Audio meldingen inschakelen",
+  "volumeLabel": "Volume",
+  "audioLanguageLabel": "Taal van audio meldingen",
+  "audioTestsTitle": "Tests",
+  "testStartButton": "Test start",
+  "testEndButton": "Test einde",
+  "playingStatus": "Afspelen...",
+  "stopButton": "Stop"
 }

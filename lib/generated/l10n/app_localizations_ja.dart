@@ -2027,8 +2027,47 @@ class AppLocalizationsJa extends AppLocalizations {
   String get hostSectionGameHistorySubtitle => 'フィールドに戻る - あなたのゲーム、あなたのデータ。';
 
   @override
-  String get audioGameStarted => 'Game started.';
+  String get audioGameStarted => 'ゲーム開始';
 
   @override
-  String get audioGameEnded => 'Game ended.';
+  String get audioGameEnded => 'ゲーム終了';
+
+  @override
+  String get optionsTitle => 'オプション';
+
+  @override
+  String get userNotConnected => 'ユーザーが接続されていません';
+
+  @override
+  String get appLanguageTitle => 'アプリケーション言語';
+
+  @override
+  String get interfaceLanguageLabel => 'インターフェース言語';
+
+  @override
+  String get audioNotificationsTitle => '音声通知';
+
+  @override
+  String get enableAudioNotifications => '音声通知を有効にする';
+
+  @override
+  String get volumeLabel => '音量';
+
+  @override
+  String get audioLanguageLabel => '音声通知の言語';
+
+  @override
+  String get audioTestsTitle => 'テスト';
+
+  @override
+  String get testStartButton => '開始テスト';
+
+  @override
+  String get testEndButton => '終了テスト';
+
+  @override
+  String get playingStatus => '再生中...';
+
+  @override
+  String get stopButton => '停止';
 }
