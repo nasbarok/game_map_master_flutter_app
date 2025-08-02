@@ -8,6 +8,7 @@ import '../../models/user.dart';
 import '../../services/audio/simple_voice_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/l10n/locale_service.dart';
+import '../adaptive_background.dart';
 
 /// Menu d'options générales utilisateur accessible via le logo croppé
 class UserOptionsMenu extends StatefulWidget {
@@ -38,25 +39,27 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.menu,
+      enableParallax: true,
+      backgroundOpacity: 0.85,
+      // Légère transparence pour la lisibilité
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Row(
           children: [
             Icon(Icons.settings, color: Colors.white),
             SizedBox(width: 8),
             Text(
               l10n.optionsTitle,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-        backgroundColor: Theme.of(context).primaryColor,
-        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -120,7 +123,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                       backgroundColor: Theme.of(context).primaryColor,
                       child: Text(
                         _getInitials(user),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -134,7 +137,7 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                         children: [
                           Text(
                             user.username,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -160,33 +163,12 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
                     ),
                   ],
                 ),
-                if (user.phoneNumber != null) ...[
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(Icons.phone, size: 16, color: Colors.grey[600]),
-                      SizedBox(width: 8),
-                      Text(
-                        user.phoneNumber!,
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ],
                 if (user.roles.isNotEmpty) ...[
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
                     children: user.roles.map((role) {
-                      return Chip(
-                        label: Text(
-                          _formatRole(role),
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        backgroundColor:
-                            Theme.of(context).primaryColor.withOpacity(0.1),
-                        side: BorderSide(color: Theme.of(context).primaryColor),
-                      );
+                      return _buildRoleChip(context, role);
                     }).toList(),
                   ),
                 ],
@@ -438,12 +420,41 @@ class _UserOptionsMenuState extends State<UserOptionsMenu> {
     return initials;
   }
 
-  String _formatRole(String role) {
-    // Enlever le préfixe ROLE_ s'il existe
-    String cleanRole = role.replaceFirst('ROLE_', '');
-    // Capitaliser la première lettre
-    return cleanRole[0].toUpperCase() + cleanRole.substring(1).toLowerCase();
+  String _formatRoleLabel(BuildContext context, String role) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (role == 'ROLE_HOST') {
+      return l10n.roleHost; // "Organisateur"
+    } else {
+      return l10n.roleGamer; // "Joueur"
+    }
   }
+
+  Chip _buildRoleChip(BuildContext context, String role) {
+    final roleLabel = _formatRoleLabel(context, role);
+    final isHost = role == 'ROLE_HOST';
+
+    final icon = isHost
+        ? const Icon(Icons.shield, size: 16, color: Colors.green)
+        : const Icon(Icons.sports_kabaddi, size: 16, color: Colors.blue);
+
+    return Chip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          const SizedBox(width: 4),
+          Text(
+            roleLabel,
+            style: const TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+      side: BorderSide(color: Theme.of(context).primaryColor),
+    );
+  }
+
 
   String _getLanguageName(String languageCode) {
     const languageNames = {

@@ -8,4 +8,4 @@ flutter pub get
 flutter build apk --dart-define=ENVIRONMENT=preprod --release
 
 echo "✅ Build terminé!"
-echo "📱 APK disponible dans: build/app/outputs/flutter-apk/app-release.apk"
+echo "📱 APK disponible dans: F:\dev\airsoft_app\flutter-app\build\app\outputs\apk\release/app-release.apk"

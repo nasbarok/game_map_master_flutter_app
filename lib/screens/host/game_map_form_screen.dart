@@ -132,8 +132,8 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
       });
 
       try {
-        // Use the GameMap instance from widget.gameMap if editing, or create a new one
-        // Then, apply all current field values, including those from the interactive editor
+        final authService = Provider.of<AuthService>(context, listen: false);
+        final currentUser = authService.currentUser;
         final gameMap = GameMap(
           id: _localGameMap?.id ?? widget.gameMap?.id,
           name: _nameController.text,
@@ -150,11 +150,11 @@ class _GameMapFormScreenState extends State<GameMapFormScreen> {
           backgroundImageBase64: _backgroundImageBase64,
           // Preserve other fields if editing an existing map
           fieldId: _localGameMap?.fieldId ?? widget.gameMap?.fieldId,
-          ownerId: _localGameMap?.ownerId ?? widget.gameMap?.ownerId,
+          ownerId: _localGameMap?.ownerId ?? widget.gameMap?.ownerId ?? currentUser?.id,
           scenarioIds: widget.gameMap?.scenarioIds,
           imageUrl: widget.gameMap?.imageUrl,
           // Keep existing non-interactive image if any
-          owner: widget.gameMap?.owner,
+          owner: widget.gameMap?.owner ?? currentUser,
           field: widget.gameMap?.field,
         );
 
