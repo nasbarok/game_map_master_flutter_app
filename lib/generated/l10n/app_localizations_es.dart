@@ -2117,4 +2117,63 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get stopButton => 'Parar';
+
+  @override
+  String bombZoneEntered(Object zoneName) {
+    return 'Zona $zoneName alcanzada. Iniciando armado de bomba.';
+  }
+
+  @override
+  String bombArmingTimeRemaining(Object seconds) {
+    return 'Tiempo restante antes de activación: $seconds segundos.';
+  }
+
+  @override
+  String get bombStayInZone => 'Permanezca en la zona para armar la bomba.';
+
+  @override
+  String get bombCountdown30 => 'Treinta';
+
+  @override
+  String get bombCountdown20 => 'Veinte';
+
+  @override
+  String get bombCountdown10 => 'Diez';
+
+  @override
+  String get bombCountdown9 => 'Nueve';
+
+  @override
+  String get bombCountdown8 => 'Ocho';
+
+  @override
+  String get bombCountdown7 => 'Siete';
+
+  @override
+  String get bombCountdown6 => 'Seis';
+
+  @override
+  String get bombCountdown5 => 'Cinco';
+
+  @override
+  String get bombCountdown4 => 'Cuatro';
+
+  @override
+  String get bombCountdown3 => 'Tres';
+
+  @override
+  String get bombCountdown2 => 'Dos';
+
+  @override
+  String get bombCountdown1 => 'Uno';
+
+  @override
+  String bombArmed(Object zoneName) {
+    return 'Bomba de la zona $zoneName armada';
+  }
+
+  @override
+  String bombZoneExited(Object zoneName) {
+    return 'Salida de la zona $zoneName. Armado interrumpido.';
+  }
 }

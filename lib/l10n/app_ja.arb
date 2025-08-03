@@ -627,5 +627,22 @@
   "testStartButton": "開始テスト",
   "testEndButton": "終了テスト",
   "playingStatus": "再生中...",
-  "stopButton": "停止"
+  "stopButton": "停止",
+  "bombZoneEntered": "ゾーン{zoneName}に到達。爆弾の起動を開始。",
+  "bombArmingTimeRemaining": "起動まで残り時間：{seconds}秒。",
+  "bombStayInZone": "ゾーンに留まって爆弾を起動してください。",
+  "bombCountdown30": "三十",
+  "bombCountdown20": "二十",
+  "bombCountdown10": "十",
+  "bombCountdown9": "九",
+  "bombCountdown8": "八",
+  "bombCountdown7": "七",
+  "bombCountdown6": "六",
+  "bombCountdown5": "五",
+  "bombCountdown4": "四",
+  "bombCountdown3": "三",
+  "bombCountdown2": "二",
+  "bombCountdown1": "一",
+  "bombArmed": "ゾーン{zoneName}の爆弾が起動されました",
+  "bombZoneExited": "ゾーン{zoneName}から退出。起動が中断されました。"
 }

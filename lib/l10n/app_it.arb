@@ -627,5 +627,22 @@
   "testStartButton": "Test inizio",
   "testEndButton": "Test fine",
   "playingStatus": "Riproduzione in corso...",
-  "stopButton": "Ferma"
+  "stopButton": "Ferma",
+  "bombZoneEntered": "Zona {zoneName} raggiunta. Inizio attivazione bomba.",
+  "bombArmingTimeRemaining": "Tempo rimanente prima dell'attivazione: {seconds} secondi.",
+  "bombStayInZone": "Rimanete nella zona per attivare la bomba.",
+  "bombCountdown30": "Trenta",
+  "bombCountdown20": "Venti",
+  "bombCountdown10": "Dieci",
+  "bombCountdown9": "Nove",
+  "bombCountdown8": "Otto",
+  "bombCountdown7": "Sette",
+  "bombCountdown6": "Sei",
+  "bombCountdown5": "Cinque",
+  "bombCountdown4": "Quattro",
+  "bombCountdown3": "Tre",
+  "bombCountdown2": "Due",
+  "bombCountdown1": "Uno",
+  "bombArmed": "Bomba della zona {zoneName} attivata",
+  "bombZoneExited": "Uscita dalla zona {zoneName}. Attivazione interrotta."
 }

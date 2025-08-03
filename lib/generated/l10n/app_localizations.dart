@@ -3819,6 +3819,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop'**
   String get stopButton;
+
+  /// No description provided for @bombZoneEntered.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone {zoneName} reached. Beginning bomb arming.'**
+  String bombZoneEntered(Object zoneName);
+
+  /// No description provided for @bombArmingTimeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining before activation: {seconds} seconds.'**
+  String bombArmingTimeRemaining(Object seconds);
+
+  /// No description provided for @bombStayInZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay in the zone to arm the bomb.'**
+  String get bombStayInZone;
+
+  /// No description provided for @bombCountdown30.
+  ///
+  /// In en, this message translates to:
+  /// **'Thirty'**
+  String get bombCountdown30;
+
+  /// No description provided for @bombCountdown20.
+  ///
+  /// In en, this message translates to:
+  /// **'Twenty'**
+  String get bombCountdown20;
+
+  /// No description provided for @bombCountdown10.
+  ///
+  /// In en, this message translates to:
+  /// **'Ten'**
+  String get bombCountdown10;
+
+  /// No description provided for @bombCountdown9.
+  ///
+  /// In en, this message translates to:
+  /// **'Nine'**
+  String get bombCountdown9;
+
+  /// No description provided for @bombCountdown8.
+  ///
+  /// In en, this message translates to:
+  /// **'Eight'**
+  String get bombCountdown8;
+
+  /// No description provided for @bombCountdown7.
+  ///
+  /// In en, this message translates to:
+  /// **'Seven'**
+  String get bombCountdown7;
+
+  /// No description provided for @bombCountdown6.
+  ///
+  /// In en, this message translates to:
+  /// **'Six'**
+  String get bombCountdown6;
+
+  /// No description provided for @bombCountdown5.
+  ///
+  /// In en, this message translates to:
+  /// **'Five'**
+  String get bombCountdown5;
+
+  /// No description provided for @bombCountdown4.
+  ///
+  /// In en, this message translates to:
+  /// **'Four'**
+  String get bombCountdown4;
+
+  /// No description provided for @bombCountdown3.
+  ///
+  /// In en, this message translates to:
+  /// **'Three'**
+  String get bombCountdown3;
+
+  /// No description provided for @bombCountdown2.
+  ///
+  /// In en, this message translates to:
+  /// **'Two'**
+  String get bombCountdown2;
+
+  /// No description provided for @bombCountdown1.
+  ///
+  /// In en, this message translates to:
+  /// **'One'**
+  String get bombCountdown1;
+
+  /// No description provided for @bombArmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bomb in zone {zoneName} armed'**
+  String bombArmed(Object zoneName);
+
+  /// No description provided for @bombZoneExited.
+  ///
+  /// In en, this message translates to:
+  /// **'Exited zone {zoneName}. Arming interrupted.'**
+  String bombZoneExited(Object zoneName);
 }
 
 class _AppLocalizationsDelegate

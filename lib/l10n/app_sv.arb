@@ -623,5 +623,22 @@
   "testStartButton": "Test start",
   "testEndButton": "Test slut",
   "playingStatus": "Spelar...",
-  "stopButton": "Stoppa"
+  "stopButton": "Stoppa",
+  "bombZoneEntered": "Zon {zoneName} nådd. Börjar bombaktivering.",
+  "bombArmingTimeRemaining": "Återstående tid före aktivering: {seconds} sekunder.",
+  "bombStayInZone": "Stanna i zonen för att aktivera bomben.",
+  "bombCountdown30": "Trettio",
+  "bombCountdown20": "Tjugo",
+  "bombCountdown10": "Tio",
+  "bombCountdown9": "Nio",
+  "bombCountdown8": "Åtta",
+  "bombCountdown7": "Sju",
+  "bombCountdown6": "Sex",
+  "bombCountdown5": "Fem",
+  "bombCountdown4": "Fyra",
+  "bombCountdown3": "Tre",
+  "bombCountdown2": "Två",
+  "bombCountdown1": "Ett",
+  "bombArmed": "Bomb i zon {zoneName} aktiverad",
+  "bombZoneExited": "Lämnade zon {zoneName}. Aktivering avbruten."
 }

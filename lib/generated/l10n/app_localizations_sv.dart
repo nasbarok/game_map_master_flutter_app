@@ -2107,4 +2107,63 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get stopButton => 'Stoppa';
+
+  @override
+  String bombZoneEntered(Object zoneName) {
+    return 'Zon $zoneName nådd. Börjar bombaktivering.';
+  }
+
+  @override
+  String bombArmingTimeRemaining(Object seconds) {
+    return 'Återstående tid före aktivering: $seconds sekunder.';
+  }
+
+  @override
+  String get bombStayInZone => 'Stanna i zonen för att aktivera bomben.';
+
+  @override
+  String get bombCountdown30 => 'Trettio';
+
+  @override
+  String get bombCountdown20 => 'Tjugo';
+
+  @override
+  String get bombCountdown10 => 'Tio';
+
+  @override
+  String get bombCountdown9 => 'Nio';
+
+  @override
+  String get bombCountdown8 => 'Åtta';
+
+  @override
+  String get bombCountdown7 => 'Sju';
+
+  @override
+  String get bombCountdown6 => 'Sex';
+
+  @override
+  String get bombCountdown5 => 'Fem';
+
+  @override
+  String get bombCountdown4 => 'Fyra';
+
+  @override
+  String get bombCountdown3 => 'Tre';
+
+  @override
+  String get bombCountdown2 => 'Två';
+
+  @override
+  String get bombCountdown1 => 'Ett';
+
+  @override
+  String bombArmed(Object zoneName) {
+    return 'Bomb i zon $zoneName aktiverad';
+  }
+
+  @override
+  String bombZoneExited(Object zoneName) {
+    return 'Lämnade zon $zoneName. Aktivering avbruten.';
+  }
 }

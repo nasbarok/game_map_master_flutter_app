@@ -7,6 +7,7 @@ import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bom
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 import '../../../models/scenario/bomb_operation/bomb_operation_team.dart';
+import '../../audio/bomb_terrorist_audio_manager.dart';
 
 /// Service de détection automatique de proximité avec feedback sonore
 class BombProximityDetectionService {
@@ -31,6 +32,9 @@ class BombProximityDetectionService {
   
   // États des sites (pour savoir si armé ou non)
   final Map<int, BombSiteState> _siteStates = {};
+
+  // Manager audio
+  final BombTerroristAudioManager _audioManager = BombTerroristAudioManager();
 
   BombProximityDetectionService({
     required BombOperationService bombOperationService,
@@ -140,7 +144,7 @@ class BombProximityDetectionService {
     _isInActiveZone = true;
     
     // Bip d'entrée dans la zone
-    _playEnterZoneSound();
+    _playEnterZoneSound(site);
     
     // Vérifier les actions possibles
     _checkAvailableActions(site);
@@ -156,7 +160,7 @@ class BombProximityDetectionService {
     _isInActiveZone = false;
     
     // Bip de sortie de zone
-    _playExitZoneSound();
+    _playExitZoneSound(site);
     
     // Notifier la sortie de zone
     onExitBombZone?.call(site);
@@ -194,11 +198,16 @@ class BombProximityDetectionService {
   }
 
   /// Joue le son d'entrée dans une zone
-  void _playEnterZoneSound() {
+  void _playEnterZoneSound(BombSite site) {
     try {
-      // Bip court et aigu pour l'entrée
-      HapticFeedback.lightImpact();
-      // TODO: Ajouter un vrai son avec audioplayers
+      // Audio pour terroristes
+      final role = _bombOperationService.getPlayerRoleBombOperation(_userId);
+      if (role == BombOperationTeam.attack) {
+        // Récupérer le temps d'armement depuis la configuration
+        int armingTime = _bombOperationScenario.armingTime ?? 30;
+        _audioManager.playZoneEnteredAudio(site.name, armingTime);
+        _audioManager.startCountdown(armingTime);
+      }
       logger.d('🔊 [BombProximityDetection] Bip d\'entrée de zone');
     } catch (e) {
       logger.d('❌ [BombProximityDetection] Erreur son entrée: $e');
@@ -206,11 +215,16 @@ class BombProximityDetectionService {
   }
 
   /// Joue le son de sortie d'une zone
-  void _playExitZoneSound() {
+  void _playExitZoneSound(BombSite site) {
     try {
-      // Bip plus grave pour la sortie
-      HapticFeedback.mediumImpact();
-      // TODO: Ajouter un vrai son avec audioplayers
+      //Arrêter l'audio pour terroristes
+      final role = _bombOperationService.getPlayerRoleBombOperation(_userId);
+      if (role == BombOperationTeam.attack) {
+        _audioManager.stopCountdown();
+        //Jouer l'audio de sortie de zone
+        _audioManager.playZoneExitedAudio(site.name);
+      }
+        //xxxxxxxxxxxxxxxxxx => Sortie de la zone [XXX]. Amorçage interrompu.
       logger.d('🔊 [BombProximityDetection] Bip de sortie de zone');
     } catch (e) {
       logger.d('❌ [BombProximityDetection] Erreur son sortie: $e');
@@ -229,11 +243,13 @@ class BombProximityDetectionService {
   }
 
   /// Joue le bip final de confirmation
-  void playCompletionSound(bool isSuccess) {
+  void playCompletionSound(bool isSuccess, String zoneName) {
     try {
       if (isSuccess) {
-        // Bip de succès (plus long et satisfaisant)
-        HapticFeedback.heavyImpact();
+        final role = _bombOperationService.getPlayerRoleBombOperation(_userId);
+        if (role == BombOperationTeam.attack) {
+          _audioManager.playBombArmedAudio(zoneName);
+        }
       } else {
         // Bip d'échec (vibration d'erreur)
         HapticFeedback.vibrate();
@@ -268,6 +284,7 @@ class BombProximityDetectionService {
   /// Nettoie les ressources
   void dispose() {
     stopDetection();
+    _audioManager.dispose();
     logger.d('🧹 [BombProximityDetection] Service nettoyé');
   }
 }

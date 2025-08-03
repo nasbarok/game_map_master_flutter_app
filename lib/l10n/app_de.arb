@@ -627,5 +627,22 @@
   "testStartButton": "Test Start",
   "testEndButton": "Test Ende",
   "playingStatus": "Wiedergabe läuft...",
-  "stopButton": "Stoppen"
+  "stopButton": "Stoppen",
+  "bombZoneEntered": "Zone {zoneName} erreicht. Bombenaktivierung beginnt.",
+  "bombArmingTimeRemaining": "Verbleibende Zeit bis zur Aktivierung: {seconds} Sekunden.",
+  "bombStayInZone": "Bleiben Sie in der Zone, um die Bombe zu aktivieren.",
+  "bombCountdown30": "Dreißig",
+  "bombCountdown20": "Zwanzig",
+  "bombCountdown10": "Zehn",
+  "bombCountdown9": "Neun",
+  "bombCountdown8": "Acht",
+  "bombCountdown7": "Sieben",
+  "bombCountdown6": "Sechs",
+  "bombCountdown5": "Fünf",
+  "bombCountdown4": "Vier",
+  "bombCountdown3": "Drei",
+  "bombCountdown2": "Zwei",
+  "bombCountdown1": "Eins",
+  "bombArmed": "Bombe in Zone {zoneName} aktiviert",
+  "bombZoneExited": "Zone {zoneName} verlassen. Aktivierung unterbrochen."
 }

@@ -627,5 +627,22 @@
   "testStartButton": "Test start",
   "testEndButton": "Test slutt",
   "playingStatus": "Spiller...",
-  "stopButton": "Stopp"
+  "stopButton": "Stopp",
+  "bombZoneEntered": "Sone {zoneName} nådd. Starter bombeaktivering.",
+  "bombArmingTimeRemaining": "Gjenværende tid før aktivering: {seconds} sekunder.",
+  "bombStayInZone": "Bli i sonen for å aktivere bomben.",
+  "bombCountdown30": "Tretti",
+  "bombCountdown20": "Tjue",
+  "bombCountdown10": "Ti",
+  "bombCountdown9": "Ni",
+  "bombCountdown8": "Åtte",
+  "bombCountdown7": "Syv",
+  "bombCountdown6": "Seks",
+  "bombCountdown5": "Fem",
+  "bombCountdown4": "Fire",
+  "bombCountdown3": "Tre",
+  "bombCountdown2": "To",
+  "bombCountdown1": "En",
+  "bombArmed": "Bombe i sone {zoneName} aktivert",
+  "bombZoneExited": "Forlot sone {zoneName}. Aktivering avbrutt."
 }

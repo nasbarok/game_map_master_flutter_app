@@ -627,5 +627,22 @@
   "testStartButton": "Test start",
   "testEndButton": "Test einde",
   "playingStatus": "Afspelen...",
-  "stopButton": "Stop"
+  "stopButton": "Stop",
+  "bombZoneEntered": "Zone {zoneName} bereikt. Begin van bomactivering.",
+  "bombArmingTimeRemaining": "Resterende tijd voor activering: {seconds} seconden.",
+  "bombStayInZone": "Blijf in de zone om de bom te activeren.",
+  "bombCountdown30": "Dertig",
+  "bombCountdown20": "Twintig",
+  "bombCountdown10": "Tien",
+  "bombCountdown9": "Negen",
+  "bombCountdown8": "Acht",
+  "bombCountdown7": "Zeven",
+  "bombCountdown6": "Zes",
+  "bombCountdown5": "Vijf",
+  "bombCountdown4": "Vier",
+  "bombCountdown3": "Drie",
+  "bombCountdown2": "Twee",
+  "bombCountdown1": "Een",
+  "bombArmed": "Bom in zone {zoneName} geactiveerd",
+  "bombZoneExited": "Zone {zoneName} verlaten. Activering onderbroken."
 }

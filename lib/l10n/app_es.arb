@@ -623,5 +623,22 @@
   "testStartButton": "Prueba inicio",
   "testEndButton": "Prueba fin",
   "playingStatus": "Reproduciendo...",
-  "stopButton": "Parar"
+  "stopButton": "Parar",
+  "bombZoneEntered": "Zona {zoneName} alcanzada. Iniciando armado de bomba.",
+  "bombArmingTimeRemaining": "Tiempo restante antes de activación: {seconds} segundos.",
+  "bombStayInZone": "Permanezca en la zona para armar la bomba.",
+  "bombCountdown30": "Treinta",
+  "bombCountdown20": "Veinte",
+  "bombCountdown10": "Diez",
+  "bombCountdown9": "Nueve",
+  "bombCountdown8": "Ocho",
+  "bombCountdown7": "Siete",
+  "bombCountdown6": "Seis",
+  "bombCountdown5": "Cinco",
+  "bombCountdown4": "Cuatro",
+  "bombCountdown3": "Tres",
+  "bombCountdown2": "Dos",
+  "bombCountdown1": "Uno",
+  "bombArmed": "Bomba de la zona {zoneName} armada",
+  "bombZoneExited": "Salida de la zona {zoneName}. Armado interrumpido."
 }

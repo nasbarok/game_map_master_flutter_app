@@ -118,7 +118,7 @@ class _BombActionDialogState extends State<BombActionDialog>
 
     try {
       // Bip final de succès
-      widget.proximityService.playCompletionSound(true);
+      widget.proximityService.playCompletionSound(true, widget.bombSite.name);
 
       // Envoyer la notification au serveur
       if (widget.actionType == BombActionType.arm) {
@@ -140,7 +140,7 @@ class _BombActionDialogState extends State<BombActionDialog>
       logger.d('❌ [BombActionDialog] Erreur lors de l\'action: $e');
 
       // Bip d'échec
-      widget.proximityService.playCompletionSound(false);
+      widget.proximityService.playCompletionSound(false, widget.bombSite.name);
 
       // Fermer le dialog avec échec
       if (mounted) {

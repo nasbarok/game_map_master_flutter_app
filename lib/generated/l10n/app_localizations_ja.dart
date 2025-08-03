@@ -2070,4 +2070,63 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stopButton => '停止';
+
+  @override
+  String bombZoneEntered(Object zoneName) {
+    return 'ゾーン$zoneNameに到達。爆弾の起動を開始。';
+  }
+
+  @override
+  String bombArmingTimeRemaining(Object seconds) {
+    return '起動まで残り時間：$seconds秒。';
+  }
+
+  @override
+  String get bombStayInZone => 'ゾーンに留まって爆弾を起動してください。';
+
+  @override
+  String get bombCountdown30 => '三十';
+
+  @override
+  String get bombCountdown20 => '二十';
+
+  @override
+  String get bombCountdown10 => '十';
+
+  @override
+  String get bombCountdown9 => '九';
+
+  @override
+  String get bombCountdown8 => '八';
+
+  @override
+  String get bombCountdown7 => '七';
+
+  @override
+  String get bombCountdown6 => '六';
+
+  @override
+  String get bombCountdown5 => '五';
+
+  @override
+  String get bombCountdown4 => '四';
+
+  @override
+  String get bombCountdown3 => '三';
+
+  @override
+  String get bombCountdown2 => '二';
+
+  @override
+  String get bombCountdown1 => '一';
+
+  @override
+  String bombArmed(Object zoneName) {
+    return 'ゾーン$zoneNameの爆弾が起動されました';
+  }
+
+  @override
+  String bombZoneExited(Object zoneName) {
+    return 'ゾーン$zoneNameから退出。起動が中断されました。';
+  }
 }
