@@ -644,5 +644,12 @@
   "bombCountdown2": "Dwa",
   "bombCountdown1": "Jeden",
   "bombArmed": "Bomba w strefie {zoneName} aktywowana",
-  "bombZoneExited": "Opuszczono strefę {zoneName}. Aktywacja przerwana."
+  "bombZoneExited": "Opuszczono strefę {zoneName}. Aktywacja przerwana.",
+  "bombActiveAlert": "Bomba aktywna na {zoneName}. Wymagana interwencja.",
+  "defuseZoneEntered": "Strefa {zoneName} osiągnięta. Rozpoczęcie rozbroienia.",
+  "defuseTimeRemaining": "Pozostały czas: {seconds} sekund.",
+  "defuseStayInZone": "Pozostań na miejscu, aby ukończyć operację.",
+  "defuseZoneExited": "Opuszczono strefę {zoneName}. Rozbrajanie przerwane.",
+  "bombDefused": "Miejsce {zoneName} zabezpieczone. Bomba rozbrojona.",
+  "bombExploded": "Wybuch! Bomba w miejscu {zoneName} została zdetonowana."
 }

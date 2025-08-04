@@ -644,5 +644,12 @@
   "bombCountdown2": "Due",
   "bombCountdown1": "Uno",
   "bombArmed": "Bomba della zona {zoneName} attivata",
-  "bombZoneExited": "Uscita dalla zona {zoneName}. Attivazione interrotta."
+  "bombZoneExited": "Uscita dalla zona {zoneName}. Attivazione interrotta.",
+  "bombActiveAlert": "Bomba attiva su {zoneName}. Intervento richiesto.",
+  "defuseZoneEntered": "Zona {zoneName} raggiunta. Inizio disinnesco.",
+  "defuseTimeRemaining": "Tempo rimanente: {seconds} secondi.",
+  "defuseStayInZone": "Rimanete in posizione per completare l'operazione.",
+  "defuseZoneExited": "Uscita dalla zona {zoneName}. Disinnesco interrotto.",
+  "bombDefused": "Sito {zoneName} messo in sicurezza. Bomba disinnescata.",
+  "bombExploded": "Esplosione! La bomba sul sito {zoneName} è stata innescata."
 }

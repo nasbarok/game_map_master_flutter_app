@@ -2166,4 +2166,37 @@ class AppLocalizationsSv extends AppLocalizations {
   String bombZoneExited(Object zoneName) {
     return 'Lämnade zon $zoneName. Aktivering avbruten.';
   }
+
+  @override
+  String bombActiveAlert(Object zoneName) {
+    return 'Bomb aktiv på $zoneName. Ingripande krävs.';
+  }
+
+  @override
+  String defuseZoneEntered(Object zoneName) {
+    return 'Zon $zoneName nådd. Börjar desarmering.';
+  }
+
+  @override
+  String defuseTimeRemaining(Object seconds) {
+    return 'Återstående tid: $seconds sekunder.';
+  }
+
+  @override
+  String get defuseStayInZone => 'Stanna kvar för att slutföra operationen.';
+
+  @override
+  String defuseZoneExited(Object zoneName) {
+    return 'Lämnade zon $zoneName. Desarmering avbruten.';
+  }
+
+  @override
+  String bombDefused(Object zoneName) {
+    return 'Plats $zoneName säkrad. Bomb desarmer.';
+  }
+
+  @override
+  String bombExploded(Object zoneName) {
+    return 'Explosion! Bomben på plats $zoneName har utlösts.';
+  }
 }

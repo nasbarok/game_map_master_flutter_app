@@ -644,5 +644,12 @@
   "bombCountdown2": "Zwei",
   "bombCountdown1": "Eins",
   "bombArmed": "Bombe in Zone {zoneName} aktiviert",
-  "bombZoneExited": "Zone {zoneName} verlassen. Aktivierung unterbrochen."
+  "bombZoneExited": "Zone {zoneName} verlassen. Aktivierung unterbrochen.",
+  "bombActiveAlert": "Bombe aktiv auf {zoneName}. Eingriff erforderlich.",
+  "defuseZoneEntered": "Zone {zoneName} erreicht. Entschärfung beginnt.",
+  "defuseTimeRemaining": "Verbleibende Zeit: {seconds} Sekunden.",
+  "defuseStayInZone": "Bleiben Sie vor Ort, um die Operation abzuschließen.",
+  "defuseZoneExited": "Zone {zoneName} verlassen. Entschärfung unterbrochen.",
+  "bombDefused": "Standort {zoneName} gesichert. Bombe entschärft.",
+  "bombExploded": "Explosion! Die Bombe am Standort {zoneName} wurde ausgelöst."
 }

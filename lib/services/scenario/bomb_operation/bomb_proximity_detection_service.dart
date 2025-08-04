@@ -7,6 +7,7 @@ import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bom
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 import '../../../models/scenario/bomb_operation/bomb_operation_team.dart';
+import '../../audio/bomb_defender_audio_manager.dart';
 import '../../audio/bomb_terrorist_audio_manager.dart';
 
 /// Service de détection automatique de proximité avec feedback sonore
@@ -35,6 +36,8 @@ class BombProximityDetectionService {
 
   // Manager audio
   final BombTerroristAudioManager _audioManager = BombTerroristAudioManager();
+  // Manager audio pour défenseurs
+  final BombDefenderAudioManager _defenderAudioManager = BombDefenderAudioManager();
 
   BombProximityDetectionService({
     required BombOperationService bombOperationService,
@@ -207,6 +210,10 @@ class BombProximityDetectionService {
         int armingTime = _bombOperationScenario.armingTime ?? 30;
         _audioManager.playZoneEnteredAudio(site.name, armingTime);
         _audioManager.startCountdown(armingTime);
+      } else if (role == BombOperationTeam.defense) {
+        int defuseTime = _bombOperationScenario.defuseTime ?? 30;
+        _defenderAudioManager.playDefuseZoneEnteredAudio(site.name, defuseTime);
+        _defenderAudioManager.startDefuseCountdown(defuseTime);
       }
       logger.d('🔊 [BombProximityDetection] Bip d\'entrée de zone');
     } catch (e) {
@@ -223,8 +230,11 @@ class BombProximityDetectionService {
         _audioManager.stopCountdown();
         //Jouer l'audio de sortie de zone
         _audioManager.playZoneExitedAudio(site.name);
+      } else if (role == BombOperationTeam.defense) {
+        //Audio pour défenseurs
+        _defenderAudioManager.stopCountdown();
+        _defenderAudioManager.playDefuseZoneExitedAudio(site.name);
       }
-        //xxxxxxxxxxxxxxxxxx => Sortie de la zone [XXX]. Amorçage interrompu.
       logger.d('🔊 [BombProximityDetection] Bip de sortie de zone');
     } catch (e) {
       logger.d('❌ [BombProximityDetection] Erreur son sortie: $e');
@@ -249,6 +259,9 @@ class BombProximityDetectionService {
         final role = _bombOperationService.getPlayerRoleBombOperation(_userId);
         if (role == BombOperationTeam.attack) {
           _audioManager.playBombArmedAudio(zoneName);
+        }else if (role == BombOperationTeam.defense) {
+          //Audio pour défenseurs
+          _defenderAudioManager.playBombDefusedAudio(zoneName);
         }
       } else {
         // Bip d'échec (vibration d'erreur)
@@ -285,6 +298,7 @@ class BombProximityDetectionService {
   void dispose() {
     stopDetection();
     _audioManager.dispose();
+    _defenderAudioManager.dispose();
     logger.d('🧹 [BombProximityDetection] Service nettoyé');
   }
 }

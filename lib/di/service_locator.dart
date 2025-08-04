@@ -41,6 +41,10 @@ import '../services/location/movement_detector.dart';
 import 'package:get_it/get_it.dart';
 
 void setupServiceLocator() {
+
+  // 0. ENREGISTRER LE SERVICE AUDIO (lazy → créé à la première utilisation)
+  GetIt.I.registerLazySingleton<SimpleVoiceService>(() => SimpleVoiceService());
+
   //service locator
   final localServiceLocator = LocaleService();
 
@@ -146,7 +150,5 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<AdvancedLocationService>(advancedLocationService);
   GetIt.I.registerSingleton<InvitationService>(invitationService);
 
-  // ✅ 8. ENREGISTRER LE SERVICE AUDIO (lazy → créé à la première utilisation)
-  GetIt.I.registerLazySingleton<SimpleVoiceService>(() => SimpleVoiceService());
 }
 

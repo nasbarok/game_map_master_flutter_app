@@ -35,9 +35,9 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
   late BombOperationService _bombOperationService;
   List<ArmedBombInfo> _armedBombs = [];
 
-  static final Color neutralCardColor = Colors.grey.shade200;
-  static final Color attackCardColor = Colors.red.shade100;
-  static final Color defenseCardColor = Colors.blue.shade100;
+  static final Color neutralCardColor = Colors.grey.shade50;
+  static final Color attackCardColor = Colors.red.shade50;
+  static final Color defenseCardColor = Colors.blue.shade50;
 
   @override
   void initState() {
@@ -241,7 +241,8 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withOpacity(0.95),
+                border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -249,7 +250,7 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
                 children: [
                   Row(
                     children: [
-                      Icon(roleIcon, size: 20),
+                      Icon(roleIcon, size: 20, color: Colors.grey.shade700),
                       const SizedBox(width: 8),
                       Text(
                         'Vous êtes : $roleText',

@@ -227,18 +227,38 @@ class SimpleVoiceService extends ChangeNotifier {
 
   /// Obtient les messages audio pour une langue
   Future<Map<String, String>> _getAudioMessages(String language) async {
-    // Créer un objet Locale à partir du code langue (ex. 'fr' → Locale('fr'))
     final locale = Locale(language);
-
-    // Charger la localisation correspondante sans passer par un BuildContext
     final l10n = await AppLocalizations.delegate.load(locale);
 
-    // Retourner un dictionnaire où les clés sont vos identifiants de messages
-    // et les valeurs les textes localisés provenant des .arb
     return {
-      'audioGameStarted': l10n.audioGameStarted,
-      'audioGameEnded': l10n.audioGameEnded,
-      // Ajoutez ici d'autres entrées si vous étendez l'audio à d'autres événements.
+      // 🔥 Bomb Operation – Zone Terroriste
+      'bombZoneEntered': l10n.bombZoneEntered('{zoneName}'),
+      'bombArmingTimeRemaining': l10n.bombArmingTimeRemaining('{seconds}'),
+      'bombStayInZone': l10n.bombStayInZone,
+      'bombCountdown30': l10n.bombCountdown30,
+      'bombCountdown20': l10n.bombCountdown20,
+      'bombCountdown10': l10n.bombCountdown10,
+      'bombCountdown9': l10n.bombCountdown9,
+      'bombCountdown8': l10n.bombCountdown8,
+      'bombCountdown7': l10n.bombCountdown7,
+      'bombCountdown6': l10n.bombCountdown6,
+      'bombCountdown5': l10n.bombCountdown5,
+      'bombCountdown4': l10n.bombCountdown4,
+      'bombCountdown3': l10n.bombCountdown3,
+      'bombCountdown2': l10n.bombCountdown2,
+      'bombCountdown1': l10n.bombCountdown1,
+      'bombArmed': l10n.bombArmed('{zoneName}'),
+      'bombActiveAlert': l10n.bombActiveAlert('{zoneName}'),
+
+      // 🔧 Bomb Operation – Désamorçage (Defuse)
+      'defuseZoneEntered': l10n.defuseZoneEntered('{zoneName}'),
+      'defuseTimeRemaining': l10n.defuseTimeRemaining('{seconds}'),
+      'defuseStayInZone': l10n.defuseStayInZone,
+      'defuseZoneExited': l10n.defuseZoneExited('{zoneName}'),
+      'bombDefused': l10n.bombDefused('{zoneName}'),
+
+      // 💥 Explosion
+      'bombExploded': l10n.bombExploded('{zoneName}'),
     };
   }
 

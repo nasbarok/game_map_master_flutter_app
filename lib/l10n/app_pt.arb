@@ -644,5 +644,12 @@
   "bombCountdown2": "Dois",
   "bombCountdown1": "Um",
   "bombArmed": "Bomba da zona {zoneName} ativada",
-  "bombZoneExited": "Saída da zona {zoneName}. Ativação interrompida."
+  "bombZoneExited": "Saída da zona {zoneName}. Ativação interrompida.",
+  "bombActiveAlert": "Bomba ativa em {zoneName}. Intervenção necessária.",
+  "defuseZoneEntered": "Zona {zoneName} alcançada. Iniciando desarmamento.",
+  "defuseTimeRemaining": "Tempo restante: {seconds} segundos.",
+  "defuseStayInZone": "Permaneça na posição para completar a operação.",
+  "defuseZoneExited": "Saída da zona {zoneName}. Desarmamento interrompido.",
+  "bombDefused": "Local {zoneName} protegido. Bomba desarmada.",
+  "bombExploded": "Explosão! A bomba no local {zoneName} foi detonada."
 }

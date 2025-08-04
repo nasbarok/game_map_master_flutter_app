@@ -17,6 +17,9 @@ import '../../../models/game_session_participant.dart';
 import '../../../models/scenario/bomb_operation/bomb_operation_session.dart';
 import '../../../models/scenario/bomb_operation/bomb_site_state.dart';
 import '../../../utils/app_utils.dart';
+import '../../audio/bomb_defender_audio_manager.dart';
+import '../../audio/bomb_terrorist_audio_manager.dart';
+import '../../auth_service.dart';
 import '../../game_state_service.dart';
 
 /// Service pour gérer l'état du scénario Opération Bombe
@@ -434,6 +437,21 @@ class BombOperationService {
     if (index != -1) {
       final site = _activeBombSites.removeAt(index);
       _explodedBombSites.add(site);
+
+      // ✅ NOUVEAU : Déclencher l'audio d'explosion pour TOUS
+      final currentUserId = GetIt.I<AuthService>().currentUser?.id;
+      if (currentUserId != null) {
+        final role = getPlayerRoleBombOperation(currentUserId);
+
+        if (role == BombOperationTeam.attack) {
+          // audio d'explosion (victoire)
+          GetIt.I<BombTerroristAudioManager>().playBombExplodedAudio(site.name);
+        } else if (role == BombOperationTeam.defense) {
+          // Pour les défenseurs : audio d'explosion (échec)
+          GetIt.I<BombDefenderAudioManager>().playBombExplodedAudio(site.name);
+        }
+      }
+
       _bombSitesStreamController.add(null);
       logger.d('💥 [BombOperationService] Site $siteId déplacé vers exploded');
     }

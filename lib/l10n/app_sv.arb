@@ -640,5 +640,12 @@
   "bombCountdown2": "Två",
   "bombCountdown1": "Ett",
   "bombArmed": "Bomb i zon {zoneName} aktiverad",
-  "bombZoneExited": "Lämnade zon {zoneName}. Aktivering avbruten."
+  "bombZoneExited": "Lämnade zon {zoneName}. Aktivering avbruten.",
+  "bombActiveAlert": "Bomb aktiv på {zoneName}. Ingripande krävs.",
+  "defuseZoneEntered": "Zon {zoneName} nådd. Börjar desarmering.",
+  "defuseTimeRemaining": "Återstående tid: {seconds} sekunder.",
+  "defuseStayInZone": "Stanna kvar för att slutföra operationen.",
+  "defuseZoneExited": "Lämnade zon {zoneName}. Desarmering avbruten.",
+  "bombDefused": "Plats {zoneName} säkrad. Bomb desarmer.",
+  "bombExploded": "Explosion! Bomben på plats {zoneName} har utlösts."
 }

@@ -644,5 +644,12 @@
   "bombCountdown2": "二",
   "bombCountdown1": "一",
   "bombArmed": "ゾーン{zoneName}の爆弾が起動されました",
-  "bombZoneExited": "ゾーン{zoneName}から退出。起動が中断されました。"
+  "bombZoneExited": "ゾーン{zoneName}から退出。起動が中断されました。",
+  "bombActiveAlert": "{zoneName}で爆弾が作動中。介入が必要です。",
+  "defuseZoneEntered": "ゾーン{zoneName}に到達。解除を開始します。",
+  "defuseTimeRemaining": "残り時間：{seconds}秒。",
+  "defuseStayInZone": "作業を完了するため、その場に留まってください。",
+  "defuseZoneExited": "ゾーン{zoneName}から退出。解除が中断されました。",
+  "bombDefused": "サイト{zoneName}を確保。爆弾を解除しました。",
+  "bombExploded": "爆発！サイト{zoneName}の爆弾が起爆されました。"
 }

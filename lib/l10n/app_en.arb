@@ -2612,6 +2612,13 @@
   "bombCountdown2": "Two",
   "bombCountdown1": "One",
   "bombArmed": "Bomb in zone {zoneName} armed",
-  "bombZoneExited": "Exited zone {zoneName}. Arming interrupted."
+  "bombZoneExited": "Exited zone {zoneName}. Arming interrupted.",
+  "bombActiveAlert": "Bomb active on {zoneName}. Intervention required.",
+  "defuseZoneEntered": "Zone {zoneName} reached. Beginning defusal.",
+  "defuseTimeRemaining": "Time remaining: {seconds} seconds.",
+  "defuseStayInZone": "Stay in position to complete the operation.",
+  "defuseZoneExited": "Exited zone {zoneName}. Defusal interrupted.",
+  "bombDefused": "Site {zoneName} secured. Bomb defused.",
+  "bombExploded": "Explosion! The bomb on site {zoneName} has been triggered."
 
 }

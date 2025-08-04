@@ -2129,4 +2129,37 @@ class AppLocalizationsJa extends AppLocalizations {
   String bombZoneExited(Object zoneName) {
     return 'ゾーン$zoneNameから退出。起動が中断されました。';
   }
+
+  @override
+  String bombActiveAlert(Object zoneName) {
+    return '$zoneNameで爆弾が作動中。介入が必要です。';
+  }
+
+  @override
+  String defuseZoneEntered(Object zoneName) {
+    return 'ゾーン$zoneNameに到達。解除を開始します。';
+  }
+
+  @override
+  String defuseTimeRemaining(Object seconds) {
+    return '残り時間：$seconds秒。';
+  }
+
+  @override
+  String get defuseStayInZone => '作業を完了するため、その場に留まってください。';
+
+  @override
+  String defuseZoneExited(Object zoneName) {
+    return 'ゾーン$zoneNameから退出。解除が中断されました。';
+  }
+
+  @override
+  String bombDefused(Object zoneName) {
+    return 'サイト$zoneNameを確保。爆弾を解除しました。';
+  }
+
+  @override
+  String bombExploded(Object zoneName) {
+    return '爆発！サイト$zoneNameの爆弾が起爆されました。';
+  }
 }

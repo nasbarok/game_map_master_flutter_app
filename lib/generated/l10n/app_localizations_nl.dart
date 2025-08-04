@@ -2167,4 +2167,38 @@ class AppLocalizationsNl extends AppLocalizations {
   String bombZoneExited(Object zoneName) {
     return 'Zone $zoneName verlaten. Activering onderbroken.';
   }
+
+  @override
+  String bombActiveAlert(Object zoneName) {
+    return 'Bom actief op $zoneName. Interventie vereist.';
+  }
+
+  @override
+  String defuseZoneEntered(Object zoneName) {
+    return 'Zone $zoneName bereikt. Begin van ontmanteling.';
+  }
+
+  @override
+  String defuseTimeRemaining(Object seconds) {
+    return 'Resterende tijd: $seconds seconden.';
+  }
+
+  @override
+  String get defuseStayInZone =>
+      'Blijf op positie om de operatie te voltooien.';
+
+  @override
+  String defuseZoneExited(Object zoneName) {
+    return 'Zone $zoneName verlaten. Ontmanteling onderbroken.';
+  }
+
+  @override
+  String bombDefused(Object zoneName) {
+    return 'Locatie $zoneName beveiligd. Bom ontmanteld.';
+  }
+
+  @override
+  String bombExploded(Object zoneName) {
+    return 'Explosie! De bom op locatie $zoneName is geactiveerd.';
+  }
 }

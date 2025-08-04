@@ -1,11 +1,15 @@
 import 'package:game_map_master_flutter_app/models/websocket/bomb_defused_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import '../../generated/l10n/app_localizations.dart';
+import '../../models/scenario/bomb_operation/bomb_operation_team.dart';
 import '../../models/websocket/bomb_exploded_message.dart';
 import '../../models/websocket/bomb_operation_message.dart';
 import '../../models/websocket/bomb_planted_message.dart';
 import '../../models/websocket/websocket_message.dart';
 import '../api_service.dart';
+import '../audio/bomb_defender_audio_manager.dart';
+import '../audio/bomb_terrorist_audio_manager.dart';
 import '../auth_service.dart';
 import '../game_state_service.dart';
 import '../scenario/bomb_operation/bomb_operation_service.dart';
@@ -18,6 +22,9 @@ class BombOperationWebSocketHandler {
   final AuthService _authService;
   final GlobalKey<NavigatorState> _navigatorKey;
   final ApiService _apiService;
+
+  final BombTerroristAudioManager _audioManager = BombTerroristAudioManager();
+  final BombDefenderAudioManager _defenderAudioManager = BombDefenderAudioManager();
 
   BombOperationWebSocketHandler(
     this._authService,
@@ -110,12 +117,27 @@ class BombOperationWebSocketHandler {
     final bombTimer = msg.bombTimer;
     final plantedTimestamp = msg.plantedTimestamp;
     final senderId = msg.senderId;
-    final playerName = getPlayerName(senderId);
+    final l10n = AppLocalizations.of(context)!;
+    final playerName = getPlayerName(l10n,senderId);
     // Met à jour l'état local du site comme armé
     _proximityService.updateSiteState(msg.siteId, BombSiteState.armed);
 
     final _bombOperationService = GetIt.I<BombOperationService>();
     _bombOperationService.activateSite(msg.siteId, bombTimer, plantedTimestamp, playerName);
+
+    // Déclencher l'audio selon le rôle
+    final currentUserId = _authService.currentUser?.id;
+    if (currentUserId != null) {
+      final role = _bombOperationService.getPlayerRoleBombOperation(currentUserId);
+
+      if (role == BombOperationTeam.attack) {
+        // Pour les terroristes : confirmation d'armement
+        _audioManager.playBombArmedAudio(siteName!);
+      } else if (role == BombOperationTeam.defense) {
+        // Pour les défenseurs : alerte d'intervention
+        _defenderAudioManager.playBombActiveAlert(siteName!);
+      }
+    }
 
     // Affiche une notification snack + dialog court
     showNotification('💣 Bombe plantée sur $siteName par $playerName');
@@ -125,10 +147,10 @@ class BombOperationWebSocketHandler {
   void handleBombDefused(Map<String, dynamic> message, BuildContext context) {
     final msg = BombDefusedMessage.fromJson(message);
     logger.d('✅ [BombOperationWebSocket] Bombe désarmée: ${msg.siteName} par ${msg.senderId}');
-
+    final l10n = AppLocalizations.of(context)!;
     final siteId = msg.siteId;
     final siteName = msg.siteName;
-    final playerName = getPlayerName(msg.senderId);
+    final playerName = getPlayerName(l10n,msg.senderId);
 
     // 1. Mise à jour de l'état dans le service de proximité
     _proximityService.updateSiteState(siteId, BombSiteState.disarmed);
@@ -136,6 +158,17 @@ class BombOperationWebSocketHandler {
     // 2. Mise à jour dans le BombOperationService : désactivation du site
     final bombOperationService = GetIt.I<BombOperationService>();
     bombOperationService.deactivateSite(siteId);
+
+    // Déclencher l'audio de succès pour les défenseurs
+    final currentUserId = _authService.currentUser?.id;
+    if (currentUserId != null) {
+      final role = bombOperationService.getPlayerRoleBombOperation(currentUserId);
+
+      if (role == BombOperationTeam.defense) {
+        // Pour les défenseurs : confirmation de succès
+        _defenderAudioManager.playBombDefusedAudio(siteName!);
+      }
+    }
 
     // 3. Notification visuelle
     showNotification('✅ Bombe désarmée sur $siteName par $playerName');
@@ -156,7 +189,8 @@ class BombOperationWebSocketHandler {
     showNotification('💥 Explosion sur ${msg.siteName} !');
   }
 
-  String getPlayerName(int userId) {
+  String getPlayerName(AppLocalizations l10n,int userId) {
+
     final gameStateService = GetIt.I<GameStateService>();
 
     final player = gameStateService.connectedPlayersList.firstWhere(
@@ -167,13 +201,13 @@ class BombOperationWebSocketHandler {
       },
     );
     if (player.isEmpty) {
-      return 'Joueur #$userId';
+      return l10n.playerMarkerLabel(userId);
     }
 
     final username = player['username'];
     if (username == null) {
       logger.w('[getPlayerName] Joueur trouvé mais "username" est null → player=$player');
-      return 'Joueur #$userId';
+      return l10n.playerMarkerLabel(userId);
     }
     return username;
   }

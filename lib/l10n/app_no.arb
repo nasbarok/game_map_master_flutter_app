@@ -644,5 +644,12 @@
   "bombCountdown2": "To",
   "bombCountdown1": "En",
   "bombArmed": "Bombe i sone {zoneName} aktivert",
-  "bombZoneExited": "Forlot sone {zoneName}. Aktivering avbrutt."
+  "bombZoneExited": "Forlot sone {zoneName}. Aktivering avbrutt.",
+  "bombActiveAlert": "Bombe aktiv på {zoneName}. Inngripen påkrevd.",
+  "defuseZoneEntered": "Sone {zoneName} nådd. Starter desarmering.",
+  "defuseTimeRemaining": "Gjenværende tid: {seconds} sekunder.",
+  "defuseStayInZone": "Bli på plass for å fullføre operasjonen.",
+  "defuseZoneExited": "Forlot sone {zoneName}. Desarmering avbrutt.",
+  "bombDefused": "Område {zoneName} sikret. Bombe desarmer.",
+  "bombExploded": "Eksplosjon! Bomben på område {zoneName} har blitt utløst."
 }

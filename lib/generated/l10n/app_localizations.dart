@@ -3921,6 +3921,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exited zone {zoneName}. Arming interrupted.'**
   String bombZoneExited(Object zoneName);
+
+  /// No description provided for @bombActiveAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Bomb active on {zoneName}. Intervention required.'**
+  String bombActiveAlert(Object zoneName);
+
+  /// No description provided for @defuseZoneEntered.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone {zoneName} reached. Beginning defusal.'**
+  String defuseZoneEntered(Object zoneName);
+
+  /// No description provided for @defuseTimeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining: {seconds} seconds.'**
+  String defuseTimeRemaining(Object seconds);
+
+  /// No description provided for @defuseStayInZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay in position to complete the operation.'**
+  String get defuseStayInZone;
+
+  /// No description provided for @defuseZoneExited.
+  ///
+  /// In en, this message translates to:
+  /// **'Exited zone {zoneName}. Defusal interrupted.'**
+  String defuseZoneExited(Object zoneName);
+
+  /// No description provided for @bombDefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Site {zoneName} secured. Bomb defused.'**
+  String bombDefused(Object zoneName);
+
+  /// No description provided for @bombExploded.
+  ///
+  /// In en, this message translates to:
+  /// **'Explosion! The bomb on site {zoneName} has been triggered.'**
+  String bombExploded(Object zoneName);
 }
 
 class _AppLocalizationsDelegate

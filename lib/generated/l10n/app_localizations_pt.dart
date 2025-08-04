@@ -2169,4 +2169,38 @@ class AppLocalizationsPt extends AppLocalizations {
   String bombZoneExited(Object zoneName) {
     return 'Saída da zona $zoneName. Ativação interrompida.';
   }
+
+  @override
+  String bombActiveAlert(Object zoneName) {
+    return 'Bomba ativa em $zoneName. Intervenção necessária.';
+  }
+
+  @override
+  String defuseZoneEntered(Object zoneName) {
+    return 'Zona $zoneName alcançada. Iniciando desarmamento.';
+  }
+
+  @override
+  String defuseTimeRemaining(Object seconds) {
+    return 'Tempo restante: $seconds segundos.';
+  }
+
+  @override
+  String get defuseStayInZone =>
+      'Permaneça na posição para completar a operação.';
+
+  @override
+  String defuseZoneExited(Object zoneName) {
+    return 'Saída da zona $zoneName. Desarmamento interrompido.';
+  }
+
+  @override
+  String bombDefused(Object zoneName) {
+    return 'Local $zoneName protegido. Bomba desarmada.';
+  }
+
+  @override
+  String bombExploded(Object zoneName) {
+    return 'Explosão! A bomba no local $zoneName foi detonada.';
+  }
 }

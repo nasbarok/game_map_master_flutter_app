@@ -2163,4 +2163,37 @@ class AppLocalizationsNo extends AppLocalizations {
   String bombZoneExited(Object zoneName) {
     return 'Forlot sone $zoneName. Aktivering avbrutt.';
   }
+
+  @override
+  String bombActiveAlert(Object zoneName) {
+    return 'Bombe aktiv på $zoneName. Inngripen påkrevd.';
+  }
+
+  @override
+  String defuseZoneEntered(Object zoneName) {
+    return 'Sone $zoneName nådd. Starter desarmering.';
+  }
+
+  @override
+  String defuseTimeRemaining(Object seconds) {
+    return 'Gjenværende tid: $seconds sekunder.';
+  }
+
+  @override
+  String get defuseStayInZone => 'Bli på plass for å fullføre operasjonen.';
+
+  @override
+  String defuseZoneExited(Object zoneName) {
+    return 'Forlot sone $zoneName. Desarmering avbrutt.';
+  }
+
+  @override
+  String bombDefused(Object zoneName) {
+    return 'Område $zoneName sikret. Bombe desarmer.';
+  }
+
+  @override
+  String bombExploded(Object zoneName) {
+    return 'Eksplosjon! Bomben på område $zoneName har blitt utløst.';
+  }
 }
