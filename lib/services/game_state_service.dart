@@ -332,7 +332,7 @@ class GameStateService extends ChangeNotifier {
         logger.d("📡 [GameStateService] POST /game-sessions/$sessionId/end");
         final response =
             await _apiService.post('game-sessions/$sessionId/end', {
-          'endTime': now.toIso8601String(),
+          'endTime': now.toUtc().toIso8601String(),
         });
         if (response != null) {
           logger.d("✅ Partie terminée côté serveur.");

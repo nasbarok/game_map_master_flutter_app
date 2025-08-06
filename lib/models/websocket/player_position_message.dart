@@ -36,13 +36,13 @@ class PlayerPositionMessage extends WebSocketMessage {
     return {
       'type': type,
       'senderId': senderId,
-      'timestamp': timestamp.toIso8601String(),
+      'timestamp': timestamp.toUtc().toIso8601String(),
       'payload': {
         'latitude': latitude,
         'longitude': longitude,
         'gameSessionId': gameSessionId,
         'teamId': teamId,
-        'timestamp': positionTimestamp.toIso8601String(),
+        'timestamp': positionTimestamp.toUtc().toIso8601String(),
       }
     };
   }

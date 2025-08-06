@@ -84,8 +84,8 @@ class BombOperationScore {
       'roundsWon': roundsWon,
       'bombsPlanted': bombsPlanted,
       'bombsDefused': bombsDefused,
-      'lastUpdated': lastUpdated.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
+      'lastUpdated': lastUpdated.toUtc().toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
     };
     
     return data;

@@ -2619,6 +2619,26 @@
   "defuseStayInZone": "Stay in position to complete the operation.",
   "defuseZoneExited": "Exited zone {zoneName}. Defusal interrupted.",
   "bombDefused": "Site {zoneName} secured. Bomb defused.",
-  "bombExploded": "Explosion! The bomb on site {zoneName} has been triggered."
+  "bombExploded": "Explosion! The bomb on site {zoneName} has been triggered.",
+  "bombOperationActive": "Bomb Operation scenario active - Waiting for role assignment",
+  "noTeamRole": "Your team has no assigned role in this scenario",
+  "terroristRole": "Terrorist",
+  "antiTerroristRole": "Counter-terrorist",
+  "unknownRole": "Unknown role",
+  "terroristObjective": "Objective: Go to a bomb zone to activate detonation",
+  "antiTerroristObjective": "Objective: Go to the active bomb zone to deactivate it",
+  "observerObjective": "Objective: Observe the game",
+  "youAre": "You are: {role}",
+  "sitesActivated": "{activatedCount} sites activated out of {totalSites}",
+  "armingTime": "Arming time: {time}s",
+  "defuseTime": "Defuse time: {time}s",
+  "bombStats": "{armedCount} bombs armed • {disarmedCount} defused • {explodedCount} exploded",
+  "inZone": "In zone: {zoneName}",
+  "armedBombs": "Armed bombs:",
+  "bombsToDefuse": "Bombs to defuse:",
+  "victory": "🏆 Victory!",
+  "defeat": "💀 Defeat!",
+  "draw": "⚖️ Draw",
+  "bombTimerText": "Bomb at site {siteName} armed - explosion in {time}"
 
 }

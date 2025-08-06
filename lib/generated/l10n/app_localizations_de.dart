@@ -2217,4 +2217,83 @@ class AppLocalizationsDe extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return 'Explosion! Die Bombe am Standort $zoneName wurde ausgelöst.';
   }
+
+  @override
+  String get bombOperationActive =>
+      'Bombenoperations-Szenario aktiv - Warten auf Rollenzuweisung';
+
+  @override
+  String get noTeamRole =>
+      'Ihr Team hat keine zugewiesene Rolle in diesem Szenario';
+
+  @override
+  String get terroristRole => 'Terrorist';
+
+  @override
+  String get antiTerroristRole => 'Anti-Terrorist';
+
+  @override
+  String get unknownRole => 'Unbekannte Rolle';
+
+  @override
+  String get terroristObjective =>
+      'Ziel: Begeben Sie sich in eine Bombenzone, um die Detonation zu aktivieren';
+
+  @override
+  String get antiTerroristObjective =>
+      'Ziel: Begeben Sie sich in die aktive Bombenzone, um sie zu deaktivieren';
+
+  @override
+  String get observerObjective => 'Ziel: Das Spiel beobachten';
+
+  @override
+  String youAre(Object role) {
+    return 'Sie sind: $role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$activatedCount Standorte aktiviert von $totalSites';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return 'Aktivierungszeit: ${time}s';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return 'Entschärfungszeit: ${time}s';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount Bomben aktiviert • $disarmedCount entschärft • $explodedCount explodiert';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'In Zone: $zoneName';
+  }
+
+  @override
+  String get armedBombs => 'Aktivierte Bomben:';
+
+  @override
+  String get bombsToDefuse => 'Zu entschärfende Bomben:';
+
+  @override
+  String get victory => '🏆 Sieg!';
+
+  @override
+  String get defeat => '💀 Niederlage!';
+
+  @override
+  String get draw => '⚖️ Unentschieden';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'Bombe am Standort $siteName aktiviert - Explosion in $time';
+  }
 }

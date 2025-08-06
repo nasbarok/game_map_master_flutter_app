@@ -56,7 +56,7 @@ class PlayerPosition {
       'teamId': teamId,
       'latitude': latitude,
       'longitude': longitude,
-      'timestamp': timestamp.toIso8601String(),
+      'timestamp': timestamp.toUtc().toIso8601String(),
     };
   }
   

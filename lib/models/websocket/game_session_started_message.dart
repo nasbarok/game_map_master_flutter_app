@@ -37,7 +37,7 @@ class GameSessionStartedMessage extends WebSocketMessage {
         'id': gameSessionId,
         'gameMap': gameMap.toJson(),
         'field': field.toJson(),
-        'startTime': startTime.toIso8601String(),
+        'startTime': startTime.toUtc().toIso8601String(),
         'durationMinutes': durationMinutes,
         'participants': participants.map((p) => p.toJson()).toList(),
         'scenarios': scenarios.map((s) => s.toJson()).toList(),

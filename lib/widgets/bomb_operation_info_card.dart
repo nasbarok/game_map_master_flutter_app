@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/scenario/bomb_operation/bomb_operation_team.dart';
 import '../models/scenario/bomb_operation/bomb_site.dart';
 import '../models/websocket/bomb_planted_message.dart';
@@ -8,6 +9,7 @@ import '../services/scenario/bomb_operation/bomb_operation_auto_manager.dart';
 import '../services/scenario/bomb_operation/bomb_operation_service.dart';
 import '../services/scenario/bomb_operation/bomb_timer_calculator_service.dart';
 import '../utils/logger.dart';
+import 'dart:ui';
 
 /// Widget affichant les informations enrichies du scénario Opération Bombe
 /// Utilise les calculs dynamiques basés sur les timestamps WebSocket
@@ -28,6 +30,7 @@ class BombOperationInfoCard extends StatefulWidget {
   @override
   _BombOperationInfoCardState createState() => _BombOperationInfoCardState();
 }
+
 enum GameResult { win, lose, draw }
 
 class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
@@ -35,9 +38,9 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
   late BombOperationService _bombOperationService;
   List<ArmedBombInfo> _armedBombs = [];
 
-  static final Color neutralCardColor = Colors.grey.shade50;
-  static final Color attackCardColor = Colors.red.shade50;
-  static final Color defenseCardColor = Colors.blue.shade50;
+  static final Color neutralCardColor = Colors.transparent;
+  static final Color attackCardColor = Colors.transparent;
+  static final Color defenseCardColor = Colors.transparent;
 
   @override
   void initState() {
@@ -72,7 +75,8 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
 
       logger.d('🔄 [BombOperationInfoCard] Mise à jour des bombSitesStream');
 
-      final scenario = bombOperationService.activeSessionScenarioBomb?.bombOperationScenario;
+      final scenario =
+          bombOperationService.activeSessionScenarioBomb?.bombOperationScenario;
       if (scenario == null) return;
 
       final activeSites = bombOperationService.activeBombSites;
@@ -80,7 +84,8 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
         return ArmedBombInfo(
           siteId: site.id!,
           siteName: site.name,
-          plantedTimestamp: site.plantedTimestamp ?? DateTime.now(), // ✅ vraie valeur si dispo
+          plantedTimestamp: site.plantedTimestamp ?? DateTime.now(),
+          // ✅ vraie valeur si dispo
           bombTimerSeconds: scenario.bombTimer,
           playerName: site.plantedBy ?? 'Inconnu', // ✅ nom du joueur si dispo
         );
@@ -100,7 +105,8 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
       final isDisarmed = site != null && site.active == false;
 
       if (isDisarmed) {
-        logger.d('🟦 Bombe désamorcée détectée : ${bomb.siteName} – suppression du timer');
+        logger.d(
+            '🟦 Bombe désamorcée détectée : ${bomb.siteName} – suppression du timer');
         toRemove.add(bomb);
       } else if (bomb.shouldHaveExploded) {
         logger.w('💥 Explosion locale détectée pour ${bomb.siteName}');
@@ -116,10 +122,9 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
     }
   }
 
-
-
   void addArmedBomb(BombPlantedMessage message) {
-    final scenario = _bombOperationService.activeSessionScenarioBomb?.bombOperationScenario;
+    final scenario =
+        _bombOperationService.activeSessionScenarioBomb?.bombOperationScenario;
     if (scenario == null) return;
 
     final armedBomb = ArmedBombInfo(
@@ -144,21 +149,22 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
   @override
   Widget build(BuildContext context) {
     if (widget.teamId == null) {
-      logger.d('⚠️ [BombOperationInfoCard] teamId est null, impossible d\'afficher le rôle');
+      logger.d(
+          '⚠️ [BombOperationInfoCard] teamId est null, impossible d\'afficher le rôle');
       return const SizedBox.shrink();
     }
-
+    final l10n = AppLocalizations.of(context)!;
     final teamRoles = _bombOperationService.teamRoles;
-    
+
     if (teamRoles.isEmpty) {
       logger.d('⚠️ [BombOperationInfoCard] Aucun rôle d\'équipe défini');
       return Card(
         color: neutralCardColor,
-        child: const Padding(
-          padding: EdgeInsets.all(16.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Text(
-            'Scénario Opération Bombe actif - En attente d\'assignation des rôles',
-            style: TextStyle(fontSize: 16),
+            l10n.bombOperationActive,
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
             textAlign: TextAlign.center,
           ),
         ),
@@ -167,48 +173,81 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
 
     final role = teamRoles[widget.teamId];
     if (role == null) {
-      logger.d('⚠️ [BombOperationInfoCard] Aucun rôle trouvé pour l\'équipe ${widget.teamId}');
+      logger.d(
+          '⚠️ [BombOperationInfoCard] Aucun rôle trouvé pour l\'équipe ${widget.teamId}');
       return Card(
         color: neutralCardColor,
-        child: const Padding(
-          padding: EdgeInsets.all(16.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Text(
-            'Votre équipe n\'a pas de rôle assigné dans ce scénario',
-            style: TextStyle(fontSize: 16),
+            l10n.noTeamRole,
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
             textAlign: TextAlign.center,
           ),
         ),
       );
     }
 
-    return _buildEnrichedInfoCard(role);
+    return _buildEnrichedInfoCard(role, l10n);
   }
 
-  Widget _buildEnrichedInfoCard(BombOperationTeam role) {
+  Widget _buildEnrichedInfoCard(BombOperationTeam role, AppLocalizations l10n) {
     // Déterminer le style en fonction du rôle
     String roleText;
     String objectiveText;
-    Color cardColor;
+    Color borderColor;
+    Color accentColor;
     IconData roleIcon;
+    LinearGradient backgroundGradient;
 
     switch (role) {
       case BombOperationTeam.attack:
-        roleText = 'Terroriste';
-        objectiveText = 'Objectif : Rendez-vous dans une zone de bombe pour activer la détonation';
-        cardColor = attackCardColor;
+        roleText = l10n.terroristRole;
+        objectiveText = l10n.terroristObjective;
+        borderColor = Colors.red.shade600;
+        accentColor = Colors.red.shade700;
         roleIcon = Icons.dangerous;
+        backgroundGradient = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.red.withOpacity(0.1),
+            Colors.red.withOpacity(0.05),
+            Colors.transparent,
+          ],
+        );
         break;
       case BombOperationTeam.defense:
-        roleText = 'Anti-terroriste';
-        objectiveText = 'Objectif : Rendez-vous dans la zone de bombe active pour la désactiver';
-        cardColor = defenseCardColor;
+        roleText = l10n.antiTerroristRole;
+        objectiveText = l10n.antiTerroristObjective;
+        borderColor = Colors.blue.shade600;
+        accentColor = Colors.blue.shade700;
         roleIcon = Icons.shield;
+        backgroundGradient = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.withOpacity(0.1),
+            Colors.blue.withOpacity(0.05),
+            Colors.transparent,
+          ],
+        );
         break;
       default:
-        roleText = 'Rôle inconnu';
-        objectiveText = 'Objectif : Observer la partie';
-        cardColor = neutralCardColor;
+        roleText = l10n.unknownRole;
+        objectiveText = l10n.observerObjective;
+        borderColor = Colors.grey.shade600;
+        accentColor = Colors.grey.shade700;
         roleIcon = Icons.question_mark;
+        backgroundGradient = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey.withOpacity(0.1),
+            Colors.grey.withOpacity(0.05),
+            Colors.transparent,
+          ],
+        );
     }
 
     // Récupération des données dynamiques
@@ -229,132 +268,292 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
     final gameEnded = _isGameEnded(activeSites, _armedBombs);
     final result = _getGameResult(role, explodedCount, disarmedCount);
 
-    return Card(
-      color: cardColor,
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // En-tête avec rôle et objectif
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: backgroundGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: borderColor,
+          width: 3, // Bordure épaisse
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: borderColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(9), // Légèrement plus petit que la bordure
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.1), // Fond très transparent
+            ),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // En-tête avec rôle et objectif - Style militaire
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7), // Fond sombre semi-transparent
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: borderColor.withOpacity(0.8),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(roleIcon, size: 20, color: Colors.grey.shade700),
-                      const SizedBox(width: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              roleIcon,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              l10n.youAre(roleText),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(1, 1),
+                                    blurRadius: 2,
+                                    color: Colors.black54,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        'Vous êtes : $roleText',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        objectiveText,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade200,
+                          height: 1.3,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    objectiveText,
-                    style: const TextStyle(fontSize: 14),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Informations sur les sites - Style tactique
+                _buildInfoRow(
+                  icon: Icons.location_city,
+                  label: l10n.sitesActivated(activatedCount, totalSites),
+                  color: accentColor,
+                  isImportant: true,
+                ),
+
+                // Temps d'amorçage/désarmement
+                if (scenario != null) ...[
+                  const SizedBox(height: 8),
+                  _buildInfoRow(
+                    icon: Icons.timer,
+                    label: role == BombOperationTeam.attack
+                        ? l10n.armingTime(scenario.armingTime)
+                        : l10n.defuseTime(scenario.defuseTime),
+                    color: Colors.orange.shade600,
                   ),
                 ],
-              ),
-            ),
 
-            const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
-            // Informations sur les sites
-            Text(
-              '$activatedCount sites activés sur $totalSites',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
+                // Liste des bombes amorcées avec timers dynamiques
+                if (_armedBombs.isNotEmpty) ...[
+                  _buildArmedBombsSection(role, l10n, accentColor),
+                  const SizedBox(height: 16),
+                ],
 
-            // Temps d'amorçage/désarmement
-            if (scenario != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                role == BombOperationTeam.attack
-                  ? 'Temps d\'amorçage : ${scenario.armingTime}s'
-                  : 'Temps de désarmement : ${scenario.defuseTime}s',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-            ],
+                // Statistiques globales - Style dashboard
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.grey.shade600.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.analytics,
+                        color: Colors.grey.shade300,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.bombStats(armedCount, disarmedCount, explodedCount),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade200,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-            const SizedBox(height: 16),
+                // Résultat du jeu
+                if (gameEnded) ...[
+                  const SizedBox(height: 12),
+                  _buildGameResultWidget(result, l10n),
+                ],
 
-            // Liste des bombes amorcées avec timers dynamiques
-            if (_armedBombs.isNotEmpty) ...[
-              _buildArmedBombsSection(role),
-              const SizedBox(height: 16),
-            ],
-
-            // Statistiques globales
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Text(
-                '$armedCount bombes amorcées • $disarmedCount désarmées • $explodedCount explosées',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-            ),
-
-            // Résultat du jeu
-            if (gameEnded) ...[
-              const SizedBox(height: 12),
-              _buildGameResultWidget(result),
-            ],
-
-            // Indicateur de zone active
-            if (widget.autoManager != null && widget.autoManager!.isInActiveZone && widget.autoManager!.currentSite != null) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.location_on, color: Colors.red.shade700, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Dans la zone : ${widget.autoManager!.currentSite!.name}',
-                    style: const TextStyle(fontSize: 14),
+                // Indicateur de zone active - Style alerte
+                if (widget.autoManager != null &&
+                    widget.autoManager!.isInActiveZone &&
+                    widget.autoManager!.currentSite != null) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.red.shade600,
+                        width: 2,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: Colors.red.shade300,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.inZone(widget.autoManager!.currentSite!.name),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade100,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-              ),
-            ],
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildArmedBombsSection(BombOperationTeam role) {
-    final icon = role == BombOperationTeam.attack ? '🔥' : '⚠️';
-    final title = role == BombOperationTeam.attack ? 'Bombes armées :' : 'Bombes à désarmer :';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required Color color,
+    bool isImportant = false,
+  }) {
+    return Row(
       children: [
-        Text(
-          '$icon $title',
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 16,
+          ),
         ),
-        const SizedBox(height: 8),
-        ..._armedBombs.map((bomb) => _buildBombTimerRow(bomb)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isImportant ? 15 : 14,
+              fontWeight: isImportant ? FontWeight.bold : FontWeight.w500,
+              color: Colors.white,
+              shadows: const [
+                Shadow(
+                  offset: Offset(1, 1),
+                  blurRadius: 2,
+                  color: Colors.black54,
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildBombTimerRow(ArmedBombInfo bomb) {
+  Widget _buildArmedBombsSection(BombOperationTeam role, AppLocalizations l10n, Color accentColor) {
+    final icon = role == BombOperationTeam.attack ? '🔥' : '⚠️';
+    final title = role == BombOperationTeam.attack ? l10n.armedBombs : l10n.bombsToDefuse;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: accentColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: accentColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                icon,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ..._armedBombs.map((bomb) => _buildBombTimerRow(bomb, l10n)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBombTimerRow(ArmedBombInfo bomb, AppLocalizations l10n) {
     final remainingSeconds = bomb.remainingSeconds;
     final formattedTime = bomb.formattedRemainingTime;
     final timerColor = bomb.timerColor;
@@ -376,31 +575,33 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Text(
-        'Bombe du site ${bomb.siteName} amorcée - explosion dans $formattedTime',
+        l10n.bombTimerText(bomb.siteName, formattedTime),
         style: TextStyle(
           fontSize: 13,
           color: textColor,
-          fontWeight: timerColor == TimerColor.critical ? FontWeight.bold : FontWeight.normal,
+          fontWeight: timerColor == TimerColor.critical
+              ? FontWeight.bold
+              : FontWeight.normal,
         ),
       ),
     );
   }
 
-  Widget _buildGameResultWidget(GameResult result) {
+  Widget _buildGameResultWidget(GameResult result, AppLocalizations l10n) {
     String resultText;
     Color resultColor;
 
     switch (result) {
       case GameResult.win:
-        resultText = '🏆 Victoire !';
+        resultText = l10n.victory;
         resultColor = Colors.green.shade700;
         break;
       case GameResult.lose:
-        resultText = '💀 Défaite !';
+        resultText = l10n.defeat;
         resultColor = Colors.red.shade700;
         break;
       case GameResult.draw:
-        resultText = '⚖️ Égalité';
+        resultText = l10n.draw;
         resultColor = Colors.orange.shade700;
         break;
     }
@@ -425,20 +626,25 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
 
   // Méthodes utilitaires
   int _getDisarmedCount() {
-    return _bombOperationService.activeBombSites.where((site) => site.active == false).length;
+    return _bombOperationService.activeBombSites
+        .where((site) => site.active == false)
+        .length;
   }
 
-  bool _isGameEnded(List<BombSite> activeSites, List<ArmedBombInfo> armedBombs) {
+  bool _isGameEnded(
+      List<BombSite> activeSites, List<ArmedBombInfo> armedBombs) {
     // 1. Il ne doit plus rester de sites à activer
     final toActivateEmpty = _bombOperationService.toActivateBombSites.isEmpty;
 
     // 2. Tous les sites activés doivent être soit désamorcés (active == false), soit explosés
-    final allHandled = _bombOperationService.activeBombSites.every((site) => !site.active);
+    final allHandled =
+        _bombOperationService.activeBombSites.every((site) => !site.active);
 
     return toActivateEmpty && allHandled && armedBombs.isEmpty;
   }
 
-  GameResult _getGameResult(BombOperationTeam role, int explodedCount, int disarmedCount) {
+  GameResult _getGameResult(
+      BombOperationTeam role, int explodedCount, int disarmedCount) {
     if (explodedCount == disarmedCount) return GameResult.draw;
 
     if (role == BombOperationTeam.attack) {
@@ -447,5 +653,4 @@ class _BombOperationInfoCardState extends State<BombOperationInfoCard> {
       return disarmedCount > explodedCount ? GameResult.win : GameResult.lose;
     }
   }
-
 }

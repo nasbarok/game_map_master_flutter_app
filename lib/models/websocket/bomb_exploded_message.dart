@@ -25,7 +25,7 @@ class BombExplodedMessage extends WebSocketMessage {
     return {
       'type': type,
       'senderId': senderId,
-      'timestamp': timestamp.toIso8601String(),
+      'timestamp': timestamp.toUtc().toIso8601String(),
       'payload': {
         'siteId': siteId,
         'siteName': siteName,

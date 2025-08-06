@@ -40,8 +40,8 @@ class Invitation {
       'user': user.toJson(),
       'team': team?.toJson(),
       'status': status,
-      'createdAt': createdAt.toIso8601String(),
-      'respondedAt': respondedAt?.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'respondedAt': respondedAt?.toUtc().toIso8601String(),
     };
   }
 

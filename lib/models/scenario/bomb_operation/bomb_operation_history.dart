@@ -92,8 +92,8 @@ class BombOperationHistory {
   Map<String, dynamic> toJson() {
     return {
       'gameSessionId': gameSessionId,
-      'sessionStartTime': sessionStartTime.toIso8601String(),
-      'sessionEndTime': sessionEndTime?.toIso8601String(),
+      'sessionStartTime': sessionStartTime.toUtc().toIso8601String(),
+      'sessionEndTime': sessionEndTime?.toUtc().toIso8601String(),
       'sessionStatus': sessionStatus,
       'scenarioName': scenarioName,
       'bombTimer': bombTimer,
@@ -259,7 +259,7 @@ class BombEvent {
 
   Map<String, dynamic> toJson() {
     return {
-      'timestamp': timestamp.toIso8601String(),
+      'timestamp': timestamp.toUtc().toIso8601String(),
       'eventType': eventType,
       'siteName': siteName,
       if (playerName != null) 'playerName': playerName,

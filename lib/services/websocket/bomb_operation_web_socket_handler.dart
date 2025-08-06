@@ -51,7 +51,7 @@ class BombOperationWebSocketHandler {
     }
     final bombOperationService = GetIt.I<BombOperationService>();
     final userId = _authService.currentUser!.id!;
-    final now = DateTime.now().toUtc().toIso8601String();
+    final now = DateTime.now().toUtc().toUtc().toIso8601String();
     final requestBody = {
       'userId': userId,
       'bombSiteId': bombSiteId,

@@ -2196,4 +2196,83 @@ class AppLocalizationsNo extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return 'Eksplosjon! Bomben på område $zoneName har blitt utløst.';
   }
+
+  @override
+  String get bombOperationActive =>
+      'Bombeoperasjon scenario aktivt - Venter på rolletildeling';
+
+  @override
+  String get noTeamRole =>
+      'Laget ditt har ingen tildelt rolle i dette scenarioet';
+
+  @override
+  String get terroristRole => 'Terrorist';
+
+  @override
+  String get antiTerroristRole => 'Anti-terrorist';
+
+  @override
+  String get unknownRole => 'Ukjent rolle';
+
+  @override
+  String get terroristObjective =>
+      'Mål: Gå til en bombesone for å aktivere detonasjonen';
+
+  @override
+  String get antiTerroristObjective =>
+      'Mål: Gå til den aktive bombesonen for å deaktivere den';
+
+  @override
+  String get observerObjective => 'Mål: Observere spillet';
+
+  @override
+  String youAre(Object role) {
+    return 'Du er: $role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$activatedCount steder aktivert av $totalSites';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return 'Armeringstid: ${time}s';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return 'Desarmeringstid: ${time}s';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount bomber armert • $disarmedCount desarmer • $explodedCount eksplodert';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'I sone: $zoneName';
+  }
+
+  @override
+  String get armedBombs => 'Armerte bomber:';
+
+  @override
+  String get bombsToDefuse => 'Bomber å desarmer:';
+
+  @override
+  String get victory => '🏆 Seier!';
+
+  @override
+  String get defeat => '💀 Nederlag!';
+
+  @override
+  String get draw => '⚖️ Uavgjort';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'Bombe på sted $siteName armert - eksplosjon om $time';
+  }
 }

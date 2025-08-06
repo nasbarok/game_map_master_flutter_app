@@ -69,7 +69,7 @@ class BombOperationHistoryService {
   /// Obtient l'état des sites à un moment donné (pour le replay)
   Future<List<BombSiteHistory>> getSitesStateAtTime(int gameSessionId, DateTime timestamp) async {
     try {
-      final response = await _apiService.get('bomb-operation/history/$gameSessionId/state-at-time?timestamp=${timestamp.toIso8601String()}');
+      final response = await _apiService.get('bomb-operation/history/$gameSessionId/state-at-time?timestamp=${timestamp.toUtc().toIso8601String()}');
 
       if (response != null && response is List) {
         return response.map((e) => BombSiteHistory.fromJson(e as Map<String, dynamic>)).toList();

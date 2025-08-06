@@ -47,7 +47,7 @@ class TreasureHuntScore {
       'teamName': teamName,
       'score': score,
       'treasuresFound': treasuresFound,
-      'lastUpdated': lastUpdated.toIso8601String(),
+      'lastUpdated': lastUpdated.toUtc().toIso8601String(),
     };
   }
 }

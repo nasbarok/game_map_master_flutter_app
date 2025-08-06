@@ -44,8 +44,8 @@ class GameSessionParticipant {
       'username': username,
       'teamId': teamId,
       'teamName': teamName,
-      'joinedAt': joinedAt.toIso8601String(),
-      'leftAt': leftAt?.toIso8601String(),
+      'joinedAt': joinedAt.toUtc().toIso8601String(),
+      'leftAt': leftAt?.toUtc().toIso8601String(),
       'participantType': participantType,
     };
   }

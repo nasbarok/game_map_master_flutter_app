@@ -50,8 +50,8 @@ class Scenario {
       'creator': creator?.toJson(),
       'gameSessionId': gameSessionId,
       'active': active,
-      'startTime': startTime?.toIso8601String(),
-      'endTime': endTime?.toIso8601String(),
+      'startTime': startTime?.toUtc().toIso8601String(),
+      'endTime': endTime?.toUtc().toIso8601String(),
     };
   }
 

@@ -231,6 +231,10 @@ class SimpleVoiceService extends ChangeNotifier {
     final l10n = await AppLocalizations.delegate.load(locale);
 
     return {
+      // 🔥 General
+      'audioGameStarted': l10n.audioGameStarted,
+      'audioGameEnded': l10n.audioGameEnded,
+
       // 🔥 Bomb Operation – Zone Terroriste
       'bombZoneEntered': l10n.bombZoneEntered('{zoneName}'),
       'bombArmingTimeRemaining': l10n.bombArmingTimeRemaining('{seconds}'),

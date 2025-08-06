@@ -2199,4 +2199,82 @@ class AppLocalizationsSv extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return 'Explosion! Bomben på plats $zoneName har utlösts.';
   }
+
+  @override
+  String get bombOperationActive =>
+      'Bomboperations scenario aktivt - Väntar på rolltilldelning';
+
+  @override
+  String get noTeamRole => 'Ditt lag har ingen tilldelad roll i detta scenario';
+
+  @override
+  String get terroristRole => 'Terrorist';
+
+  @override
+  String get antiTerroristRole => 'Antiterrorist';
+
+  @override
+  String get unknownRole => 'Okänd roll';
+
+  @override
+  String get terroristObjective =>
+      'Mål: Gå till en bombzon för att aktivera detonationen';
+
+  @override
+  String get antiTerroristObjective =>
+      'Mål: Gå till den aktiva bombzonen för att deaktivera den';
+
+  @override
+  String get observerObjective => 'Mål: Observera spelet';
+
+  @override
+  String youAre(Object role) {
+    return 'Du är: $role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$activatedCount platser aktiverade av $totalSites';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return 'Beväpningstid: ${time}s';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return 'Desarmering tid: ${time}s';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount bomber beväpnade • $disarmedCount desarmerade • $explodedCount exploderade';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'I zon: $zoneName';
+  }
+
+  @override
+  String get armedBombs => 'Beväpnade bomber:';
+
+  @override
+  String get bombsToDefuse => 'Bomber att desarmer:';
+
+  @override
+  String get victory => '🏆 Seger!';
+
+  @override
+  String get defeat => '💀 Nederlag!';
+
+  @override
+  String get draw => '⚖️ Oavgjort';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'Bomb på plats $siteName beväpnad - explosion om $time';
+  }
 }

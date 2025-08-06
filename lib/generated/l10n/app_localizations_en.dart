@@ -2194,4 +2194,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return 'Explosion! The bomb on site $zoneName has been triggered.';
   }
+
+  @override
+  String get bombOperationActive =>
+      'Bomb Operation scenario active - Waiting for role assignment';
+
+  @override
+  String get noTeamRole => 'Your team has no assigned role in this scenario';
+
+  @override
+  String get terroristRole => 'Terrorist';
+
+  @override
+  String get antiTerroristRole => 'Counter-terrorist';
+
+  @override
+  String get unknownRole => 'Unknown role';
+
+  @override
+  String get terroristObjective =>
+      'Objective: Go to a bomb zone to activate detonation';
+
+  @override
+  String get antiTerroristObjective =>
+      'Objective: Go to the active bomb zone to deactivate it';
+
+  @override
+  String get observerObjective => 'Objective: Observe the game';
+
+  @override
+  String youAre(Object role) {
+    return 'You are: $role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$activatedCount sites activated out of $totalSites';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return 'Arming time: ${time}s';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return 'Defuse time: ${time}s';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount bombs armed • $disarmedCount defused • $explodedCount exploded';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'In zone: $zoneName';
+  }
+
+  @override
+  String get armedBombs => 'Armed bombs:';
+
+  @override
+  String get bombsToDefuse => 'Bombs to defuse:';
+
+  @override
+  String get victory => '🏆 Victory!';
+
+  @override
+  String get defeat => '💀 Defeat!';
+
+  @override
+  String get draw => '⚖️ Draw';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'Bomb at site $siteName armed - explosion in $time';
+  }
 }

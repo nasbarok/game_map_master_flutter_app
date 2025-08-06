@@ -2200,4 +2200,83 @@ class AppLocalizationsPl extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return 'Wybuch! Bomba w miejscu $zoneName została zdetonowana.';
   }
+
+  @override
+  String get bombOperationActive =>
+      'Scenariusz Operacji Bombowej aktywny - Oczekiwanie na przydzielenie ról';
+
+  @override
+  String get noTeamRole =>
+      'Twój zespół nie ma przydzielonej roli w tym scenariuszu';
+
+  @override
+  String get terroristRole => 'Terrorysta';
+
+  @override
+  String get antiTerroristRole => 'Antyterrorysta';
+
+  @override
+  String get unknownRole => 'Nieznana rola';
+
+  @override
+  String get terroristObjective =>
+      'Cel: Udaj się do strefy bomby, aby aktywować detonację';
+
+  @override
+  String get antiTerroristObjective =>
+      'Cel: Udaj się do aktywnej strefy bomby, aby ją dezaktywować';
+
+  @override
+  String get observerObjective => 'Cel: Obserwować grę';
+
+  @override
+  String youAre(Object role) {
+    return 'Jesteś: $role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$activatedCount miejsc aktywowanych z $totalSites';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return 'Czas uzbrajania: ${time}s';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return 'Czas rozbrajania: ${time}s';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount bomb uzbrojonych • $disarmedCount rozbrojonch • $explodedCount wybuchłych';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'W strefie: $zoneName';
+  }
+
+  @override
+  String get armedBombs => 'Uzbrojone bomby:';
+
+  @override
+  String get bombsToDefuse => 'Bomby do rozbrojenia:';
+
+  @override
+  String get victory => '🏆 Zwycięstwo!';
+
+  @override
+  String get defeat => '💀 Porażka!';
+
+  @override
+  String get draw => '⚖️ Remis';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'Bomba w miejscu $siteName uzbrojona - wybuch za $time';
+  }
 }

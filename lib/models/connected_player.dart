@@ -36,7 +36,7 @@ class ConnectedPlayer {
       'user': user.toJson(),
       'gameMap': gameMap.toJson(),
       'team': team?.toJson(),
-      'joinedAt': joinedAt.toIso8601String(),
+      'joinedAt': joinedAt.toUtc().toIso8601String(),
       'active': active,
     };
   }

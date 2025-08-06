@@ -34,7 +34,7 @@ class GameSessionService {
   Future<GameSession> startGameSession(int gameSessionId) async {
     final now = DateTime.now().toUtc();
     final json = await _apiService.post('game-sessions/$gameSessionId/start', {
-      'startTime': now.toIso8601String(),
+      'startTime': now.toUtc().toIso8601String(),
     });
     return GameSession.fromJson(json);
   }
@@ -43,7 +43,7 @@ class GameSessionService {
     logger.d('[GameSessionService] 📡 POST /game-sessions/$gameSessionId/end');
 
     final now = DateTime.now().toUtc();
-    final endTimeString = now.toIso8601String();
+    final endTimeString = now.toUtc().toIso8601String();
     logger.d('[GameSessionService] endTime que je vais envoyer: $endTimeString');
     // Ici tu utilises le module importé : json.encode(...)
     logger.d('[GameSessionService] Données envoyées pour end: ${jsonConvert.jsonEncode({

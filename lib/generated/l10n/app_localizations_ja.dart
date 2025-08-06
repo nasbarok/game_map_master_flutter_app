@@ -2162,4 +2162,79 @@ class AppLocalizationsJa extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return '爆発！サイト$zoneNameの爆弾が起爆されました。';
   }
+
+  @override
+  String get bombOperationActive => '爆弾作戦シナリオが有効 - 役割の割り当てを待機中';
+
+  @override
+  String get noTeamRole => 'あなたのチームにはこのシナリオで割り当てられた役割がありません';
+
+  @override
+  String get terroristRole => 'テロリスト';
+
+  @override
+  String get antiTerroristRole => 'カウンターテロリスト';
+
+  @override
+  String get unknownRole => '不明な役割';
+
+  @override
+  String get terroristObjective => '目標：爆弾ゾーンに行き、起爆を活性化する';
+
+  @override
+  String get antiTerroristObjective => '目標：アクティブな爆弾ゾーンに行き、無効化する';
+
+  @override
+  String get observerObjective => '目標：ゲームを観察する';
+
+  @override
+  String youAre(Object role) {
+    return 'あなたは：$role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$totalSitesサイト中$activatedCountサイトが有効';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return '武装時間：$time秒';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return '解除時間：$time秒';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount個の爆弾が武装 • $disarmedCount個解除 • $explodedCount個爆発';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'ゾーン内：$zoneName';
+  }
+
+  @override
+  String get armedBombs => '武装した爆弾：';
+
+  @override
+  String get bombsToDefuse => '解除する爆弾：';
+
+  @override
+  String get victory => '🏆 勝利！';
+
+  @override
+  String get defeat => '💀 敗北！';
+
+  @override
+  String get draw => '⚖️ 引き分け';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'サイト$siteNameの爆弾が武装 - $timeで爆発';
+  }
 }

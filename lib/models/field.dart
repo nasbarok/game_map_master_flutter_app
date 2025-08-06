@@ -61,8 +61,8 @@ class Field {
       'sizeX': sizeX,
       'sizeY': sizeY,
       'imageUrl': imageUrl,
-      'openedAt': openedAt?.toIso8601String(),
-      'closedAt': closedAt?.toIso8601String(),
+      'openedAt': openedAt?.toUtc().toIso8601String(),
+      'closedAt': closedAt?.toUtc().toIso8601String(),
       'active': active,
       'owner': owner?.toJson(),
     };

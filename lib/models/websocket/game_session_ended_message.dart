@@ -24,7 +24,7 @@ class GameSessionEndedMessage extends WebSocketMessage {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'payload': {
         'id': gameSessionId,
-        'endTime': endTime.toIso8601String(),
+        'endTime': endTime.toUtc().toIso8601String(),
         'field': field.toJson(),
         'gameMap': gameMap.toJson(),
       }

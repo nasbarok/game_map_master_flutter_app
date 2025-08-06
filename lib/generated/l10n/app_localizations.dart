@@ -3963,6 +3963,127 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explosion! The bomb on site {zoneName} has been triggered.'**
   String bombExploded(Object zoneName);
+
+  /// No description provided for @bombOperationActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Bomb Operation scenario active - Waiting for role assignment'**
+  String get bombOperationActive;
+
+  /// No description provided for @noTeamRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Your team has no assigned role in this scenario'**
+  String get noTeamRole;
+
+  /// No description provided for @terroristRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Terrorist'**
+  String get terroristRole;
+
+  /// No description provided for @antiTerroristRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter-terrorist'**
+  String get antiTerroristRole;
+
+  /// No description provided for @unknownRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown role'**
+  String get unknownRole;
+
+  /// No description provided for @terroristObjective.
+  ///
+  /// In en, this message translates to:
+  /// **'Objective: Go to a bomb zone to activate detonation'**
+  String get terroristObjective;
+
+  /// No description provided for @antiTerroristObjective.
+  ///
+  /// In en, this message translates to:
+  /// **'Objective: Go to the active bomb zone to deactivate it'**
+  String get antiTerroristObjective;
+
+  /// No description provided for @observerObjective.
+  ///
+  /// In en, this message translates to:
+  /// **'Objective: Observe the game'**
+  String get observerObjective;
+
+  /// No description provided for @youAre.
+  ///
+  /// In en, this message translates to:
+  /// **'You are: {role}'**
+  String youAre(Object role);
+
+  /// No description provided for @sitesActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'{activatedCount} sites activated out of {totalSites}'**
+  String sitesActivated(Object activatedCount, Object totalSites);
+
+  /// No description provided for @armingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Arming time: {time}s'**
+  String armingTime(Object time);
+
+  /// No description provided for @defuseTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Defuse time: {time}s'**
+  String defuseTime(Object time);
+
+  /// No description provided for @bombStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{armedCount} bombs armed • {disarmedCount} defused • {explodedCount} exploded'**
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount);
+
+  /// No description provided for @inZone.
+  ///
+  /// In en, this message translates to:
+  /// **'In zone: {zoneName}'**
+  String inZone(Object zoneName);
+
+  /// No description provided for @armedBombs.
+  ///
+  /// In en, this message translates to:
+  /// **'Armed bombs:'**
+  String get armedBombs;
+
+  /// No description provided for @bombsToDefuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Bombs to defuse:'**
+  String get bombsToDefuse;
+
+  /// No description provided for @victory.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Victory!'**
+  String get victory;
+
+  /// No description provided for @defeat.
+  ///
+  /// In en, this message translates to:
+  /// **'💀 Defeat!'**
+  String get defeat;
+
+  /// No description provided for @draw.
+  ///
+  /// In en, this message translates to:
+  /// **'⚖️ Draw'**
+  String get draw;
+
+  /// No description provided for @bombTimerText.
+  ///
+  /// In en, this message translates to:
+  /// **'Bomb at site {siteName} armed - explosion in {time}'**
+  String bombTimerText(Object siteName, Object time);
 }
 
 class _AppLocalizationsDelegate

@@ -2201,4 +2201,82 @@ class AppLocalizationsNl extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return 'Explosie! De bom op locatie $zoneName is geactiveerd.';
   }
+
+  @override
+  String get bombOperationActive =>
+      'Bomoperatie scenario actief - Wachten op roltoewijzing';
+
+  @override
+  String get noTeamRole => 'Uw team heeft geen toegewezen rol in dit scenario';
+
+  @override
+  String get terroristRole => 'Terrorist';
+
+  @override
+  String get antiTerroristRole => 'Anti-terrorist';
+
+  @override
+  String get unknownRole => 'Onbekende rol';
+
+  @override
+  String get terroristObjective =>
+      'Doel: Ga naar een bomzone om de detonatie te activeren';
+
+  @override
+  String get antiTerroristObjective =>
+      'Doel: Ga naar de actieve bomzone om deze te deactiveren';
+
+  @override
+  String get observerObjective => 'Doel: Het spel observeren';
+
+  @override
+  String youAre(Object role) {
+    return 'U bent: $role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$activatedCount locaties geactiveerd van $totalSites';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return 'Bewapeningtijd: ${time}s';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return 'Ontmantelingstijd: ${time}s';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount bommen bewapend • $disarmedCount ontmanteld • $explodedCount geëxplodeerd';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'In zone: $zoneName';
+  }
+
+  @override
+  String get armedBombs => 'Bewapende bommen:';
+
+  @override
+  String get bombsToDefuse => 'Te ontmantelen bommen:';
+
+  @override
+  String get victory => '🏆 Overwinning!';
+
+  @override
+  String get defeat => '💀 Nederlaag!';
+
+  @override
+  String get draw => '⚖️ Gelijkspel';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'Bom op locatie $siteName bewapend - explosie in $time';
+  }
 }

@@ -410,7 +410,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         logger.d('📡 Requête POST /fields/$fieldId/open');
         final now = DateTime.now().toUtc();
         final response = await apiService.post('fields/$fieldId/open', {
-          'openedAt': now.toIso8601String(),
+          'openedAt': now.toUtc().toIso8601String(),
         });
         logger.d('✅ Terrain ouvert côté serveur : $response');
         gameStateService.setTerrainOpen(true);
@@ -451,7 +451,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
         logger.d('📡 Requête POST /fields/$fieldId/close');
         final now = DateTime.now().toUtc();
         final response = await apiService.post('fields/$fieldId/close', {
-          'closedAt': now.toIso8601String(),
+          'closedAt': now.toUtc().toIso8601String(),
         });
         logger.d('✅ Terrain fermé côté serveur : $response');
         gameStateService.setTerrainOpen(false);

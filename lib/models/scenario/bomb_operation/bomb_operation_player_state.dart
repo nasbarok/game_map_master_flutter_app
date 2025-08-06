@@ -81,8 +81,8 @@ class BombOperationPlayerState {
       'team': team.toString().split('.').last,
       'isAlive': isAlive,
       'hasDefuseKit': hasDefuseKit,
-      'createdAt': createdAt.toIso8601String(),
-      'lastUpdated': lastUpdated.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'lastUpdated': lastUpdated.toUtc().toIso8601String(),
     };
     
     return data;

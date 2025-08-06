@@ -2203,4 +2203,82 @@ class AppLocalizationsPt extends AppLocalizations {
   String bombExploded(Object zoneName) {
     return 'Explosão! A bomba no local $zoneName foi detonada.';
   }
+
+  @override
+  String get bombOperationActive =>
+      'Cenário de Operação Bomba ativo - Aguardando atribuição de papéis';
+
+  @override
+  String get noTeamRole => 'Sua equipe não tem papel atribuído neste cenário';
+
+  @override
+  String get terroristRole => 'Terrorista';
+
+  @override
+  String get antiTerroristRole => 'Anti-terrorista';
+
+  @override
+  String get unknownRole => 'Papel desconhecido';
+
+  @override
+  String get terroristObjective =>
+      'Objetivo: Vá para uma zona de bomba para ativar a detonação';
+
+  @override
+  String get antiTerroristObjective =>
+      'Objetivo: Vá para a zona de bomba ativa para desativá-la';
+
+  @override
+  String get observerObjective => 'Objetivo: Observar o jogo';
+
+  @override
+  String youAre(Object role) {
+    return 'Você é: $role';
+  }
+
+  @override
+  String sitesActivated(Object activatedCount, Object totalSites) {
+    return '$activatedCount locais ativados de $totalSites';
+  }
+
+  @override
+  String armingTime(Object time) {
+    return 'Tempo de armamento: ${time}s';
+  }
+
+  @override
+  String defuseTime(Object time) {
+    return 'Tempo de desarmamento: ${time}s';
+  }
+
+  @override
+  String bombStats(
+      Object armedCount, Object disarmedCount, Object explodedCount) {
+    return '$armedCount bombas armadas • $disarmedCount desarmadas • $explodedCount explodidas';
+  }
+
+  @override
+  String inZone(Object zoneName) {
+    return 'Na zona: $zoneName';
+  }
+
+  @override
+  String get armedBombs => 'Bombas armadas:';
+
+  @override
+  String get bombsToDefuse => 'Bombas para desarmar:';
+
+  @override
+  String get victory => '🏆 Vitória!';
+
+  @override
+  String get defeat => '💀 Derrota!';
+
+  @override
+  String get draw => '⚖️ Empate';
+
+  @override
+  String bombTimerText(Object siteName, Object time) {
+    return 'Bomba do local $siteName armada - explosão em $time';
+  }
 }

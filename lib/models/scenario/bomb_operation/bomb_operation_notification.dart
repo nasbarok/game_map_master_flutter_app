@@ -130,7 +130,7 @@ class BombOperationNotification {
     if (isInActiveSite != null) data['isInActiveSite'] = isInActiveSite;
     if (isAlive != null) data['isAlive'] = isAlive;
     if (gameState != null) data['gameState'] = gameState;
-    if (timestamp != null) data['timestamp'] = timestamp!.toIso8601String();
+    if (timestamp != null) data['timestamp'] = timestamp!.toUtc().toIso8601String();
     if (activeBombSiteIds != null) data['activeBombSiteIds'] = activeBombSiteIds;
     if (this.data != null) data['data'] = this.data;
     
