@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/game_session.dart';
 import '../models/game_session_participant.dart';
 
@@ -14,6 +15,7 @@ class ParticipantsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Regrouper les participants par équipe
     Map<int?, List<GameSessionParticipant>> participantsByTeam = {};
 
@@ -43,7 +45,7 @@ class ParticipantsCard extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  'Joueurs connectés',
+                  l10n.connectedPlayers,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -72,8 +74,8 @@ class ParticipantsCard extends StatelessWidget {
               final teamId = entry.key;
               final teamParticipants = entry.value;
               final teamName = teamId != null && teamParticipants.isNotEmpty
-                  ? teamParticipants.first.teamName ?? 'Équipe $teamId'
-                  : 'Sans équipe';
+                  ? teamParticipants.first.teamName ?? l10n.team + ' $teamId'
+                  : l10n.noTeam;
               final teamColor = teamId != null ? teamColors[teamId] ?? Colors.grey : Colors.grey;
 
               return Column(

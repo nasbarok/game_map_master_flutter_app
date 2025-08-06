@@ -671,5 +671,20 @@
   "victory": "🏆 Vittoria!",
   "defeat": "💀 Sconfitta!",
   "draw": "⚖️ Pareggio",
-  "bombTimerText": "Bomba del sito {siteName} attivata - esplosione in {time}"
+  "bombTimerText": "Bomba del sito {siteName} attivata - esplosione in {time}",
+  "finished": "Terminato",
+  "individualRanking": "Classifica individuale",
+  "inProgress": "In corso",
+  "locked": "Bloccato",
+  "playerName": "Giocatore {playerId}",
+  "points": "{score} pt",
+  "qrCodesFound": "{found}/{total} codici QR trovati, totale: {points} {symbol}",
+  "scenarioType": "Tipo: {type}",
+  "teamRanking": "Classifica squadre",
+  "timeElapsed": "Tempo trascorso",
+  "timeRemaining": "Tempo rimanente",
+  "unknown": "Sconosciuto",
+  "unknownScenario": "Scenario sconosciuto",
+  "team": "Squadra"
+
 }

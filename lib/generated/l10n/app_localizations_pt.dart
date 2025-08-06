@@ -2281,4 +2281,55 @@ class AppLocalizationsPt extends AppLocalizations {
   String bombTimerText(Object siteName, Object time) {
     return 'Bomba do local $siteName armada - explosão em $time';
   }
+
+  @override
+  String get finished => 'Terminado';
+
+  @override
+  String get individualRanking => 'Classificação individual';
+
+  @override
+  String get inProgress => 'Em andamento';
+
+  @override
+  String get locked => 'Bloqueado';
+
+  @override
+  String playerName(Object playerId) {
+    return 'Jogador $playerId';
+  }
+
+  @override
+  String points(Object score) {
+    return '$score pts';
+  }
+
+  @override
+  String qrCodesFound(
+      Object found, Object points, Object symbol, Object total) {
+    return '$found/$total códigos QR encontrados, total: $points $symbol';
+  }
+
+  @override
+  String scenarioType(Object type) {
+    return 'Tipo: $type';
+  }
+
+  @override
+  String get teamRanking => 'Classificação por equipes';
+
+  @override
+  String get timeElapsed => 'Tempo decorrido';
+
+  @override
+  String get timeRemaining => 'Tempo restante';
+
+  @override
+  String get unknown => 'Desconhecido';
+
+  @override
+  String get unknownScenario => 'Cenário desconhecido';
+
+  @override
+  String get team => 'Equipe';
 }

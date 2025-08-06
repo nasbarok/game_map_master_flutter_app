@@ -4084,6 +4084,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bomb at site {siteName} armed - explosion in {time}'**
   String bombTimerText(Object siteName, Object time);
+
+  /// No description provided for @finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get finished;
+
+  /// No description provided for @individualRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual ranking'**
+  String get individualRanking;
+
+  /// No description provided for @inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get inProgress;
+
+  /// No description provided for @locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get locked;
+
+  /// No description provided for @playerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Player {playerId}'**
+  String playerName(Object playerId);
+
+  /// No description provided for @points.
+  ///
+  /// In en, this message translates to:
+  /// **'{score} pts'**
+  String points(Object score);
+
+  /// No description provided for @qrCodesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{found}/{total} QR codes found, total: {points} {symbol}'**
+  String qrCodesFound(Object found, Object points, Object symbol, Object total);
+
+  /// No description provided for @scenarioType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type: {type}'**
+  String scenarioType(Object type);
+
+  /// No description provided for @teamRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Team ranking'**
+  String get teamRanking;
+
+  /// No description provided for @timeElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Time elapsed'**
+  String get timeElapsed;
+
+  /// No description provided for @timeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining'**
+  String get timeRemaining;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @unknownScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown scenario'**
+  String get unknownScenario;
+
+  /// No description provided for @team.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get team;
 }
 
 class _AppLocalizationsDelegate

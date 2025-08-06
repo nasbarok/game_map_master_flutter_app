@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game_map_master_flutter_app/generated/l10n/app_localizations.dart';
 
 class TimeRemainingCard extends StatelessWidget {
   final int remainingTimeInSeconds;
@@ -26,6 +27,7 @@ class TimeRemainingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -45,7 +47,7 @@ class TimeRemainingCard extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  isCountdown ? 'Temps restant' : 'Temps écoulé',
+                  isCountdown ? l10n.timeRemaining : l10n.timeElapsed,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -59,7 +61,7 @@ class TimeRemainingCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    isActive ? 'En cours' : 'Terminé',
+                    isActive ? l10n.inProgress : l10n.finished,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

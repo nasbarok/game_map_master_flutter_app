@@ -2272,4 +2272,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String bombTimerText(Object siteName, Object time) {
     return 'Bomb at site $siteName armed - explosion in $time';
   }
+
+  @override
+  String get finished => 'Finished';
+
+  @override
+  String get individualRanking => 'Individual ranking';
+
+  @override
+  String get inProgress => 'In progress';
+
+  @override
+  String get locked => 'Locked';
+
+  @override
+  String playerName(Object playerId) {
+    return 'Player $playerId';
+  }
+
+  @override
+  String points(Object score) {
+    return '$score pts';
+  }
+
+  @override
+  String qrCodesFound(
+      Object found, Object points, Object symbol, Object total) {
+    return '$found/$total QR codes found, total: $points $symbol';
+  }
+
+  @override
+  String scenarioType(Object type) {
+    return 'Type: $type';
+  }
+
+  @override
+  String get teamRanking => 'Team ranking';
+
+  @override
+  String get timeElapsed => 'Time elapsed';
+
+  @override
+  String get timeRemaining => 'Time remaining';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get unknownScenario => 'Unknown scenario';
+
+  @override
+  String get team => 'Team';
 }

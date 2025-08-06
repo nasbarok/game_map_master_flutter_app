@@ -671,5 +671,19 @@
   "victory": "🏆 Vitória!",
   "defeat": "💀 Derrota!",
   "draw": "⚖️ Empate",
-  "bombTimerText": "Bomba do local {siteName} armada - explosão em {time}"
+  "bombTimerText": "Bomba do local {siteName} armada - explosão em {time}",
+  "finished": "Terminado",
+  "individualRanking": "Classificação individual",
+  "inProgress": "Em andamento",
+  "locked": "Bloqueado",
+  "playerName": "Jogador {playerId}",
+  "points": "{score} pts",
+  "qrCodesFound": "{found}/{total} códigos QR encontrados, total: {points} {symbol}",
+  "scenarioType": "Tipo: {type}",
+  "teamRanking": "Classificação por equipes",
+  "timeElapsed": "Tempo decorrido",
+  "timeRemaining": "Tempo restante",
+  "unknown": "Desconhecido",
+  "unknownScenario": "Cenário desconhecido",
+  "team": "Equipe"
 }

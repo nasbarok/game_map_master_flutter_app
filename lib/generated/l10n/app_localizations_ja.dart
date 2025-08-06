@@ -2237,4 +2237,55 @@ class AppLocalizationsJa extends AppLocalizations {
   String bombTimerText(Object siteName, Object time) {
     return 'サイト$siteNameの爆弾が武装 - $timeで爆発';
   }
+
+  @override
+  String get finished => '終了';
+
+  @override
+  String get individualRanking => '個人ランキング';
+
+  @override
+  String get inProgress => '進行中';
+
+  @override
+  String get locked => 'ロック済み';
+
+  @override
+  String playerName(Object playerId) {
+    return 'プレイヤー$playerId';
+  }
+
+  @override
+  String points(Object score) {
+    return '$scoreポイント';
+  }
+
+  @override
+  String qrCodesFound(
+      Object found, Object points, Object symbol, Object total) {
+    return '$found/$total QRコード発見、合計: $points $symbol';
+  }
+
+  @override
+  String scenarioType(Object type) {
+    return 'タイプ: $type';
+  }
+
+  @override
+  String get teamRanking => 'チームランキング';
+
+  @override
+  String get timeElapsed => '経過時間';
+
+  @override
+  String get timeRemaining => '残り時間';
+
+  @override
+  String get unknown => '不明';
+
+  @override
+  String get unknownScenario => '不明なシナリオ';
+
+  @override
+  String get team => 'チーム';
 }

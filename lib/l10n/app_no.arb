@@ -671,5 +671,19 @@
   "victory": "🏆 Seier!",
   "defeat": "💀 Nederlag!",
   "draw": "⚖️ Uavgjort",
-  "bombTimerText": "Bombe på sted {siteName} armert - eksplosjon om {time}"
+  "bombTimerText": "Bombe på sted {siteName} armert - eksplosjon om {time}",
+  "finished": "Ferdig",
+  "individualRanking": "Individuell ranking",
+  "inProgress": "Pågår",
+  "locked": "Låst",
+  "playerName": "Spiller {playerId}",
+  "points": "{score} poeng",
+  "qrCodesFound": "{found}/{total} QR-koder funnet, totalt: {points} {symbol}",
+  "scenarioType": "Type: {type}",
+  "teamRanking": "Lagranking",
+  "timeElapsed": "Forløpt tid",
+  "timeRemaining": "Gjenværende tid",
+  "unknown": "Ukjent",
+  "unknownScenario": "Ukjent scenario",
+  "team": "Lag"
 }

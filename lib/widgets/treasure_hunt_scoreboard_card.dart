@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/scenario/scenario_dto.dart';
 import '../models/scenario/treasure_hunt/treasure_hunt_score.dart';
 
@@ -28,6 +29,8 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -36,18 +39,18 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(l10n),
             const SizedBox(height: 12),
-            if (scoreboard.teamScores.isNotEmpty) _buildTeamRanking(),
+            if (scoreboard.teamScores.isNotEmpty) _buildTeamRanking(l10n),
             const SizedBox(height: 12),
-            _buildIndividualRanking(),
+            _buildIndividualRanking(l10n),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AppLocalizations l10n) {
     final treasure = scenarioDTO?.treasureHuntScenario;
     final scenario = scenarioDTO?.scenario;
 
@@ -65,7 +68,7 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                scenario?.name ?? 'Scénario inconnu',
+                scenario?.name ?? l10n.unknownScenario,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -76,11 +79,11 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(Icons.lock, color: Colors.white, size: 16),
                     SizedBox(width: 4),
-                    Text('Verrouillé', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text(l10n.locked, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -88,7 +91,9 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Type : ${scenario?.type == 'treasure_hunt' ? 'Chasse au trésor' : scenario?.type ?? 'Inconnu'}',
+          l10n.scenarioType(
+            scenario?.type == 'treasure_hunt' ? l10n.treasureHunt : (scenario?.type ?? l10n.unknown)
+          ),
           style: const TextStyle(color: Colors.grey),
         ),
         if (scenario?.description != null && scenario!.description!.isNotEmpty)
@@ -101,18 +106,18 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
           ),
         const SizedBox(height: 6),
         Text(
-          '$found/$total QR codes trouvés, total : $totalPoints $symbol',
+          l10n.qrCodesFound(found, totalPoints, symbol, total),
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green[700]),
         ),
       ],
     );
   }
 
-  Widget _buildTeamRanking() {
+  Widget _buildTeamRanking(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Classement par équipe', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(l10n.teamRanking, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -143,10 +148,12 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(team.teamName ?? 'Équipe ${team.teamId}',
-                          style: TextStyle(fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal)),
+                      child: Text(
+                        team.teamName ?? l10n.teamName.replaceAll('{teamId}', team.teamId.toString()),
+                        style: TextStyle(fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal)
+                      ),
                     ),
-                    _buildScoreBadge('${team.score} pts', color),
+                    _buildScoreBadge(l10n.points(team.score.toString()), color),
                     const SizedBox(width: 8),
                     Text('${team.treasuresFound} 🏆', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
@@ -159,11 +166,11 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIndividualRanking() {
+  Widget _buildIndividualRanking(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Classement individuel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(l10n.individualRanking, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -198,14 +205,16 @@ class TreasureHuntScoreboardCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(player.username ?? 'Joueur ${player.userId}',
-                              style: TextStyle(fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal)),
+                          Text(
+                            player.username ?? l10n.playerName(player.userId.toString()),
+                            style: TextStyle(fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal)
+                          ),
                           if (player.teamName != null)
                             Text(player.teamName!, style: TextStyle(fontSize: 12, color: color)),
                         ],
                       ),
                     ),
-                    _buildScoreBadge('${player.score} pts', Colors.blue),
+                    _buildScoreBadge(l10n.points(player.score.toString()), Colors.blue),
                     const SizedBox(width: 8),
                     Text('${player.treasuresFound} 🏆', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],

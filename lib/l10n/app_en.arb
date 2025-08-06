@@ -2639,6 +2639,21 @@
   "victory": "🏆 Victory!",
   "defeat": "💀 Defeat!",
   "draw": "⚖️ Draw",
-  "bombTimerText": "Bomb at site {siteName} armed - explosion in {time}"
+  "bombTimerText": "Bomb at site {siteName} armed - explosion in {time}",
+  "finished": "Finished",
+  "individualRanking": "Individual ranking",
+  "inProgress": "In progress",
+  "locked": "Locked",
+  "playerName": "Player {playerId}",
+  "points": "{score} pts",
+  "qrCodesFound": "{found}/{total} QR codes found, total: {points} {symbol}",
+  "scenarioType": "Type: {type}",
+  "teamRanking": "Team ranking",
+  "timeElapsed": "Time elapsed",
+  "timeRemaining": "Time remaining",
+  "unknown": "Unknown",
+  "unknownScenario": "Unknown scenario",
+  "team": "Team"
+
 
 }

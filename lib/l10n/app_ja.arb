@@ -671,5 +671,20 @@
   "victory": "🏆 勝利！",
   "defeat": "💀 敗北！",
   "draw": "⚖️ 引き分け",
-  "bombTimerText": "サイト{siteName}の爆弾が武装 - {time}で爆発"
+  "bombTimerText": "サイト{siteName}の爆弾が武装 - {time}で爆発",
+  "finished": "終了",
+  "individualRanking": "個人ランキング",
+  "inProgress": "進行中",
+  "locked": "ロック済み",
+  "playerName": "プレイヤー{playerId}",
+  "points": "{score}ポイント",
+  "qrCodesFound": "{found}/{total} QRコード発見、合計: {points} {symbol}",
+  "scenarioType": "タイプ: {type}",
+  "teamRanking": "チームランキング",
+  "timeElapsed": "経過時間",
+  "timeRemaining": "残り時間",
+  "unknown": "不明",
+  "unknownScenario": "不明なシナリオ",
+  "team": "チーム"
+
 }

@@ -671,5 +671,19 @@
   "victory": "🏆 Overwinning!",
   "defeat": "💀 Nederlaag!",
   "draw": "⚖️ Gelijkspel",
-  "bombTimerText": "Bom op locatie {siteName} bewapend - explosie in {time}"
+  "bombTimerText": "Bom op locatie {siteName} bewapend - explosie in {time}",
+  "finished": "Voltooid",
+  "individualRanking": "Individuele ranglijst",
+  "inProgress": "Bezig",
+  "locked": "Vergrendeld",
+  "playerName": "Speler {playerId}",
+  "points": "{score} ptn",
+  "qrCodesFound": "{found}/{total} QR-codes gevonden, totaal: {points} {symbol}",
+  "scenarioType": "Type: {type}",
+  "teamRanking": "Team ranglijst",
+  "timeElapsed": "Verstreken tijd",
+  "timeRemaining": "Resterende tijd",
+  "unknown": "Onbekend",
+  "unknownScenario": "Onbekend scenario",
+  "team": "Team"
 }

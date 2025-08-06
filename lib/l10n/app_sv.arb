@@ -667,5 +667,19 @@
   "victory": "🏆 Seger!",
   "defeat": "💀 Nederlag!",
   "draw": "⚖️ Oavgjort",
-  "bombTimerText": "Bomb på plats {siteName} beväpnad - explosion om {time}"
+  "bombTimerText": "Bomb på plats {siteName} beväpnad - explosion om {time}",
+  "finished": "Avslutat",
+  "individualRanking": "Individuell ranking",
+  "inProgress": "Pågår",
+  "locked": "Låst",
+  "playerName": "Spelare {playerId}",
+  "points": "{score} poäng",
+  "qrCodesFound": "{found}/{total} QR-koder hittade, totalt: {points} {symbol}",
+  "scenarioType": "Typ: {type}",
+  "teamRanking": "Lagranking",
+  "timeElapsed": "Förfluten tid",
+  "timeRemaining": "Återstående tid",
+  "unknown": "Okänt",
+  "unknownScenario": "Okänt scenario",
+  "team": "Lag"
 }
