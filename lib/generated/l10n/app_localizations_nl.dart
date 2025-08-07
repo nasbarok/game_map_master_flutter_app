@@ -2330,4 +2330,22 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get team => 'Team';
+
+  @override
+  String get showFullScreen => 'Volledig scherm tonen';
+
+  @override
+  String geolocationError(Object error) {
+    return 'Geolocatie fout: $error';
+  }
+
+  @override
+  String mapOpenError(Object error) {
+    return 'Fout bij openen kaart: $error';
+  }
+
+  @override
+  String fullScreenMapError(Object error) {
+    return 'Fout bij openen volledig scherm kaart: $error';
+  }
 }

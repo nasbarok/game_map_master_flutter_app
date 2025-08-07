@@ -685,6 +685,11 @@
   "timeRemaining": "残り時間",
   "unknown": "不明",
   "unknownScenario": "不明なシナリオ",
-  "team": "チーム"
+  "team": "チーム",
+  "showFullScreen": "フルスクリーン表示",
+  "geolocationError": "位置情報エラー: {error}",
+  "mapOpenError": "マップを開く際のエラー: {error}",
+  "fullScreenMapError": "フルスクリーンマップを開く際のエラー: {error}"
+
 
 }

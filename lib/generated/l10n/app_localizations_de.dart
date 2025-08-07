@@ -2347,4 +2347,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get team => 'Team';
+
+  @override
+  String get showFullScreen => 'Vollbild anzeigen';
+
+  @override
+  String geolocationError(Object error) {
+    return 'Geolokalisierungsfehler: $error';
+  }
+
+  @override
+  String mapOpenError(Object error) {
+    return 'Fehler beim Öffnen der Karte: $error';
+  }
+
+  @override
+  String fullScreenMapError(Object error) {
+    return 'Fehler beim Öffnen der Vollbildkarte: $error';
+  }
 }

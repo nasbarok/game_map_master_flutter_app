@@ -685,5 +685,10 @@
   "timeRemaining": "Gjenværende tid",
   "unknown": "Ukjent",
   "unknownScenario": "Ukjent scenario",
-  "team": "Lag"
+  "team": "Lag",
+  "showFullScreen": "Vis i fullskjerm",
+  "geolocationError": "Geolokalisering feil: {error}",
+  "mapOpenError": "Feil ved åpning av kart: {error}",
+  "fullScreenMapError": "Feil ved åpning av fullskjerm kart: {error}"
+
 }

@@ -11,6 +11,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../generated/l10n/app_localizations.dart';
 import '../models/coordinate.dart';
 import '../models/game_session_participant.dart';
 import '../models/team.dart';
@@ -73,7 +74,8 @@ class _GameMapWidgetState extends State<GameMapWidget> {
     final playerLocationService = GetIt.I<PlayerLocationService>();
 
     // 🚀 Initialisation complète du tracking
-    playerLocationService.initialize(widget.userId, widget.teamId, widget.fieldId!);
+    playerLocationService.initialize(
+        widget.userId, widget.teamId, widget.fieldId!);
     playerLocationService.loadInitialPositions(widget.fieldId!);
     playerLocationService.startLocationTracking(widget.gameSessionId);
 
@@ -95,10 +97,12 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         final username = participant?.username ?? 'Inconnu';
         final team = participant?.teamName ?? 'Sans équipe';
         final isMe = userId == widget.userId ? ' 👈 (moi)' : '';
-        logger.d('🧭 $username (ID: $userId, équipe: $team)$isMe → lat=${coord.latitude}, lng=${coord.longitude}');
+        logger.d(
+            '🧭 $username (ID: $userId, équipe: $team)$isMe → lat=${coord.latitude}, lng=${coord.longitude}');
       }
 
-      final missingUsers = participantIds.where((id) => !receivedIds.contains(id));
+      final missingUsers =
+          participantIds.where((id) => !receivedIds.contains(id));
       if (missingUsers.isNotEmpty) {
         logger.w('⚠️ Participants sans position reçue :');
         for (final userId in missingUsers) {
@@ -131,7 +135,6 @@ class _GameMapWidgetState extends State<GameMapWidget> {
       if (event is MapEventMove && mounted) setState(() {});
     });
   }
-
 
   Future<void> _initializeAdvancedLocation() async {
     try {
@@ -186,7 +189,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
     final bombScenario = bombOperationService.activeSessionScenarioBomb;
     final gameState = bombOperationService.currentState;
     final roles = bombOperationService.teamRoles;
-
+    final l10n = AppLocalizations.of(context)!;
 /*    logger.d(
         '[GameMapWidget] [build] hasBombOperationScenario=${widget.hasBombOperationScenario}, bombScenario=$bombScenario, gameState=$gameState, roles=$roles');*/
 
@@ -200,14 +203,15 @@ class _GameMapWidgetState extends State<GameMapWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Carte de jeu',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.gameMapScreenTitle,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.fullscreen),
-                  tooltip: 'Afficher en plein écran',
-                  onPressed: () => _openFullMapScreen(context),
+                  tooltip: l10n.showFullScreen,
+                  onPressed: () => _openFullMapScreen(context, l10n),
                 ),
               ],
             ),
@@ -321,7 +325,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
 
                           final isCurrentUser = userId == widget.userId;
                           final markerWidget =
-                              _buildPlayerMarker(userId, isCurrentUser);
+                              _buildPlayerMarker(userId, isCurrentUser, l10n);
                           return Marker(
                             point:
                                 LatLng(position.latitude, position.longitude),
@@ -337,21 +341,13 @@ class _GameMapWidgetState extends State<GameMapWidget> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Positions partagées toutes les 30 secondes',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-          ),
           LocationIndicatorWidget(),
         ],
       ),
     );
   }
 
-  void _openFullMapScreen(BuildContext context) {
+  void _openFullMapScreen(BuildContext context, AppLocalizations l10n) {
     try {
       // Pas besoin de réinitialiser le service de localisation, il est déjà initialisé dans le widget
 
@@ -376,7 +372,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
       // Afficher un message d'erreur à l'utilisateur
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors de l\'ouverture de la carte : $e'),
+          content: Text(l10n.fullScreenMapError(e)),
           backgroundColor: Colors.red,
         ),
       );
@@ -395,14 +391,15 @@ class _GameMapWidgetState extends State<GameMapWidget> {
     }
   }
 
-  Widget _buildPlayerMarker(int userId, bool isCurrentUser) {
+  Widget _buildPlayerMarker(
+      int userId, bool isCurrentUser, AppLocalizations l10n) {
     final participant = _findParticipantByUserId(userId);
-    final String teamName = participant?.teamName ?? 'Aucune';
+    final String teamName = participant?.teamName ?? l10n.noTeam;
     final int? teamId = participant?.teamId;
     // Définir la couleur selon équipe
     Color markerColor = Colors.blue;
 
-    final String playerName = _getPlayerName(userId);
+    final String playerName = _getPlayerName(userId, l10n);
     final double radius = 8;
     final double fontSize = math.max(8, radius);
 
@@ -453,13 +450,13 @@ class _GameMapWidgetState extends State<GameMapWidget> {
   }
 
 // Méthode pour récupérer le nom du joueur
-  String _getPlayerName(int userId) {
+  String _getPlayerName(int userId, AppLocalizations l10n) {
     final participant = widget.participants
         .where((p) => p.userId == userId)
         .cast<GameSessionParticipant?>()
         .firstOrNull;
 
-    return participant?.username ?? 'Joueur $userId';
+    return participant?.username ?? l10n.playerMarkerLabel(userId.toString());
   }
 
   GameSessionParticipant? _findParticipantByUserId(int userId) {

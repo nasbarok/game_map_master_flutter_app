@@ -4168,6 +4168,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Team'**
   String get team;
+
+  /// No description provided for @showFullScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fullscreen'**
+  String get showFullScreen;
+
+  /// No description provided for @geolocationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Geolocation error: {error}'**
+  String geolocationError(Object error);
+
+  /// No description provided for @mapOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error opening map: {error}'**
+  String mapOpenError(Object error);
+
+  /// No description provided for @fullScreenMapError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error opening fullscreen map: {error}'**
+  String fullScreenMapError(Object error);
 }
 
 class _AppLocalizationsDelegate

@@ -681,5 +681,10 @@
   "timeRemaining": "Återstående tid",
   "unknown": "Okänt",
   "unknownScenario": "Okänt scenario",
-  "team": "Lag"
+  "team": "Lag",
+  "showFullScreen": "Visa i helskärm",
+  "geolocationError": "Geolokaliseringsfel: {error}",
+  "mapOpenError": "Fel vid öppning av karta: {error}",
+  "fullScreenMapError": "Fel vid öppning av helskärmskarta: {error}"
+
 }

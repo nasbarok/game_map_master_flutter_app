@@ -681,6 +681,11 @@
   "timeRemaining": "Temps restant",
   "unknown": "Inconnu",
   "unknownScenario": "Scénario inconnu",
-  "team": "Équipe"
+  "team": "Équipe",
+  "showFullScreen": "Afficher en plein écran",
+  "geolocationError": "Erreur géolocalisation: {error}",
+  "mapOpenError": "Erreur lors de l'ouverture de la carte : {error}",
+  "fullScreenMapError": "Erreur lors de l'ouverture de la carte en plein écran : {error}"
+
 
 }

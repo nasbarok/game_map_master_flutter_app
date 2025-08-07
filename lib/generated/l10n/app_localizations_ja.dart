@@ -2288,4 +2288,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get team => 'チーム';
+
+  @override
+  String get showFullScreen => 'フルスクリーン表示';
+
+  @override
+  String geolocationError(Object error) {
+    return '位置情報エラー: $error';
+  }
+
+  @override
+  String mapOpenError(Object error) {
+    return 'マップを開く際のエラー: $error';
+  }
+
+  @override
+  String fullScreenMapError(Object error) {
+    return 'フルスクリーンマップを開く際のエラー: $error';
+  }
 }

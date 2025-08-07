@@ -2328,4 +2328,22 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get team => 'Lag';
+
+  @override
+  String get showFullScreen => 'Visa i helskärm';
+
+  @override
+  String geolocationError(Object error) {
+    return 'Geolokaliseringsfel: $error';
+  }
+
+  @override
+  String mapOpenError(Object error) {
+    return 'Fel vid öppning av karta: $error';
+  }
+
+  @override
+  String fullScreenMapError(Object error) {
+    return 'Fel vid öppning av helskärmskarta: $error';
+  }
 }

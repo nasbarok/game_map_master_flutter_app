@@ -2323,4 +2323,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get team => 'Team';
+
+  @override
+  String get showFullScreen => 'Show fullscreen';
+
+  @override
+  String geolocationError(Object error) {
+    return 'Geolocation error: $error';
+  }
+
+  @override
+  String mapOpenError(Object error) {
+    return 'Error opening map: $error';
+  }
+
+  @override
+  String fullScreenMapError(Object error) {
+    return 'Error opening fullscreen map: $error';
+  }
 }

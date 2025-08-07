@@ -685,5 +685,10 @@
   "timeRemaining": "Resterende tijd",
   "unknown": "Onbekend",
   "unknownScenario": "Onbekend scenario",
-  "team": "Team"
+  "team": "Team",
+  "showFullScreen": "Volledig scherm tonen",
+  "geolocationError": "Geolocatie fout: {error}",
+  "mapOpenError": "Fout bij openen kaart: {error}",
+  "fullScreenMapError": "Fout bij openen volledig scherm kaart: {error}"
+
 }

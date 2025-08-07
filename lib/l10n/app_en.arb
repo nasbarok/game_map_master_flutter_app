@@ -2653,7 +2653,12 @@
   "timeRemaining": "Time remaining",
   "unknown": "Unknown",
   "unknownScenario": "Unknown scenario",
-  "team": "Team"
+  "team": "Team",
+  "showFullScreen": "Show fullscreen",
+  "geolocationError": "Geolocation error: {error}",
+  "mapOpenError": "Error opening map: {error}",
+  "fullScreenMapError": "Error opening fullscreen map: {error}"
+
 
 
 }

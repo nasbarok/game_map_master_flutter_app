@@ -2339,4 +2339,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get team => 'Équipe';
+
+  @override
+  String get showFullScreen => 'Afficher en plein écran';
+
+  @override
+  String geolocationError(Object error) {
+    return 'Erreur géolocalisation: $error';
+  }
+
+  @override
+  String mapOpenError(Object error) {
+    return 'Erreur lors de l\'ouverture de la carte : $error';
+  }
+
+  @override
+  String fullScreenMapError(Object error) {
+    return 'Erreur lors de l\'ouverture de la carte en plein écran : $error';
+  }
 }
