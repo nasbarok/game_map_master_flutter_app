@@ -2657,7 +2657,18 @@
   "showFullScreen": "Show fullscreen",
   "geolocationError": "Geolocation error: {error}",
   "mapOpenError": "Error opening map: {error}",
-  "fullScreenMapError": "Error opening fullscreen map: {error}"
+  "fullScreenMapError": "Error opening fullscreen map: {error}",
+  "noMapSelected": "No map selected",
+  "noFieldOpen": "No field open",
+  "fieldNotAccessible": "Field not accessible",
+  "gameReady": "Ready to play",
+  "joinCurrentGame": "Join current game",
+  "leaveCurrentField": "Leave current field",
+  "manageTeam": "Manage team",
+  "previousFields": "Previous fields",
+  "noFieldHistory": "No field history available",
+  "reconnectToField": "Reconnect to field"
+
 
 
 

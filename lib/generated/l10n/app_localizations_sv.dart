@@ -2346,4 +2346,34 @@ class AppLocalizationsSv extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Fel vid öppning av helskärmskarta: $error';
   }
+
+  @override
+  String get noMapSelected => 'Ingen karta vald';
+
+  @override
+  String get noFieldOpen => 'Inget fält öppet';
+
+  @override
+  String get fieldNotAccessible => 'Fält inte tillgängligt';
+
+  @override
+  String get gameReady => 'Redo att spela';
+
+  @override
+  String get joinCurrentGame => 'Gå med i pågående spel';
+
+  @override
+  String get leaveCurrentField => 'Lämna nuvarande fält';
+
+  @override
+  String get manageTeam => 'Hantera lag';
+
+  @override
+  String get previousFields => 'Tidigare fält';
+
+  @override
+  String get noFieldHistory => 'Ingen fälthistorik tillgänglig';
+
+  @override
+  String get reconnectToField => 'Återanslut till fält';
 }

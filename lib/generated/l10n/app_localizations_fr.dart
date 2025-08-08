@@ -2357,4 +2357,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Erreur lors de l\'ouverture de la carte en plein écran : $error';
   }
+
+  @override
+  String get noMapSelected => 'Aucune carte sélectionnée';
+
+  @override
+  String get noFieldOpen => 'Aucun terrain ouvert';
+
+  @override
+  String get fieldNotAccessible => 'Terrain non accessible';
+
+  @override
+  String get gameReady => 'Prêt à jouer';
+
+  @override
+  String get joinCurrentGame => 'Rejoindre la partie en cours';
+
+  @override
+  String get leaveCurrentField => 'Quitter le terrain actuel';
+
+  @override
+  String get manageTeam => 'Gérer l\'équipe';
+
+  @override
+  String get previousFields => 'Terrains précédents';
+
+  @override
+  String get noFieldHistory => 'Aucun historique de terrain disponible';
+
+  @override
+  String get reconnectToField => 'Se reconnecter au terrain';
 }

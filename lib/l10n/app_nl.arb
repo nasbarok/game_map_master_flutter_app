@@ -689,6 +689,17 @@
   "showFullScreen": "Volledig scherm tonen",
   "geolocationError": "Geolocatie fout: {error}",
   "mapOpenError": "Fout bij openen kaart: {error}",
-  "fullScreenMapError": "Fout bij openen volledig scherm kaart: {error}"
+  "fullScreenMapError": "Fout bij openen volledig scherm kaart: {error}",
+  "noMapSelected": "Geen kaart geselecteerd",
+  "noFieldOpen": "Geen veld geopend",
+  "fieldNotAccessible": "Veld niet toegankelijk",
+  "gameReady": "Klaar om te spelen",
+  "joinCurrentGame": "Deelnemen aan huidig spel",
+  "leaveCurrentField": "Huidig veld verlaten",
+  "manageTeam": "Team beheren",
+  "previousFields": "Vorige velden",
+  "noFieldHistory": "Geen veldgeschiedenis beschikbaar",
+  "reconnectToField": "Opnieuw verbinden met veld"
+
 
 }

@@ -2348,4 +2348,34 @@ class AppLocalizationsNl extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Fout bij openen volledig scherm kaart: $error';
   }
+
+  @override
+  String get noMapSelected => 'Geen kaart geselecteerd';
+
+  @override
+  String get noFieldOpen => 'Geen veld geopend';
+
+  @override
+  String get fieldNotAccessible => 'Veld niet toegankelijk';
+
+  @override
+  String get gameReady => 'Klaar om te spelen';
+
+  @override
+  String get joinCurrentGame => 'Deelnemen aan huidig spel';
+
+  @override
+  String get leaveCurrentField => 'Huidig veld verlaten';
+
+  @override
+  String get manageTeam => 'Team beheren';
+
+  @override
+  String get previousFields => 'Vorige velden';
+
+  @override
+  String get noFieldHistory => 'Geen veldgeschiedenis beschikbaar';
+
+  @override
+  String get reconnectToField => 'Opnieuw verbinden met veld';
 }

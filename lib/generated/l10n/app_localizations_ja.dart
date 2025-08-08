@@ -2306,4 +2306,34 @@ class AppLocalizationsJa extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'フルスクリーンマップを開く際のエラー: $error';
   }
+
+  @override
+  String get noMapSelected => 'マップが選択されていません';
+
+  @override
+  String get noFieldOpen => 'フィールドが開いていません';
+
+  @override
+  String get fieldNotAccessible => 'フィールドにアクセスできません';
+
+  @override
+  String get gameReady => 'プレイ準備完了';
+
+  @override
+  String get joinCurrentGame => '現在のゲームに参加';
+
+  @override
+  String get leaveCurrentField => '現在のフィールドを離れる';
+
+  @override
+  String get manageTeam => 'チーム管理';
+
+  @override
+  String get previousFields => '以前のフィールド';
+
+  @override
+  String get noFieldHistory => 'フィールド履歴がありません';
+
+  @override
+  String get reconnectToField => 'フィールドに再接続';
 }

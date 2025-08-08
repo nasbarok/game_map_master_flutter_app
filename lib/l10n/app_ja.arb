@@ -689,7 +689,18 @@
   "showFullScreen": "フルスクリーン表示",
   "geolocationError": "位置情報エラー: {error}",
   "mapOpenError": "マップを開く際のエラー: {error}",
-  "fullScreenMapError": "フルスクリーンマップを開く際のエラー: {error}"
+  "fullScreenMapError": "フルスクリーンマップを開く際のエラー: {error}",
+  "noMapSelected": "マップが選択されていません",
+  "noFieldOpen": "フィールドが開いていません",
+  "fieldNotAccessible": "フィールドにアクセスできません",
+  "gameReady": "プレイ準備完了",
+  "joinCurrentGame": "現在のゲームに参加",
+  "leaveCurrentField": "現在のフィールドを離れる",
+  "manageTeam": "チーム管理",
+  "previousFields": "以前のフィールド",
+  "noFieldHistory": "フィールド履歴がありません",
+  "reconnectToField": "フィールドに再接続"
+
 
 
 }

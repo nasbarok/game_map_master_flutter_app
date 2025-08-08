@@ -685,6 +685,17 @@
   "showFullScreen": "Visa i helskärm",
   "geolocationError": "Geolokaliseringsfel: {error}",
   "mapOpenError": "Fel vid öppning av karta: {error}",
-  "fullScreenMapError": "Fel vid öppning av helskärmskarta: {error}"
+  "fullScreenMapError": "Fel vid öppning av helskärmskarta: {error}",
+  "noMapSelected": "Ingen karta vald",
+  "noFieldOpen": "Inget fält öppet",
+  "fieldNotAccessible": "Fält inte tillgängligt",
+  "gameReady": "Redo att spela",
+  "joinCurrentGame": "Gå med i pågående spel",
+  "leaveCurrentField": "Lämna nuvarande fält",
+  "manageTeam": "Hantera lag",
+  "previousFields": "Tidigare fält",
+  "noFieldHistory": "Ingen fälthistorik tillgänglig",
+  "reconnectToField": "Återanslut till fält"
+
 
 }

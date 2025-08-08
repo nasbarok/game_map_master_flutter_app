@@ -2350,4 +2350,34 @@ class AppLocalizationsIt extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Errore nell\'apertura della mappa a schermo intero: $error';
   }
+
+  @override
+  String get noMapSelected => 'Nessuna mappa selezionata';
+
+  @override
+  String get noFieldOpen => 'Nessun campo aperto';
+
+  @override
+  String get fieldNotAccessible => 'Campo non accessibile';
+
+  @override
+  String get gameReady => 'Pronto a giocare';
+
+  @override
+  String get joinCurrentGame => 'Unisciti al gioco corrente';
+
+  @override
+  String get leaveCurrentField => 'Lascia il campo corrente';
+
+  @override
+  String get manageTeam => 'Gestisci squadra';
+
+  @override
+  String get previousFields => 'Campi precedenti';
+
+  @override
+  String get noFieldHistory => 'Nessuna cronologia campo disponibile';
+
+  @override
+  String get reconnectToField => 'Riconnetti al campo';
 }

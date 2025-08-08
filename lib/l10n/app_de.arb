@@ -689,7 +689,18 @@
   "showFullScreen": "Vollbild anzeigen",
   "geolocationError": "Geolokalisierungsfehler: {error}",
   "mapOpenError": "Fehler beim Öffnen der Karte: {error}",
-  "fullScreenMapError": "Fehler beim Öffnen der Vollbildkarte: {error}"
+  "fullScreenMapError": "Fehler beim Öffnen der Vollbildkarte: {error}",
+  "noMapSelected": "Keine Karte ausgewählt",
+  "noFieldOpen": "Kein Feld geöffnet",
+  "fieldNotAccessible": "Feld nicht zugänglich",
+  "gameReady": "Bereit zu spielen",
+  "joinCurrentGame": "Laufendem Spiel beitreten",
+  "leaveCurrentField": "Aktuelles Feld verlassen",
+  "manageTeam": "Team verwalten",
+  "previousFields": "Vorherige Felder",
+  "noFieldHistory": "Keine Feldhistorie verfügbar",
+  "reconnectToField": "Wieder mit Feld verbinden"
+
 
 
 }

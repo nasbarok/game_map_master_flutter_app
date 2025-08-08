@@ -2341,4 +2341,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Error opening fullscreen map: $error';
   }
+
+  @override
+  String get noMapSelected => 'No map selected';
+
+  @override
+  String get noFieldOpen => 'No field open';
+
+  @override
+  String get fieldNotAccessible => 'Field not accessible';
+
+  @override
+  String get gameReady => 'Ready to play';
+
+  @override
+  String get joinCurrentGame => 'Join current game';
+
+  @override
+  String get leaveCurrentField => 'Leave current field';
+
+  @override
+  String get manageTeam => 'Manage team';
+
+  @override
+  String get previousFields => 'Previous fields';
+
+  @override
+  String get noFieldHistory => 'No field history available';
+
+  @override
+  String get reconnectToField => 'Reconnect to field';
 }

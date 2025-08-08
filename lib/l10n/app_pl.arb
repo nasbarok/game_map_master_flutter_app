@@ -689,6 +689,17 @@
   "showFullScreen": "Pokaż na pełnym ekranie",
   "geolocationError": "Błąd geolokalizacji: {error}",
   "mapOpenError": "Błąd podczas otwierania mapy: {error}",
-  "fullScreenMapError": "Błąd podczas otwierania mapy na pełnym ekranie: {error}"
+  "fullScreenMapError": "Błąd podczas otwierania mapy na pełnym ekranie: {error}",
+  "noMapSelected": "Nie wybrano mapy",
+  "noFieldOpen": "Brak otwartego pola",
+  "fieldNotAccessible": "Pole niedostępne",
+  "gameReady": "Gotowy do gry",
+  "joinCurrentGame": "Dołącz do bieżącej gry",
+  "leaveCurrentField": "Opuść bieżące pole",
+  "manageTeam": "Zarządzaj zespołem",
+  "previousFields": "Poprzednie pola",
+  "noFieldHistory": "Brak dostępnej historii pól",
+  "reconnectToField": "Połącz ponownie z polem"
+
 
 }

@@ -2358,4 +2358,34 @@ class AppLocalizationsEs extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Error al abrir el mapa en pantalla completa: $error';
   }
+
+  @override
+  String get noMapSelected => 'Ningún mapa seleccionado';
+
+  @override
+  String get noFieldOpen => 'Ningún campo abierto';
+
+  @override
+  String get fieldNotAccessible => 'Campo no accesible';
+
+  @override
+  String get gameReady => 'Listo para jugar';
+
+  @override
+  String get joinCurrentGame => 'Unirse al juego actual';
+
+  @override
+  String get leaveCurrentField => 'Salir del campo actual';
+
+  @override
+  String get manageTeam => 'Gestionar equipo';
+
+  @override
+  String get previousFields => 'Campos anteriores';
+
+  @override
+  String get noFieldHistory => 'No hay historial de campos disponible';
+
+  @override
+  String get reconnectToField => 'Reconectar al campo';
 }

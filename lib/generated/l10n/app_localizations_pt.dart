@@ -2350,4 +2350,34 @@ class AppLocalizationsPt extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Erro ao abrir o mapa em tela cheia: $error';
   }
+
+  @override
+  String get noMapSelected => 'Nenhum mapa selecionado';
+
+  @override
+  String get noFieldOpen => 'Nenhum campo aberto';
+
+  @override
+  String get fieldNotAccessible => 'Campo não acessível';
+
+  @override
+  String get gameReady => 'Pronto para jogar';
+
+  @override
+  String get joinCurrentGame => 'Entrar no jogo atual';
+
+  @override
+  String get leaveCurrentField => 'Sair do campo atual';
+
+  @override
+  String get manageTeam => 'Gerenciar equipe';
+
+  @override
+  String get previousFields => 'Campos anteriores';
+
+  @override
+  String get noFieldHistory => 'Nenhum histórico de campo disponível';
+
+  @override
+  String get reconnectToField => 'Reconectar ao campo';
 }

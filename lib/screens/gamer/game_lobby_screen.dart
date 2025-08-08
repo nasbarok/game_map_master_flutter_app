@@ -14,6 +14,7 @@ import '../../services/websocket_service.dart';
 import '../../services/invitation_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/team.dart';
+import '../../widgets/adaptive_background.dart';
 import '../../widgets/gamer_history_button.dart';
 import '../../widgets/options/user_options_menu.dart';
 import '../../widgets/options/cropped_logo_button.dart';
@@ -82,47 +83,79 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     // ✅ Rendu normal
     logger.d('✅ Affichage de l’interface GameLobbyScreen');
 
-    return Scaffold(
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.home,
+      enableParallax: true,
+      backgroundOpacity: 0.85,
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CroppedLogoButtonAnimated(
-            size: 35.0,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => UserOptionsMenu()),
-              );
-            },
+        toolbarHeight: 70,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          l10n.mapLabel(selectedMap?.name ?? l10n.unknownMap),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                offset: Offset(1, 1),
+                blurRadius: 3,
+                color: Colors.black.withOpacity(0.7),
+              ),
+            ],
           ),
         ),
-        title: Text(l10n.mapLabel(selectedMap?.name ?? l10n.unknownMap)),
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          child: const CroppedLogoButton(),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              final authService = context.read<AuthService>();
-              await authService.leaveAndLogout(context);
-              if (mounted) {
-                context.go('/login');
-              }
-            },
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white),
+              tooltip: l10n.logout,
+              onPressed: () async {
+                final authService = context.read<AuthService>();
+                await authService.leaveAndLogout(context);
+                if (mounted) {
+                  context.go('/login');
+                }
+              },
+            ),
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(icon: const Icon(Icons.map), text: l10n.terrainTab),
-            Tab(icon: const Icon(Icons.people), text: l10n.playersTab),
-          ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(56),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: Colors.white,
+              indicatorWeight: 3,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              labelStyle: TextStyle(fontWeight: FontWeight.bold),
+              tabs: [
+                Tab(icon: const Icon(Icons.map), text: l10n.terrainTab),
+                Tab(icon: const Icon(Icons.people), text: l10n.playersTab),
+              ],
+            ),
+          ),
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Onglet Terrain
+          // ✅ GARDER VOS MÉTHODES EXISTANTES EXACTEMENT COMME ELLES SONT
           _buildTerrainTab(),
-          // Onglet Joueurs
           _buildPlayersTab(),
         ],
       ),
@@ -146,6 +179,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           children: [
             Card(
               elevation: 4,
+              color: Colors.black.withOpacity(0.7),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side:
+                    BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -215,6 +254,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             if (gameState.isGameRunning)
               Card(
                 elevation: 4,
+                color: Colors.black.withOpacity(0.7),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                      color: Colors.white.withOpacity(0.3), width: 1),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -250,6 +295,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             else
               Card(
                 elevation: 4,
+                color: Colors.black.withOpacity(0.7),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                      color: Colors.white.withOpacity(0.3), width: 1),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -320,6 +371,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               : (scenario.scenario.description ?? l10n.noDescription);
 
           return Card(
+            color: Colors.black.withOpacity(0.7),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+            ),
             elevation: 2,
             margin: const EdgeInsets.symmetric(vertical: 4),
             child: ListTile(
@@ -392,6 +448,12 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 : l10n.unknownOwner;
 
             return Card(
+              color: Colors.black.withOpacity(0.7),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side:
+                    BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+              ),
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 children: [
@@ -568,6 +630,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         _buildTeamInfo(),
         const SizedBox(height: 16),
         Card(
+          color: Colors.black.withOpacity(0.7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+          ),
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -672,6 +739,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     }
 
     return Card(
+      color: Colors.black.withOpacity(0.7),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+      ),
       margin: const EdgeInsets.all(16),
       child: Padding(
         padding: const EdgeInsets.all(16),

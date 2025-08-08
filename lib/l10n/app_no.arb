@@ -689,6 +689,17 @@
   "showFullScreen": "Vis i fullskjerm",
   "geolocationError": "Geolokalisering feil: {error}",
   "mapOpenError": "Feil ved åpning av kart: {error}",
-  "fullScreenMapError": "Feil ved åpning av fullskjerm kart: {error}"
+  "fullScreenMapError": "Feil ved åpning av fullskjerm kart: {error}",
+  "noMapSelected": "Ingen kart valgt",
+  "noFieldOpen": "Ingen bane åpen",
+  "fieldNotAccessible": "Bane ikke tilgjengelig",
+  "gameReady": "Klar til å spille",
+  "joinCurrentGame": "Bli med i pågående spill",
+  "leaveCurrentField": "Forlat nåværende bane",
+  "manageTeam": "Administrer lag",
+  "previousFields": "Tidligere baner",
+  "noFieldHistory": "Ingen banehistorikk tilgjengelig",
+  "reconnectToField": "Koble til bane igjen"
+
 
 }

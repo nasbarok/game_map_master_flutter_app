@@ -2344,4 +2344,34 @@ class AppLocalizationsNo extends AppLocalizations {
   String fullScreenMapError(Object error) {
     return 'Feil ved åpning av fullskjerm kart: $error';
   }
+
+  @override
+  String get noMapSelected => 'Ingen kart valgt';
+
+  @override
+  String get noFieldOpen => 'Ingen bane åpen';
+
+  @override
+  String get fieldNotAccessible => 'Bane ikke tilgjengelig';
+
+  @override
+  String get gameReady => 'Klar til å spille';
+
+  @override
+  String get joinCurrentGame => 'Bli med i pågående spill';
+
+  @override
+  String get leaveCurrentField => 'Forlat nåværende bane';
+
+  @override
+  String get manageTeam => 'Administrer lag';
+
+  @override
+  String get previousFields => 'Tidligere baner';
+
+  @override
+  String get noFieldHistory => 'Ingen banehistorikk tilgjengelig';
+
+  @override
+  String get reconnectToField => 'Koble til bane igjen';
 }

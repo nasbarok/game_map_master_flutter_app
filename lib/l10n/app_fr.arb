@@ -685,7 +685,18 @@
   "showFullScreen": "Afficher en plein écran",
   "geolocationError": "Erreur géolocalisation: {error}",
   "mapOpenError": "Erreur lors de l'ouverture de la carte : {error}",
-  "fullScreenMapError": "Erreur lors de l'ouverture de la carte en plein écran : {error}"
+  "fullScreenMapError": "Erreur lors de l'ouverture de la carte en plein écran : {error}",
+  "noMapSelected": "Aucune carte sélectionnée",
+  "noFieldOpen": "Aucun terrain ouvert",
+  "fieldNotAccessible": "Terrain non accessible",
+  "gameReady": "Prêt à jouer",
+  "joinCurrentGame": "Rejoindre la partie en cours",
+  "leaveCurrentField": "Quitter le terrain actuel",
+  "manageTeam": "Gérer l'équipe",
+  "previousFields": "Terrains précédents",
+  "noFieldHistory": "Aucun historique de terrain disponible",
+  "reconnectToField": "Se reconnecter au terrain"
+
 
 
 }

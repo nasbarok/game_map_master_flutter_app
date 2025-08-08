@@ -4192,6 +4192,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error opening fullscreen map: {error}'**
   String fullScreenMapError(Object error);
+
+  /// No description provided for @noMapSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No map selected'**
+  String get noMapSelected;
+
+  /// No description provided for @noFieldOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'No field open'**
+  String get noFieldOpen;
+
+  /// No description provided for @fieldNotAccessible.
+  ///
+  /// In en, this message translates to:
+  /// **'Field not accessible'**
+  String get fieldNotAccessible;
+
+  /// No description provided for @gameReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to play'**
+  String get gameReady;
+
+  /// No description provided for @joinCurrentGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Join current game'**
+  String get joinCurrentGame;
+
+  /// No description provided for @leaveCurrentField.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave current field'**
+  String get leaveCurrentField;
+
+  /// No description provided for @manageTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage team'**
+  String get manageTeam;
+
+  /// No description provided for @previousFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous fields'**
+  String get previousFields;
+
+  /// No description provided for @noFieldHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No field history available'**
+  String get noFieldHistory;
+
+  /// No description provided for @reconnectToField.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect to field'**
+  String get reconnectToField;
 }
 
 class _AppLocalizationsDelegate
