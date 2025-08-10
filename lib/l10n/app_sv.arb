@@ -695,7 +695,12 @@
   "manageTeam": "Hantera lag",
   "previousFields": "Tidigare fält",
   "noFieldHistory": "Ingen fälthistorik tillgänglig",
-  "reconnectToField": "Återanslut till fält"
+  "reconnectToField": "Återanslut till fält",
+  "unknownSession": "Okänd session",
+  "sessionStartedOn": "Startad {date}",
+  "gameSessionDetailsTitle": "Sessionsdetaljer",
+  "gameReplayTitle": "Spelrepris",
+  "noGameSessionsAvailable": "Inga spelsessioner tillgängliga"
 
 
 }

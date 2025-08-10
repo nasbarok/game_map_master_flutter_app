@@ -699,7 +699,12 @@
   "manageTeam": "Administrer lag",
   "previousFields": "Tidligere baner",
   "noFieldHistory": "Ingen banehistorikk tilgjengelig",
-  "reconnectToField": "Koble til bane igjen"
+  "reconnectToField": "Koble til bane igjen",
+  "unknownSession": "Ukjent økt",
+  "sessionStartedOn": "Startet {date}",
+  "gameSessionDetailsTitle": "Øktdetaljer",
+  "gameReplayTitle": "Spill-reprise",
+  "noGameSessionsAvailable": "Ingen spilløkter tilgjengelig"
 
 
 }

@@ -641,6 +641,7 @@
   "bombCountdown2": "Deux",
   "bombCountdown1": "Un",
   "bombArmed": "Bombe de la zone {zoneName} armée",
+  "bombZoneExited": "Zone {zoneName} quittée. Armement interrompu.",
   "bombActiveAlert": "Bombe active sur {zoneName}. Intervention requise.",
   "defuseZoneEntered": "Zone {zoneName} atteinte. Début du désamorçage.",
   "defuseTimeRemaining": "Temps restant : {seconds} secondes.",
@@ -695,7 +696,12 @@
   "manageTeam": "Gérer l'équipe",
   "previousFields": "Terrains précédents",
   "noFieldHistory": "Aucun historique de terrain disponible",
-  "reconnectToField": "Se reconnecter au terrain"
+  "reconnectToField": "Se reconnecter au terrain",
+  "unknownSession": "Session inconnue",
+  "sessionStartedOn": "Démarrée le {date}",
+  "gameSessionDetailsTitle": "Détails de la session",
+  "gameReplayTitle": "Replay de la partie",
+  "noGameSessionsAvailable": "Aucune session de jeu disponible"
 
 
 

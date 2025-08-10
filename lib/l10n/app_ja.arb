@@ -699,7 +699,12 @@
   "manageTeam": "チーム管理",
   "previousFields": "以前のフィールド",
   "noFieldHistory": "フィールド履歴がありません",
-  "reconnectToField": "フィールドに再接続"
+  "reconnectToField": "フィールドに再接続",
+  "unknownSession": "不明なセッション",
+  "sessionStartedOn": "{date}に開始",
+  "gameSessionDetailsTitle": "セッション詳細",
+  "gameReplayTitle": "ゲームリプレイ",
+  "noGameSessionsAvailable": "利用可能なゲームセッションがありません"
 
 
 

@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
 import '../../services/history_service.dart';
+import '../../widgets/adaptive_background.dart';
+import '../../widgets/options/cropped_logo_button.dart';
 import 'field_sessions_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -100,16 +102,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.menu,
+      enableParallax: true,
+      backgroundOpacity: 0.85,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 70,
+        title: Text(
+          widget.fieldId != null
+              ? l10n.historyScreenTitleField
+              : l10n.historyScreenTitleGeneric,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                offset: Offset(1, 1),
+                blurRadius: 3,
+                color: Colors.black.withOpacity(0.7),
+              ),
+            ],
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : _errorMessage != null
               ? Center(
                   child: Text(_errorMessage!,
-                      style: const TextStyle(color: Colors.red)))
+                      style: const TextStyle(color: Colors.red, fontSize: 16)))
               : _fields.isEmpty
-                  ? Center(child: Text(l10n.noFieldsAvailable))
+                  ? Center(
+                      child: Text(l10n.noFieldsAvailable,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16)))
                   : ListView.builder(
                       itemCount: _fields.length,
                       itemBuilder: (context, index) {
@@ -117,16 +146,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         return Card(
                           margin: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
+                          color: Colors.black.withOpacity(0.7),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                                color: Colors.white.withOpacity(0.3), width: 1),
+                          ),
                           child: ListTile(
-                            title: Text(field.name),
+                            title: Text(field.name,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(l10n.fieldOpenedOn(
                                     _formatDate(field.openedAt!))),
                                 if (field.closedAt != null)
-                                  Text(l10n.fieldClosedOn(
-                                      _formatDate(field.closedAt!)))
+                                  Text(
+                                      l10n.fieldClosedOn(
+                                          _formatDate(field.closedAt!)),
+                                      style: const TextStyle(
+                                          color: Colors.white70))
                                 else
                                   Text(l10n.fieldStatusOpen,
                                       style:
@@ -143,7 +184,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     tooltip: l10n.deleteFieldTooltip,
                                     onPressed: () => _confirmDeleteField(field),
                                   ),
-                                const Icon(Icons.arrow_forward_ios),
+                                const Icon(Icons.arrow_forward_ios,
+                                    color: Colors.white),
                               ],
                             ),
                             onTap: () {
@@ -164,7 +206,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               heroTag: 'history_fab',
               onPressed: _loadFields,
               tooltip: l10n.refreshTooltip,
-              child: const Icon(Icons.refresh),
+              backgroundColor: Colors.blue.shade600,
+              child: const Icon(Icons.refresh, color: Colors.white),
             )
           : null,
     );

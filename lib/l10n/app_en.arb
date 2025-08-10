@@ -2667,7 +2667,12 @@
   "manageTeam": "Manage team",
   "previousFields": "Previous fields",
   "noFieldHistory": "No field history available",
-  "reconnectToField": "Reconnect to field"
+  "reconnectToField": "Reconnect to field",
+  "unknownSession": "Unknown session",
+  "sessionStartedOn": "Started on {date}",
+  "gameSessionDetailsTitle": "Session details",
+  "gameReplayTitle": "Game replay",
+  "noGameSessionsAvailable": "No game sessions available"
 
 
 

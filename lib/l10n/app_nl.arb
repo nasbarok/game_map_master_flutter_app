@@ -699,7 +699,12 @@
   "manageTeam": "Team beheren",
   "previousFields": "Vorige velden",
   "noFieldHistory": "Geen veldgeschiedenis beschikbaar",
-  "reconnectToField": "Opnieuw verbinden met veld"
+  "reconnectToField": "Opnieuw verbinden met veld",
+  "unknownSession": "Onbekende sessie",
+  "sessionStartedOn": "Gestart op {date}",
+  "gameSessionDetailsTitle": "Sessiedetails",
+  "gameReplayTitle": "Game replay",
+  "noGameSessionsAvailable": "Geen spelsessies beschikbaar"
 
 
 }

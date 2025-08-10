@@ -2378,4 +2378,21 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get reconnectToField => 'Opnieuw verbinden met veld';
+
+  @override
+  String get unknownSession => 'Onbekende sessie';
+
+  @override
+  String sessionStartedOn(Object date) {
+    return 'Gestart op $date';
+  }
+
+  @override
+  String get gameSessionDetailsTitle => 'Sessiedetails';
+
+  @override
+  String get gameReplayTitle => 'Game replay';
+
+  @override
+  String get noGameSessionsAvailable => 'Geen spelsessies beschikbaar';
 }

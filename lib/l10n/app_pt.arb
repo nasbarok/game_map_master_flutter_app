@@ -699,7 +699,12 @@
   "manageTeam": "Gerenciar equipe",
   "previousFields": "Campos anteriores",
   "noFieldHistory": "Nenhum histórico de campo disponível",
-  "reconnectToField": "Reconectar ao campo"
+  "reconnectToField": "Reconectar ao campo",
+  "unknownSession": "Sessão desconhecida",
+  "sessionStartedOn": "Iniciada em {date}",
+  "gameSessionDetailsTitle": "Detalhes da sessão",
+  "gameReplayTitle": "Replay do jogo",
+  "noGameSessionsAvailable": "Nenhuma sessão de jogo disponível"
 
 
 }

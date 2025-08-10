@@ -699,7 +699,12 @@
   "manageTeam": "Zarządzaj zespołem",
   "previousFields": "Poprzednie pola",
   "noFieldHistory": "Brak dostępnej historii pól",
-  "reconnectToField": "Połącz ponownie z polem"
+  "reconnectToField": "Połącz ponownie z polem",
+  "unknownSession": "Nieznana sesja",
+  "sessionStartedOn": "Rozpoczęta {date}",
+  "gameSessionDetailsTitle": "Szczegóły sesji",
+  "gameReplayTitle": "Powtórka gry",
+  "noGameSessionsAvailable": "Brak dostępnych sesji gry"
 
 
 }

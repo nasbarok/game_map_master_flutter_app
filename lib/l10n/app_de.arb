@@ -699,7 +699,12 @@
   "manageTeam": "Team verwalten",
   "previousFields": "Vorherige Felder",
   "noFieldHistory": "Keine Feldhistorie verfügbar",
-  "reconnectToField": "Wieder mit Feld verbinden"
+  "reconnectToField": "Wieder mit Feld verbinden",
+  "unknownSession": "Unbekannte Sitzung",
+  "sessionStartedOn": "Gestartet am {date}",
+  "gameSessionDetailsTitle": "Sitzungsdetails",
+  "gameReplayTitle": "Spiel-Wiederholung",
+  "noGameSessionsAvailable": "Keine Spielsitzungen verfügbar"
 
 
 

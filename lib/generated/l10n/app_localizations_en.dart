@@ -2371,4 +2371,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reconnectToField => 'Reconnect to field';
+
+  @override
+  String get unknownSession => 'Unknown session';
+
+  @override
+  String sessionStartedOn(Object date) {
+    return 'Started on $date';
+  }
+
+  @override
+  String get gameSessionDetailsTitle => 'Session details';
+
+  @override
+  String get gameReplayTitle => 'Game replay';
+
+  @override
+  String get noGameSessionsAvailable => 'No game sessions available';
 }

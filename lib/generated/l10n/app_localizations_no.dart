@@ -2374,4 +2374,21 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get reconnectToField => 'Koble til bane igjen';
+
+  @override
+  String get unknownSession => 'Ukjent økt';
+
+  @override
+  String sessionStartedOn(Object date) {
+    return 'Startet $date';
+  }
+
+  @override
+  String get gameSessionDetailsTitle => 'Øktdetaljer';
+
+  @override
+  String get gameReplayTitle => 'Spill-reprise';
+
+  @override
+  String get noGameSessionsAvailable => 'Ingen spilløkter tilgjengelig';
 }

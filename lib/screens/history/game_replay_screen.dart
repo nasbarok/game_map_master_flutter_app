@@ -12,18 +12,20 @@ import 'package:latlong2/latlong.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/scenario/scenario_detector_service.dart';
 import '../../models/scenario/scenario_replay_extension.dart';
+import '../../widgets/adaptive_background.dart';
+import '../../widgets/options/cropped_logo_button.dart';
 
 /// Écran de replay extensible des déplacements des joueurs et des scénarios
 class GameReplayScreen extends StatefulWidget {
   final int gameSessionId;
   final GameMap gameMap;
-  
+
   const GameReplayScreen({
     Key? key,
     required this.gameSessionId,
     required this.gameMap,
   }) : super(key: key);
-  
+
   @override
   _GameReplayScreenState createState() => _GameReplayScreenState();
 }
@@ -36,7 +38,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
   GameSessionPositionHistory? _positionHistory;
   bool _isLoading = true;
   String? _errorMessage;
-  
+
   // Extensions de scénarios (peut supporter plusieurs scénarios simultanés)
   List<ScenarioReplayExtension> _scenarioExtensions = [];
 
@@ -44,12 +46,12 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
   bool _isPlaying = false;
   double _playbackSpeed = 1.0;
   Timer? _playbackTimer;
-  
+
   // Curseur de temps
   DateTime? _startTime;
   DateTime? _endTime;
   DateTime? _currentTime;
-  
+
   // Positions affichées actuellement
   Map<int, Coordinate> _displayedPositions = {};
 
@@ -64,7 +66,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     7: Colors.pink,
     8: Colors.indigo,
   };
-  
+
   // Informations sur les équipes des joueurs
   final Map<int, int?> _playerTeams = {};
 
@@ -92,24 +94,26 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     _scenarioDetector.disposeExtensions(_scenarioExtensions);
     super.dispose();
   }
-  
+
   Future<void> _loadReplayData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       // Charger l'historique des positions
-      final positionHistory = await _locationService.getPositionHistory(widget.gameSessionId);
+      final positionHistory =
+          await _locationService.getPositionHistory(widget.gameSessionId);
 
       // Détecter et charger les extensions de scénarios appropriées
-      _scenarioExtensions = await _scenarioDetector.detectAndLoadScenarios(widget.gameSessionId);
-      
+      _scenarioExtensions =
+          await _scenarioDetector.detectAndLoadScenarios(widget.gameSessionId);
+
       // Déterminer les timestamps de début et de fin
       DateTime? earliest;
       DateTime? latest;
-      
+
       // Extraire les informations d'équipe des joueurs
       positionHistory.playerPositions.forEach((userId, positions) {
         for (final position in positions) {
@@ -119,14 +123,14 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
           if (latest == null || position.timestamp.isAfter(latest!)) {
             latest = position.timestamp;
           }
-          
+
           // Stocker l'équipe du joueur (utiliser la dernière valeur connue)
           if (position.teamId != null) {
             _playerTeams[userId] = position.teamId;
           }
         }
       });
-      
+
       // Étendre la plage de temps avec les données des scénarios si disponibles
       for (final extension in _scenarioExtensions) {
         if (extension.hasData) {
@@ -141,7 +145,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         _endTime = latest;
         _currentTime = earliest;
         _isLoading = false;
-        
+
         // Initialiser les positions et états affichés au début
         _updateDisplayedData();
       });
@@ -153,7 +157,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
       });
     }
   }
-  
+
   void _updateDisplayedData() {
     if (_currentTime == null) return;
 
@@ -167,20 +171,20 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
 
   void _updateDisplayedPositions() {
     if (_currentTime == null || _positionHistory == null) return;
-    
+
     final newPositions = <int, Coordinate>{};
-    
+
     _positionHistory!.playerPositions.forEach((userId, positions) {
       // Trouver la position la plus récente avant ou égale au temps actuel
       PlayerPosition? lastValidPosition;
-      
+
       for (final position in positions) {
         if (position.timestamp.isAfter(_currentTime!)) {
           break; // Les positions sont triées par timestamp
         }
         lastValidPosition = position;
       }
-      
+
       if (lastValidPosition != null) {
         newPositions[userId] = Coordinate(
           latitude: lastValidPosition.latitude,
@@ -188,7 +192,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         );
       }
     });
-    
+
     setState(() {
       _displayedPositions = newPositions;
     });
@@ -196,34 +200,35 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
 
   void _startPlayback() {
     if (_startTime == null || _endTime == null || _currentTime == null) return;
-    
+
     setState(() {
       _isPlaying = true;
     });
-    
+
     _playbackTimer?.cancel();
-    _playbackTimer = Timer.periodic(Duration(milliseconds: (1000 / _playbackSpeed).round()), (timer) {
+    _playbackTimer = Timer.periodic(
+        Duration(milliseconds: (1000 / _playbackSpeed).round()), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
 
       final newTime = _currentTime!.add(Duration(seconds: 1));
-      
+
       // Si on a dépassé la fin, arrêter le replay
       if (newTime.isAfter(_endTime!)) {
         _stopPlayback();
         return;
       }
-      
+
       setState(() {
         _currentTime = newTime;
       });
-      
+
       _updateDisplayedData();
     });
   }
-  
+
   void _stopPlayback() {
     _playbackTimer?.cancel();
     _playbackTimer = null;
@@ -234,46 +239,65 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
       _isPlaying = false;
     });
   }
-  
+
   void _setPlaybackSpeed(double speed) {
     setState(() {
       _playbackSpeed = speed;
     });
-    
+
     // Redémarrer le timer avec la nouvelle vitesse si en cours de lecture
     if (_isPlaying) {
       _startPlayback();
     }
   }
-  
+
   void _onTimelineChanged(double value) {
     if (_startTime == null || _endTime == null) return;
-    
+
     final totalDuration = _endTime!.difference(_startTime!);
     final newTime = _startTime!.add(Duration(
       milliseconds: (totalDuration.inMilliseconds * value).round(),
     ));
-    
+
     setState(() {
       _currentTime = newTime;
     });
-    
+
     _updateDisplayedData();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
+
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.menu,
+      enableParallax: true,
+      backgroundOpacity: 0.85,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 70,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.replayScreenTitle),
+            Text(l10n.replayScreenTitle,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(1, 1),
+                      blurRadius: 3,
+                      color: Colors.black.withOpacity(0.7),
+                    ),
+                  ],
+                )),
             if (_scenarioExtensions.isNotEmpty)
               Text(
                 _scenarioExtensions.map((e) => e.scenarioName).join(', '),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+                style: const TextStyle(
+                    fontSize: 14, fontWeight: FontWeight.normal),
               ),
           ],
         ),
@@ -285,6 +309,24 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
               tooltip: l10n.scenarioSummaryTitle,
             ),
         ],
+        leadingWidth: 100,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            const SizedBox(width: 4),
+            // ⬇️ Contraint la taille du logo pour éviter les débordements
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CroppedLogoButton(),
+            ),
+          ],
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -293,7 +335,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                      Text(_errorMessage!,
+                          style: const TextStyle(color: Colors.red)),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadReplayData,
@@ -306,7 +349,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                   children: [
                     // Panneaux d'information des scénarios (si disponibles)
                     for (final extension in _scenarioExtensions)
-                      if (extension.hasData && extension.buildInfoPanel() != null)
+                      if (extension.hasData &&
+                          extension.buildInfoPanel() != null)
                         extension.buildInfoPanel()!,
 
                     // Carte
@@ -325,7 +369,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                         children: [
                           // Couche de tuiles
                           TileLayer(
-                            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            urlTemplate:
+                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                             userAgentPackageName: 'com.example.app',
                           ),
 
@@ -341,18 +386,20 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                             MarkerLayer(
                               markers: widget.gameMap.mapPointsOfInterest!
                                   .map((poi) => Marker(
-                                      point: LatLng(poi.latitude, poi.longitude),
-                                      width: 40,
-                                      height: 40,
-                                      child: Tooltip(
-                                        message: poi.name,
-                                        child: Icon(
-                                          _getIconDataFromIdentifier(poi.iconIdentifier),
-                                          color: Colors.black87,
-                                          size: 30,
+                                        point:
+                                            LatLng(poi.latitude, poi.longitude),
+                                        width: 40,
+                                        height: 40,
+                                        child: Tooltip(
+                                          message: poi.name,
+                                          child: Icon(
+                                            _getIconDataFromIdentifier(
+                                                poi.iconIdentifier),
+                                            color: Colors.black87,
+                                            size: 30,
+                                          ),
                                         ),
-                                      ),
-                                    ))
+                                      ))
                                   .toList(),
                             ),
 
@@ -364,7 +411,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                               final teamId = _playerTeams[userId];
 
                               return Marker(
-                                point: LatLng(position.latitude, position.longitude),
+                                point: LatLng(
+                                    position.latitude, position.longitude),
                                 width: 30,
                                 height: 30,
                                 child: _buildPlayerMarker(userId, teamId),
@@ -384,8 +432,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                           // Affichage du temps actuel
                           Text(
                             _currentTime != null
-                              ? _formatDateTime(_currentTime!)
-                              : '--:--:--',
+                                ? _formatDateTime(_currentTime!)
+                                : '--:--:--',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -395,11 +443,20 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                           const SizedBox(height: 8),
 
                           // Slider de timeline
-                          if (_startTime != null && _endTime != null && _currentTime != null)
+                          if (_startTime != null &&
+                              _endTime != null &&
+                              _currentTime != null)
                             Slider(
-                              value: _endTime!.difference(_startTime!).inMilliseconds > 0
-                                  ? _currentTime!.difference(_startTime!).inMilliseconds /
-                                    _endTime!.difference(_startTime!).inMilliseconds
+                              value: _endTime!
+                                          .difference(_startTime!)
+                                          .inMilliseconds >
+                                      0
+                                  ? _currentTime!
+                                          .difference(_startTime!)
+                                          .inMilliseconds /
+                                      _endTime!
+                                          .difference(_startTime!)
+                                          .inMilliseconds
                                   : 0.0,
                               onChanged: _onTimelineChanged,
                               min: 0.0,
@@ -416,15 +473,20 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                               children: [
                                 // Bouton Play/Pause
                                 IconButton(
-                                  onPressed: _isPlaying ? _stopPlayback : _startPlayback,
-                                  icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                                  onPressed: _isPlaying
+                                      ? _stopPlayback
+                                      : _startPlayback,
+                                  icon: Icon(_isPlaying
+                                      ? Icons.pause
+                                      : Icons.play_arrow),
                                   iconSize: 32,
                                 ),
 
                                 const SizedBox(width: 16),
 
                                 // Sélecteur de vitesse
-                                Text(l10n.playbackSpeedLabel(_playbackSpeed.toString())),
+                                Text(l10n.playbackSpeedLabel(
+                                    _playbackSpeed.toString())),
                                 const SizedBox(width: 8),
 
                                 _buildSpeedButton(0.5),
@@ -448,8 +510,10 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
       child: ElevatedButton(
         onPressed: () => _setPlaybackSpeed(speed),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _playbackSpeed == speed ? Colors.blue : Colors.grey[300],
-          foregroundColor: _playbackSpeed == speed ? Colors.white : Colors.black,
+          backgroundColor:
+              _playbackSpeed == speed ? Colors.blue : Colors.grey[300],
+          foregroundColor:
+              _playbackSpeed == speed ? Colors.white : Colors.black,
           minimumSize: const Size(30, 24),
           padding: const EdgeInsets.symmetric(horizontal: 4),
         ),
@@ -458,8 +522,9 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
     );
   }
 
-    Widget _buildPlayerMarker(int userId, int? teamId) {
-    final color = teamId != null ? _teamColors[teamId] ?? Colors.grey : Colors.grey;
+  Widget _buildPlayerMarker(int userId, int? teamId) {
+    final color =
+        teamId != null ? _teamColors[teamId] ?? Colors.grey : Colors.grey;
     // final String playerName = userId.toString(); // Remplacé par l10n si nécessaire
     final l10n = AppLocalizations.of(context)!;
     final String playerName = l10n.playerMarkerLabel(userId.toString());
@@ -506,7 +571,7 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
       ],
     );
   }
-  
+
   IconData _getIconDataFromIdentifier(String identifier) {
     switch (identifier) {
       case 'location_on':
@@ -536,8 +601,8 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:'
-           '${dateTime.minute.toString().padLeft(2, '0')}:'
-           '${dateTime.second.toString().padLeft(2, '0')}';
+        '${dateTime.minute.toString().padLeft(2, '0')}:'
+        '${dateTime.second.toString().padLeft(2, '0')}';
   }
 
   void _showScenarioSummary() {
@@ -557,10 +622,12 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
                 if (extension.hasData) ...[
                   Text(
                     extension.scenarioName,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
-                  extension.buildInfoPanel() ?? Text(l10n.scenarioInfoNotAvailable),
+                  extension.buildInfoPanel() ??
+                      Text(l10n.scenarioInfoNotAvailable),
                   const SizedBox(height: 16),
                 ],
             ],
@@ -569,11 +636,11 @@ class _GameReplayScreenState extends State<GameReplayScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.ok), // Utilisation de l10n.ok comme bouton de fermeture
+            child: Text(
+                l10n.ok), // Utilisation de l10n.ok comme bouton de fermeture
           ),
         ],
       ),
     );
   }
 }
-

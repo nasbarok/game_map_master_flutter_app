@@ -2336,4 +2336,21 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reconnectToField => 'フィールドに再接続';
+
+  @override
+  String get unknownSession => '不明なセッション';
+
+  @override
+  String sessionStartedOn(Object date) {
+    return '$dateに開始';
+  }
+
+  @override
+  String get gameSessionDetailsTitle => 'セッション詳細';
+
+  @override
+  String get gameReplayTitle => 'ゲームリプレイ';
+
+  @override
+  String get noGameSessionsAvailable => '利用可能なゲームセッションがありません';
 }

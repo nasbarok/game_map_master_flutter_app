@@ -2376,4 +2376,21 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get reconnectToField => 'Återanslut till fält';
+
+  @override
+  String get unknownSession => 'Okänd session';
+
+  @override
+  String sessionStartedOn(Object date) {
+    return 'Startad $date';
+  }
+
+  @override
+  String get gameSessionDetailsTitle => 'Sessionsdetaljer';
+
+  @override
+  String get gameReplayTitle => 'Spelrepris';
+
+  @override
+  String get noGameSessionsAvailable => 'Inga spelsessioner tillgängliga';
 }

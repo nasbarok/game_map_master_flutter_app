@@ -4252,6 +4252,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reconnect to field'**
   String get reconnectToField;
+
+  /// No description provided for @unknownSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown session'**
+  String get unknownSession;
+
+  /// No description provided for @sessionStartedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Started on {date}'**
+  String sessionStartedOn(Object date);
+
+  /// No description provided for @gameSessionDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session details'**
+  String get gameSessionDetailsTitle;
+
+  /// No description provided for @gameReplayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Game replay'**
+  String get gameReplayTitle;
+
+  /// No description provided for @noGameSessionsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No game sessions available'**
+  String get noGameSessionsAvailable;
 }
 
 class _AppLocalizationsDelegate

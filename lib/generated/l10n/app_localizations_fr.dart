@@ -2173,7 +2173,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String bombZoneExited(Object zoneName) {
-    return 'Exited zone $zoneName. Arming interrupted.';
+    return 'Zone $zoneName quittée. Armement interrompu.';
   }
 
   @override
@@ -2387,4 +2387,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reconnectToField => 'Se reconnecter au terrain';
+
+  @override
+  String get unknownSession => 'Session inconnue';
+
+  @override
+  String sessionStartedOn(Object date) {
+    return 'Démarrée le $date';
+  }
+
+  @override
+  String get gameSessionDetailsTitle => 'Détails de la session';
+
+  @override
+  String get gameReplayTitle => 'Replay de la partie';
+
+  @override
+  String get noGameSessionsAvailable => 'Aucune session de jeu disponible';
 }

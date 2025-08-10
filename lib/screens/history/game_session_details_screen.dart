@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../generated/l10n/app_localizations.dart';
 import '../../services/history_service.dart';
+import '../../widgets/adaptive_background.dart';
+import '../../widgets/options/cropped_logo_button.dart';
 import 'field_sessions_screen.dart';
 import 'game_replay_screen.dart';
 
@@ -77,22 +79,63 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
+    return AdaptiveScaffold(
+      gameBackgroundType: GameBackgroundType.menu,
+      enableParallax: true,
+      backgroundOpacity: 0.85,
       appBar: AppBar(
-        title: Text(widget.sessionIndex != null
-            ? l10n.sessionTitleWithIndex((widget.sessionIndex! + 1).toString())
-            : _gameSessionData != null && widget.sessionIndex != null
-                ? l10n.sessionTitleWithIndex((widget.sessionIndex! + 1).toString())
-                : l10n.sessionDetailsScreenTitle),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 70,
+        title: Text(
+          widget.sessionIndex != null
+              ? l10n
+                  .sessionTitleWithIndex((widget.sessionIndex! + 1).toString())
+              : _gameSessionData != null && widget.sessionIndex != null
+                  ? l10n.sessionTitleWithIndex(
+                      (widget.sessionIndex! + 1).toString())
+                  : l10n.sessionDetailsScreenTitle,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                offset: const Offset(1, 1),
+                blurRadius: 3,
+                color: Colors.black.withOpacity(0.7),
+              ),
+            ],
+          ),
+        ),
+        leadingWidth: 100,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            const SizedBox(width: 4),
+            // ⬇️ Contraint la taille du logo pour éviter les débordements
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CroppedLogoButton(),
+            ),
+          ],
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
               ? Center(
-                  child:
-                      Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
+                  child: Text(_errorMessage!,
+                      style: const TextStyle(color: Colors.red)))
               : _gameSessionData == null
-                  ? Center(child: Text(l10n.noSessionFound))
+                  ? Center(
+                      child: Text(l10n.noSessionFound,
+                          style: TextStyle(color: Colors.white)))
                   : SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +170,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    l10n.sessionTitleWithIndex((widget.sessionIndex! + 1).toString()),
+                    l10n.sessionTitleWithIndex(
+                        (widget.sessionIndex! + 1).toString()),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   IconButton(
@@ -145,8 +189,7 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(l10n.noAssociatedField)),
+                          SnackBar(content: Text(l10n.noAssociatedField)),
                         );
                       }
                     },
@@ -155,7 +198,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.fieldLabel(_gameSessionData!['fieldName'] ?? l10n.unknownField),
+                l10n.fieldLabel(
+                    _gameSessionData!['fieldName'] ?? l10n.unknownField),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
@@ -164,7 +208,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
               ),
               if (_gameSessionData!['startTime'] != null)
                 Text(
-                  l10n.sessionStartTimeLabel(_formatDate(_gameSessionData!['startTime'])),
+                  l10n.sessionStartTimeLabel(
+                      _formatDate(_gameSessionData!['startTime'])),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               if (_gameSessionData!['endTime'] != null)
@@ -175,7 +220,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
               if (_statistics != null &&
                   _statistics!['totalParticipants'] != null)
                 Text(
-                  l10n.participantsLabel(_statistics!['totalParticipants'].toString()),
+                  l10n.participantsLabel(
+                      _statistics!['totalParticipants'].toString()),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               const SizedBox(height: 12),
@@ -253,7 +299,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
     return widgets;
   }
 
-  List<Widget> _buildBombOperationStatsSection(Map<String, dynamic> bombOperationStats) {
+  List<Widget> _buildBombOperationStatsSection(
+      Map<String, dynamic> bombOperationStats) {
     final l10n = AppLocalizations.of(context)!;
     List<Widget> widgets = [];
 
@@ -319,7 +366,6 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
         resultText = l10n.drawResult;
     }
 
-
     widgets.add(
       Container(
         width: double.infinity,
@@ -359,7 +405,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
     return widgets;
   }
 
-  Widget _buildBombOperationTeamCard(String teamName, Color teamColor, int stat1, int stat2, String label1, String label2) {
+  Widget _buildBombOperationTeamCard(String teamName, Color teamColor,
+      int stat1, int stat2, String label1, String label2) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -406,25 +453,36 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(l10n.statisticLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.statisticLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(l10n.valueLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.valueLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
-        _buildBombOperationStatsRow(l10n.totalSitesStat, '${stats['totalSites'] ?? 0}'),
-        _buildBombOperationStatsRow(l10n.activeSitesLabel, '${stats['activeSites'] ?? 0}'), // Re-using activeSitesLabel as it's the same text
-        _buildBombOperationStatsRow(l10n.armedSitesLabel, '${stats['armedSites'] ?? 0}'),
-        _buildBombOperationStatsRow(l10n.disarmedSitesLabel, '${stats['disarmedSites'] ?? 0}'),
-        _buildBombOperationStatsRow(l10n.explodedSitesLabel, '${stats['explodedSites'] ?? 0}'),
+        _buildBombOperationStatsRow(
+            l10n.totalSitesStat, '${stats['totalSites'] ?? 0}'),
+        _buildBombOperationStatsRow(
+            l10n.activeSitesLabel, '${stats['activeSites'] ?? 0}'),
+        // Re-using activeSitesLabel as it's the same text
+        _buildBombOperationStatsRow(
+            l10n.armedSitesLabel, '${stats['armedSites'] ?? 0}'),
+        _buildBombOperationStatsRow(
+            l10n.disarmedSitesLabel, '${stats['disarmedSites'] ?? 0}'),
+        _buildBombOperationStatsRow(
+            l10n.explodedSitesLabel, '${stats['explodedSites'] ?? 0}'),
         if (stats['bombTimer'] != null)
-          _buildBombOperationStatsRow(l10n.bombTimerStat, '${stats['bombTimer']}s'),
+          _buildBombOperationStatsRow(
+              l10n.bombTimerStat, '${stats['bombTimer']}s'),
         if (stats['defuseTime'] != null)
-          _buildBombOperationStatsRow(l10n.defuseTimeStat, '${stats['defuseTime']}s'),
+          _buildBombOperationStatsRow(
+              l10n.defuseTimeStat, '${stats['defuseTime']}s'),
         if (stats['armingTime'] != null)
-          _buildBombOperationStatsRow(l10n.armingTimeStat, '${stats['armingTime']}s'),
+          _buildBombOperationStatsRow(
+              l10n.armingTimeStat, '${stats['armingTime']}s'),
       ],
     );
   }
@@ -438,7 +496,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+          child:
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ),
       ],
     );
@@ -553,12 +612,13 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  Text(l10n.rankLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.rankLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(l10n.nameLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.nameLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -567,8 +627,8 @@ class _GameSessionDetailsScreenState extends State<GameSessionDetailsScreen> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  Text(l10n.scoreLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.scoreLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
