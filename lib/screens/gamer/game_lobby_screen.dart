@@ -40,7 +40,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     super.initState();
 
     // Initialiser avec un seul onglet par défaut
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     _gameStateService = Provider.of<GameStateService>(context, listen: false);
     _webSocketService = Provider.of<WebSocketService>(context, listen: false);
@@ -80,6 +80,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
     final bool isConnectedToField = gameState.isTerrainOpen;
 
+    final invitationsCount =
+        context.watch<InvitationService>().pendingInvitations.length;
     // ✅ Rendu normal
     logger.d('✅ Affichage de l’interface GameLobbyScreen');
 
@@ -138,6 +140,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
             ),
             child: TabBar(
               controller: _tabController,
+              isScrollable: true,
               indicatorColor: Colors.white,
               indicatorWeight: 3,
               labelColor: Colors.white,
@@ -145,6 +148,27 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               labelStyle: TextStyle(fontWeight: FontWeight.bold),
               tabs: [
                 Tab(icon: const Icon(Icons.map), text: l10n.terrainTab),
+                Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(Icons.mail, size: 24),
+                            if (invitationsCount > 0)
+                              const Positioned(right: -6, top: -4, child: Badge()),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(l10n.invitations),
+                    ],
+                  ),
+                ),
                 Tab(icon: const Icon(Icons.people), text: l10n.playersTab),
               ],
             ),
@@ -154,12 +178,145 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          // ✅ GARDER VOS MÉTHODES EXISTANTES EXACTEMENT COMME ELLES SONT
           _buildTerrainTab(),
+          _buildInvitationsTab(),
           _buildPlayersTab(),
         ],
       ),
     );
+  }
+
+  int _getPendingInvitationsCount() {
+    final invitationService = context.watch<InvitationService>();
+    return invitationService.pendingInvitations.length;
+  }
+
+  Widget _buildInvitationsTab() {
+    final l10n = AppLocalizations.of(context)!;
+    final invitationService = context.watch<InvitationService>();
+    final pendingInvitations = invitationService.pendingInvitations;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.receivedInvitations,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: () {
+                  // TODO: Refresh invitations
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.invitationsRefreshed)),
+                  );
+                },
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Expanded(
+            child: pendingInvitations.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.mail_outline, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          l10n.noInvitations,
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: pendingInvitations.length,
+                    itemBuilder: (context, index) {
+                      final invitation = pendingInvitations[index];
+                      return _buildInvitationCard(invitation);
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInvitationCard(dynamic invitation) {
+    final l10n = AppLocalizations.of(context)!;
+    final invitationService = context.read<InvitationService>();
+    final invitationJson = invitation.toJson();
+    final payload = invitationJson['payload'] ?? {};
+
+    final fromUsername = payload['fromUsername'] ?? l10n.unknownPlayerName;
+    final mapName = payload['mapName'] ?? l10n.unknownMap;
+    final timestamp = DateTime.fromMillisecondsSinceEpoch(
+      invitationJson['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
+    );
+
+    return Card(
+      margin: EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.blue,
+          child: Icon(Icons.person, color: Colors.white),
+        ),
+        title: Text(l10n.invitationFrom(fromUsername)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.mapLabelShort(mapName)),
+            Text(
+              _formatTimestamp(timestamp),
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton(
+              onPressed: () => invitationService.respondToInvitation(
+                context,
+                invitationJson,
+                false,
+              ),
+              child: Text(l10n.declineInvitation),
+            ),
+            SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () => invitationService.respondToInvitation(
+                context,
+                invitationJson,
+                true,
+              ),
+              child: Text(l10n.acceptInvitation),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inMinutes < 1) {
+      return 'À l\'instant';
+    } else if (difference.inHours < 1) {
+      return 'Il y a ${difference.inMinutes} min';
+    } else if (difference.inDays < 1) {
+      return 'Il y a ${difference.inHours}h';
+    } else {
+      return '${timestamp.day}/${timestamp.month}';
+    }
   }
 
   Widget _buildTerrainTab() {

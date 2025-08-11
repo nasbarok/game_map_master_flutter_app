@@ -700,7 +700,13 @@
   "sessionStartedOn": "Iniciada el {date}",
   "gameSessionDetailsTitle": "Detalles de la sesión",
   "gameReplayTitle": "Repetición del juego",
-  "noGameSessionsAvailable": "No hay sesiones de juego disponibles"
+  "noGameSessionsAvailable": "No hay sesiones de juego disponibles",
+  "favorites": "Favoritos",
+  "favoritesTab": "Favoritos",
+  "favoritesComingSoon": "Función próximamente",
+  "alreadyInvited": "Ya invitado",
+  "receivedInvitations": "Invitaciones recibidas",
+  "invitationsRefreshed": "Invitaciones actualizadas"
 
 
 

@@ -2672,7 +2672,13 @@
   "sessionStartedOn": "Started on {date}",
   "gameSessionDetailsTitle": "Session details",
   "gameReplayTitle": "Game replay",
-  "noGameSessionsAvailable": "No game sessions available"
+  "noGameSessionsAvailable": "No game sessions available",
+  "favorites": "Favorites",
+  "favoritesTab": "Favorites",
+  "favoritesComingSoon": "Feature coming soon",
+  "alreadyInvited": "Already invited",
+  "receivedInvitations": "Received invitations",
+  "invitationsRefreshed": "Invitations refreshed"
 
 
 

@@ -2388,4 +2388,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noGameSessionsAvailable => 'No game sessions available';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get favoritesTab => 'Favorites';
+
+  @override
+  String get favoritesComingSoon => 'Feature coming soon';
+
+  @override
+  String get alreadyInvited => 'Already invited';
+
+  @override
+  String get receivedInvitations => 'Received invitations';
+
+  @override
+  String get invitationsRefreshed => 'Invitations refreshed';
 }

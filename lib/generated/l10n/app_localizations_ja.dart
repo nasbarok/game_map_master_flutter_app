@@ -2353,4 +2353,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noGameSessionsAvailable => '利用可能なゲームセッションがありません';
+
+  @override
+  String get favorites => 'お気に入り';
+
+  @override
+  String get favoritesTab => 'お気に入り';
+
+  @override
+  String get favoritesComingSoon => '機能は近日公開';
+
+  @override
+  String get alreadyInvited => '既に招待済み';
+
+  @override
+  String get receivedInvitations => '受信した招待';
+
+  @override
+  String get invitationsRefreshed => '招待を更新しました';
 }

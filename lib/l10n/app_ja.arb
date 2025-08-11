@@ -704,7 +704,13 @@
   "sessionStartedOn": "{date}に開始",
   "gameSessionDetailsTitle": "セッション詳細",
   "gameReplayTitle": "ゲームリプレイ",
-  "noGameSessionsAvailable": "利用可能なゲームセッションがありません"
+  "noGameSessionsAvailable": "利用可能なゲームセッションがありません",
+  "favorites": "お気に入り",
+  "favoritesTab": "お気に入り",
+  "favoritesComingSoon": "機能は近日公開",
+  "alreadyInvited": "既に招待済み",
+  "receivedInvitations": "受信した招待",
+  "invitationsRefreshed": "招待を更新しました"
 
 
 

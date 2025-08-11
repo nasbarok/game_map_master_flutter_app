@@ -2405,4 +2405,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noGameSessionsAvailable => 'No hay sesiones de juego disponibles';
+
+  @override
+  String get favorites => 'Favoritos';
+
+  @override
+  String get favoritesTab => 'Favoritos';
+
+  @override
+  String get favoritesComingSoon => 'Función próximamente';
+
+  @override
+  String get alreadyInvited => 'Ya invitado';
+
+  @override
+  String get receivedInvitations => 'Invitaciones recibidas';
+
+  @override
+  String get invitationsRefreshed => 'Invitaciones actualizadas';
 }

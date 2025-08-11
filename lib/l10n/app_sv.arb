@@ -700,7 +700,13 @@
   "sessionStartedOn": "Startad {date}",
   "gameSessionDetailsTitle": "Sessionsdetaljer",
   "gameReplayTitle": "Spelrepris",
-  "noGameSessionsAvailable": "Inga spelsessioner tillgängliga"
+  "noGameSessionsAvailable": "Inga spelsessioner tillgängliga",
+  "favorites": "Favoriter",
+  "favoritesTab": "Favoriter",
+  "favoritesComingSoon": "Funktion kommer snart",
+  "alreadyInvited": "Redan inbjuden",
+  "receivedInvitations": "Mottagna inbjudningar",
+  "invitationsRefreshed": "Inbjudningar uppdaterade"
 
 
 }

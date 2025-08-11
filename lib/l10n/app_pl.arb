@@ -704,7 +704,12 @@
   "sessionStartedOn": "Rozpoczęta {date}",
   "gameSessionDetailsTitle": "Szczegóły sesji",
   "gameReplayTitle": "Powtórka gry",
-  "noGameSessionsAvailable": "Brak dostępnych sesji gry"
-
+  "noGameSessionsAvailable": "Brak dostępnych sesji gry",
+  "favorites": "Ulubione",
+  "favoritesTab": "Ulubione",
+  "favoritesComingSoon": "Funkcja wkrótce",
+  "alreadyInvited": "Już zaproszony",
+  "receivedInvitations": "Otrzymane zaproszenia",
+  "invitationsRefreshed": "Zaproszenia odświeżone"
 
 }

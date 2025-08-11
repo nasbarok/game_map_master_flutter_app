@@ -2393,4 +2393,22 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get noGameSessionsAvailable => 'Inga spelsessioner tillgängliga';
+
+  @override
+  String get favorites => 'Favoriter';
+
+  @override
+  String get favoritesTab => 'Favoriter';
+
+  @override
+  String get favoritesComingSoon => 'Funktion kommer snart';
+
+  @override
+  String get alreadyInvited => 'Redan inbjuden';
+
+  @override
+  String get receivedInvitations => 'Mottagna inbjudningar';
+
+  @override
+  String get invitationsRefreshed => 'Inbjudningar uppdaterade';
 }

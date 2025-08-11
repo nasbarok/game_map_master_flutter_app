@@ -704,7 +704,13 @@
   "sessionStartedOn": "Gestartet am {date}",
   "gameSessionDetailsTitle": "Sitzungsdetails",
   "gameReplayTitle": "Spiel-Wiederholung",
-  "noGameSessionsAvailable": "Keine Spielsitzungen verfügbar"
+  "noGameSessionsAvailable": "Keine Spielsitzungen verfügbar",
+  "favorites": "Favoriten",
+  "favoritesTab": "Favoriten",
+  "favoritesComingSoon": "Funktion kommt bald",
+  "alreadyInvited": "Bereits eingeladen",
+  "receivedInvitations": "Erhaltene Einladungen",
+  "invitationsRefreshed": "Einladungen aktualisiert"
 
 
 

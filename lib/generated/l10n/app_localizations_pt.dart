@@ -2397,4 +2397,22 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noGameSessionsAvailable => 'Nenhuma sessão de jogo disponível';
+
+  @override
+  String get favorites => 'Favoritos';
+
+  @override
+  String get favoritesTab => 'Favoritos';
+
+  @override
+  String get favoritesComingSoon => 'Funcionalidade em breve';
+
+  @override
+  String get alreadyInvited => 'Já convidado';
+
+  @override
+  String get receivedInvitations => 'Convites recebidos';
+
+  @override
+  String get invitationsRefreshed => 'Convites atualizados';
 }

@@ -183,6 +183,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
     final invitationService = context.watch<InvitationService>();
+    final count = _getPendingInvitationsCount();
 
     // Si le terrain n'est pas ouvert, afficher un message
     if (!gameStateService.isTerrainOpen) {
@@ -216,7 +217,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     }
 
     return DefaultTabController(
-      length: 2,
+      length: 4,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -226,19 +227,52 @@ class _PlayersScreenState extends State<PlayersScreen> {
           bottom: TabBar(
             tabs: [
               Tab(text: l10n.searchTab),
+              Tab(text: l10n.invitations),
               Tab(text: l10n.teams),
+              Tab(text: l10n.favorites),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            // Onglet Recherche
             _buildSearchTab(),
-
-            // Onglet Équipes
+            _buildInvitationsTab(invitationService),
             _buildTeamsTab(teamService, gameStateService),
+            _buildFavoritesTab(), // Nouveau
           ],
         ),
+      ),
+    );
+  }
+
+  int _getPendingInvitationsCount() {
+    final invitationService = context.watch<InvitationService>();
+    return invitationService.sentInvitations
+        .where((inv) => inv.toJson()['status'] == 'pending')
+        .length;
+  }
+
+  Widget _buildFavoritesTab() {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            l10n.favoritesTab,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          SizedBox(height: 16),
+          Expanded(
+            child: Center(
+              child: Text(
+                l10n.favoritesComingSoon,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -291,13 +325,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                             title: Text(user['username']),
                             subtitle: Text(user['role'] ?? l10n.roleGamer),
                             trailing: canInvite
-                                ? ElevatedButton(
-                                    onPressed: () => _sendInvitation(
-                                      user['id'],
-                                      user['username'],
-                                    ),
-                                    child: Text(l10n.inviteButton),
-                                  )
+                                ? _buildInviteButton(
+                                    user['id'], user['username'])
                                 : const SizedBox.shrink(),
                           );
                         },
@@ -305,6 +334,37 @@ class _PlayersScreenState extends State<PlayersScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInviteButton(int userId, String username) {
+    final l10n = AppLocalizations.of(context)!;
+    final invitationService = context.watch<InvitationService>();
+
+    // Vérifier si une invitation pending existe déjà
+    final hasPendingInvitation = invitationService.sentInvitations.any((inv) {
+      final json = inv.toJson();
+      final payload = json['payload'] ?? {};
+      return payload['targetUserId'] == userId && json['status'] == 'pending';
+    });
+
+    if (hasPendingInvitation) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          l10n.alreadyInvited,
+          style: TextStyle(color: Colors.grey.shade600),
+        ),
+      );
+    }
+
+    return ElevatedButton(
+      onPressed: () => _sendInvitation(userId, username),
+      child: Text(l10n.inviteButton),
     );
   }
 

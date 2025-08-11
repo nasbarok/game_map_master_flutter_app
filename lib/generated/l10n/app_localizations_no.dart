@@ -2391,4 +2391,22 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get noGameSessionsAvailable => 'Ingen spilløkter tilgjengelig';
+
+  @override
+  String get favorites => 'Favoritter';
+
+  @override
+  String get favoritesTab => 'Favoritter';
+
+  @override
+  String get favoritesComingSoon => 'Funksjon kommer snart';
+
+  @override
+  String get alreadyInvited => 'Allerede invitert';
+
+  @override
+  String get receivedInvitations => 'Mottatte invitasjoner';
+
+  @override
+  String get invitationsRefreshed => 'Invitasjoner oppdatert';
 }

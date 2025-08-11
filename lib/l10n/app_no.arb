@@ -704,7 +704,13 @@
   "sessionStartedOn": "Startet {date}",
   "gameSessionDetailsTitle": "Øktdetaljer",
   "gameReplayTitle": "Spill-reprise",
-  "noGameSessionsAvailable": "Ingen spilløkter tilgjengelig"
+  "noGameSessionsAvailable": "Ingen spilløkter tilgjengelig",
+  "favorites": "Favoritter",
+  "favoritesTab": "Favoritter",
+  "favoritesComingSoon": "Funksjon kommer snart",
+  "alreadyInvited": "Allerede invitert",
+  "receivedInvitations": "Mottatte invitasjoner",
+  "invitationsRefreshed": "Invitasjoner oppdatert"
 
 
 }

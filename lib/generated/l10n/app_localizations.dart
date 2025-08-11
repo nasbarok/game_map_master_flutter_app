@@ -4282,6 +4282,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No game sessions available'**
   String get noGameSessionsAvailable;
+
+  /// No description provided for @favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favorites;
+
+  /// No description provided for @favoritesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favoritesTab;
+
+  /// No description provided for @favoritesComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature coming soon'**
+  String get favoritesComingSoon;
+
+  /// No description provided for @alreadyInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Already invited'**
+  String get alreadyInvited;
+
+  /// No description provided for @receivedInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Received invitations'**
+  String get receivedInvitations;
+
+  /// No description provided for @invitationsRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations refreshed'**
+  String get invitationsRefreshed;
 }
 
 class _AppLocalizationsDelegate

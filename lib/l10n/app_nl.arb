@@ -704,7 +704,13 @@
   "sessionStartedOn": "Gestart op {date}",
   "gameSessionDetailsTitle": "Sessiedetails",
   "gameReplayTitle": "Game replay",
-  "noGameSessionsAvailable": "Geen spelsessies beschikbaar"
+  "noGameSessionsAvailable": "Geen spelsessies beschikbaar",
+  "favorites": "Favorieten",
+  "favoritesTab": "Favorieten",
+  "favoritesComingSoon": "Functie komt binnenkort",
+  "alreadyInvited": "Al uitgenodigd",
+  "receivedInvitations": "Ontvangen uitnodigingen",
+  "invitationsRefreshed": "Uitnodigingen bijgewerkt"
 
 
 }
