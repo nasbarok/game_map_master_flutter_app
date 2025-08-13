@@ -3,38 +3,43 @@ import 'dart:async';
 import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as client;
-import 'package:provider/provider.dart';
-import 'dart:convert';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/websocket_service.dart';
-import '../models/field.dart';
-import '../models/game_map.dart';
 import '../models/invitation.dart';
 import '../models/websocket/game_invitation_message.dart';
 import '../models/websocket/invitation_response_message.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import 'invitation_api_service.dart';
+
 class InvitationService extends ChangeNotifier {
   final WebSocketService _webSocketService;
   final AuthService _authService;
   final GameStateService _gameStateService;
+  final InvitationApiService _invitationApiService;
 
-  List<WebSocketMessage> _pendingInvitations = [];
-  List<WebSocketMessage> _sentInvitations = [];
   StreamSubscription<WebSocketMessage>? _messageSubscription;
 
   InvitationService(this._webSocketService, this._authService,
-      this._gameStateService) {
-    _messageSubscription = _webSocketService.messageStream.listen(_handleWebSocketMessage as void Function(WebSocketMessage event)?);
+      this._gameStateService, this._invitationApiService) {
+    _messageSubscription = _webSocketService.messageStream.listen(
+        _handleWebSocketMessage as void Function(WebSocketMessage event)?);
   }
 
-  List<WebSocketMessage> get pendingInvitations => _pendingInvitations;
+  // listes depuis DB
+  List<Invitation> _sentInvitations = [];
+  List<Invitation> _receivedInvitations = [];
 
-  List<WebSocketMessage> get sentInvitations => _sentInvitations;
+  List<Invitation> get sentInvitations => List.unmodifiable(_sentInvitations);
+  List<Invitation> get receivedInvitations => List.unmodifiable(_receivedInvitations);
+  int get sentPendingCount => _sentInvitations.where((i) => i.isPending).length;
 
+
+  List<WebSocketMessage> get pendingInvitations => [];
+
+  List<WebSocketMessage> get sentInvitationsOld => [];
   void Function(Map<String, dynamic> invitation)? onInvitationReceivedDialog;
 
   get baseUrl => null;
@@ -47,37 +52,45 @@ class InvitationService extends ChangeNotifier {
         _gameStateService.isTerrainOpen;
   }
 
-  Future<void> sendInvitation(int userId, String username) async {
+  Future<void> sendInvitation(int userId) async {
     if (!canSendInvitations()) {
       throw Exception(
           'Vous devez être un host avec un terrain ouvert pour envoyer des invitations');
     }
 
     final fieldId = _gameStateService.selectedMap!.field!.id!;
-    final senderId = _authService.currentUser!.id;
 
-    final invitation = GameInvitationMessage(
-      fieldId: fieldId,
-      senderId: senderId!,
-      targetUserId: userId,
-    );
+    try {
+      // 1. Créer/récupérer l'invitation en base
+      final invitation =
+          await _invitationApiService.createOrGetInvitation(fieldId, userId);
 
-    // ✅ Envoi typé via WebSocket
-    await _webSocketService.sendMessage('/app/invitation', invitation);
-
-    // 🔄 Optionnel : enregistrer localement l'invitation envoyée
-    _sentInvitations.add(invitation);
-    notifyListeners();
+      // 2. Envoyer le WebSocket seulement si l'invitation est PENDING
+      if (invitation.isPending) {
+        final wsMessage = GameInvitationMessage(
+          fieldId: fieldId,
+          senderId: _authService.currentUser!.id!,
+          targetUserId: userId,
+        );
+        await _webSocketService.sendMessage('/app/invitation', wsMessage);
+        logger.d(
+            '✅ Invitation WebSocket envoyée pour ${invitation.targetUsername}');
+      } else {
+        logger.d(
+            'ℹ️ Invitation déjà existante avec statut: ${invitation.status}');
+      }
+    } catch (e) {
+      logger.e('Erreur lors de l\'envoi d\'invitation: $e');
+      rethrow;
+    }
   }
 
-
-  void _handleWebSocketMessage(WebSocketMessage message) {
+  void _Old_handleWebSocketMessage(WebSocketMessage message) {
     final messageJson = message.toJson();
     final type = messageJson['type'];
     final payload = messageJson['payload'];
     if (type == 'GAME_INVITATION') {
       logger.d('📬 Invitation de jeu reçue');
-
 
       logger.d('🧾 Payload invitation : $payload');
       // Vérifier que toUserId existe et correspond à l'utilisateur actuel
@@ -88,7 +101,7 @@ class InvitationService extends ChangeNotifier {
           currentUserId != null &&
           toUserId == currentUserId) {
         {
-          _pendingInvitations.add(message);
+          //_pendingInvitations.add(message);
           notifyListeners();
 
           // ➕ Affichage du dialogue si défini
@@ -113,8 +126,8 @@ class InvitationService extends ChangeNotifier {
           final mapId = response['mapId'];
           if (toUserId != null && mapId != null) {}
           final index = _sentInvitations.indexWhere(
-                (inv) {
-                  final invToJson = inv.toJson();
+            (inv) {
+              final invToJson = inv.toJson();
               final invPayload = invToJson['payload'] ?? {};
               return invPayload['toUserId'] == toUserId &&
                   invPayload['mapId'] == mapId;
@@ -125,7 +138,7 @@ class InvitationService extends ChangeNotifier {
             final invitation = _sentInvitations[index];
             final invitationToJson = invitation.toJson();
             invitationToJson['status'] =
-            response['accepted'] == true ? 'accepted' : 'declined';
+                response['accepted'] == true ? 'accepted' : 'declined';
             notifyListeners();
           }
         } else if (messageJson['type'] == 'PLAYER_JOINED') {
@@ -161,129 +174,151 @@ class InvitationService extends ChangeNotifier {
     }
   }
 
+  /// Répondre à une invitation
   Future<void> respondToInvitation(
-      BuildContext context,
-      Map<String, dynamic> invitation,
-      bool accept,
-      ) async {
+      BuildContext context, int invitationId, bool accept) async {
     try {
-      final senderId = invitation['senderId'];
-      final payload = invitation['payload'];
-      final targetUserId = payload['targetUserId'];
-      final fieldId = payload['fieldId'];
-      final fromUsername = payload['fromUsername'];
-      final mapName = payload['mapName'];
+      // 1. Répondre via API
+      final updatedInvitation =
+          await _invitationApiService.respondToInvitation(invitationId, accept);
 
-      final currentUserId = _authService.currentUser?.id;
-
-      if (senderId == null || targetUserId == null || fieldId == null || currentUserId == null) {
-        logger.d('❌ [invitation_service] [respondToInvitation] Invitation invalide ou utilisateur non connecté');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur: Invitation invalide.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      // Créer un message de réponse typé
+      // 2. Envoyer WebSocket de réponse
       final response = InvitationResponseMessage(
-        senderId: currentUserId,
-        targetUserId: targetUserId,
-        fieldId: fieldId,
+        senderId: _authService.currentUser!.id!,
+        targetUserId: updatedInvitation.senderId,
+        fieldId: updatedInvitation.fieldId,
         accepted: accept,
-        fromUsername: fromUsername,
-        mapName: mapName,
+        fromUsername: _authService.currentUser!.username,
+        mapName: updatedInvitation.fieldName,
       );
 
-      logger.d('📤 Envoi de la réponse à l’invitation : accept=$accept');
       await _webSocketService.sendMessage('/app/invitation-response', response);
 
-      // Si l'invitation est acceptée, connecter le joueur au terrain
+      // 3. Si accepté, connecter au terrain
       if (accept) {
         final apiService = GetIt.I<ApiService>();
-        _gameStateService.restoreSessionIfNeeded(apiService,fieldId);
+        _gameStateService.restoreSessionIfNeeded(
+            apiService, updatedInvitation.fieldId);
       }
 
-      // Supprimer des invitations en attente
-      _pendingInvitations.removeWhere((inv) {
-        final json = inv.toJson();
-        return json['senderId'] == senderId && json['fieldId'] == fieldId;
-      });
+      // 4. Rafraîchir les invitations reçues
+      await loadReceivedInvitations();
 
-      notifyListeners();
+      logger.d('✅ Réponse à l\'invitation: ${accept ? "Acceptée" : "Refusée"}');
     } catch (e) {
-      logger.d('❌ Erreur respondToInvitation : $e');
+      logger.e('Erreur lors de la réponse à l\'invitation: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur lors du traitement de l’invitation"), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text("Erreur lors du traitement de l'invitation"),
+            backgroundColor: Colors.red),
       );
     }
   }
 
-
-  // Récupérer toutes les invitations pour l'utilisateur connecté
-  Future<List<Invitation>> getMyInvitations() async {
-    final url = '$baseUrl/api/invitations/me';
-
-    final response = await client.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> invitationsJson = jsonDecode(response.body);
-      return invitationsJson
-          .map((json) => Invitation.fromJson(json))
-          .toList();
-    } else {
-      throw Exception('Failed to get invitations: ${response.body}');
+  /// Méthode de compatibilité pour l'ancienne signature
+  Future<void> respondToInvitationOld(BuildContext context,
+      Map<String, dynamic> invitationJson, bool accept) async {
+    // Extraire l'ID de l'invitation depuis le JSON
+    final invitationId = invitationJson['id'] as int?;
+    if (invitationId != null) {
+      await respondToInvitation(context, invitationId, accept);
     }
   }
 
-// Récupérer les invitations en attente
-  Future<List<Invitation>> getMyPendingInvitations() async {
-    final url = '$baseUrl/api/invitations/me/pending';
+  /// Charger les invitations envoyées depuis la DB
+  Future<void> loadSentInvitations() async {
+    if (_gameStateService.selectedMap?.field?.id == null) return;
 
-    final response = await client.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> invitationsJson = jsonDecode(response.body);
-      return invitationsJson
-          .map((json) => Invitation.fromJson(json))
-          .toList();
-    } else {
-      throw Exception('Failed to get pending invitations: ${response.body}');
+    try {
+      final fieldId = _gameStateService.selectedMap!.field!.id!;
+      _sentInvitations =
+          await _invitationApiService.getSentInvitations(fieldId);
+      notifyListeners();
+      logger.d('✅ ${_sentInvitations.length} invitations envoyées chargées');
+    } catch (e) {
+      logger.e('Erreur lors du chargement des invitations envoyées: $e');
     }
   }
 
-  // Accepter une invitation
-  Future<Invitation> acceptInvitation(int invitationId) async {
-    final url = '$baseUrl/api/invitations/$invitationId/accept';
-
-    final response = await client.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      return Invitation.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to accept invitation: ${response.body}');
+  /// Charger les invitations reçues depuis la DB
+  Future<void> loadReceivedInvitations() async {
+    try {
+      _receivedInvitations =
+          await _invitationApiService.getReceivedInvitations();
+      notifyListeners();
+      logger.d('✅ ${_receivedInvitations.length} invitations reçues chargées');
+    } catch (e) {
+      logger.e('Erreur lors du chargement des invitations reçues: $e');
     }
   }
 
-  // Refuser une invitation
-  Future<Invitation> declineInvitation(int invitationId) async {
-    final url = '$baseUrl/api/invitations/$invitationId/decline';
-
-    final response = await client.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      return Invitation.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to decline invitation: ${response.body}');
+  /// Annuler une invitation
+  Future<void> cancelInvitation(int invitationId) async {
+    try {
+      await _invitationApiService.cancelInvitation(invitationId);
+      await loadSentInvitations();
+      logger.d('✅ Invitation annulée');
+    } catch (e) {
+      logger.e('Erreur lors de l\'annulation de l\'invitation: $e');
+      rethrow;
     }
+  }
+
+  /// Vérifier si une invitation pending existe déjà
+  bool hasPendingInvitation(int targetUserId) {
+    return _sentInvitations.any((invitation) =>
+        invitation.targetUserId == targetUserId && invitation.isPending);
+  }
+
+  /// Compter les invitations en attente envoyées
+  Future<int> countPendingInvitations() async {
+    if (_gameStateService.selectedMap?.field?.id == null) return 0;
+
+    try {
+      final fieldId = _gameStateService.selectedMap!.field!.id!;
+      return await _invitationApiService.countPendingInvitations(fieldId);
+    } catch (e) {
+      return _sentInvitations.where((inv) => inv.isPending).length;
+    }
+  }
+
+  /// Compter les invitations reçues en attente
+  Future<int> countReceivedPendingInvitations() async {
+    try {
+      return await _invitationApiService.countReceivedPendingInvitations();
+    } catch (e) {
+      return _receivedInvitations.where((inv) => inv.isPending).length;
+    }
+  }
+
+  // Garder la logique WebSocket existante pour les notifications temps réel
+  void _handleWebSocketMessage(WebSocketMessage message) {
+    switch (message.type) {
+      case 'GAME_INVITATION':
+        _handleGameInvitation(message);
+        break;
+      case 'INVITATION_RESPONSE':
+        _handleInvitationResponse(message);
+        break;
+    }
+  }
+
+  void _handleGameInvitation(WebSocketMessage message) {
+    // 1) rafraîchir la liste depuis l’API (source de vérité)
+    loadReceivedInvitations();
+
+    // 2) afficher un dialog immédiat si demandé
+    if (onInvitationReceivedDialog != null) {
+      final json = message.toJson();
+      final payload = (json['payload'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
+      onInvitationReceivedDialog!(payload);
+    }
+  }
+
+  void _handleInvitationResponse(WebSocketMessage message) {
+    // Notification temps réel + refresh des invitations envoyées
+    loadSentInvitations();
   }
 
   @override

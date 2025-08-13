@@ -2413,4 +2413,22 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => 'Zaproszenia odświeżone';
+
+  @override
+  String get invitationPending => 'Oczekujące';
+
+  @override
+  String get invitationAccepted => 'Zaakceptowane';
+
+  @override
+  String get invitationDeclined => 'Odrzucone';
+
+  @override
+  String get invitationCanceled => 'Anulowane';
+
+  @override
+  String get invitationExpired => 'Wygasłe';
+
+  @override
+  String get cancelInvitation => 'Anuluj';
 }

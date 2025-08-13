@@ -2678,7 +2678,13 @@
   "favoritesComingSoon": "Feature coming soon",
   "alreadyInvited": "Already invited",
   "receivedInvitations": "Received invitations",
-  "invitationsRefreshed": "Invitations refreshed"
+  "invitationsRefreshed": "Invitations refreshed",
+  "invitationPending": "Pending",
+  "invitationAccepted": "Accepted",
+  "invitationDeclined": "Declined",
+  "invitationCanceled": "Canceled",
+  "invitationExpired": "Expired",
+  "cancelInvitation": "Cancel"
 
 
 

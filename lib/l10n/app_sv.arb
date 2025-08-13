@@ -706,7 +706,13 @@
   "favoritesComingSoon": "Funktion kommer snart",
   "alreadyInvited": "Redan inbjuden",
   "receivedInvitations": "Mottagna inbjudningar",
-  "invitationsRefreshed": "Inbjudningar uppdaterade"
+  "invitationsRefreshed": "Inbjudningar uppdaterade",
+  "invitationPending": "Väntande",
+  "invitationAccepted": "Accepterad",
+  "invitationDeclined": "Avvisad",
+  "invitationCanceled": "Avbruten",
+  "invitationExpired": "Utgången",
+  "cancelInvitation": "Avbryt"
 
 
 }

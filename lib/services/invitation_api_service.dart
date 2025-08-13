@@ -1,115 +1,99 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../models/invitation.dart';
+import 'api_service.dart';
+import 'auth_service.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class InvitationApiService {
-  final String baseUrl;
-  final http.Client client;
+  final ApiService _apiService;
+  final AuthService _authService;
 
-  InvitationApiService({required this.baseUrl, required this.client});
+  InvitationApiService(this._apiService, this._authService);
 
-  // Créer une invitation
-  Future<Invitation> createInvitation(int fieldId, int userId) async {
-    final url = '$baseUrl/api/invitations';
-    final queryParams = {
-      'fieldId': fieldId.toString(),
-      'userId': userId.toString(),
-    };
-    
-    final response = await client.post(
-      Uri.parse(url).replace(queryParameters: queryParams),
-      headers: {'Content-Type': 'application/json'},
-    );
-    
-    if (response.statusCode == 201) {
-      return Invitation.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to create invitation: ${response.body}');
+  /// Créer ou récupérer une invitation (idempotent)
+  Future<Invitation> createOrGetInvitation(int fieldId, int targetUserId) async {
+    try {
+      final response = await _apiService.post('invitations', {
+        'fieldId': fieldId,
+        'targetUserId': targetUserId,
+      });
+
+      return Invitation.fromJson(response);
+    } catch (e) {
+      logger.e('Erreur création invitation: $e');
+      rethrow;
     }
   }
 
-  // Récupérer toutes les invitations pour l'utilisateur connecté
-  Future<List<Invitation>> getMyInvitations() async {
-    final url = '$baseUrl/api/invitations/me';
-    
-    final response = await client.get(Uri.parse(url));
-    
-    if (response.statusCode == 200) {
-      final List<dynamic> invitationsJson = jsonDecode(response.body);
+  /// Récupérer les invitations envoyées pour un terrain
+  Future<List<Invitation>> getSentInvitations(int fieldId) async {
+    try {
+      final response = await _apiService.get('invitations/sent?fieldId=$fieldId');
+
+      final List<dynamic> invitationsJson = response as List;
       return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to get invitations: ${response.body}');
+    } catch (e) {
+      logger.e('Erreur récupération invitations envoyées: $e');
+      return [];
     }
   }
 
-  // Récupérer les invitations en attente
-  Future<List<Invitation>> getMyPendingInvitations() async {
-    final url = '$baseUrl/api/invitations/me/pending';
-    
-    final response = await client.get(Uri.parse(url));
-    
-    if (response.statusCode == 200) {
-      final List<dynamic> invitationsJson = jsonDecode(response.body);
+  /// Récupérer les invitations reçues
+  Future<List<Invitation>> getReceivedInvitations() async {
+    try {
+      final response = await _apiService.get('invitations/received');
+
+      final List<dynamic> invitationsJson = response as List;
       return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to get pending invitations: ${response.body}');
+    } catch (e) {
+      logger.e('Erreur récupération invitations reçues: $e');
+      return [];
+    }
+  }
+  /// Répondre à une invitation
+  Future<Invitation> respondToInvitation(int invitationId, bool accepted) async {
+    try {
+      final response = await _apiService.post('invitations/$invitationId/respond', {
+        'accepted': accepted,
+      });
+
+      return Invitation.fromJson(response);
+    } catch (e) {
+      logger.e('Erreur réponse invitation: $e');
+      rethrow;
     }
   }
 
-  // Récupérer les invitations pour un scénario
-  Future<List<Invitation>> getInvitationsForScenario(int scenarioId) async {
-    final url = '$baseUrl/api/invitations/scenario/$scenarioId';
-    
-    final response = await client.get(Uri.parse(url));
-    
-    if (response.statusCode == 200) {
-      final List<dynamic> invitationsJson = jsonDecode(response.body);
-      return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to get invitations for scenario: ${response.body}');
+  /// Annuler une invitation
+  Future<Invitation> cancelInvitation(int invitationId) async {
+    try {
+      final response = await _apiService.delete('invitations/$invitationId');
+
+      return Invitation.fromJson(response);
+    } catch (e) {
+      logger.e('Erreur annulation invitation: $e');
+      rethrow;
     }
   }
 
-  // Accepter une invitation
-  Future<Invitation> acceptInvitation(int invitationId) async {
-    final url = '$baseUrl/api/invitations/$invitationId/accept';
-    
-    final response = await client.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-    
-    if (response.statusCode == 200) {
-      return Invitation.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to accept invitation: ${response.body}');
+  /// Compter les invitations en attente envoyées
+  Future<int> countPendingInvitations(int fieldId) async {
+    try {
+      final response = await _apiService.get('invitations/count/pending?fieldId=$fieldId');
+      return response as int;
+    } catch (e) {
+      logger.e('Erreur comptage invitations envoyées: $e');
+      return 0;
     }
   }
 
-  // Refuser une invitation
-  Future<Invitation> declineInvitation(int invitationId) async {
-    final url = '$baseUrl/api/invitations/$invitationId/decline';
-    
-    final response = await client.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-    );
-    
-    if (response.statusCode == 200) {
-      return Invitation.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to decline invitation: ${response.body}');
-    }
-  }
-
-  // Annuler une invitation
-  Future<void> cancelInvitation(int invitationId) async {
-    final url = '$baseUrl/api/invitations/$invitationId';
-    
-    final response = await client.delete(Uri.parse(url));
-    
-    if (response.statusCode != 200) {
-      throw Exception('Failed to cancel invitation: ${response.body}');
+  /// Compter les invitations reçues en attente
+  Future<int> countReceivedPendingInvitations() async {
+    try {
+      final response = await _apiService.get('invitations/count/received');
+      return response as int;
+    } catch (e) {
+      logger.e('Erreur comptage invitations reçues: $e');
+      return 0;
     }
   }
 }

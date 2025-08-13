@@ -2409,4 +2409,22 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => 'Invitasjoner oppdatert';
+
+  @override
+  String get invitationPending => 'Venter';
+
+  @override
+  String get invitationAccepted => 'Akseptert';
+
+  @override
+  String get invitationDeclined => 'Avvist';
+
+  @override
+  String get invitationCanceled => 'Kansellert';
+
+  @override
+  String get invitationExpired => 'Utløpt';
+
+  @override
+  String get cancelInvitation => 'Avbryt';
 }

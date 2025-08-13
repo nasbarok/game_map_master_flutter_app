@@ -4318,6 +4318,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invitations refreshed'**
   String get invitationsRefreshed;
+
+  /// No description provided for @invitationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get invitationPending;
+
+  /// No description provided for @invitationAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get invitationAccepted;
+
+  /// No description provided for @invitationDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get invitationDeclined;
+
+  /// No description provided for @invitationCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get invitationCanceled;
+
+  /// No description provided for @invitationExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get invitationExpired;
+
+  /// No description provided for @cancelInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelInvitation;
 }
 
 class _AppLocalizationsDelegate

@@ -2411,4 +2411,22 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => 'Inbjudningar uppdaterade';
+
+  @override
+  String get invitationPending => 'Väntande';
+
+  @override
+  String get invitationAccepted => 'Accepterad';
+
+  @override
+  String get invitationDeclined => 'Avvisad';
+
+  @override
+  String get invitationCanceled => 'Avbruten';
+
+  @override
+  String get invitationExpired => 'Utgången';
+
+  @override
+  String get cancelInvitation => 'Avbryt';
 }

@@ -1,14 +1,12 @@
-import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/invitation.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/invitation_service.dart';
 import '../../services/team_service.dart';
 import '../../services/api_service.dart';
-import '../../services/websocket_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 class PlayersScreen extends StatefulWidget {
@@ -18,7 +16,8 @@ class PlayersScreen extends StatefulWidget {
   State<PlayersScreen> createState() => _PlayersScreenState();
 }
 
-class _PlayersScreenState extends State<PlayersScreen> {
+class _PlayersScreenState extends State<PlayersScreen>
+    with AutomaticKeepAliveClientMixin{
   final TextEditingController _searchController = TextEditingController();
   late TeamService teamService;
   late GameStateService gameStateService;
@@ -29,6 +28,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
   int? getCurrentMapId(BuildContext context) {
     return context.watch<GameStateService>().selectedMap?.id;
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -45,6 +47,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
             '🌀 [players_screen] [initState] Chargement des équipes et des joueurs connectés');
         gameStateService.loadConnectedPlayers();
       }
+      // 👉 charge les invitations envoyées une seule fois
+      context.read<InvitationService>().loadSentInvitations();
     });
   }
 
@@ -99,7 +103,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     final invitationService = context.read<InvitationService>();
 
     try {
-      invitationService.sendInvitation(userId, username);
+      invitationService.sendInvitation(userId);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Invitation envoyée à $username'),
@@ -180,6 +184,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // nécessaire avec le mixin AutomaticKeepAliveClientMixin
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
     final invitationService = context.watch<InvitationService>();
@@ -206,7 +211,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
             ElevatedButton.icon(
               onPressed: () {
                 // Naviguer vers l'onglet Terrain
-                DefaultTabController.of(context)?.animateTo(0);
+                DefaultTabController.of(context).animateTo(0);
               },
               icon: const Icon(Icons.dashboard),
               label: Text(l10n.goToFieldTabButton),
@@ -247,7 +252,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   int _getPendingInvitationsCount() {
     final invitationService = context.watch<InvitationService>();
-    return invitationService.sentInvitations
+    return invitationService.sentInvitationsOld
         .where((inv) => inv.toJson()['status'] == 'pending')
         .length;
   }
@@ -342,7 +347,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     final invitationService = context.watch<InvitationService>();
 
     // Vérifier si une invitation pending existe déjà
-    final hasPendingInvitation = invitationService.sentInvitations.any((inv) {
+    final hasPendingInvitation = invitationService.sentInvitationsOld.any((inv) {
       final json = inv.toJson();
       final payload = json['payload'] ?? {};
       return payload['targetUserId'] == userId && json['status'] == 'pending';
@@ -370,7 +375,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   Widget _buildInvitationsTab(InvitationService invitationService) {
     final l10n = AppLocalizations.of(context)!;
-    final pendingInvitations = invitationService.pendingInvitations;
     final sentInvitations = invitationService.sentInvitations;
 
     return Padding(
@@ -378,110 +382,153 @@ class _PlayersScreenState extends State<PlayersScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.invitations,
-            style: Theme.of(context).textTheme.titleLarge,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(l10n.invitationsSentTitle, style: Theme.of(context).textTheme.titleLarge),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () => invitationService.loadSentInvitations(),
+                tooltip: l10n.refreshTooltip,
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          pendingInvitations.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: Text(
-                      l10n.noInvitations,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                )
-              : Expanded(
-                  child: ListView.builder(
-                    itemCount: pendingInvitations.length,
-                    itemBuilder: (context, index) {
-                      final invitation = pendingInvitations[index];
-                      final invitationToJson = invitation.toJson();
-                      final payload = invitationToJson['payload'] ?? {};
-                      final fromUsername =
-                          payload['fromUsername'] ?? l10n.unknownPlayerName;
-                      final mapName = payload['mapName'] ?? l10n.unknownMap;
-                      return Card(
-                        child: ListTile(
-                          title: Text(l10n.invitationFrom(fromUsername)),
-                          subtitle: Text(l10n.mapLabelShort(mapName)),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextButton(
-                                onPressed: () =>
-                                    invitationService.respondToInvitation(
-                                        context, invitationToJson, false),
-                                child: Text(l10n.declineInvitation),
-                              ),
-                              ElevatedButton(
-                                onPressed: () =>
-                                    invitationService.respondToInvitation(
-                                        context, invitationToJson, true),
-                                child: Text(l10n.acceptInvitation),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
           const SizedBox(height: 16),
-          Text(
-            l10n.invitationsSentTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          sentInvitations.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: Text(
-                      l10n.noInvitationsSent,
-                      style: const TextStyle(color: Colors.grey),
+
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () => invitationService.loadSentInvitations(),
+              child: sentInvitations.isEmpty
+              // Important: un scrollable même vide pour pouvoir "pull-to-refresh"
+                  ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: 120),
+                  Center(
+                    child: Column(
+                      children: [
+                        const Icon(Icons.mail_outline, size: 64, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        Text(l10n.noInvitationsSent, style: const TextStyle(color: Colors.grey)),
+                      ],
                     ),
                   ),
-                )
-              : Expanded(
-                  child: ListView.builder(
-                    itemCount: sentInvitations.length,
-                    itemBuilder: (context, index) {
-                      final invitation = sentInvitations[index];
-                      final invitationToJson = invitation.toJson();
-                      final payload = invitationToJson['payload'] ?? {};
-                      final status = invitationToJson['status'] ?? 'pending';
-                      final toUsername =
-                          payload['toUsername'] ?? l10n.unknownPlayerName;
-
-                      String statusText;
-                      if (status == 'pending') {
-                        statusText = l10n.statusPending;
-                      } else if (status == 'accepted') {
-                        statusText = l10n.statusAccepted;
-                      } else {
-                        statusText = l10n.statusDeclined;
-                      }
-
-                      return Card(
-                        child: ListTile(
-                          title: Text(l10n.invitationTo(toUsername)),
-                          subtitle: Text(l10n.sessionStatusLabel(statusText)),
-                          trailing: status == 'pending'
-                              ? const Icon(Icons.hourglass_empty)
-                              : status == 'accepted'
-                                  ? const Icon(Icons.check, color: Colors.green)
-                                  : const Icon(Icons.close, color: Colors.red),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                ],
+              )
+                  : ListView.builder(
+                itemCount: sentInvitations.length,
+                itemBuilder: (context, index) {
+                  final invitation = sentInvitations[index];
+                  return _buildInvitationCard(invitation, invitationService);
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+
+  Widget _buildInvitationCard(
+      Invitation invitation, InvitationService invitationService) {
+    final l10n = AppLocalizations.of(context)!;
+
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+
+    switch (invitation.status) {
+      case 'PENDING':
+        statusColor = Colors.orange;
+        statusIcon = Icons.hourglass_empty;
+        statusText = l10n.invitationPending;
+        break;
+      case 'ACCEPTED':
+        statusColor = Colors.green;
+        statusIcon = Icons.check_circle;
+        statusText = l10n.invitationAccepted;
+        break;
+      case 'DECLINED':
+        statusColor = Colors.red;
+        statusIcon = Icons.cancel;
+        statusText = l10n.invitationDeclined;
+        break;
+      case 'CANCELED':
+        statusColor = Colors.grey;
+        statusIcon = Icons.block;
+        statusText = l10n.invitationCanceled;
+        break;
+      case 'EXPIRED':
+        statusColor = Colors.grey.shade400;
+        statusIcon = Icons.access_time;
+        statusText = l10n.invitationExpired;
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusIcon = Icons.help;
+        statusText = invitation.status;
+    }
+
+    return Card(
+      margin: EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: statusColor,
+          child: Icon(statusIcon, color: Colors.white, size: 20),
+        ),
+        title: Text(l10n.invitationTo(invitation.targetUsername)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(statusText,
+                style:
+                    TextStyle(color: statusColor, fontWeight: FontWeight.w500)),
+            Text(
+              _formatTimestamp(invitation.createdAt),
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        trailing: invitation.isPending
+            ? TextButton(
+                onPressed: () =>
+                    _cancelInvitation(invitation.id, invitationService),
+                child: Text(l10n.cancelInvitation,
+                    style: TextStyle(color: Colors.red)),
+              )
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _cancelInvitation(
+      int invitationId, InvitationService invitationService) async {
+    try {
+      await invitationService.cancelInvitation(invitationId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invitation annulée avec succès')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inMinutes < 1) {
+      return 'À l\'instant';
+    } else if (difference.inHours < 1) {
+      return 'Il y a ${difference.inMinutes} min';
+    } else if (difference.inDays < 1) {
+      return 'Il y a ${difference.inHours}h';
+    } else {
+      return '${timestamp.day}/${timestamp.month}';
+    }
   }
 
   Widget _buildUnassignedPlayerTile(Map<String, dynamic> player,

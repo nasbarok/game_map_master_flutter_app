@@ -2406,4 +2406,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => 'Invitations refreshed';
+
+  @override
+  String get invitationPending => 'Pending';
+
+  @override
+  String get invitationAccepted => 'Accepted';
+
+  @override
+  String get invitationDeclined => 'Declined';
+
+  @override
+  String get invitationCanceled => 'Canceled';
+
+  @override
+  String get invitationExpired => 'Expired';
+
+  @override
+  String get cancelInvitation => 'Cancel';
 }

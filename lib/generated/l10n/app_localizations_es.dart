@@ -2423,4 +2423,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => 'Invitaciones actualizadas';
+
+  @override
+  String get invitationPending => 'Pendiente';
+
+  @override
+  String get invitationAccepted => 'Aceptada';
+
+  @override
+  String get invitationDeclined => 'Rechazada';
+
+  @override
+  String get invitationCanceled => 'Cancelada';
+
+  @override
+  String get invitationExpired => 'Expirada';
+
+  @override
+  String get cancelInvitation => 'Cancelar';
 }

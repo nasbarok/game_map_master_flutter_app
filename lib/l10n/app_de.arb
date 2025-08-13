@@ -710,7 +710,13 @@
   "favoritesComingSoon": "Funktion kommt bald",
   "alreadyInvited": "Bereits eingeladen",
   "receivedInvitations": "Erhaltene Einladungen",
-  "invitationsRefreshed": "Einladungen aktualisiert"
+  "invitationsRefreshed": "Einladungen aktualisiert",
+  "invitationPending": "Ausstehend",
+  "invitationAccepted": "Angenommen",
+  "invitationDeclined": "Abgelehnt",
+  "invitationCanceled": "Storniert",
+  "invitationExpired": "Abgelaufen",
+  "cancelInvitation": "Stornieren"
 
 
 

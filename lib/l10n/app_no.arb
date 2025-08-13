@@ -710,7 +710,13 @@
   "favoritesComingSoon": "Funksjon kommer snart",
   "alreadyInvited": "Allerede invitert",
   "receivedInvitations": "Mottatte invitasjoner",
-  "invitationsRefreshed": "Invitasjoner oppdatert"
+  "invitationsRefreshed": "Invitasjoner oppdatert",
+  "invitationPending": "Venter",
+  "invitationAccepted": "Akseptert",
+  "invitationDeclined": "Avvist",
+  "invitationCanceled": "Kansellert",
+  "invitationExpired": "Utløpt",
+  "cancelInvitation": "Avbryt"
 
 
 }

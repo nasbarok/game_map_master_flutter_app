@@ -1,9 +1,7 @@
-import 'package:flutter/src/widgets/framework.dart';
 
-import 'package:flutter/src/widgets/navigator.dart';
+import 'package:game_map_master_flutter_app/services/invitation_api_service.dart';
 import 'package:game_map_master_flutter_app/services/l10n/locale_service.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart' as Http;
 
 import '../config/environment_config.dart';
 import '../services/api_service.dart';
@@ -20,7 +18,6 @@ import '../services/player_connection_service.dart';
 import '../services/player_location_service.dart';
 import '../services/scenario/bomb_operation/bomb_operation_scenario_service.dart';
 import '../services/scenario/bomb_operation/bomb_operation_service.dart';
-import '../services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
 import '../services/scenario/treasure_hunt/treasure_hunt_score_service.dart';
 import '../services/scenario/treasure_hunt/treasure_hunt_service.dart';
 import '../services/scenario_service.dart';
@@ -114,11 +111,14 @@ void setupServiceLocator() {
     fieldHandler,
   );
 
+  final invitationApiService = InvitationApiService(apiService, authService);
+
   // ✅ 7. ENREGISTRER LE SERVICE D'INVITATION À LA FIN
   final invitationService = InvitationService(
     webSocketService,
     authService,
     gameStateService,
+      invitationApiService
   );
 
 
@@ -148,6 +148,7 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<LocationFilter>(locationFilter);
   GetIt.I.registerSingleton<MovementDetector>(movementDetector);
   GetIt.I.registerSingleton<AdvancedLocationService>(advancedLocationService);
+  GetIt.I.registerSingleton<InvitationApiService>(invitationApiService);
   GetIt.I.registerSingleton<InvitationService>(invitationService);
 
 }

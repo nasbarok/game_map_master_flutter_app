@@ -4,6 +4,7 @@ import 'package:game_map_master_flutter_app/services/game_session_service.dart';
 import 'package:game_map_master_flutter_app/services/game_state_service.dart';
 import 'package:game_map_master_flutter_app/services/geocoding_service.dart';
 import 'package:game_map_master_flutter_app/services/history_service.dart';
+import 'package:game_map_master_flutter_app/services/invitation_api_service.dart';
 import 'package:game_map_master_flutter_app/services/invitation_service.dart';
 import 'package:game_map_master_flutter_app/services/l10n/locale_service.dart';
 import 'package:game_map_master_flutter_app/services/location/advanced_location_service.dart';
@@ -22,7 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:game_map_master_flutter_app/theme/global_theme.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'app.dart';
 import 'di/service_locator.dart';
@@ -73,6 +73,8 @@ void main() async {
             value: GetIt.I<WebSocketService>()),
         ChangeNotifierProvider<InvitationService>.value(
             value: GetIt.I<InvitationService>()),
+        Provider<InvitationApiService>.value(
+            value: GetIt.I<InvitationApiService>()),
         Provider<NavigationService>.value(value: GetIt.I<NavigationService>()),
         Provider<WebSocketManager>.value(value: GetIt.I<WebSocketManager>()),
         Provider<PlayerConnectionService>.value(

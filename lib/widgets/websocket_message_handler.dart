@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'package:game_map_master_flutter_app/services/team_service.dart';
 import 'package:game_map_master_flutter_app/services/websocket/web_socket_game_session_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../models/invitation.dart';
 import '../models/scenario/scenario_dto.dart';
 import '../models/scenario/treasure_hunt/treasure_hunt_notification.dart';
 import '../models/websocket/player_kicked_message.dart';
@@ -191,14 +191,13 @@ class WebSocketMessageHandler {
 
   // méthode pour afficher le dialogue d'invitation
   void _showInvitationDialog(
-      Map<String, dynamic> invitation, BuildContext context) {
+      Map<String, dynamic> payload, BuildContext context) {
+    final invitation = Invitation.fromJson(payload);
     final currentUser = authService.currentUser;
-    final payload = invitation['payload'];
-    final fieldId = payload['fieldId'];
 
-    if (gameStateService.selectedField?.id == fieldId &&
+    if (gameStateService.selectedField?.id == invitation.fieldId &&
         gameStateService.isTerrainOpen) {
-      logger.d('⏩ Invitation ignorée car déjà connecté au terrain $fieldId');
+      logger.d('⏩ Invitation ignorée car déjà connecté au terrain $invitation.fieldId');
       return;
     }
 
@@ -211,21 +210,21 @@ class WebSocketMessageHandler {
 
     // Afficher également un dialogue
     logger.d(
-        '🔔 Ouverture du dialogue pour invitation de ${payload['fromUsername']} sur carte "${payload['mapName']}"');
+        '🔔 Ouverture du dialogue pour invitation de ${invitation.senderUsername} sur carte "${invitation.fieldName}"');
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Invitation reçue'),
         content: Text(
-            '${payload['fromUsername']} vous invite à rejoindre la carte "${payload['mapName']}"'),
+            '${invitation.senderUsername} vous invite à rejoindre la carte "${invitation.fieldName}"'),
         actions: [
           TextButton(
             onPressed: () {
               // Refuser l'invitation
               logger.d('❌ Invitation refusée par l\'utilisateur');
               final invitationService = context.read<InvitationService>();
-              invitationService.respondToInvitation(context, invitation, false);
+              invitationService.respondToInvitation(context, invitation.id, false);
               Navigator.of(context).pop();
             },
             child: const Text('Refuser'),
@@ -238,11 +237,11 @@ class WebSocketMessageHandler {
 
               // 1. Envoi réponse ACCEPT
               await invitationService.respondToInvitation(
-                  context, invitation, true);
+                  context, invitation.id, true);
 
               // 3. Restore session complète
               await gameStateService.restoreSessionIfNeeded(
-                  apiService, invitation['payload']['fieldId']);
+                  apiService, invitation.fieldId);
 
               // 4. Fermer dialogue
               if (context.mounted) {
@@ -377,25 +376,6 @@ class WebSocketMessageHandler {
     gameStateService.reset();
   }
 
-  void _showGameInvitation(Map<String, dynamic> message, BuildContext context) {
-    final gameData = message['data'] as Map<String, dynamic>? ?? {};
-    final gameName = gameData['name'] as String? ?? 'Partie inconnue';
-    final hostName = gameData['hostName'] as String? ?? 'Hôte inconnu';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Invitation à la partie "$gameName" par $hostName'),
-        action: SnackBarAction(
-          label: 'Voir',
-          onPressed: () {
-            // Naviguer vers l'écran de détails de la partie
-          },
-        ),
-        duration: const Duration(seconds: 10),
-      ),
-    );
-  }
-
   void _handleTeamUpdate(Map<String, dynamic> message, BuildContext context) {
     logger.d(
         '🟦 [WebSocketMessageHandler] [_handleTeamUpdate] TEAM_UPDATE reçu : $message');
@@ -466,7 +446,7 @@ class WebSocketMessageHandler {
     logger
         .d('📥 [WebSocketHandler] SCENARIO_UPDATE reçu pour fieldId=$fieldId');
 
-    if (scenarioDtos == null || scenarioDtos.isEmpty) {
+    if (scenarioDtos.isEmpty) {
       logger.d('⚠️ Aucun scénario reçu dans SCENARIO_UPDATE');
       return;
     }
@@ -478,58 +458,6 @@ class WebSocketMessageHandler {
       const SnackBar(
         content: Text('✅ Scénarios mis à jour sur le terrain'),
         backgroundColor: Colors.blueAccent,
-      ),
-    );
-  }
-
-  void _handleTreasureFound(
-      Map<String, dynamic> message, BuildContext context) {
-    final payload = message['payload'];
-    final treasureFoundData = TreasureFoundData.fromJson(payload);
-
-    final treasureHuntService = GetIt.I<TreasureHuntService>();
-    treasureHuntService.addTreasureFoundEvent(treasureFoundData);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-            '${treasureFoundData.username} a trouvé le trésor "${treasureFoundData.treasureName}"'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _handleGameStarted(Map<String, dynamic> message, BuildContext context) {
-    final payload = message['payload'];
-    final gameId = payload['gameId'];
-    // Mettre à jour l'état du jeu
-    gameStateService.startGame(gameId);
-
-    // Si une durée est spécifiée, synchroniser le temps
-    if (payload['endTime'] != null) {
-      final endTimeStr = payload['endTime'] as String;
-      final endTime = DateTime.parse(endTimeStr);
-      gameStateService.syncGameTime(endTime);
-    }
-
-    // Afficher une notification
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('La partie a commencé !'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _handleGameEnded(Map<String, dynamic> message, BuildContext context) {
-    // Mettre à jour l'état du jeu
-    gameStateService.stopGameLocally();
-
-    // Afficher une notification
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('La partie est terminée !'),
-        backgroundColor: Colors.orange,
       ),
     );
   }

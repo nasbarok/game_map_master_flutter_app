@@ -2371,4 +2371,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => '招待を更新しました';
+
+  @override
+  String get invitationPending => '保留中';
+
+  @override
+  String get invitationAccepted => '承認済み';
+
+  @override
+  String get invitationDeclined => '拒否済み';
+
+  @override
+  String get invitationCanceled => 'キャンセル済み';
+
+  @override
+  String get invitationExpired => '期限切れ';
+
+  @override
+  String get cancelInvitation => 'キャンセル';
 }

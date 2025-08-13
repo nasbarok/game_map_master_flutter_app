@@ -710,7 +710,13 @@
   "favoritesComingSoon": "Functie komt binnenkort",
   "alreadyInvited": "Al uitgenodigd",
   "receivedInvitations": "Ontvangen uitnodigingen",
-  "invitationsRefreshed": "Uitnodigingen bijgewerkt"
+  "invitationsRefreshed": "Uitnodigingen bijgewerkt",
+  "invitationPending": "In behandeling",
+  "invitationAccepted": "Geaccepteerd",
+  "invitationDeclined": "Afgewezen",
+  "invitationCanceled": "Geannuleerd",
+  "invitationExpired": "Verlopen",
+  "cancelInvitation": "Annuleren"
 
 
 }

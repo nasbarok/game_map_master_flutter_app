@@ -1,8 +1,8 @@
 import 'package:game_map_master_flutter_app/screens/host/players_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:game_map_master_flutter_app/utils/app_utils.dart';
 import 'package:provider/provider.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/invitation.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import '../../services/invitation_service.dart';
@@ -67,8 +67,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     super.dispose();
   }
 
-  Future<void> _showInvitationDialog(Map<String, dynamic> invitation) async {
+  Future<void> _showInvitationDialog(Map<String, dynamic> payload) async {
     final l10n = AppLocalizations.of(context)!;
+    final invitation = Invitation.fromJson(payload);
 
     if (ModalRoute.of(context)?.isCurrent == true) {
       showDialog(
@@ -77,8 +78,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
           title: l10n.invitationReceivedTitle,
           content: Text(
             l10n.invitationReceivedMessage(
-              invitation['fromUsername'] ?? l10n.unknownPlayerName,
-              invitation['mapName'] ?? l10n.unknownMap,
+              invitation.senderUsername ?? l10n.unknownPlayerName,
+              invitation.fieldName ?? l10n.unknownMap,
             ),
             style: const TextStyle(color: Color(0xFFF7FAFC)),
           ),
@@ -87,7 +88,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
               text: l10n.declineInvitation,
               onPressed: () {
                 _invitationService.respondToInvitation(
-                    context, invitation, false);
+                    context, invitation.id, false);
                 Navigator.of(context).pop();
               },
               style: _MilitaryButtonStyle.secondary,
@@ -96,7 +97,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
               text: l10n.acceptInvitation,
               onPressed: () {
                 _invitationService.respondToInvitation(
-                    context, invitation, true);
+                    context, invitation.id, true);
                 Navigator.of(context).pop();
               },
               style: _MilitaryButtonStyle.primary,
@@ -112,7 +113,6 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final authService = context.watch<AuthService>();
     final gameStateService = context.watch<GameStateService>();
 
     return AdaptiveScaffold(

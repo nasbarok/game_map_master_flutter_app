@@ -710,6 +710,12 @@
   "favoritesComingSoon": "Funkcja wkrótce",
   "alreadyInvited": "Już zaproszony",
   "receivedInvitations": "Otrzymane zaproszenia",
-  "invitationsRefreshed": "Zaproszenia odświeżone"
+  "invitationsRefreshed": "Zaproszenia odświeżone",
+  "invitationPending": "Oczekujące",
+  "invitationAccepted": "Zaakceptowane",
+  "invitationDeclined": "Odrzucone",
+  "invitationCanceled": "Anulowane",
+  "invitationExpired": "Wygasłe",
+  "cancelInvitation": "Anuluj"
 
 }

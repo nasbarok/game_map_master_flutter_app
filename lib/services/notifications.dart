@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../models/invitation.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> initNotifications() async {
@@ -12,7 +14,7 @@ Future<void> initNotifications() async {
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 }
 
-Future<void> showInvitationNotification(Map<String, dynamic> invitation) async {
+Future<void> showInvitationNotification(Invitation invitation) async {
   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     'invitation_channel',
     'Invitations',
@@ -26,7 +28,7 @@ Future<void> showInvitationNotification(Map<String, dynamic> invitation) async {
   await flutterLocalNotificationsPlugin.show(
     0,
     'Invitation reçue',
-    'De ${invitation['fromUsername']} pour la carte "${invitation['mapName']}"',
+    'De ${invitation.senderUsername} pour "${invitation.fieldName}"',
     platformDetails,
   );
 }

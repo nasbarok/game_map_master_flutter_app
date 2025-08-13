@@ -2415,4 +2415,22 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => 'Inviti aggiornati';
+
+  @override
+  String get invitationPending => 'In attesa';
+
+  @override
+  String get invitationAccepted => 'Accettata';
+
+  @override
+  String get invitationDeclined => 'Rifiutata';
+
+  @override
+  String get invitationCanceled => 'Annullata';
+
+  @override
+  String get invitationExpired => 'Scaduta';
+
+  @override
+  String get cancelInvitation => 'Annulla';
 }

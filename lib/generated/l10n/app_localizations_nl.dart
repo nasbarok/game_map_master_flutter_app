@@ -2413,4 +2413,22 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get invitationsRefreshed => 'Uitnodigingen bijgewerkt';
+
+  @override
+  String get invitationPending => 'In behandeling';
+
+  @override
+  String get invitationAccepted => 'Geaccepteerd';
+
+  @override
+  String get invitationDeclined => 'Afgewezen';
+
+  @override
+  String get invitationCanceled => 'Geannuleerd';
+
+  @override
+  String get invitationExpired => 'Verlopen';
+
+  @override
+  String get cancelInvitation => 'Annuleren';
 }
