@@ -36,6 +36,8 @@ class InvitationService extends ChangeNotifier {
   List<Invitation> get receivedInvitations => List.unmodifiable(_receivedInvitations);
   int get sentPendingCount => _sentInvitations.where((i) => i.isPending).length;
 
+  List<Invitation> get receivedPendingInvitations =>
+      _receivedInvitations.where((i) => i.isPending).toList(growable: false);
 
   List<WebSocketMessage> get pendingInvitations => [];
 
@@ -251,6 +253,7 @@ class InvitationService extends ChangeNotifier {
       logger.e('Erreur lors du chargement des invitations reçues: $e');
     }
   }
+
 
   /// Annuler une invitation
   Future<void> cancelInvitation(int invitationId) async {

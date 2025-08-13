@@ -78,8 +78,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     logger.d('🔍 Carte sélectionnée : ${selectedMap?.name ?? "Aucune"}');
     logger.d('🔓 Terrain ouvert : $terrainOuvert');
 
-    final bool isConnectedToField = gameState.isTerrainOpen;
-
     final invitationsCount =
         context.watch<InvitationService>().pendingInvitations.length;
     // ✅ Rendu normal
@@ -132,11 +130,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(56),
+          preferredSize: const Size.fromHeight(56),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.3),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: TabBar(
               controller: _tabController,
@@ -145,27 +143,32 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               indicatorWeight: 3,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white70,
-              labelStyle: TextStyle(fontWeight: FontWeight.bold),
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
               tabs: [
                 Tab(icon: const Icon(Icons.map), text: l10n.terrainTab),
                 Tab(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const Icon(Icons.mail, size: 24),
-                            if (invitationsCount > 0)
-                              const Positioned(right: -6, top: -4, child: Badge()),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 6),
+                      const Icon(Icons.mail, size: 16),
+                      const SizedBox(width: 4),
                       Text(l10n.invitations),
+                      if (invitationsCount > 0) ...[
+                        const SizedBox(width: 4),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                          child: Text(
+                            '$invitationsCount',
+                            style: const TextStyle(color: Colors.white, fontSize: 10),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -186,11 +189,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     );
   }
 
-  int _getPendingInvitationsCount() {
-    final invitationService = context.watch<InvitationService>();
-    return invitationService.pendingInvitations.length;
-  }
-
   Widget _buildInvitationsTab() {
     final l10n = AppLocalizations.of(context)!;
     final invitationService = context.watch<InvitationService>();
@@ -209,9 +207,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               IconButton(
-                icon: Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh),
                 onPressed: () {
-                  // TODO: Refresh invitations
+                  context.read<InvitationService>().loadReceivedInvitations();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.invitationsRefreshed)),
                   );
@@ -219,18 +217,23 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Expanded(
             child: pendingInvitations.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.mail_outline, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
+                        const Icon(Icons.mail_outline, size: 64, color: Colors.grey),
+                        const SizedBox(height: 16),
                         Text(
                           l10n.noInvitations,
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                          style: const TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Les invitations apparaîtront ici',
+                          style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                         ),
                       ],
                     ),
@@ -255,15 +258,15 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     final payload = invitationJson['payload'] ?? {};
 
     final fromUsername = payload['fromUsername'] ?? l10n.unknownPlayerName;
-    final mapName = payload['mapName'] ?? l10n.unknownMap;
+    final fieldName = payload['fieldName'] ?? l10n.unknownMap;
     final timestamp = DateTime.fromMillisecondsSinceEpoch(
       invitationJson['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
     );
 
     return Card(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: CircleAvatar(
+        leading: const CircleAvatar(
           backgroundColor: Colors.blue,
           child: Icon(Icons.person, color: Colors.white),
         ),
@@ -271,10 +274,10 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.mapLabelShort(mapName)),
+            Text(l10n.mapLabelShort(fieldName)),
             Text(
               _formatTimestamp(timestamp),
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
@@ -289,7 +292,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               ),
               child: Text(l10n.declineInvitation),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: () => invitationService.respondToInvitation(
                 context,
