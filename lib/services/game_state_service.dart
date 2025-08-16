@@ -409,6 +409,16 @@ class GameStateService extends ChangeNotifier {
 
     _connectedPlayers = _connectedPlayersList.length;
 
+    // 🔁 NOUVEAU : resynchroniser les équipes si le service est disponible
+    try {
+      if (_teamService != null && _selectedMap?.id != null) {
+        // recharge les équipes depuis le back (source de vérité)
+        _teamService!.loadTeams(_selectedMap!.id!);
+      }
+    } catch (e) {
+      logger.d('⚠️ [GameStateService] Erreur lors de la resynchro des équipes: $e');
+    }
+
     // Notifier les listeners (UI)
     logger.d(
         '📊 [GameStateService] [removeConnectedPlayer] Nombre de joueurs connectés après suppression : $_connectedPlayers');

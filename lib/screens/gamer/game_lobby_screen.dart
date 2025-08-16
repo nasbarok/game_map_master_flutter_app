@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
+import '../../models/invitation.dart';
 import '../../models/websocket/player_left_message.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
@@ -34,6 +35,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   late TabController _tabController;
   late GameStateService _gameStateService;
   late WebSocketService _webSocketService;
+  int _lastIndex = 0;
 
   @override
   void initState() {
@@ -41,6 +43,16 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
     // Initialiser avec un seul onglet par défaut
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_tabController.index == 1) {
+            logger.d("📩 Rafraîchissement des invitations (onglet ouvert)");
+            context.read<InvitationService>().loadReceivedInvitations();
+          }
+        });
+      }
+    });
 
     _gameStateService = Provider.of<GameStateService>(context, listen: false);
     _webSocketService = Provider.of<WebSocketService>(context, listen: false);
@@ -62,6 +74,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         }
       } else {
         logger.d('❌ Pas de terrain ouvert en cours');
+        // 👉 Charger les invitations
+        context.read<InvitationService>().loadReceivedInvitations();
       }
     });
   }
@@ -69,7 +83,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final gameState = context.read<GameStateService>();
+    final gameState = context.watch<GameStateService>();
 
     final selectedMap = gameState.selectedMap;
     final terrainOuvert = gameState.isTerrainOpen;
@@ -79,7 +93,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     logger.d('🔓 Terrain ouvert : $terrainOuvert');
 
     final invitationsCount =
-        context.watch<InvitationService>().pendingInvitations.length;
+        context.watch<InvitationService>().receivedPendingInvitations.length;
+
     // ✅ Rendu normal
     logger.d('✅ Affichage de l’interface GameLobbyScreen');
 
@@ -134,7 +149,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           child: Container(
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.3),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: TabBar(
               controller: _tabController,
@@ -150,25 +166,35 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.mail, size: 16),
-                      const SizedBox(width: 4),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(Icons.mail, size: 20),
+                          if (invitationsCount > 0)
+                            Positioned(
+                              left: -8, // 👈 met le badge à gauche
+                              top: -6, // ajuste verticalement
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                    minWidth: 16, minHeight: 16),
+                                child: Text(
+                                  '$invitationsCount',
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 10),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
                       Text(l10n.invitations),
-                      if (invitationsCount > 0) ...[
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                          child: Text(
-                            '$invitationsCount',
-                            style: const TextStyle(color: Colors.white, fontSize: 10),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -192,7 +218,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   Widget _buildInvitationsTab() {
     final l10n = AppLocalizations.of(context)!;
     final invitationService = context.watch<InvitationService>();
-    final pendingInvitations = invitationService.pendingInvitations;
+    final pendingInvitations = invitationService.receivedInvitations;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -219,21 +245,27 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           ),
           const SizedBox(height: 16),
           Expanded(
+              child: RefreshIndicator(
+            onRefresh: () =>
+                context.read<InvitationService>().loadReceivedInvitations(),
             child: pendingInvitations.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.mail_outline, size: 64, color: Colors.grey),
+                        const Icon(Icons.mail_outline,
+                            size: 64, color: Colors.grey),
                         const SizedBox(height: 16),
                         Text(
                           l10n.noInvitations,
-                          style: const TextStyle(color: Colors.grey, fontSize: 16),
+                          style:
+                              const TextStyle(color: Colors.grey, fontSize: 16),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Les invitations apparaîtront ici',
-                          style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                          style: TextStyle(
+                              color: Colors.grey.shade400, fontSize: 14),
                         ),
                       ],
                     ),
@@ -245,23 +277,19 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
                       return _buildInvitationCard(invitation);
                     },
                   ),
-          ),
+          )),
         ],
       ),
     );
   }
 
-  Widget _buildInvitationCard(dynamic invitation) {
+  Widget _buildInvitationCard(Invitation invitation) {
     final l10n = AppLocalizations.of(context)!;
     final invitationService = context.read<InvitationService>();
-    final invitationJson = invitation.toJson();
-    final payload = invitationJson['payload'] ?? {};
 
-    final fromUsername = payload['fromUsername'] ?? l10n.unknownPlayerName;
-    final fieldName = payload['fieldName'] ?? l10n.unknownMap;
-    final timestamp = DateTime.fromMillisecondsSinceEpoch(
-      invitationJson['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
-    );
+    final fromUsername = invitation.senderUsername ?? l10n.unknownPlayerName;
+    final fieldName = invitation.fieldName ?? l10n.unknownMap;
+    final DateTime timestamp = invitation.createdAt;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -279,27 +307,29 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
               _formatTimestamp(timestamp),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton(
-              onPressed: () => invitationService.respondToInvitation(
-                context,
-                invitationJson,
-                false,
-              ),
-              child: Text(l10n.declineInvitation),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () => invitationService.respondToInvitation(
-                context,
-                invitationJson,
-                true,
-              ),
-              child: Text(l10n.acceptInvitation),
+            const SizedBox(height: 8),
+            OverflowBar(
+              alignment: MainAxisAlignment.start,
+              spacing: 8,
+              overflowSpacing: 8,
+              children: [
+                TextButton(
+                  onPressed: () => invitationService.respondToInvitation(
+                    context,
+                    invitation.id,
+                    false,
+                  ),
+                  child: Text(l10n.declineInvitation),
+                ),
+                ElevatedButton(
+                  onPressed: () => invitationService.respondToInvitation(
+                    context,
+                    invitation.id,
+                    true,
+                  ),
+                  child: Text(l10n.acceptInvitation),
+                ),
+              ],
             ),
           ],
         ),
@@ -552,7 +582,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   // Méthode pour afficher la liste des anciens terrains
   Widget _buildPreviousFieldsList() {
     final l10n = AppLocalizations.of(context)!;
+    final isOpen = context.select<GameStateService, bool>((gs) => gs.isTerrainOpen);
     return FutureBuilder<List<Field>>(
+      key: ValueKey(isOpen),
       future: _loadPreviousFields(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -677,7 +709,18 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
       final fields =
           (response as List).map((data) => Field.fromJson(data)).toList();
-      // 🔥 NOUVEAU : pour chaque terrain actif, tenter de s'abonner
+
+      // 🔽 TRI par openedAt décroissant (les null vont en bas)
+      fields.sort((a, b) {
+        final ad = a.openedAt;
+        final bd = b.openedAt;
+        if (ad == null && bd == null) return 0;
+        if (ad == null) return 1;   // a après b
+        if (bd == null) return -1;  // a avant b
+        return bd.compareTo(ad);    // récent d’abord
+      });
+
+      // pour chaque terrain actif, tenter de s'abonner
       for (final field in fields) {
         if (field.active == true && field.id != null) {
           logger.d(
@@ -771,7 +814,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
   Widget _buildPlayersTab() {
     final l10n = AppLocalizations.of(context)!;
-    final gameStateService = context.read<GameStateService>();
+    final gameStateService = context.watch<GameStateService>();
     final teamService = context.watch<TeamService>();
     final authService = context.read<AuthService>();
     final connectedPlayers = gameStateService.connectedPlayersList;

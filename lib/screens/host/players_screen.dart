@@ -17,13 +17,14 @@ class PlayersScreen extends StatefulWidget {
 }
 
 class _PlayersScreenState extends State<PlayersScreen>
-    with AutomaticKeepAliveClientMixin{
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   late TeamService teamService;
   late GameStateService gameStateService;
 
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
+  late TabController _tabController;
 
   int? getCurrentMapId(BuildContext context) {
     return context.watch<GameStateService>().selectedMap?.id;
@@ -35,6 +36,29 @@ class _PlayersScreenState extends State<PlayersScreen>
   @override
   void initState() {
     super.initState();
+
+    _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
+
+      if (_tabController.index == 1) {
+        // Onglet "Invitations" sélectionné
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          context.read<InvitationService>().loadSentInvitations();
+        });
+      }
+      if (_tabController.index == 2) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final gs = context.read<GameStateService>();
+          final ts = context.read<TeamService>();
+          final mapId = gs.selectedMap?.id;
+          gs.loadConnectedPlayers();
+          if (mapId != null) ts.loadTeams(mapId);
+        });
+      }
+    });
 
     // Chargement initial des équipes si le terrain est déjà ouvert
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -54,6 +78,7 @@ class _PlayersScreenState extends State<PlayersScreen>
 
   @override
   void dispose() {
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -221,31 +246,29 @@ class _PlayersScreenState extends State<PlayersScreen>
       );
     }
 
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: null,
-          toolbarHeight: 0,
-          // supprime l’espace du titre
-          bottom: TabBar(
-            tabs: [
-              Tab(text: l10n.searchTab),
-              Tab(text: l10n.invitations),
-              Tab(text: l10n.teams),
-              Tab(text: l10n.favorites),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildSearchTab(),
-            _buildInvitationsTab(invitationService),
-            _buildTeamsTab(teamService, gameStateService),
-            _buildFavoritesTab(), // Nouveau
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: null,
+        toolbarHeight: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: l10n.searchTab),
+            Tab(text: l10n.invitations),
+            Tab(text: l10n.teams),
+            Tab(text: l10n.favorites),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildSearchTab(),
+          _buildInvitationsTab(invitationService),
+          _buildTeamsTab(teamService, gameStateService),
+          _buildFavoritesTab(),
+        ],
       ),
     );
   }

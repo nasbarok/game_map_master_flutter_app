@@ -25,6 +25,7 @@ import 'game_invitation_message.dart';
 import 'game_session_ended_message.dart';
 import 'game_session_started_message.dart';
 import 'invitation_received_message.dart';
+import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 abstract class WebSocketMessage {
   final String type;
@@ -41,6 +42,7 @@ abstract class WebSocketMessage {
       case 'GAME_INVITATION':
         return GameInvitationMessage.fromJson(json);
       case 'INVITATION_RESPONSE':
+        logger.d('InvitationResponseMessage fromJson');
         return InvitationResponseMessage.fromJson(json);
       case 'INVITATION_RECEIVED':
         return InvitationReceivedMessage.fromJson(json);

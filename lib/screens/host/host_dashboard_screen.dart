@@ -8,6 +8,7 @@ import '../../services/game_map_service.dart';
 import '../../services/invitation_service.dart';
 import '../../services/notifications.dart';
 import '../../services/scenario_service.dart';
+import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/host_history_tab.dart';
@@ -54,9 +55,19 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
     // Écouter les changements d'onglet pour mettre à jour l'encadré
     _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        setState(() {}); // Redessiner pour changer l'encadré
+      if (_tabController.indexIsChanging) return;
+
+      // 🔁 NOUVEAU : refresh quand on arrive sur "Joueurs"
+      if (_tabController.index == 3 || _tabController.index == 0) {
+        final gameState = context.read<GameStateService>();
+        final teamService = context.read<TeamService>();
+        if (gameState.selectedMap?.id != null) {
+          gameState.loadConnectedPlayers();
+          teamService.loadTeams(gameState.selectedMap!.id!);
+        }
       }
+
+      setState(() {}); // garder ton redraw pour l’encadré
     });
   }
 

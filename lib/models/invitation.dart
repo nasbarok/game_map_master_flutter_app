@@ -32,22 +32,25 @@ class Invitation {
 
   factory Invitation.fromJson(Map<String, dynamic> json) {
     return Invitation(
-      id: json['id'],
+      id: (json['id'] as num).toInt(),
       scenario: (json['scenario'] is Map)
           ? Scenario.fromJson((json['scenario'] as Map).cast<String, dynamic>())
           : null,
-      fieldId: json['fieldId'],
-      fieldName: json['fieldName'],
-      senderId: json['senderId'],
-      senderUsername: json['senderUsername'],
-      targetUserId: json['targetUserId'],
-      targetUsername: json['targetUsername'],
-      team: json['team'] != null ? Team.fromJson(json['team']) : null,
-      status: json['status'],
-      createdAt: DateTime.parse(json['createdAt']),
-      respondedAt: json['respondedAt'] != null ? DateTime.parse(json['respondedAt']) : null,
+      fieldId: (json['fieldId'] as num).toInt(),
+      fieldName: (json['fieldName'] as String?) ?? '',
+      senderId: (json['senderId'] as num).toInt(),
+      senderUsername: (json['senderUsername'] as String?) ?? '',
+      targetUserId: (json['targetUserId'] as num).toInt(),
+      targetUsername: (json['targetUsername'] as String?) ?? '',
+      team: (json['team'] is Map) ? Team.fromJson((json['team'] as Map).cast<String, dynamic>()) : null,
+      status: (json['status'] as String?) ?? 'PENDING',
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      respondedAt: (json['respondedAt'] as String?) != null
+          ? DateTime.parse(json['respondedAt'] as String)
+          : null,
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {

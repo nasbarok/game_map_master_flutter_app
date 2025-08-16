@@ -1,3 +1,4 @@
+import 'package:game_map_master_flutter_app/models/websocket/invitation_received_message.dart';
 import 'package:game_map_master_flutter_app/services/team_service.dart';
 import 'package:game_map_master_flutter_app/services/websocket/web_socket_game_session_handler.dart';
 import 'package:flutter/material.dart';
@@ -191,8 +192,9 @@ class WebSocketMessageHandler {
 
   // méthode pour afficher le dialogue d'invitation
   void _showInvitationDialog(
-      Map<String, dynamic> payload, BuildContext context) {
-    final invitation = Invitation.fromJson(payload);
+      Map<String, dynamic> invitationJson, BuildContext context) {
+    InvitationReceivedMessage invitationReceivedMessage = InvitationReceivedMessage.fromJson(invitationJson);
+    final invitation = invitationReceivedMessage.toInvitation();
     final currentUser = authService.currentUser;
 
     if (gameStateService.selectedField?.id == invitation.fieldId &&

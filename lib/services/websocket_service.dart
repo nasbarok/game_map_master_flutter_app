@@ -181,7 +181,9 @@ class WebSocketService with ChangeNotifier {
   void _onMessageReceived(StompFrame frame) {
     try {
       if (frame.body == null) return;
-      logger.d('📩 Message reçu : ${frame.body}');
+
+      logger.d('📩 WS raw: ${frame.body}');
+
       final Map<String, dynamic> json = jsonDecode(frame.body!);
       final message = WebSocketMessage.fromJson(json);
       _messageController.add(message);

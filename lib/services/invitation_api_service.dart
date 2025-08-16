@@ -10,7 +10,8 @@ class InvitationApiService {
   InvitationApiService(this._apiService, this._authService);
 
   /// Créer ou récupérer une invitation (idempotent)
-  Future<Invitation> createOrGetInvitation(int fieldId, int targetUserId) async {
+  Future<Invitation> createOrGetInvitation(
+      int fieldId, int targetUserId) async {
     try {
       final response = await _apiService.post('invitations', {
         'fieldId': fieldId,
@@ -27,7 +28,8 @@ class InvitationApiService {
   /// Récupérer les invitations envoyées pour un terrain
   Future<List<Invitation>> getSentInvitations(int fieldId) async {
     try {
-      final response = await _apiService.get('invitations/sent?fieldId=$fieldId');
+      final response =
+          await _apiService.get('invitations/sent?fieldId=$fieldId');
 
       final List<dynamic> invitationsJson = response as List;
       return invitationsJson.map((json) => Invitation.fromJson(json)).toList();
@@ -49,10 +51,13 @@ class InvitationApiService {
       return [];
     }
   }
+
   /// Répondre à une invitation
-  Future<Invitation> respondToInvitation(int invitationId, bool accepted) async {
+  Future<Invitation> respondToInvitation(
+      int invitationId, bool accepted) async {
     try {
-      final response = await _apiService.post('invitations/$invitationId/respond', {
+      final response =
+          await _apiService.post('invitations/$invitationId/respond', {
         'accepted': accepted,
       });
 
@@ -64,11 +69,9 @@ class InvitationApiService {
   }
 
   /// Annuler une invitation
-  Future<Invitation> cancelInvitation(int invitationId) async {
+  Future<void> cancelInvitation(int invitationId) async {
     try {
-      final response = await _apiService.delete('invitations/$invitationId');
-
-      return Invitation.fromJson(response);
+      await _apiService.delete('invitations/$invitationId');
     } catch (e) {
       logger.e('Erreur annulation invitation: $e');
       rethrow;
@@ -78,7 +81,8 @@ class InvitationApiService {
   /// Compter les invitations en attente envoyées
   Future<int> countPendingInvitations(int fieldId) async {
     try {
-      final response = await _apiService.get('invitations/count/pending?fieldId=$fieldId');
+      final response =
+          await _apiService.get('invitations/count/pending?fieldId=$fieldId');
       return response as int;
     } catch (e) {
       logger.e('Erreur comptage invitations envoyées: $e');
