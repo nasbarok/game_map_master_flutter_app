@@ -68,7 +68,7 @@ class InvitationService extends ChangeNotifier {
           await _invitationApiService.createOrGetInvitation(fieldId, userId);
 
       // 2. Envoyer le WebSocket seulement si l'invitation est PENDING
-      if (invitation.isPending) {
+/*      if (invitation.isPending) {
         final wsMessage = GameInvitationMessage(
           fieldId: fieldId,
           senderId: _authService.currentUser!.id!,
@@ -80,7 +80,7 @@ class InvitationService extends ChangeNotifier {
       } else {
         logger.d(
             'ℹ️ Invitation déjà existante avec statut: ${invitation.status}');
-      }
+      }*/
     } catch (e) {
       logger.e('Erreur lors de l\'envoi d\'invitation: $e');
       rethrow;
