@@ -9,8 +9,11 @@ import '../../services/team_service.dart';
 import '../../services/api_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import '../../widgets/common/invite_badge.dart';
+
 class PlayersScreen extends StatefulWidget {
-  const PlayersScreen({Key? key}) : super(key: key);
+  const PlayersScreen({Key? key, this.onGoToFieldTab}) : super(key: key);
+  final VoidCallback? onGoToFieldTab;
 
   @override
   State<PlayersScreen> createState() => _PlayersScreenState();
@@ -24,7 +27,15 @@ class _PlayersScreenState extends State<PlayersScreen>
 
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
-  late TabController _tabController;
+  TabController? _tabController;
+  bool _bootstrapped = false;
+
+  bool _lastIsOpen = true; // pour détecter les changements d’ouverture
+
+  int get _currentTabsLength {
+    final isOpen = context.read<GameStateService>().isTerrainOpen;
+    return isOpen ? 4 : 1;
+  }
 
   int? getCurrentMapId(BuildContext context) {
     return context.watch<GameStateService>().selectedMap?.id;
@@ -36,49 +47,11 @@ class _PlayersScreenState extends State<PlayersScreen>
   @override
   void initState() {
     super.initState();
-
-    _tabController = TabController(length: 4, vsync: this);
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) return;
-
-      if (_tabController.index == 1) {
-        // Onglet "Invitations" sélectionné
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          context.read<InvitationService>().loadSentInvitations();
-        });
-      }
-      if (_tabController.index == 2) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          final gs = context.read<GameStateService>();
-          final ts = context.read<TeamService>();
-          final mapId = gs.selectedMap?.id;
-          gs.loadConnectedPlayers();
-          if (mapId != null) ts.loadTeams(mapId);
-        });
-      }
-    });
-
-    // Chargement initial des équipes si le terrain est déjà ouvert
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return; // Vérifier si le widget est toujours monté
-
-      if (gameStateService.isTerrainOpen &&
-          gameStateService.selectedMap != null) {
-        teamService.loadTeams(gameStateService.selectedMap!.id!);
-        logger.d(
-            '🌀 [players_screen] [initState] Chargement des équipes et des joueurs connectés');
-        gameStateService.loadConnectedPlayers();
-      }
-      // 👉 charge les invitations envoyées une seule fois
-      context.read<InvitationService>().loadSentInvitations();
-    });
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -88,6 +61,100 @@ class _PlayersScreenState extends State<PlayersScreen>
 
     teamService = context.watch<TeamService>();
     gameStateService = context.watch<GameStateService>();
+
+    final isOpen = gameStateService.isTerrainOpen;
+    final newLength = isOpen ? 4 : 1;
+
+    // 🔹 Bootstrap unique ici
+    if (!_bootstrapped) {
+      logger.d('🚀 PlayersScreen bootstrap (isOpen=$isOpen)');
+      // Charger "envoyées" quoi qu’il arrive (ne fera rien si pas de fieldId côté service)
+      context.read<InvitationService>().loadSentInvitations();
+      logger.d('📤 loadSentInvitations() demandé au bootstrap');
+
+      if (isOpen && gameStateService.selectedMap != null) {
+        final mapId = gameStateService.selectedMap!.id!;
+        logger.d('🌀 Chargement équipes + joueurs (bootstrap) mapId=$mapId');
+        teamService.loadTeams(mapId);
+        gameStateService.loadConnectedPlayers();
+      } else {
+        // Terrain fermé → on veut voir les reçues
+        context.read<InvitationService>().loadReceivedInvitations();
+        logger.d('📥 loadReceivedInvitations() demandé (terrain fermé)');
+      }
+      _bootstrapped = true;
+    }
+
+    // 1) Première init : si _tabController n’existe pas, on le crée
+    if (_tabController == null) {
+      _createController(newLength, initialIndex: 0);
+      _lastIsOpen = isOpen;
+      return;
+    }
+
+    // 2) Si la longueur doit changer (ouvert <-> fermé), on recrée
+    if (_lastIsOpen != isOpen || _tabController?.length != newLength) {
+      final currentIndex = _tabController?.index;
+      _tabController?.removeListener(_tabListener);
+
+      // Map index pour rester "logique" après le switch
+      // - Si on se ferme: Invitations passe de 1 -> 0
+      // - Si on s’ouvre: Invitations passe de 0 -> 1
+      int? mappedIndex = 0;
+      if (isOpen) {
+        mappedIndex = (currentIndex == 0)
+            ? 1
+            : currentIndex; // rester sur invits si possible
+        if (mappedIndex! >= newLength) mappedIndex = newLength - 1;
+      } else {
+        // on tombe toujours sur 0 (Invitations)
+        mappedIndex = 0;
+      }
+
+      _createController(newLength, initialIndex: mappedIndex);
+      _lastIsOpen = isOpen;
+    }
+  }
+
+  void _createController(int length, {int initialIndex = 0}) {
+    _tabController = TabController(
+      length: length,
+      vsync: this,
+      initialIndex: initialIndex.clamp(0, length - 1),
+    );
+    _tabController!.addListener(_tabListener);
+  }
+
+  void _tabListener() {
+    if (_tabController!.indexIsChanging) return;
+
+    final isOpen = context.read<GameStateService>().isTerrainOpen;
+    final invitationsTabIndex = isOpen ? 1 : 0;
+    final teamsTabIndex = isOpen ? 2 : null;
+
+    logger.d('🧭 PlayersScreen: tab=${_tabController!.index} (isOpen=$isOpen)');
+
+    if (_tabController!.index == invitationsTabIndex) {
+      logger
+          .d('📩 PlayersScreen → onglet Invitations sélectionné (sentInvites)');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<InvitationService>().loadSentInvitations();
+      });
+    }
+
+    if (teamsTabIndex != null && _tabController!.index == teamsTabIndex) {
+      logger.d(
+          '👥 PlayersScreen → onglet Équipes sélectionné → refresh teams & players');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final gs = context.read<GameStateService>();
+        final ts = context.read<TeamService>();
+        final mapId = gs.selectedMap?.id;
+        gs.loadConnectedPlayers();
+        if (mapId != null) ts.loadTeams(mapId);
+      });
+    }
   }
 
   Future<void> _searchUsers(String query) async {
@@ -209,43 +276,15 @@ class _PlayersScreenState extends State<PlayersScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // nécessaire avec le mixin AutomaticKeepAliveClientMixin
+    super.build(context);
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
     final invitationService = context.watch<InvitationService>();
-    final count = _getPendingInvitationsCount();
 
-    // Si le terrain n'est pas ouvert, afficher un message
-    if (!gameStateService.isTerrainOpen) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.people, size: 80, color: Colors.grey.withOpacity(0.5)),
-            const SizedBox(height: 16),
-            Text(
-              l10n.playerManagementUnavailableTitle,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.openField,
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Naviguer vers l'onglet Terrain
-                DefaultTabController.of(context).animateTo(0);
-              },
-              icon: const Icon(Icons.dashboard),
-              label: Text(l10n.goToFieldTabButton),
-            ),
-          ],
-        ),
-      );
+    final isOpen = gameStateService.isTerrainOpen;
+    if (!isOpen) {
+      return _buildNoOpenFieldBody();
     }
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -270,6 +309,101 @@ class _PlayersScreenState extends State<PlayersScreen>
           _buildFavoritesTab(),
         ],
       ),
+    );
+  }
+
+  Widget _buildNoOpenFieldBody() {
+    final l10n = AppLocalizations.of(context)!;
+    final invitationService = context.watch<InvitationService>();
+    final received = invitationService.receivedInvitations;
+    final pending = invitationService.receivedPendingInvitations;
+
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 16),
+        Icon(Icons.people, size: 80, color: Colors.grey.withOpacity(0.5)),
+        const SizedBox(height: 16),
+        Text(
+          l10n.playerManagementUnavailableTitle,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.openField,
+          style: const TextStyle(color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+        ElevatedButton.icon(
+          onPressed: widget.onGoToFieldTab, // ← si tu as passé le callback
+          icon: const Icon(Icons.dashboard),
+          label: Text(l10n.goToFieldTabButton),
+        ),
+        const SizedBox(height: 32),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(l10n.receivedInvitations,
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(width: 8),
+            if (pending.isNotEmpty) InviteBadge(count: pending.length),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (received.isEmpty) ...[
+          const Icon(Icons.mail_outline, size: 64, color: Colors.grey),
+          const SizedBox(height: 8),
+          Text(l10n.noInvitations, style: const TextStyle(color: Colors.grey)),
+        ] else ...[
+          for (final inv in received)
+            Card(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ListTile(
+                      leading: const CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        child: Icon(Icons.person, color: Colors.white),
+                      ),
+                      title: Text(
+                        l10n.invitationFrom(
+                            inv.senderUsername ?? l10n.unknownPlayerName),
+                      ),
+                      subtitle: Text(
+                        l10n.mapLabelShort(inv.fieldName ?? l10n.unknownMap),
+                      ),
+                    ),
+                    if (inv.isPending)
+                      ButtonBar(
+                        alignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => context
+                                .read<InvitationService>()
+                                .respondToInvitation(context, inv.id, false),
+                            child: Text(l10n.declineInvitation),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => context
+                                .read<InvitationService>()
+                                .respondToInvitation(context, inv.id, true),
+                            child: Text(l10n.acceptInvitation),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+        const SizedBox(height: 24),
+      ],
     );
   }
 
@@ -370,7 +504,8 @@ class _PlayersScreenState extends State<PlayersScreen>
     final invitationService = context.watch<InvitationService>();
 
     // Vérifier si une invitation pending existe déjà
-    final hasPendingInvitation = invitationService.sentInvitationsOld.any((inv) {
+    final hasPendingInvitation =
+        invitationService.sentInvitationsOld.any((inv) {
       final json = inv.toJson();
       final payload = json['payload'] ?? {};
       return payload['targetUserId'] == userId && json['status'] == 'pending';
@@ -399,7 +534,9 @@ class _PlayersScreenState extends State<PlayersScreen>
   Widget _buildInvitationsTab(InvitationService invitationService) {
     final l10n = AppLocalizations.of(context)!;
     final sentInvitations = invitationService.sentInvitations;
-
+    final sentPendingCount = context.select<InvitationService, int>(
+      (svc) => svc.sentInvitations.where((i) => i.isPending).length,
+    );
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -408,7 +545,8 @@ class _PlayersScreenState extends State<PlayersScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(l10n.invitationsSentTitle, style: Theme.of(context).textTheme.titleLarge),
+              Text(l10n.invitationsSentTitle,
+                  style: Theme.of(context).textTheme.titleLarge),
               IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: () => invitationService.loadSentInvitations(),
@@ -417,41 +555,55 @@ class _PlayersScreenState extends State<PlayersScreen>
             ],
           ),
           const SizedBox(height: 16),
-
           Expanded(
             child: RefreshIndicator(
               onRefresh: () => invitationService.loadSentInvitations(),
               child: sentInvitations.isEmpty
-              // Important: un scrollable même vide pour pouvoir "pull-to-refresh"
+                  // Important: un scrollable même vide pour pouvoir "pull-to-refresh"
                   ? ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: 120),
-                  Center(
-                    child: Column(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        const Icon(Icons.mail_outline, size: 64, color: Colors.grey),
-                        const SizedBox(height: 16),
-                        Text(l10n.noInvitationsSent, style: const TextStyle(color: Colors.grey)),
+                        SizedBox(height: 120),
+                        Center(
+                          child: Column(
+                            children: [
+                              Stack(
+                                children: [
+                                  const Icon(Icons.mail_outline,
+                                      size: 64, color: Colors.grey),
+                                  if (sentPendingCount > 0)
+                                    Positioned(
+                                      right: -6,
+                                      top: -6,
+                                      child:
+                                          InviteBadge(count: sentPendingCount),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                l10n.noInvitationsSent,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                ],
-              )
+                    )
                   : ListView.builder(
-                itemCount: sentInvitations.length,
-                itemBuilder: (context, index) {
-                  final invitation = sentInvitations[index];
-                  return _buildInvitationCard(invitation, invitationService);
-                },
-              ),
+                      itemCount: sentInvitations.length,
+                      itemBuilder: (context, index) {
+                        final invitation = sentInvitations[index];
+                        return _buildInvitationCard(
+                            invitation, invitationService);
+                      },
+                    ),
             ),
           ),
         ],
       ),
     );
   }
-
 
   Widget _buildInvitationCard(
       Invitation invitation, InvitationService invitationService) {

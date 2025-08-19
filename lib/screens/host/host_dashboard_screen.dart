@@ -125,6 +125,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
+    void _goToField() => _tabController.animateTo(0);
 
     return AdaptiveScaffold(
       gameBackgroundType: GameBackgroundType.home,
@@ -156,9 +157,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
                       _buildScenariosTab(),
 
                       // Onglet Joueurs (équipes)
-                      gameStateService.isTerrainOpen
-                          ? const PlayersScreen()
-                          : _buildDisabledTeamsTab(),
+                      PlayersScreen(onGoToFieldTab: _goToField),
 
                       // Onglet Historique
                       const HostHistoryTab(),
