@@ -716,7 +716,13 @@
   "invitationDeclined": "Afgewezen",
   "invitationCanceled": "Geannuleerd",
   "invitationExpired": "Verlopen",
-  "cancelInvitation": "Annuleren"
+  "cancelInvitation": "Annuleren",
+  "visitingTerrain": "Op bezoek bij {terrainName}",
+  "returnToHostMode": "Terug naar host-modus",
+  "returnedToHostMode": "Succesvol teruggekeerd naar host-modus",
+  "errorReturningToHostMode": "Fout bij terugkeren naar host-modus",
+  "hostVisitorMode": "Bezoeker-modus",
+  "connectedAsVisitor": "Verbonden als bezoeker"
 
 
 }

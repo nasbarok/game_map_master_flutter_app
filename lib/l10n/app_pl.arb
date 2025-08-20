@@ -716,6 +716,12 @@
   "invitationDeclined": "Odrzucone",
   "invitationCanceled": "Anulowane",
   "invitationExpired": "Wygasłe",
-  "cancelInvitation": "Anuluj"
+  "cancelInvitation": "Anuluj",
+  "visitingTerrain": "Odwiedzając {terrainName}",
+  "returnToHostMode": "Powrót do trybu hosta",
+  "returnedToHostMode": "Pomyślny powrót do trybu hosta",
+  "errorReturningToHostMode": "Błąd podczas powrotu do trybu hosta",
+  "hostVisitorMode": "Tryb gościa",
+  "connectedAsVisitor": "Połączony jako gość"
 
 }

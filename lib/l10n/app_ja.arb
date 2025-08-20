@@ -716,7 +716,13 @@
   "invitationDeclined": "拒否済み",
   "invitationCanceled": "キャンセル済み",
   "invitationExpired": "期限切れ",
-  "cancelInvitation": "キャンセル"
+  "cancelInvitation": "キャンセル",
+  "visitingTerrain": "{terrainName}を訪問中",
+  "returnToHostMode": "ホストモードに戻る",
+  "returnedToHostMode": "ホストモードへの復帰に成功しました",
+  "errorReturningToHostMode": "ホストモードへの復帰エラー",
+  "hostVisitorMode": "訪問者モード",
+  "connectedAsVisitor": "訪問者として接続"
 
 
 

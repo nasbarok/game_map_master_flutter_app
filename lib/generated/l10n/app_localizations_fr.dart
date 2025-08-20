@@ -2440,4 +2440,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cancelInvitation => 'Annuler';
+
+  @override
+  String visitingTerrain(Object terrainName) {
+    return 'En visite sur $terrainName';
+  }
+
+  @override
+  String get returnToHostMode => 'Retour mode host';
+
+  @override
+  String get returnedToHostMode => 'Retour au mode host réussi';
+
+  @override
+  String get errorReturningToHostMode => 'Erreur lors du retour au mode host';
+
+  @override
+  String get hostVisitorMode => 'Mode visiteur';
+
+  @override
+  String get connectedAsVisitor => 'Connecté en tant que visiteur';
 }

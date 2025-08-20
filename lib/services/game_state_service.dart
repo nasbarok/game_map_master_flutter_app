@@ -25,6 +25,11 @@ class GameStateService extends ChangeNotifier {
   bool _isGameRunning = false;
   GameSession? _activeGameSession;
 
+  // ÉTATS POUR HOST VISITEUR
+  bool _isHostVisiting = false;
+  GameMap? _originalHostMap; // Sauvegarde de la carte host originale
+  bool _wasTerrainOpenBeforeVisit = false; // État terrain avant visite
+
   GameSession? get activeGameSession => _activeGameSession;
 
   void setActiveGameSession(GameSession? session) {
@@ -72,6 +77,7 @@ class GameStateService extends ChangeNotifier {
 
   DateTime? get gameStartTime => _gameStartTime;
   late final ApiService _apiService;
+  late final AuthService _authService;
 
   WebSocketService? _webSocketService;
   final TreasureHuntService _treasureHuntService;
@@ -89,12 +95,17 @@ class GameStateService extends ChangeNotifier {
 
   Stream<GameSession?> get gameSessionStream => _gameSessionController.stream;
 
-  GameStateService(this._apiService, this._treasureHuntService);
+  GameStateService(this._apiService,this._authService, this._treasureHuntService);
 
 // 🔐 Config temporaire pour BombOperation avant création de GameSession
   BombOperationScenarioConfig? _bombOperationConfig;
 
   BombOperationScenarioConfig? get bombOperationConfig => _bombOperationConfig;
+
+  bool get isHostVisiting => _isHostVisiting;
+  GameMap? get originalHostMap => _originalHostMap;
+  bool get isCurrentUserHost => _authService.currentUser?.hasRole('HOST') ?? false;
+  bool get isHostInOwnTerrain => isCurrentUserHost && !_isHostVisiting;
 
   void dispose() {
     _gameTimer?.cancel();
@@ -128,7 +139,7 @@ class GameStateService extends ChangeNotifier {
 
   factory GameStateService.placeholder() {
     return GameStateService(
-        ApiService.placeholder(), TreasureHuntService(ApiService.placeholder()))
+        ApiService.placeholder(),AuthService.placeholder(), TreasureHuntService(ApiService.placeholder()))
       .._isTerrainOpen = false
       .._selectedMap = null
       .._selectedScenarios = []
@@ -451,6 +462,12 @@ class GameStateService extends ChangeNotifier {
       _gameTimer!.cancel();
       _gameTimer = null;
     }
+
+    // Reset états host visiteur
+    _isHostVisiting = false;
+    _originalHostMap = null;
+    _wasTerrainOpenBeforeVisit = false;
+
     logger.d('[GameStateService] ✅ État réinitialisé');
     notifyListeners();
   }
@@ -863,4 +880,45 @@ class GameStateService extends ChangeNotifier {
   void clearBombOperationConfig() {
     _bombOperationConfig = null;
   }
+  /// 🆕 Démarrer une visite en tant que host
+  void startHostVisit(GameMap visitedMap) {
+    // Sauvegarder l'état host actuel
+    _originalHostMap = _selectedMap;
+    _wasTerrainOpenBeforeVisit = _isTerrainOpen;
+
+    // Basculer vers le terrain visité
+    _selectedMap = visitedMap;
+    _isHostVisiting = true;
+    _isTerrainOpen = true; // Le terrain visité est forcément ouvert
+    _isGameRunning = false; // Reset du statut de jeu
+
+    logger.d('🏠➡️🎮 Host visite le terrain: ${visitedMap.name}');
+    notifyListeners();
+  }
+
+  /// 🆕 Terminer la visite et revenir en mode host
+  void endHostVisit() {
+    if (!_isHostVisiting) return;
+
+    logger.d('🎮➡️🏠 Fin de visite, retour mode host');
+
+    // Restaurer l'état host original
+    _selectedMap = _originalHostMap;
+    _isTerrainOpen = _wasTerrainOpenBeforeVisit;
+    _isHostVisiting = false;
+    _isGameRunning = false; // Reset du statut de jeu
+
+    // Nettoyer les sauvegardes
+    _originalHostMap = null;
+    _wasTerrainOpenBeforeVisit = false;
+
+    notifyListeners();
+  }
+
+  /// 🆕 Vérifier si on peut basculer en mode host visiteur
+  bool canStartHostVisit() {
+    return isCurrentUserHost && !_isHostVisiting;
+  }
+
+
 }

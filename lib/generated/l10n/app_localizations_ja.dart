@@ -2389,4 +2389,24 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cancelInvitation => 'キャンセル';
+
+  @override
+  String visitingTerrain(Object terrainName) {
+    return '$terrainNameを訪問中';
+  }
+
+  @override
+  String get returnToHostMode => 'ホストモードに戻る';
+
+  @override
+  String get returnedToHostMode => 'ホストモードへの復帰に成功しました';
+
+  @override
+  String get errorReturningToHostMode => 'ホストモードへの復帰エラー';
+
+  @override
+  String get hostVisitorMode => '訪問者モード';
+
+  @override
+  String get connectedAsVisitor => '訪問者として接続';
 }

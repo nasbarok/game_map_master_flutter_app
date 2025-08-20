@@ -87,6 +87,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
     final selectedMap = gameState.selectedMap;
     final terrainOuvert = gameState.isTerrainOpen;
+    final isHostVisiting = gameState.isHostVisiting;
+    String appBarTitle;
+    Color appBarColor;
 
     logger.d('🧭 [GameLobbyScreen] build() déclenché');
     logger.d('🔍 Carte sélectionnée : ${selectedMap?.name ?? "Aucune"}');
@@ -94,6 +97,15 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
     final invitationsCount =
         context.watch<InvitationService>().receivedPendingInvitations.length;
+
+    if (isHostVisiting) {
+      appBarTitle = '🏠 ${l10n.visitingTerrain(selectedMap?.name ?? l10n.unknownMap)}';
+      appBarColor = Colors.orange; // Couleur distinctive pour host visiteur
+    } else {
+      appBarTitle = l10n.mapLabel(selectedMap?.name ?? l10n.unknownMap);
+      appBarColor = Colors.blue; // Couleur normale pour gamer
+    }
+
 
     // ✅ Rendu normal
     logger.d('✅ Affichage de l’interface GameLobbyScreen');
@@ -128,19 +140,16 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.8),
+              color: isHostVisiting ? Colors.orange.withOpacity(0.8) : Colors.red.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
-              tooltip: l10n.logout,
-              onPressed: () async {
-                final authService = context.read<AuthService>();
-                await authService.leaveAndLogout(context);
-                if (mounted) {
-                  context.go('/login');
-                }
-              },
+              icon: Icon(
+                isHostVisiting ? Icons.home : Icons.logout,
+                color: Colors.white,
+              ),
+              tooltip: isHostVisiting ? l10n.returnToHostMode : l10n.logout,
+              onPressed: () => _handleDisconnection(context, isHostVisiting),
             ),
           ),
         ],
@@ -1159,6 +1168,73 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     }
   }
 
+  /// 🆕 Gérer la déconnexion selon le contexte
+  Future<void> _handleDisconnection(BuildContext context, bool isHostVisiting) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (isHostVisiting) {
+      // CAS HOST VISITEUR : Retour mode host
+      await _returnToHostMode(context);
+    } else {
+      // CAS GAMER NORMAL : Déconnexion complète
+      await _performLogout(context);
+    }
+  }
+
+  /// 🆕 Retour au mode host
+  Future<void> _returnToHostMode(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final gameStateService = context.read<GameStateService>();
+    final playerConnectionService = context.read<PlayerConnectionService>();
+    final webSocketService  = context.read<WebSocketService>();
+
+    final fieldId = gameStateService.selectedMap?.field?.id;
+
+    try {
+      if (fieldId != null) {
+        // quitte proprement le terrain visité (tu l’avais rejoint comme gamer)
+        await playerConnectionService.leaveField(fieldId);
+        webSocketService.unsubscribeFromField(fieldId);
+      }
+
+      // restaure l’état host (ta méthode existe déjà)
+      gameStateService.endHostVisit();
+
+      if (!context.mounted) return;
+
+
+      // 3. Navigation vers interface host
+      if (context.mounted) {
+        context.go('/host');
+      }
+
+      // 4. Notification
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.returnedToHostMode), backgroundColor: Colors.green),
+      );
+      logger.d('🎮➡️🏠 Retour mode host réussi');
+
+    } catch (e) {
+      logger.e('Erreur lors du retour mode host: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.errorReturningToHostMode),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Déconnexion complète (gamer normal)
+  Future<void> _performLogout(BuildContext context) async {
+    final authService = context.read<AuthService>();
+    await authService.leaveAndLogout(context);
+    if (context.mounted) {
+      context.go('/login');
+    }
+  }
   @override
   void dispose() {
     final fieldId = _gameStateService.selectedMap?.field?.id;

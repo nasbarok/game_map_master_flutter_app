@@ -4354,6 +4354,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancelInvitation;
+
+  /// No description provided for @visitingTerrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Visiting {terrainName}'**
+  String visitingTerrain(Object terrainName);
+
+  /// No description provided for @returnToHostMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to host mode'**
+  String get returnToHostMode;
+
+  /// No description provided for @returnedToHostMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully returned to host mode'**
+  String get returnedToHostMode;
+
+  /// No description provided for @errorReturningToHostMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Error returning to host mode'**
+  String get errorReturningToHostMode;
+
+  /// No description provided for @hostVisitorMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitor mode'**
+  String get hostVisitorMode;
+
+  /// No description provided for @connectedAsVisitor.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected as visitor'**
+  String get connectedAsVisitor;
 }
 
 class _AppLocalizationsDelegate

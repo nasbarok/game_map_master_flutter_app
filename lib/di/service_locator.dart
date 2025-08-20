@@ -1,8 +1,10 @@
 
 import 'package:game_map_master_flutter_app/services/invitation_api_service.dart';
 import 'package:game_map_master_flutter_app/services/l10n/locale_service.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 
+import '../config/app_router.dart';
 import '../config/environment_config.dart';
 import '../services/api_service.dart';
 import '../services/audio/simple_voice_service.dart';
@@ -58,7 +60,7 @@ void setupServiceLocator() {
 
 
   // 2. Services de base
-  final gameStateService = GameStateService(apiService,treasureHuntService);
+  final gameStateService = GameStateService(apiService,authService,treasureHuntService);
   final gameMapService = GameMapService(apiService);
   final scenarioService = ScenarioService(apiService);
   final teamService = TeamService(apiService, gameStateService);
@@ -151,5 +153,8 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<InvitationApiService>(invitationApiService);
   GetIt.I.registerSingleton<InvitationService>(invitationService);
 
+
+
+  GetIt.I.registerSingleton<GoRouter>(buildAppRouter());
 }
 

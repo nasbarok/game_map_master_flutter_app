@@ -716,7 +716,13 @@
   "invitationDeclined": "Avvist",
   "invitationCanceled": "Kansellert",
   "invitationExpired": "Utløpt",
-  "cancelInvitation": "Avbryt"
+  "cancelInvitation": "Avbryt",
+  "visitingTerrain": "Besøker {terrainName}",
+  "returnToHostMode": "Tilbake til vertsmodus",
+  "returnedToHostMode": "Vellykket retur til vertsmodus",
+  "errorReturningToHostMode": "Feil ved retur til vertsmodus",
+  "hostVisitorMode": "Besøksmodus",
+  "connectedAsVisitor": "Tilkoblet som besøkende"
 
 
 }

@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/websocket_service.dart';
+import '../models/game_map.dart';
 import '../models/invitation.dart';
 import '../models/websocket/game_invitation_message.dart';
 import '../models/websocket/invitation_response_message.dart';
@@ -196,12 +198,24 @@ class InvitationService extends ChangeNotifier {
 
       await _webSocketService.sendMessage('/app/invitation-response', response);
 
+      logger.d('✅ Réponse à l\'invitation: ${accept ? "Acceptée" : "Refusée"}');
+
       // 3. Si accepté, connecter au terrain
       if (accept) {
-        final apiService = GetIt.I<ApiService>();
-        _gameStateService.restoreSessionIfNeeded(
-            apiService, updatedInvitation.fieldId);
+        final currentUser = _authService.currentUser;
+        final isCurrentUserHost = currentUser?.hasRole('HOST') ?? false;
+
+        if (isCurrentUserHost && _gameStateService.canStartHostVisit()) {
+          // 🆕 CAS HOST VISITEUR
+          await _handleHostVisitAcceptance(context, updatedInvitation);
+        } else {
+          // CAS GAMER NORMAL
+          await _handleGamerAcceptance(context, updatedInvitation);
+        }
       }
+
+      // 3. Refresh automatique des invitations reçues
+      await loadReceivedInvitations();
 
       // 4. Rafraîchir les invitations reçues
       await loadReceivedInvitations();
@@ -322,6 +336,78 @@ class InvitationService extends ChangeNotifier {
   void _handleInvitationResponse(WebSocketMessage message) {
     // Notification temps réel + refresh des invitations envoyées
     loadSentInvitations();
+  }
+
+  /// 🆕 Gérer l'acceptation d'invitation par un host (mode visiteur)
+  Future<void> _handleHostVisitAcceptance(BuildContext context, Invitation invitation) async {
+    try {
+      // 1. Récupérer les informations du terrain visité
+      final apiService = GetIt.I<ApiService>();
+      final fieldData = await apiService.get('fields/${invitation.fieldId}');
+
+      // 2. Créer un GameMap temporaire pour le terrain visité
+      final visitedMap = GameMap.fromJson(fieldData);
+
+      // 3. Démarrer la visite host
+      _gameStateService.startHostVisit(visitedMap);
+
+      // 4. Connecter au terrain comme un gamer
+      _gameStateService.restoreSessionIfNeeded(apiService, invitation.fieldId);
+
+      // 5. Navigation vers GameLobbyScreen
+      if (context.mounted) {
+        context.go('/gamer/lobby');
+      }
+
+      // 6. Afficher notification
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Connecté au terrain ${invitation.fieldName} en tant que visiteur'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+      logger.d('🏠➡️🎮 Host connecté en visiteur sur: ${invitation.fieldName}');
+
+    } catch (e) {
+      logger.e('Erreur lors de la connexion host visiteur: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la connexion au terrain'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Gérer l'acceptation d'invitation par un gamer normal
+  Future<void> _handleGamerAcceptance(BuildContext context, Invitation invitation) async {
+    try {
+      final apiService = GetIt.I<ApiService>();
+      _gameStateService.restoreSessionIfNeeded(apiService, invitation.fieldId);
+
+      if (context.mounted) {
+        context.go('/gamer/lobby');
+      }
+
+      logger.d('🎮 Gamer connecté au terrain: ${invitation.fieldName}');
+
+    } catch (e) {
+      logger.e('Erreur lors de la connexion gamer: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la connexion au terrain'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

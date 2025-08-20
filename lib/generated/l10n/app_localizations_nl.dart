@@ -2431,4 +2431,24 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get cancelInvitation => 'Annuleren';
+
+  @override
+  String visitingTerrain(Object terrainName) {
+    return 'Op bezoek bij $terrainName';
+  }
+
+  @override
+  String get returnToHostMode => 'Terug naar host-modus';
+
+  @override
+  String get returnedToHostMode => 'Succesvol teruggekeerd naar host-modus';
+
+  @override
+  String get errorReturningToHostMode => 'Fout bij terugkeren naar host-modus';
+
+  @override
+  String get hostVisitorMode => 'Bezoeker-modus';
+
+  @override
+  String get connectedAsVisitor => 'Verbonden als bezoeker';
 }

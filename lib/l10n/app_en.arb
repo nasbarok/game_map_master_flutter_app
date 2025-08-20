@@ -2684,7 +2684,13 @@
   "invitationDeclined": "Declined",
   "invitationCanceled": "Canceled",
   "invitationExpired": "Expired",
-  "cancelInvitation": "Cancel"
+  "cancelInvitation": "Cancel",
+  "visitingTerrain": "Visiting {terrainName}",
+  "returnToHostMode": "Return to host mode",
+  "returnedToHostMode": "Successfully returned to host mode",
+  "errorReturningToHostMode": "Error returning to host mode",
+  "hostVisitorMode": "Visitor mode",
+  "connectedAsVisitor": "Connected as visitor"
 
 
 

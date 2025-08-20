@@ -20,69 +20,17 @@ class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
 
   final navigationService = GetIt.instance<NavigationService>();
+  final GoRouter _router = GetIt.I<GoRouter>();
 
   @override
   Widget build(BuildContext context) {
-    final navigatorKey = navigationService.navigatorKey;
-
-    final router = GoRouter(
-      navigatorKey: navigatorKey,
-      initialLocation: '/splash',
-      routes: [
-        GoRoute(
-          path: '/splash',
-          builder: (context, state) => const SplashScreen(),
-        ),
-        GoRoute(
-          path: '/login',
-          builder: (context, state) => const LoginScreen(),
-        ),
-        GoRoute(
-          path: '/register',
-          builder: (context, state) => const RegisterScreen(),
-        ),
-        GoRoute(
-          path: '/host',
-          builder: (context, state) => const HostDashboardScreen(),
-        ),
-        GoRoute(
-          path: '/gamer/lobby',
-          builder: (context, state) {
-            final refresh = state.queryParameters['refresh'];
-            return GameLobbyScreen(key: ValueKey(refresh));
-          },
-        ),
-      ],
-      redirect: (context, state) {
-       final authService = GetIt.I<AuthService>();
-        final isLoggedIn = authService.isLoggedIn;
-        final isLoggingIn = state.location == '/login' || state.location == '/register';
-        final isSplash = state.location == '/splash';
-
-       // ⚠️ NE RIEN FAIRE tant qu’on est sur le splash (il gère tout)
-        if (isSplash) return null;
-
-       // ➕ Empêche accès aux autres pages sans session
-        if (!isLoggedIn && !isLoggingIn) return '/login';
-
-       // ➕ Empêche retour à login/register après authentification
-        if (isLoggedIn && isLoggingIn) {
-          final user = authService.currentUser;
-          if (user != null) {
-            return user.hasRole('HOST') ? '/host' : '/gamer/lobby';
-          }
-        }
-        return null;
-      },
-    );
-
     return ChangeNotifierProvider<LocaleService>.value(
       value: GetIt.instance<LocaleService>(), // Récupère l'instance de GetIt
       child: WebSocketInitializer(
         child: Consumer<LocaleService>( // Utilise Consumer pour réagir aux changements de locale
           builder: (context, localeService, child) {
             return MaterialApp.router(
-              title: AppLocalizations.of(context)?.appTitle ?? 'Airsoft Game Master', // Utilise la chaîne localisée
+              title: AppLocalizations.of(context)?.appTitle ?? 'Game Map Master', // Utilise la chaîne localisée
 
               // Configuration i18n
               locale: localeService.currentLocale, // La locale actuelle du service
@@ -107,7 +55,7 @@ class App extends StatelessWidget {
               },
 
               theme: GlobalMilitaryTheme.themeData,
-              routerConfig: router, // Votre configuration GoRouter
+              routerConfig: _router, // Votre configuration GoRouter
             );
           },
         ),

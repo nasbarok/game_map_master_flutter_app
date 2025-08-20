@@ -2441,4 +2441,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cancelInvitation => 'Cancelar';
+
+  @override
+  String visitingTerrain(Object terrainName) {
+    return 'Visitando $terrainName';
+  }
+
+  @override
+  String get returnToHostMode => 'Volver al modo host';
+
+  @override
+  String get returnedToHostMode => 'Regreso exitoso al modo host';
+
+  @override
+  String get errorReturningToHostMode => 'Error al regresar al modo host';
+
+  @override
+  String get hostVisitorMode => 'Modo visitante';
+
+  @override
+  String get connectedAsVisitor => 'Conectado como visitante';
 }

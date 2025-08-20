@@ -2429,4 +2429,24 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get cancelInvitation => 'Avbryt';
+
+  @override
+  String visitingTerrain(Object terrainName) {
+    return 'Besöker $terrainName';
+  }
+
+  @override
+  String get returnToHostMode => 'Tillbaka till värdläge';
+
+  @override
+  String get returnedToHostMode => 'Framgångsrik återgång till värdläge';
+
+  @override
+  String get errorReturningToHostMode => 'Fel vid återgång till värdläge';
+
+  @override
+  String get hostVisitorMode => 'Besökarläge';
+
+  @override
+  String get connectedAsVisitor => 'Ansluten som besökare';
 }

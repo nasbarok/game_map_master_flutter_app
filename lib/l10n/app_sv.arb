@@ -712,7 +712,13 @@
   "invitationDeclined": "Avvisad",
   "invitationCanceled": "Avbruten",
   "invitationExpired": "Utgången",
-  "cancelInvitation": "Avbryt"
+  "cancelInvitation": "Avbryt",
+  "visitingTerrain": "Besöker {terrainName}",
+  "returnToHostMode": "Tillbaka till värdläge",
+  "returnedToHostMode": "Framgångsrik återgång till värdläge",
+  "errorReturningToHostMode": "Fel vid återgång till värdläge",
+  "hostVisitorMode": "Besökarläge",
+  "connectedAsVisitor": "Ansluten som besökare"
 
 
 }
