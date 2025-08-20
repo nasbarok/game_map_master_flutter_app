@@ -21,14 +21,13 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   // 🎨 COULEURS DU THÈME MILITAIRE (même que global_theme.dart)
-  static const Color darkMetal = Color(0xFF2D3748);      // Gris-bleu foncé
-  static const Color textDark = Color(0xFF1A202C);       // Très sombre
-  static const Color primaryMetal = Color(0xFF4A5568);   // Gris-bleu moyen
-  static const Color lightMetal = Color(0xFF718096);     // Gris-bleu clair
-  static const Color accentGreen = Color(0xFF48BB78);    // Vert militaire
-  static const Color textLight = Color(0xFFF7FAFC);      // Blanc cassé
+  static const Color darkMetal = Color(0xFF2D3748); // Gris-bleu foncé
+  static const Color textDark = Color(0xFF1A202C); // Très sombre
+  static const Color primaryMetal = Color(0xFF4A5568); // Gris-bleu moyen
+  static const Color lightMetal = Color(0xFF718096); // Gris-bleu clair
+  static const Color accentGreen = Color(0xFF48BB78); // Vert militaire
+  static const Color textLight = Color(0xFFF7FAFC); // Blanc cassé
 
   @override
   void initState() {
@@ -81,13 +80,15 @@ class _SplashScreenState extends State<SplashScreen> {
     final isHost = user.hasRole('HOST');
 
     if (!mounted) {
-      logger.d('❌ [splash_screen] Le widget n est plus monté, arrêt de la navigation');
+      logger.d(
+          '❌ [splash_screen] Le widget n est plus monté, arrêt de la navigation');
       return;
-      }
-
-      logger.d('➡️ Redirection finale vers: ${isHost ? '/host' : '/gamer/lobby'}');
-      context.go(isHost ? '/host' : '/gamer/lobby');
     }
+
+    final goTo = gameState.isHostInOwnTerrain ? '/host' : '/gamer/lobby';
+    logger.d('➡️ Redirection finale (isHostInOwnTerrain=${gameState.isHostInOwnTerrain}) vers: $goTo');
+    context.go(goTo);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +105,8 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              textDark,     // 0xFF1A202C - Très sombre (haut)
-              darkMetal,    // 0xFF2D3748 - Gris-bleu foncé (bas)
+              textDark, // 0xFF1A202C - Très sombre (haut)
+              darkMetal, // 0xFF2D3748 - Gris-bleu foncé (bas)
             ],
             stops: [0.0, 1.0],
           ),
@@ -296,9 +297,11 @@ class MilitaryTextFormField extends StatelessWidget {
         border: const OutlineInputBorder(),
         // 🎨 FOND ADAPTÉ AU THÈME SOMBRE
         filled: true,
-        fillColor: textLight.withOpacity(0.95), // Blanc cassé du thème
+        fillColor: textLight.withOpacity(0.95),
+        // Blanc cassé du thème
         focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF48BB78), width: 2), // Vert militaire
+          borderSide:
+              BorderSide(color: Color(0xFF48BB78), width: 2), // Vert militaire
         ),
       ),
       validator: validator,

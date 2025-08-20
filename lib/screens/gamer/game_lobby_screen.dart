@@ -1062,6 +1062,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   void _showLeaveConfirmationDialog(Field field) {
     final l10n = AppLocalizations.of(context)!;
     final playerConnectionService = context.read<PlayerConnectionService>();
+    final authService = context.read<AuthService>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1076,8 +1077,19 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           ),
           ElevatedButton(
             onPressed: () {
+              // Ferme la boîte de dialogue
               Navigator.of(context).pop();
+              // Effectuer la déconnexion
               playerConnectionService.leaveField(field.id!);
+
+              // Vérifier si l'utilisateur est un hôte et rediriger en conséquence
+              if (authService.currentUser?.hasRole('HOST') ?? false) {
+                // Si c'est un hôte, redirigez vers /host
+                context.go('/host');
+              } else {
+                // Sinon, redirigez vers /gamer/lobby
+                context.go('/gamer/lobby');
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

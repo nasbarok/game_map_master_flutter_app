@@ -105,7 +105,27 @@ class GameStateService extends ChangeNotifier {
   bool get isHostVisiting => _isHostVisiting;
   GameMap? get originalHostMap => _originalHostMap;
   bool get isCurrentUserHost => _authService.currentUser?.hasRole('HOST') ?? false;
-  bool get isHostInOwnTerrain => isCurrentUserHost && !_isHostVisiting;
+
+  bool get isHostInOwnTerrain {
+    // Récupérer l'utilisateur actuel
+    final currentUser = _authService.currentUser;
+
+    // Vérifier si l'utilisateur est un hôte
+    final isHost = currentUser?.hasRole('HOST') ?? false;
+
+    // Récupérer l'ID du propriétaire de la carte
+    final ownerId = _selectedMap?.owner?.id;
+
+    // Vérification détaillée de l'état
+    logger.d('Vérification si l\'hôte est sur son terrain: Utilisateur est hôte: $isHost, Visite en cours: ${_isHostVisiting}, Propriétaire de la carte: $ownerId, ID utilisateur actuel: ${currentUser?.id}');
+
+    // Retourner si l'utilisateur est un hôte, n'est pas en visite et est le propriétaire
+    final result = isHost && !_isHostVisiting && ownerId != null && currentUser?.id == ownerId;
+
+    logger.d('  Résultat final (est-ce l\'hôte sur son terrain) : $result');
+    return result;
+  }
+
 
   void dispose() {
     _gameTimer?.cancel();
