@@ -20,7 +20,7 @@ class PlayersScreen extends StatefulWidget {
 }
 
 class _PlayersScreenState extends State<PlayersScreen>
-    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   late TeamService teamService;
   late GameStateService gameStateService;
@@ -47,6 +47,10 @@ class _PlayersScreenState extends State<PlayersScreen>
   @override
   void initState() {
     super.initState();
+    final isOpen = context.read<GameStateService>().isTerrainOpen;
+    final initialLen = isOpen ? 4 : 1;
+    _recreateTabController(initialLen, initialIndex: 0);
+    _lastIsOpen = isOpen;
   }
 
   @override
@@ -85,44 +89,44 @@ class _PlayersScreenState extends State<PlayersScreen>
       _bootstrapped = true;
     }
 
-    // 1) Première init : si _tabController n’existe pas, on le crée
-    if (_tabController == null) {
-      _createController(newLength, initialIndex: 0);
-      _lastIsOpen = isOpen;
-      return;
-    }
+    // Si la longueur change (ouverture/fermeture), on RECRÉE proprement
+    if (_tabController == null ||
+        _lastIsOpen != isOpen ||
+        _tabController!.length != newLength) {
 
-    // 2) Si la longueur doit changer (ouvert <-> fermé), on recrée
-    if (_lastIsOpen != isOpen || _tabController?.length != newLength) {
-      final currentIndex = _tabController?.index;
-      _tabController?.removeListener(_tabListener);
+      final currentIndex = _tabController?.index ?? 0;
 
-      // Map index pour rester "logique" après le switch
-      // - Si on se ferme: Invitations passe de 1 -> 0
-      // - Si on s’ouvre: Invitations passe de 0 -> 1
-      int? mappedIndex = 0;
+      int mappedIndex;
       if (isOpen) {
-        mappedIndex = (currentIndex == 0)
-            ? 1
-            : currentIndex; // rester sur invits si possible
-        if (mappedIndex! >= newLength) mappedIndex = newLength - 1;
+        // fermeture→ouverture : Invitations était 0 devient 1
+        mappedIndex = (currentIndex == 0) ? 1 : currentIndex;
+        if (mappedIndex >= newLength) mappedIndex = newLength - 1;
       } else {
-        // on tombe toujours sur 0 (Invitations)
+        // ouverture→fermeture : on retombe sur l’onglet 0 (Invitations reçues)
         mappedIndex = 0;
       }
 
-      _createController(newLength, initialIndex: mappedIndex);
+      _recreateTabController(newLength, initialIndex: mappedIndex);
       _lastIsOpen = isOpen;
     }
   }
 
-  void _createController(int length, {int initialIndex = 0}) {
+  void _recreateTabController(int length, {int initialIndex = 0}) {
+    // Nettoyer l'ancien controller AVANT d'en créer un nouveau
+    if (_tabController != null) {
+      _tabController!.removeListener(_tabListener);
+      _tabController!.dispose();
+    }
+
     _tabController = TabController(
       length: length,
       vsync: this,
       initialIndex: initialIndex.clamp(0, length - 1),
     );
     _tabController!.addListener(_tabListener);
+
+    // Optionnel mais confortable pour rebâtir TabBar/TabBarView
+    if (mounted) setState(() {});
   }
 
   void _tabListener() {

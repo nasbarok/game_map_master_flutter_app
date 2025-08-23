@@ -76,17 +76,20 @@ class _SplashScreenState extends State<SplashScreen> {
       logger.d('❌ Erreur pendant restoreSessionIfNeeded: $e');
     }
 
-    final user = authService.currentUser!;
-    final isHost = user.hasRole('HOST');
-
     if (!mounted) {
       logger.d(
           '❌ [splash_screen] Le widget n est plus monté, arrêt de la navigation');
       return;
     }
+    final currentUser = authService.currentUser;
+    final ownerId = gameState.selectedMap?.owner?.id;
+    final isHost = currentUser?.hasRole('HOST') ?? false;
 
-    final goTo = gameState.isHostInOwnTerrain ? '/host' : '/gamer/lobby';
-    logger.d('➡️ Redirection finale (isHostInOwnTerrain=${gameState.isHostInOwnTerrain}) vers: $goTo');
+    // Décomposition du test
+    bool isHostAndNotOwner = isHost && gameState.selectedMap != null && ownerId != null && currentUser?.id != ownerId;
+
+    final goTo = (isHost && !isHostAndNotOwner) ? '/host' : '/gamer/lobby';
+    logger.d('➡️ Redirection finale: isHost=$isHost, isHostInOwnTerrain=${gameState.isHostInOwnTerrain}, goTo=$goTo');
     context.go(goTo);
   }
 

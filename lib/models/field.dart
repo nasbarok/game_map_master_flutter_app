@@ -45,10 +45,9 @@ class Field {
       openedAt: json['openedAt'] != null ? DateTime.parse(json['openedAt']) : null,
       closedAt: json['closedAt'] != null ? DateTime.parse(json['closedAt']) : null,
       active: json['active'] ?? false,
-      owner: json['owner'] != null ? User.fromJson(json['owner']) : null,
+      owner: json['owner'] != null ? User.fromJson(json['owner']) : null,  // Ajout d'une vérification ici
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {

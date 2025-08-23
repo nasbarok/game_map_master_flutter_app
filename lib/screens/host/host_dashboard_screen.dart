@@ -1,8 +1,12 @@
 import 'package:game_map_master_flutter_app/screens/host/players_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../config/routes.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/field.dart';
 import '../../models/invitation.dart';
+import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_map_service.dart';
 import '../../services/invitation_service.dart';
@@ -15,6 +19,7 @@ import '../../widgets/host_history_tab.dart';
 import '../../widgets/adaptive_background.dart';
 import '../../widgets/options/user_options_menu.dart';
 import '../../widgets/options/cropped_logo_button.dart';
+import '../gamer/game_lobby_screen.dart';
 import '../scenario/treasure_hunt/scoreboard_screen.dart';
 import 'team_form_screen.dart';
 import 'scenario_form_screen.dart';
@@ -35,6 +40,14 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   late TabController _tabController;
   late InvitationService _invitationService;
   bool _isSectionCardVisible = true; // État de visibilité de l'encadré complet
+  bool _isJoining = false;
+
+  bool get _showJoinLastField {
+    final gameState = context.watch<GameStateService>();
+    if (gameState.isTerrainOpen) return false;
+    final i = _tabController.index;
+    return i == 0 || i == 3; // Field ou Players
+  }
 
   @override
   void initState() {
@@ -136,13 +149,15 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         appBar: _buildMilitaryAppBar(l10n),
         body: Stack(
           children: [
-            // Contenu principal
+            // 1) Contenu principal
             Column(
               children: [
-                // Espace pour l'encadré flottant
-                SizedBox(height: _isSectionCardVisible ? 140 : 20),
-
-                // ✅ CONTENU EXISTANT
+                if (_showJoinLastField) _buildJoinLastField(),
+                SizedBox(
+                    height: (_isSectionCardVisible && _tabController.index == 0)
+                        ? 140
+                        : 20),
+                // barre de navigation
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -167,11 +182,23 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
               ],
             ),
 
-            // 🆕 ENCADRÉ COMPLET FLOTTANT AVEC SYSTÈME SHOW/HIDE
-            _buildFloatingSectionCard(),
+            // 2) Encadré flottant
+            if (_tabController.index == 0) _buildFloatingSectionCard(),
 
-            // 🆕 POINT D'INTERROGATION POUR RÉAFFICHER (toujours visible quand caché)
+            // 3) POINT D'INTERROGATION POUR RÉAFFICHER (toujours visible quand caché)
             if (!_isSectionCardVisible) _buildShowButton(),
+
+            // 4) OVERLAY DE CHARGEMENT – TOUJOURS EN DERNIER !
+            if (_isJoining)
+              Positioned.fill(
+                child: AbsorbPointer(
+                  absorbing: true,
+                  child: Container(
+                    color: Colors.black54,
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+              ),
           ],
         ),
         floatingActionButton: _buildContextualFAB(),
@@ -1177,6 +1204,153 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     } catch (e) {
       logger.d(l10n.errorLoadingScenarios(e.toString()));
     }
+  }
+
+  /// Affiche le bouton pour rejoindre le dernier terrain ouvert si l'utilisateur
+  /// n'a pas de terrain ouvert actuellement.
+  ///
+  /// Si l'utilisateur a déjà un terrain ouvert, ne rien afficher.
+  ///
+  /// Si le terrain est fermé, afficher le bouton pour l'ouvrir.
+  /// Si le terrain est ouvert, afficher le bouton pour le rejoindre.
+  ///
+  /// Si l'utilisateur est propriétaire du terrain, ne rien afficher.
+  ///
+  /// Si il n'y a pas de terrain ouvert, afficher un message d'erreur.
+  ///
+  Widget _buildJoinLastField() {
+    final l10n = AppLocalizations.of(context)!;
+    final gameStateService = context.watch<GameStateService>();
+
+    // Ne rien afficher si l'utilisateur a déjà un terrain ouvert
+    if (gameStateService.isTerrainOpen) {
+      return const SizedBox.shrink();
+    }
+
+    return FutureBuilder<List<Field>>(
+      future: _loadLastActiveField(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+              child: Text(l10n.loadingError(snapshot.error.toString())));
+        }
+
+        final fields = snapshot.data ?? [];
+        if (fields.isEmpty) {
+          return const Center(child: Text(""));
+        }
+
+        final lastField = fields.first;
+
+        final authService = context.read<AuthService>();
+        if (lastField.owner?.id == authService.currentUser?.id) {
+          return const SizedBox
+              .shrink(); // Pas d'affichage si c'est son propre terrain
+        }
+
+        // Infos pour la ListTile
+        final isOpen = lastField.active;
+        final openedAtStr = lastField.openedAt != null
+            ? l10n.fieldOpenedOn(_formatDate(lastField.openedAt!))
+            : l10n.unknownOpeningDate;
+        final closedAtStr = lastField.closedAt != null
+            ? l10n.fieldClosedOn(_formatDate(lastField.closedAt!))
+            : l10n.stillActive;
+        final ownerName = lastField.owner?.username != null
+            ? l10n.ownerLabel(lastField.owner!.username)
+            : l10n.unknownOwner;
+
+        return Card(
+          color: Colors.black.withOpacity(0.7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(lastField.name),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(openedAtStr),
+                    Text(ownerName),
+                  ],
+                ),
+                trailing: Wrap(
+                  direction: Axis.vertical,
+                  spacing: 4,
+                  children: [
+                    if (isOpen)
+                      ElevatedButton(
+                        onPressed: () => _joinField(lastField.id!),
+                        child: Text(l10n.joinButton),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _joinField(int fieldId) async {
+    final l10n = AppLocalizations.of(context)!;
+    final gameStateService = GetIt.I<GameStateService>();
+    final apiService = GetIt.I<ApiService>();
+
+    setState(() => _isJoining = true);
+    try {
+      // Appeler l'API pour rejoindre le terrain
+      final response = await apiService.post('fields/$fieldId/join', {});
+
+      if (response != null) {
+        // Mettre à jour l'état du jeu après la connexion
+        await gameStateService.restoreSessionIfNeeded(apiService, fieldId);
+        if (!mounted) return;
+        context.go(Routes.lobby);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.loadingError(e.toString()))),
+      );
+    }
+  }
+
+  // Méthode pour charger le dernier terrain actif où l'utilisateur a été invité
+  Future<List<Field>> _loadLastActiveField() async {
+    try {
+      final apiService = GetIt.I<ApiService>();
+      final response = await apiService.get(
+          'fields-history/last-active'); // On récupère les derniers terrains visités
+
+      if (response == null || !(response is List)) {
+        return []; // Retourne une liste vide si aucune donnée n'est trouvée
+      }
+
+      final fields = (response).map((data) => Field.fromJson(data)).toList();
+
+      // Trier par date de dernière activité (en premier les terrains récemment ouverts)
+      fields.sort((a, b) => b.openedAt!.compareTo(a.openedAt!));
+
+      return fields;
+    } catch (e) {
+      logger.d('❌ Erreur lors du chargement des terrains actifs : $e');
+      return [];
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
   }
 }
 

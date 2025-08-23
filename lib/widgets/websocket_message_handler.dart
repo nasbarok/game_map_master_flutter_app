@@ -376,6 +376,9 @@ class WebSocketMessageHandler {
     }
     webSocketService.unsubscribeFromField(fieldId);
     gameStateService.reset();
+
+    // ✅ Redirection selon le cas (hôte -> /host, sinon -> /gamer/lobby)
+    _redirectAfterFieldClosed(context, senderId);
   }
 
   void _handleTeamUpdate(Map<String, dynamic> message, BuildContext context) {
@@ -576,6 +579,19 @@ class WebSocketMessageHandler {
         backgroundColor: Colors.redAccent,
       ),
     );
+  }
+
+  void _redirectAfterFieldClosed(BuildContext context, int senderId) {
+    final currentUser = authService.currentUser;
+    final bool isHost = currentUser?.hasRole('HOST') ?? false;
+
+    // Si je suis hôte et c'est moi qui ai fermé → /host, sinon → lobby gamer
+    final String target = isHost ? '/host' : '/gamer/lobby';
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      context.go(target);
+    });
   }
 
   void _showDisconnectedNotification(BuildContext context) {
