@@ -1257,9 +1257,6 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         final openedAtStr = lastField.openedAt != null
             ? l10n.fieldOpenedOn(_formatDate(lastField.openedAt!))
             : l10n.unknownOpeningDate;
-        final closedAtStr = lastField.closedAt != null
-            ? l10n.fieldClosedOn(_formatDate(lastField.closedAt!))
-            : l10n.stillActive;
         final ownerName = lastField.owner?.username != null
             ? l10n.ownerLabel(lastField.owner!.username)
             : l10n.unknownOwner;
