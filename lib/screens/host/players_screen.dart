@@ -32,11 +32,6 @@ class _PlayersScreenState extends State<PlayersScreen>
 
   bool _lastIsOpen = true; // pour détecter les changements d’ouverture
 
-  int get _currentTabsLength {
-    final isOpen = context.read<GameStateService>().isTerrainOpen;
-    return isOpen ? 4 : 1;
-  }
-
   int? getCurrentMapId(BuildContext context) {
     return context.watch<GameStateService>().selectedMap?.id;
   }
@@ -93,7 +88,6 @@ class _PlayersScreenState extends State<PlayersScreen>
     if (_tabController == null ||
         _lastIsOpen != isOpen ||
         _tabController!.length != newLength) {
-
       final currentIndex = _tabController?.index ?? 0;
 
       int mappedIndex;
@@ -313,6 +307,16 @@ class _PlayersScreenState extends State<PlayersScreen>
           _buildFavoritesTab(),
         ],
       ),
+      // FAB contextuel, visible uniquement sur l’onglet Teams
+      floatingActionButton: _tabController == null
+          ? null
+          : AnimatedBuilder(
+              animation: _tabController!,
+              builder: (_, __) {
+                final fab = _buildPlayersFab(); // <-- on APPELLE la méthode
+                return fab ?? const SizedBox.shrink(); // <-- on gère le null
+              },
+            ),
     );
   }
 
@@ -377,10 +381,10 @@ class _PlayersScreenState extends State<PlayersScreen>
                       ),
                       title: Text(
                         l10n.invitationFrom(
-                            inv.senderUsername ?? l10n.unknownPlayerName),
+                            inv.senderUsername),
                       ),
                       subtitle: Text(
-                        l10n.mapLabelShort(inv.fieldName ?? l10n.unknownMap),
+                        l10n.mapLabelShort(inv.fieldName),
                       ),
                     ),
                     if (inv.isPending)
@@ -409,13 +413,6 @@ class _PlayersScreenState extends State<PlayersScreen>
         const SizedBox(height: 24),
       ],
     );
-  }
-
-  int _getPendingInvitationsCount() {
-    final invitationService = context.watch<InvitationService>();
-    return invitationService.sentInvitationsOld
-        .where((inv) => inv.toJson()['status'] == 'pending')
-        .length;
   }
 
   Widget _buildFavoritesTab() {
@@ -798,7 +795,9 @@ class _PlayersScreenState extends State<PlayersScreen>
   }
 
   Widget _buildTeamsTab(
-      TeamService teamService, GameStateService gameStateService) {
+    TeamService teamService,
+    GameStateService gameStateService,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     final connectedPlayers = gameStateService.connectedPlayersList;
     final mapId = getCurrentMapId(context);
@@ -819,49 +818,22 @@ class _PlayersScreenState extends State<PlayersScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ Titre + bouton
+          // ✅ Titre + bouton "Nouveau"
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(l10n.teams, style: Theme.of(context).textTheme.titleLarge),
               if (isMapOwner)
                 ElevatedButton.icon(
-                  onPressed: () {
-                    final nameController = TextEditingController();
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(l10n.createTeam),
-                        content: TextField(
-                          controller: nameController,
-                          decoration: InputDecoration(labelText: l10n.teamName),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(l10n.cancel),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (nameController.text.isNotEmpty) {
-                                teamService.createTeam(nameController.text);
-                                Navigator.of(context).pop();
-                              }
-                            },
-                            child: Text(l10n.create),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  onPressed: _createTeamDialog,
                   icon: const Icon(Icons.add),
-                  label: Text(l10n.newTeamButton),
+                  label: Text(l10n.newTeamButton), // texte uniformisé
                 ),
             ],
           ),
           const SizedBox(height: 16),
 
-          // ✅ Liste scrollable dans Expanded dans Column (et plus dans Row)
+          // ✅ Liste scrollable
           Expanded(
             child: (teams.isEmpty && unassignedPlayers.isEmpty)
                 ? Center(
@@ -873,8 +845,10 @@ class _PlayersScreenState extends State<PlayersScreen>
                 : ListView(
                     children: [
                       if (unassignedPlayers.isNotEmpty) ...[
-                        Text(l10n.unassignedPlayersLabel,
-                            style: Theme.of(context).textTheme.titleLarge),
+                        Text(
+                          l10n.unassignedPlayersLabel,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                         const SizedBox(height: 8),
                         ...unassignedPlayers.map((player) =>
                             _buildUnassignedPlayerTile(
@@ -891,51 +865,7 @@ class _PlayersScreenState extends State<PlayersScreen>
                     ],
                   ),
           ),
-
-          const SizedBox(height: 16),
-
-          // ✅ Bouton en bas
-          ElevatedButton.icon(
-            onPressed: () {
-              final nameController = TextEditingController();
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(l10n.saveConfigurationDialogTitle),
-                  content: TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: l10n.configurationNameLabel,
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.cancel),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (nameController.text.isNotEmpty) {
-                          teamService.saveCurrentTeamConfiguration(
-                              nameController.text);
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.configurationSavedSuccess),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        }
-                      },
-                      child: Text(l10n.save),
-                    ),
-                  ],
-                ),
-              );
-            },
-            icon: const Icon(Icons.save),
-            label: Text(l10n.saveConfigurationButton),
-          ),
+          // ❌ plus de bouton "save configuration" ici
         ],
       ),
     );
@@ -1061,6 +991,59 @@ class _PlayersScreenState extends State<PlayersScreen>
                 label: Text(l10n.addPlayersToTeamDialogTitle),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget? _buildPlayersFab() {
+    final l10n = AppLocalizations.of(context)!;
+    final isOpen = context.watch<GameStateService>().isTerrainOpen;
+
+    if (!isOpen || !isMapOwner || _tabController == null) return null;
+
+    // Teams = index 2 quand isOpen == true
+    final teamsIndex = 2;
+    if (_tabController!.index != teamsIndex) return null;
+
+    return FloatingActionButton.extended(
+      heroTag: 'players-teams-fab',
+      onPressed: _createTeamDialog,
+      // ↩︎ même action que “Nouveau”
+      icon: const Icon(Icons.add),
+      label: Text(l10n.newTeamButton),
+      // ↩︎ texte uniformisé
+      tooltip: l10n.newTeamButton,
+    );
+  }
+
+  Future<void> _createTeamDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+    final nameController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.createTeam),
+        // ou l10n.newTeamButton si tu préfères
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(labelText: l10n.teamName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                context.read<TeamService>().createTeam(nameController.text);
+                Navigator.of(context).pop();
+              }
+            },
+            child: Text(l10n.create), // texte uniforme côté validation
+          ),
         ],
       ),
     );

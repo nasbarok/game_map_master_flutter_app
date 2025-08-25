@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:provider/provider.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
@@ -13,7 +12,6 @@ import 'package:game_map_master_flutter_app/utils/logger.dart';
 import '../../theme/global_theme.dart';
 import '../../theme/themed_text_form_field.dart';
 import '../../widgets/adaptive_background.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -39,79 +37,70 @@ class _LoginScreenState extends State<LoginScreen> {
   // ✅ VOTRE MÉTHODE _login() INCHANGÉE
   Future<void> _login() async {
     logger.d('🔐 Tentative de connexion en cours...');
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      final authService = GetIt.I<AuthService>();
-      final gameStateService = GetIt.I<GameStateService>();
-      final apiService = GetIt.I<ApiService>();
+    if (!_formKey.currentState!.validate()) {
+      logger.d('⚠️ Formulaire non valide');
+      return;
+    }
 
+    if (mounted) setState(() => _isLoading = true);
+
+    final authService = GetIt.I<AuthService>();
+    final gameStateService = GetIt.I<GameStateService>();
+    final apiService = GetIt.I<ApiService>();
+    var navigated = false;
+
+    try {
       logger.d('📡 Envoi des identifiants à AuthService...');
       final success = await authService.login(
         _usernameController.text,
         _passwordController.text,
       );
-      try {
-        if (success && mounted) {
-          logger.d('✅ Connexion réussie. Début de restauration de session...');
 
-          await gameStateService.restoreSessionIfNeeded(apiService, null);
-          logger.d('🔁 Session terrain potentiellement restaurée.');
+      if (!success) {
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.loginFailed), backgroundColor: Colors.red),
+        );
+        return;
+      }
 
-          final fieldId = gameStateService.selectedMap?.field?.id;
-          final userId = authService.currentUser?.id;
-          logger.d('🧾 fieldId=$fieldId, userId=$userId');
+      logger.d('✅ Connexion réussie. Début de restauration de session...');
+      await gameStateService.restoreSessionIfNeeded(apiService, null);
+      if (!mounted) return;
 
-          if (fieldId != null && userId != null) {
-            final isAlreadyConnected =
-                gameStateService.isPlayerConnected(userId);
-            logger.d('🔎 isAlreadyConnected=$isAlreadyConnected');
+      final fieldId = gameStateService.selectedMap?.field?.id;
+      final userId  = authService.currentUser?.id;
 
-            if (!isAlreadyConnected) {
-              logger.d(
-                  '🚀 Reconnexion automatique de l utilisateur au terrain...');
-              await GetIt.I<PlayerConnectionService>().joinMap(fieldId);
-              logger.d(
-                  '✅ Rejoint le terrain avec succès. Rechargement de la session...');
-              await gameStateService.restoreSessionIfNeeded(
-                  apiService, fieldId);
-            } else {
-              logger.d('ℹ️ Utilisateur déjà connecté au terrain.');
-            }
-          } else {
-            logger.d('⚠️ Aucun terrain actif ou utilisateur non défini.');
-          }
+      if (fieldId != null && userId != null &&
+          !gameStateService.isPlayerConnected(userId)) {
+        logger.d('🚀 Reconnexion automatique de l’utilisateur au terrain...');
+        await GetIt.I<PlayerConnectionService>().joinMap(fieldId);
+        logger.d('✅ Rejoint le terrain, re-restore...');
+        await gameStateService.restoreSessionIfNeeded(apiService, fieldId);
+        if (!mounted) return;
+      }
 
-          final user = authService.currentUser;
-          if (user != null) {
-            logger.d('➡️ Redirection en fonction du rôle : ${user.roles}');
-            if (user.hasRole('HOST')) {
-              context.go('/host');
-            } else {
-              context.go('/gamer/lobby');
-            }
-          } else {
-            logger.d('⚠️ Utilisateur null après login');
-          }
-        } else if (mounted) {
-          logger.d('❌ Connexion échouée, affichage du SnackBar');
-          final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.loginFailed),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } catch (e, stack) {
-        logger.e('❌ Erreur lors de la tentative de reconnexion automatique',
-            error: e, stackTrace: stack);
-      } finally {
+      final user = authService.currentUser;
+      if (user != null && mounted) {
+        // ferme proprement l’IME → évite les warnings "inactive InputConnection"
+        FocusManager.instance.primaryFocus?.unfocus();
+        // Optionnel: SystemChannels.textInput.invokeMethod('TextInput.hide');
+
+        navigated = true;
+        context.go(user.hasRole('HOST') ? '/host' : '/gamer/lobby');
+      }
+    } catch (e, stack) {
+      logger.e('❌ Erreur lors de la tentative de reconnexion automatique',
+          error: e, stackTrace: stack);
+    } finally {
+      // évite "setState() called after dispose"
+      if (mounted && !navigated) {
         setState(() => _isLoading = false);
       }
-    } else {
-      logger.d('⚠️ Formulaire non valide');
     }
   }
+
 
   @override
 

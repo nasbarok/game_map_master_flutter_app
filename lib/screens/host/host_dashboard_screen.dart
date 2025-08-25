@@ -12,16 +12,16 @@ import '../../services/game_map_service.dart';
 import '../../services/invitation_service.dart';
 import '../../services/notifications.dart';
 import '../../services/scenario_service.dart';
+import '../../services/storage/info_panel_preferences_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
+import '../../widgets/appbar/host_section_appbar_title.dart';
 import '../../widgets/host_history_tab.dart';
 import '../../widgets/adaptive_background.dart';
 import '../../widgets/options/user_options_menu.dart';
 import '../../widgets/options/cropped_logo_button.dart';
-import '../gamer/game_lobby_screen.dart';
 import '../scenario/treasure_hunt/scoreboard_screen.dart';
-import 'team_form_screen.dart';
 import 'scenario_form_screen.dart';
 import 'game_map_form_screen.dart';
 import 'terrain_dashboard_screen.dart';
@@ -39,8 +39,13 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late InvitationService _invitationService;
-  bool _isSectionCardVisible = true; // État de visibilité de l'encadré complet
   bool _isJoining = false;
+
+  bool _isInfoModalOpen = false;
+
+  //Gestion des panneaux vus
+  Map<int, bool> _tabInfoPanelsSeen = {};
+  bool _isFirstTimeModalShown = false; // Pour éviter les doublons
 
   bool get _showJoinLastField {
     final gameState = context.watch<GameStateService>();
@@ -64,6 +69,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
 
       _loadGameMaps();
       _loadScenarios();
+
+      // Charger les préférences et vérifier l'affichage
+      _loadInfoPanelPreferences();
     });
 
     // Écouter les changements d'onglet pour mettre à jour l'encadré
@@ -81,6 +89,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
       }
 
       setState(() {}); // garder ton redraw pour l’encadré
+      _isFirstTimeModalShown = false; // reset pour l’onglet courant
+      _checkAndShowFullscreenInfoPanel();
     });
   }
 
@@ -137,7 +147,6 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final gameStateService = context.watch<GameStateService>();
     void _goToField() => _tabController.animateTo(0);
 
     return AdaptiveScaffold(
@@ -153,10 +162,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
             Column(
               children: [
                 if (_showJoinLastField) _buildJoinLastField(),
-                SizedBox(
-                    height: (_isSectionCardVisible && _tabController.index == 0)
-                        ? 140
-                        : 20),
+                SizedBox(height: 20),
                 // barre de navigation
                 Expanded(
                   child: TabBarView(
@@ -182,11 +188,8 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
               ],
             ),
 
-            // 2) Encadré flottant
-            if (_tabController.index == 0) _buildFloatingSectionCard(),
-
             // 3) POINT D'INTERROGATION POUR RÉAFFICHER (toujours visible quand caché)
-            if (!_isSectionCardVisible) _buildShowButton(),
+            _buildShowButton(),
 
             // 4) OVERLAY DE CHARGEMENT – TOUJOURS EN DERNIER !
             if (_isJoining)
@@ -206,180 +209,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     );
   }
 
-  /// 🆕 ENCADRÉ COMPLET FLOTTANT AVEC SYSTÈME SHOW/HIDE
-  Widget _buildFloatingSectionCard() {
-    if (!_isSectionCardVisible) return const SizedBox.shrink();
-
-    final l10n = AppLocalizations.of(context)!;
-
-    return Positioned(
-      top: 20,
-      left: 16,
-      right: 16,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Encadré principal
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2D3748).withOpacity(0.95),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _getSectionAccentColor().withOpacity(0.5),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: _getSectionAccentColor().withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                    spreadRadius: 2,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Logo/Image à gauche (SANS BORDURE, JUSTE OMBRE)
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        // Ombre en dessous
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                          spreadRadius: 1,
-                        ),
-                        // Ombre légère avec couleur d'accent
-                        BoxShadow(
-                          color: _getSectionAccentColor().withOpacity(0.2),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: _buildSectionLogo(),
-                    ),
-                  ),
-
-                  const SizedBox(width: 20),
-
-                  // Titre + Texte scrollable à droite
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Titre de la section
-                        Text(
-                          _getSectionTitle(l10n),
-                          style: TextStyle(
-                            color: _getSectionAccentColor(),
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // Texte scrollable
-                        Container(
-                          height: 60, // Hauteur fixe pour le scroll
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getSectionDescription(l10n),
-                                  style: const TextStyle(
-                                    color: Color(0xFFF7FAFC),
-                                    fontSize: 14,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _getSectionSubtitle(l10n),
-                                  style: const TextStyle(
-                                    color: Color(0xFF718096),
-                                    fontSize: 12,
-                                    fontStyle: FontStyle.italic,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ✅ NOUVEAU : Croix discrète petite et noire
-            Positioned(
-              top: 8, // ✅ MODIFIÉ : Position plus discrète
-              right: 8, // ✅ MODIFIÉ : Position plus discrète
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isSectionCardVisible = false;
-                  });
-                },
-                child: Container(
-                  width: 20, // ✅ MODIFIÉ : Plus petite (20x20 au lieu de 30x30)
-                  height: 20, // ✅ MODIFIÉ : Plus petite
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
-                    // ✅ MODIFIÉ : Noir semi-transparent
-                    borderRadius: BorderRadius.circular(10),
-                    // ✅ MODIFIÉ : Coins arrondis discrets
-                    // ✅ SUPPRIMÉ : border blanche
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        // ✅ MODIFIÉ : Ombre plus discrète
-                        blurRadius: 2,
-                        // ✅ MODIFIÉ : Ombre plus petite
-                        offset: const Offset(
-                            0, 1), // ✅ MODIFIÉ : Ombre plus subtile
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                    // ✅ GARDÉ : Icône blanche pour contraste
-                    size:
-                        12, // ✅ MODIFIÉ : Icône plus petite (12 au lieu de 18)
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 🆕 BOUTON POINT D'INTERROGATION POUR RÉAFFICHER
+  /// BOUTON POINT D'INTERROGATION POUR RÉAFFICHER
   Widget _buildShowButton() {
     return Positioned(
       top: 15,
@@ -387,7 +217,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
       child: GestureDetector(
         onTap: () {
           setState(() {
-            _isSectionCardVisible = true;
+            _showFullscreenInfoPanel(_tabController.index);
           });
         },
         child: AnimatedContainer(
@@ -426,7 +256,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     );
   }
 
-  /// 🆕 APPBAR MILITAIRE PERSONNALISÉE
+  /// APPBAR MILITAIRE PERSONNALISÉE
   PreferredSizeWidget _buildMilitaryAppBar(AppLocalizations l10n) {
     return AppBar(
       leading: Padding(
@@ -444,14 +274,11 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
           },
         ),
       ),
-      title: Text(
-        l10n.hostDashboardTitle,
-        style: const TextStyle(
-          color: Color(0xFFF7FAFC),
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
+      title: HostSectionAppBarTitle(
+        controller: _tabController,
+        titleOf: (i) => _getSectionTitle(l10n),
+        iconOf: (i) => _iconOfTab(i),
+        iconSize: 22, // ajuste si tu veux (20–26)
       ),
       backgroundColor: const Color(0xFF4A5568),
       foregroundColor: const Color(0xFFF7FAFC),
@@ -642,8 +469,10 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.watch<GameStateService>();
 
-    // ✅ RETOURNER null POUR L'ONGLET FIELD (index 0)
-    if (_tabController.index == 0) {
+    // ⚠️ pas de FAB sur Field (0) et Players (3) ET History (4)
+    if (_tabController.index == 0 ||
+        _tabController.index == 3 ||
+        _tabController.index == 4) {
       return null; // Pas de FAB sur l'onglet Field
     }
 
@@ -663,12 +492,6 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         return l10n.createMap;
       case 2:
         return l10n.createScenario;
-      case 3:
-        return gameStateService.isTerrainOpen
-            ? l10n.createTeam
-            : l10n.openFieldFirstSnackbar;
-      case 4:
-        return "Exporter";
       default:
         return l10n.noActionForFieldTabSnackbar;
     }
@@ -682,10 +505,6 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
         return Icons.add;
       case 2:
         return Icons.add;
-      case 3:
-        return Icons.add;
-      case 4:
-        return Icons.download;
       default:
         return Icons.add;
     }
@@ -715,33 +534,6 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ScenarioFormScreen()),
-          );
-        };
-      case 3:
-        return gameStateService.isTerrainOpen
-            ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const TeamFormScreen()),
-                );
-              }
-            : () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.openFieldFirstSnackbar),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              };
-      case 4:
-        return () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content:
-                  Text("Fonctionnalité d'export en cours de développement"),
-              backgroundColor: Colors.blue,
-            ),
           );
         };
       default:
@@ -779,7 +571,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
           color: const Color(0xFF2D3748).withOpacity(0.8),
           child: ListTile(
             title: Text(
-              map.name ?? l10n.noMapAvailable,
+              map.name,
               style: const TextStyle(color: Color(0xFFF7FAFC)),
             ),
             subtitle: Text(
@@ -1344,10 +1136,266 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
     }
   }
 
+  // Charge les préférences "vu/pas vu" pour chaque onglet au démarrage
+  Future<void> _loadInfoPanelPreferences() async {
+    // 0..4 : field, maps, scenarios, players, history
+    for (int i = 0; i < 5; i++) {
+      final tabKey = InfoPanelPreferencesService.getTabKeyFromIndex(i);
+      final seen = await InfoPanelPreferencesService.hasSeenInfoPanel(tabKey);
+      _tabInfoPanelsSeen[i] = seen;
+    }
+    // Affiche si nécessaire pour l’onglet courant
+    if (mounted) {
+      _checkAndShowFullscreenInfoPanel();
+      setState(() {}); // pour refléter _tabInfoPanelsSeen
+    }
+  }
+
+// Vérifie l’état pour l’onglet courant et ouvre le modal si 1ʳᵉ fois
+  Future<void> _checkAndShowFullscreenInfoPanel() async {
+    if (_isFirstTimeModalShown) return; // évite doublons
+    final currentIndex = _tabController.index;
+    final hasSeenPanel = _tabInfoPanelsSeen[currentIndex] ?? false;
+    if (!hasSeenPanel) {
+      _isFirstTimeModalShown = true;
+      // Laisse à l’onglet le temps de s’afficher
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) _showFullscreenInfoPanel(currentIndex);
+    }
+  }
+
+// Ouvre le modal plein écran
+  void _showFullscreenInfoPanel(int tabIndex) {
+    if (_isInfoModalOpen) return;
+    _isInfoModalOpen = true;
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _buildFullscreenInfoModal(l10n, tabIndex),
+    ).whenComplete(() {
+      _isInfoModalOpen = false;
+    });
+  }
+
+// Contenu du modal plein écran (reprend ton identité visuelle)
+  // 1) MODAL plein écran avec image responsive XXL
+  Widget _buildFullscreenInfoModal(AppLocalizations l10n, int tabIndex) {
+    return Material(
+      color: Colors.black.withOpacity(0.95),
+      child: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final size = MediaQuery.of(context).size;
+            final shortestSide = size.shortestSide;
+            final isTablet = shortestSide >= 600;
+
+            // Taille max de l’illustration (pour “le plus grand possible” sans casser la mise en page)
+            final maxGraphicHeight =
+                constraints.maxHeight * (isTablet ? 0.34 : 0.46);
+
+            // Typo un poil responsive
+            final titleFs = isTablet ? 40.0 : 32.0;
+            final subtitleFs = isTablet ? 22.0 : 18.0;
+            final bodyFs = isTablet ? 18.0 : 16.0;
+
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // *** Illustration XXL ***
+                      ConstrainedBox(
+                        constraints:
+                            BoxConstraints(maxHeight: maxGraphicHeight),
+                        child: _buildLargeSectionGraphic(),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Titre
+                      Text(
+                        _getSectionTitle(l10n),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: titleFs,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.4,
+                          color: _getSectionAccentColor(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Sous-titre
+                      Text(
+                        _getSectionSubtitle(l10n),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: subtitleFs,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      // Description
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2D3748).withOpacity(0.85),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: _getSectionAccentColor().withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          _getSectionDescription(l10n),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: bodyFs,
+                            color: Colors.white,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 36),
+
+                      // Bouton OK
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _markInfoPanelAsSeen(tabIndex);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _getSectionAccentColor(),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 48, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          elevation: 8,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check_circle_outline),
+                            const SizedBox(width: 12),
+                            Text(
+                              l10n.ok,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+// 2) Illustration grand format avec halo/ombre et fallback propre
+  Widget _buildLargeSectionGraphic() {
+    final accent = _getSectionAccentColor();
+    final logoPath = _getSectionLogoPath();
+
+    return AspectRatio(
+      aspectRatio: 1, // carré propre
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Halo/Glow doux derrière l’image (effet “néon”)
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withOpacity(0.55),
+                  blurRadius: 120,
+                  spreadRadius: 30,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.6),
+                  blurRadius: 40,
+                ),
+              ],
+            ),
+          ),
+
+          // Image qui prend 100% de la zone dispo, sans rogner
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: SizedBox.expand(
+              child: Image.asset(
+                logoPath,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback cohérent avec ton style
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          accent.withOpacity(0.30),
+                          accent.withOpacity(0.10),
+                        ],
+                      ),
+                    ),
+                    child: Icon(Icons.image, color: accent, size: 64),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Marque l’onglet comme vu et met à jour l’état mémoire
+  Future<void> _markInfoPanelAsSeen(int tabIndex) async {
+    final tabKey = InfoPanelPreferencesService.getTabKeyFromIndex(tabIndex);
+    await InfoPanelPreferencesService.markInfoPanelAsSeen(tabKey);
+    setState(() {
+      _tabInfoPanelsSeen[tabIndex] = true;
+      _isFirstTimeModalShown = false;
+    });
+  }
+
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
+  }
+
+  IconData _iconOfTab(int i) {
+    switch (i) {
+      case 0:
+        return Icons.dashboard;
+      case 1:
+        return Icons.map;
+      case 2:
+        return Icons.videogame_asset;
+      case 3:
+        return Icons.people;
+      case 4:
+        return Icons.history;
+      default:
+        return Icons.dashboard;
+    }
   }
 }
 
