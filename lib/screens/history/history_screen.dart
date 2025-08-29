@@ -3,10 +3,13 @@ import 'package:provider/provider.dart';
 
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
+import '../../models/pagination/paginated_response.dart';
 import '../../services/history_service.dart';
 import '../../widgets/adaptive_background.dart';
 import '../../widgets/options/cropped_logo_button.dart';
+import '../../widgets/pagination/pagination_controls.dart';
 import 'field_sessions_screen.dart';
+import '../../utils/logger.dart';
 
 class HistoryScreen extends StatefulWidget {
   final int? fieldId;
@@ -18,6 +21,10 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  // --- Pagination (nouveau) ---
+  PaginatedResponse<Field>? _currentPage;
+  int _currentPageNumber = 0;
+
   List<Field> _fields = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -25,10 +32,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFields();
+    _loadFieldsPaginated(0);
   }
 
-  Future<void> _loadFields() async {
+  Future<void> _loadFieldsPaginated([int page = 0]) async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -37,22 +44,42 @@ class _HistoryScreenState extends State<HistoryScreen> {
     try {
       final historyService =
           Provider.of<HistoryService>(context, listen: false);
-
-      List<Field> fields;
-
+      late PaginatedResponse<Field> fieldsPage;
       if (widget.fieldId != null) {
+        // Mode "terrain spécifique" — on garde l’ancien comportement et on enveloppe dans une page simulée
         final field = await historyService.getFieldById(widget.fieldId!);
-        fields = field != null ? [field] : [];
+        final List<Field> list = (field != null) ? <Field>[field] : <Field>[];
+
+        fieldsPage = PaginatedResponse<Field>(
+          content: list,
+          totalElements: list.length,
+          totalPages: 1,
+          number: 0,
+          size: list.length,
+          first: true,
+          last: true,
+          numberOfElements: list.length,
+        );
       } else {
-        fields = await historyService.getFields();
+        // Mode liste complète — on utilise la pagination réelle
+        fieldsPage = await historyService.getFieldsPaginated(
+          page: page,
+          size: 15,
+        );
       }
 
+      if (!mounted) return;
       setState(() {
-        _fields = fields;
+        _currentPage = fieldsPage;
+        _currentPageNumber = page;
+        _fields = fieldsPage.content;
         _isLoading = false;
       });
     } catch (e) {
       final l10n = AppLocalizations.of(context)!;
+      logger.e(l10n.errorLoadingData(e.toString()));
+
+      if (!mounted) return;
       setState(() {
         _errorMessage = l10n.errorLoadingData(e.toString());
         _isLoading = false;
@@ -90,7 +117,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           SnackBar(content: Text(l10n.fieldDeletedSuccess(field.name))),
         );
 
-        _loadFields(); // Rafraîchir la liste
+        _loadFieldsPaginated(_currentPageNumber); // Rafraîchir la liste
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.error + e.toString())),
@@ -106,7 +133,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       gameBackgroundType: GameBackgroundType.menu,
       enableParallax: true,
       backgroundOpacity: 0.85,
-      appBar: AppBar(
+      appBar: null,
+      /*appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 70,
@@ -127,90 +155,129 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      ),*/
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : _errorMessage != null
               ? Center(
                   child: Text(_errorMessage!,
                       style: const TextStyle(color: Colors.red, fontSize: 16)))
-              : _fields.isEmpty
+              : (_currentPage == null || _fields.isEmpty)
                   ? Center(
                       child: Text(l10n.noFieldsAvailable,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 16)))
-                  : ListView.builder(
-                      itemCount: _fields.length,
-                      itemBuilder: (context, index) {
-                        final field = _fields[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          color: Colors.black.withOpacity(0.7),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                                color: Colors.white.withOpacity(0.3), width: 1),
-                          ),
-                          child: ListTile(
-                            title: Text(field.name,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(l10n.fieldOpenedOn(
-                                    _formatDate(field.openedAt!))),
-                                if (field.closedAt != null)
-                                  Text(
-                                      l10n.fieldClosedOn(
-                                          _formatDate(field.closedAt!)),
-                                      style: const TextStyle(
-                                          color: Colors.white70))
-                                else
-                                  Text(l10n.fieldStatusOpen,
-                                      style:
-                                          const TextStyle(color: Colors.green)),
-                              ],
+                  : Column(
+                      children: [
+                        if ((_currentPage?.totalPages ?? 0) > 1)
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: PaginationControls(
+                              currentPage: _currentPage!.number,
+                              totalPages: _currentPage!.totalPages,
+                              totalElements: _currentPage!.totalElements,
+                              isFirst: _currentPage!.first,
+                              isLast: _currentPage!.last,
+                              onPrevious: () =>
+                                  _goToPage(_currentPageNumber - 1),
+                              onNext: () => _goToPage(_currentPageNumber + 1),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (field.closedAt != null)
-                                  IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
-                                    tooltip: l10n.deleteFieldTooltip,
-                                    onPressed: () => _confirmDeleteField(field),
+                          ),
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () =>
+                                _loadFieldsPaginated(_currentPageNumber),
+                            color: const Color(0xFF48BB78),
+                            child: ListView.builder(
+                              itemCount: _fields.length,
+                              itemBuilder: (context, index) {
+                                final field = _fields[index];
+                                // ... ton Card + ListTile inchangés
+                                return Card(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  color: Colors.black.withOpacity(0.7),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: BorderSide(
+                                        color: Colors.white.withOpacity(0.3),
+                                        width: 1),
                                   ),
-                                const Icon(Icons.arrow_forward_ios,
-                                    color: Colors.white),
-                              ],
+                                  child: ListTile(
+                                    title: Text(field.name,
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold)),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (field.openedAt != null)
+                                          Text(l10n.fieldOpenedOn(
+                                              _formatDate(field.openedAt!))),
+                                        if (field.closedAt != null)
+                                          Text(
+                                            l10n.fieldClosedOn(
+                                                _formatDate(field.closedAt!)),
+                                            style: const TextStyle(
+                                                color: Colors.white70),
+                                          )
+                                        else
+                                          Text(l10n.fieldStatusOpen,
+                                              style: const TextStyle(
+                                                  color: Colors.green)),
+                                      ],
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (field.closedAt != null)
+                                          IconButton(
+                                            icon: const Icon(Icons.delete,
+                                                color: Colors.red),
+                                            tooltip: l10n.deleteFieldTooltip,
+                                            onPressed: () =>
+                                                _confirmDeleteField(field),
+                                          ),
+                                        const Icon(Icons.arrow_forward_ios,
+                                            color: Colors.white),
+                                      ],
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              FieldSessionsScreen(
+                                                  fieldId: field.id!),
+                                        ),
+                                      ).then(
+                                          (_) => _goToPage(_currentPageNumber));
+                                    },
+                                  ),
+                                );
+                              },
                             ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      FieldSessionsScreen(fieldId: field.id!),
-                                ),
-                              ).then((_) => _loadFields());
-                            },
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
       floatingActionButton: widget.fieldId == null
           ? FloatingActionButton(
               heroTag: 'history_fab',
-              onPressed: _loadFields,
+              onPressed: () => _loadFieldsPaginated(_currentPageNumber),
               tooltip: l10n.refreshTooltip,
               backgroundColor: Colors.blue.shade600,
               child: const Icon(Icons.refresh, color: Colors.white),
             )
           : null,
     );
+  }
+
+  void _goToPage(int target) {
+    final tp = (_currentPage?.totalPages ?? 1);
+    final next = target.clamp(0, tp > 0 ? tp - 1 : 0);
+    _loadFieldsPaginated(next);
   }
 
   String _formatDate(DateTime date) {
