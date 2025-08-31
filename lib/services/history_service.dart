@@ -377,5 +377,37 @@ class HistoryService {
     }
   }
 
+  Future<PaginatedResponse<Field>> getVisitedFieldsPaginated({
+    int page = 0,
+    int size = 15,
+  }) async {
+    final query = _buildQuery({
+      'page': '$page',
+      'size': '$size',
+      'sort': 'openedAt,desc', // Tri par date ouverte
+      'sort': 'id,desc',       // Tri par ID en cas d’égalité sur openedAt
+    });
+
+    final response = await _apiService.get('fields-history/history$query');
+
+    if (response == null) {
+      return const PaginatedResponse<Field>(
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+        size: 0,
+        first: true,
+        last: true,
+        numberOfElements: 0,
+      );
+    }
+
+    return PaginatedResponse<Field>.fromJson(
+      response as Map<String, dynamic>,
+          (json) => Field.fromJson(json),
+    );
+  }
+
 
 }

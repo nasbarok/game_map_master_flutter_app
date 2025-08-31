@@ -5,10 +5,12 @@ import 'package:provider/provider.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/field.dart';
 import '../../models/invitation.dart';
+import '../../models/pagination/paginated_response.dart';
 import '../../models/websocket/player_left_message.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
+import '../../services/history_service.dart';
 import '../../services/player_connection_service.dart';
 import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
@@ -19,6 +21,7 @@ import '../../widgets/adaptive_background.dart';
 import '../../widgets/gamer_history_button.dart';
 import '../../widgets/options/user_options_menu.dart';
 import '../../widgets/options/cropped_logo_button.dart';
+import '../../widgets/pagination/pagination_controls.dart';
 import '../gamesession/game_session_screen.dart';
 import '../history/field_sessions_screen.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
@@ -35,11 +38,18 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   late TabController _tabController;
   late GameStateService _gameStateService;
   late WebSocketService _webSocketService;
+  PaginatedResponse<Field>? _visitedFieldsPage;
+  int _visitedPage = 0;
+  bool _loadingVisited = true;
+  String? _visitedError;
+  final int _visitedPageSize = 5;
   int _lastIndex = 0;
 
   @override
   void initState() {
     super.initState();
+
+    _loadVisitedFields(page: 0);
 
     // Initialiser avec un seul onglet par défaut
     _tabController = TabController(length: 3, vsync: this);
@@ -99,13 +109,13 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         context.watch<InvitationService>().receivedPendingInvitations.length;
 
     if (isHostVisiting) {
-      appBarTitle = '🏠 ${l10n.visitingTerrain(selectedMap?.name ?? l10n.unknownMap)}';
+      appBarTitle =
+          '🏠 ${l10n.visitingTerrain(selectedMap?.name ?? l10n.unknownMap)}';
       appBarColor = Colors.orange; // Couleur distinctive pour host visiteur
     } else {
       appBarTitle = l10n.mapLabel(selectedMap?.name ?? l10n.unknownMap);
       appBarColor = Colors.blue; // Couleur normale pour gamer
     }
-
 
     // ✅ Rendu normal
     logger.d('✅ Affichage de l’interface GameLobbyScreen');
@@ -140,7 +150,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
           Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isHostVisiting ? Colors.orange.withOpacity(0.8) : Colors.red.withOpacity(0.8),
+              color: isHostVisiting
+                  ? Colors.orange.withOpacity(0.8)
+                  : Colors.red.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
@@ -591,118 +603,114 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   // Méthode pour afficher la liste des anciens terrains
   Widget _buildPreviousFieldsList() {
     final l10n = AppLocalizations.of(context)!;
-    final isOpen = context.select<GameStateService, bool>((gs) => gs.isTerrainOpen);
-    return FutureBuilder<List<Field>>(
-      key: ValueKey(isOpen),
-      future: _loadPreviousFields(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(l10n.loadingError(snapshot.error.toString())),
-          );
-        }
+    if (_loadingVisited) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        final fields = snapshot.data ?? [];
+    if (_visitedError != null) {
+      return Center(child: Text(_visitedError!));
+    }
 
-        if (fields.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.map, size: 80, color: Colors.grey.withOpacity(0.5)),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.noFieldsVisited,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.waitForInvitation,
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
+    final page = _visitedFieldsPage;
+    final fields = page?.content ?? const <Field>[];
+
+    if (fields.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.map, size: 80, color: Colors.grey.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            Text(l10n.noFieldsVisited,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(l10n.waitForInvitation,
+                style: const TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        if ((page?.totalPages ?? 0) > 1)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: PaginationControls(
+              currentPage: page!.number,
+              totalPages: page.totalPages,
+              totalElements: page.totalElements,
+              isFirst: page.first,
+              isLast: page.last,
+              onPrevious: () => _loadVisitedFields(
+                  page: (_visitedPage - 1).clamp(0, page.totalPages - 1)),
+              onNext: () => _loadVisitedFields(
+                  page: (_visitedPage + 1).clamp(0, page.totalPages - 1)),
             ),
-          );
-        }
-
-        return ListView.builder(
-          itemCount: fields.length,
-          itemBuilder: (context, index) {
-            final field = fields[index];
-            final isOpen = field.active;
-
-            String openedAtStr = field.openedAt != null
-                ? l10n.fieldOpenedOn(_formatDate(field.openedAt!))
-                : l10n.unknownOpeningDate;
-
-            String closedAtStr = field.closedAt != null
-                ? l10n.fieldClosedOn(_formatDate(field.closedAt!))
-                : l10n.stillActive;
-
-            String ownerName = field.owner?.username != null
-                ? l10n.ownerLabel(field.owner!.username!)
-                : l10n.unknownOwner;
-
-            return Card(
-              color: Colors.black.withOpacity(0.7),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side:
-                    BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
-              ),
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: isOpen ? Colors.green : Colors.grey,
-                      child: const Icon(Icons.map, color: Colors.white),
-                    ),
-                    title: Text(field.name),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(isOpen
-                            ? l10n.fieldStatusOpen
-                            : l10n.fieldStatusClosed),
-                        Text(openedAtStr),
-                        Text(closedAtStr),
-                        Text(ownerName),
-                      ],
-                    ),
-                    trailing: Wrap(
-                      direction: Axis.vertical,
-                      spacing: 4,
-                      children: [
-                        if (isOpen)
-                          ElevatedButton(
-                            onPressed: () => _joinField(field.id!),
-                            child: Text(l10n.joinButton),
+          ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: fields.length,
+            itemBuilder: (context, index) {
+              final field = fields[index];
+              return Card(
+                color: Colors.black.withOpacity(0.7),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                      color: Colors.white.withOpacity(0.3), width: 1),
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            field.active ? Colors.green : Colors.grey,
+                        child: const Icon(Icons.map, color: Colors.white),
+                      ),
+                      title: Text(field.name),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(field.active
+                              ? l10n.fieldStatusOpen
+                              : l10n.fieldStatusClosed),
+                          Text(field.openedAt != null
+                              ? l10n.fieldOpenedOn(_formatDate(field.openedAt!))
+                              : l10n.unknownOpeningDate),
+                        ],
+                      ),
+                      trailing: Wrap(
+                        direction: Axis.vertical,
+                        spacing: 4,
+                        children: [
+                          if (field.active)
+                            ElevatedButton(
+                              onPressed: () => _joinField(field.id!),
+                              child: Text(l10n.joinButton),
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            tooltip: l10n.deleteFromHistoryTooltip,
+                            onPressed: () => _deleteHistoryEntry(field),
                           ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          tooltip: l10n.deleteFromHistoryTooltip,
-                          onPressed: () => _deleteHistoryEntry(field),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  // 👇 Bouton Historique spécifique
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: GamerHistoryButton(fieldId: field.id!),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: GamerHistoryButton(fieldId: field.id!),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -724,9 +732,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         final ad = a.openedAt;
         final bd = b.openedAt;
         if (ad == null && bd == null) return 0;
-        if (ad == null) return 1;   // a après b
-        if (bd == null) return -1;  // a avant b
-        return bd.compareTo(ad);    // récent d’abord
+        if (ad == null) return 1; // a après b
+        if (bd == null) return -1; // a avant b
+        return bd.compareTo(ad); // récent d’abord
       });
 
       // pour chaque terrain actif, tenter de s'abonner
@@ -1181,7 +1189,8 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   }
 
   /// 🆕 Gérer la déconnexion selon le contexte
-  Future<void> _handleDisconnection(BuildContext context, bool isHostVisiting) async {
+  Future<void> _handleDisconnection(
+      BuildContext context, bool isHostVisiting) async {
     final l10n = AppLocalizations.of(context)!;
 
     if (isHostVisiting) {
@@ -1198,7 +1207,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
     final playerConnectionService = context.read<PlayerConnectionService>();
-    final webSocketService  = context.read<WebSocketService>();
+    final webSocketService = context.read<WebSocketService>();
 
     final fieldId = gameStateService.selectedMap?.field?.id;
 
@@ -1214,7 +1223,6 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
       if (!context.mounted) return;
 
-
       // 3. Navigation vers interface host
       if (context.mounted) {
         context.go('/host');
@@ -1222,10 +1230,11 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
 
       // 4. Notification
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.returnedToHostMode), backgroundColor: Colors.green),
+        SnackBar(
+            content: Text(l10n.returnedToHostMode),
+            backgroundColor: Colors.green),
       );
       logger.d('🎮➡️🏠 Retour mode host réussi');
-
     } catch (e) {
       logger.e('Erreur lors du retour mode host: $e');
       if (context.mounted) {
@@ -1239,6 +1248,34 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     }
   }
 
+  Future<void> _loadVisitedFields({required int page}) async {
+    setState(() {
+      _loadingVisited = true;
+      _visitedError = null;
+    });
+
+    try {
+      final historyService = GetIt.I<HistoryService>();
+      final pageObj = await historyService.getVisitedFieldsPaginated(
+        page: page,
+        size: _visitedPageSize,
+      );
+      if (!mounted) return;
+      setState(() {
+        _visitedFieldsPage = pageObj;
+        _visitedPage = pageObj.number; // serveur source of truth
+        _loadingVisited = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      setState(() {
+        _visitedError = l10n.errorLoadingData(e.toString());
+        _loadingVisited = false;
+      });
+    }
+  }
+
   /// Déconnexion complète (gamer normal)
   Future<void> _performLogout(BuildContext context) async {
     final authService = context.read<AuthService>();
@@ -1247,6 +1284,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       context.go('/login');
     }
   }
+
   @override
   void dispose() {
     final fieldId = _gameStateService.selectedMap?.field?.id;
