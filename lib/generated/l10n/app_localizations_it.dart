@@ -2454,4 +2454,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => 'Connesso come visitatore';
+
+  @override
+  String get welcomeSubtitle => 'Connettiti a un campo per iniziare';
 }

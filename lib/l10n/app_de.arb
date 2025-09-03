@@ -722,7 +722,8 @@
   "returnedToHostMode": "Erfolgreich zum Host-Modus zurückgekehrt",
   "errorReturningToHostMode": "Fehler beim Zurückkehren zum Host-Modus",
   "hostVisitorMode": "Besuchermodus",
-  "connectedAsVisitor": "Als Besucher verbunden"
+  "connectedAsVisitor": "Als Besucher verbunden",
+  "welcomeSubtitle": "Verbinde dich mit einem Spielfeld, um zu starten"
 
 
 

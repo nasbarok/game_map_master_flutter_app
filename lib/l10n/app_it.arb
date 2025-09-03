@@ -722,7 +722,8 @@
   "returnedToHostMode": "Ritorno riuscito alla modalità host",
   "errorReturningToHostMode": "Errore nel ritorno alla modalità host",
   "hostVisitorMode": "Modalità visitatore",
-  "connectedAsVisitor": "Connesso come visitatore"
+  "connectedAsVisitor": "Connesso come visitatore",
+  "welcomeSubtitle": "Connettiti a un campo per iniziare"
 
 
 

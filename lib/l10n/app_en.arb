@@ -2690,7 +2690,9 @@
   "returnedToHostMode": "Successfully returned to host mode",
   "errorReturningToHostMode": "Error returning to host mode",
   "hostVisitorMode": "Visitor mode",
-  "connectedAsVisitor": "Connected as visitor"
+  "connectedAsVisitor": "Connected as visitor",
+  "welcomeSubtitle": "Connect to a field to get started"
+
 
 
 

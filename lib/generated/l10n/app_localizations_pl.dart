@@ -2451,4 +2451,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => 'Połączony jako gość';
+
+  @override
+  String get welcomeSubtitle => 'Połącz się z polem gry, aby rozpocząć';
 }

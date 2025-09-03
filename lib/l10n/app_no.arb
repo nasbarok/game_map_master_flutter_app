@@ -722,7 +722,8 @@
   "returnedToHostMode": "Vellykket retur til vertsmodus",
   "errorReturningToHostMode": "Feil ved retur til vertsmodus",
   "hostVisitorMode": "Besøksmodus",
-  "connectedAsVisitor": "Tilkoblet som besøkende"
+  "connectedAsVisitor": "Tilkoblet som besøkende",
+  "welcomeSubtitle": "Koble til et felt for å komme i gang"
 
 
 }

@@ -2449,4 +2449,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => 'Ansluten som besökare';
+
+  @override
+  String get welcomeSubtitle => 'Anslut till ett fält för att komma igång';
 }

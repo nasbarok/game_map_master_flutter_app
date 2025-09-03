@@ -718,7 +718,8 @@
   "returnedToHostMode": "Framgångsrik återgång till värdläge",
   "errorReturningToHostMode": "Fel vid återgång till värdläge",
   "hostVisitorMode": "Besökarläge",
-  "connectedAsVisitor": "Ansluten som besökare"
+  "connectedAsVisitor": "Ansluten som besökare",
+  "welcomeSubtitle": "Anslut till ett fält för att komma igång"
 
 
 }

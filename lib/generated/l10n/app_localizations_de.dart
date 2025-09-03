@@ -2469,4 +2469,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => 'Als Besucher verbunden';
+
+  @override
+  String get welcomeSubtitle =>
+      'Verbinde dich mit einem Spielfeld, um zu starten';
 }

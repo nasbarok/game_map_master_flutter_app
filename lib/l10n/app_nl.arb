@@ -722,7 +722,8 @@
   "returnedToHostMode": "Succesvol teruggekeerd naar host-modus",
   "errorReturningToHostMode": "Fout bij terugkeren naar host-modus",
   "hostVisitorMode": "Bezoeker-modus",
-  "connectedAsVisitor": "Verbonden als bezoeker"
+  "connectedAsVisitor": "Verbonden als bezoeker",
+  "welcomeSubtitle": "Verbind met een terrein om te beginnen"
 
 
 }

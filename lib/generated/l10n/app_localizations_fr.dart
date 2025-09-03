@@ -2460,4 +2460,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => 'Connecté en tant que visiteur';
+
+  @override
+  String get welcomeSubtitle => 'Connectez-vous à un terrain pour commencer';
 }

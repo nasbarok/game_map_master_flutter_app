@@ -96,14 +96,15 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
     final gameState = context.watch<GameStateService>();
 
     final selectedMap = gameState.selectedMap;
-    final terrainOuvert = gameState.isTerrainOpen;
+    final fieldOpen = gameState.isTerrainOpen;
     final isHostVisiting = gameState.isHostVisiting;
+    final bool hasActiveField = fieldOpen && selectedMap != null;
     String appBarTitle;
     Color appBarColor;
 
     logger.d('🧭 [GameLobbyScreen] build() déclenché');
     logger.d('🔍 Carte sélectionnée : ${selectedMap?.name ?? "Aucune"}');
-    logger.d('🔓 Terrain ouvert : $terrainOuvert');
+    logger.d('🔓 Terrain ouvert : $fieldOpen');
 
     final invitationsCount =
         context.watch<InvitationService>().receivedPendingInvitations.length;
@@ -128,20 +129,35 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         toolbarHeight: 70,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          l10n.mapLabel(selectedMap?.name ?? l10n.unknownMap),
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                offset: Offset(1, 1),
-                blurRadius: 3,
-                color: Colors.black.withOpacity(0.7),
+        title: hasActiveField
+            ? Text(
+                l10n.mapLabel(selectedMap!.name),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.welcomeMessage,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.welcomeSubtitle,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
         leading: Container(
           margin: const EdgeInsets.all(8),
           child: const CroppedLogoButton(),

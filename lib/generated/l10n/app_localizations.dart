@@ -4390,6 +4390,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connected as visitor'**
   String get connectedAsVisitor;
+
+  /// No description provided for @welcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to a field to get started'**
+  String get welcomeSubtitle;
 }
 
 class _AppLocalizationsDelegate

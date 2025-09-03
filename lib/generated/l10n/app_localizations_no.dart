@@ -2447,4 +2447,7 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => 'Tilkoblet som besøkende';
+
+  @override
+  String get welcomeSubtitle => 'Koble til et felt for å komme i gang';
 }

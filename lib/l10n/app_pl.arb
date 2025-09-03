@@ -722,6 +722,7 @@
   "returnedToHostMode": "Pomyślny powrót do trybu hosta",
   "errorReturningToHostMode": "Błąd podczas powrotu do trybu hosta",
   "hostVisitorMode": "Tryb gościa",
-  "connectedAsVisitor": "Połączony jako gość"
+  "connectedAsVisitor": "Połączony jako gość",
+  "welcomeSubtitle": "Połącz się z polem gry, aby rozpocząć"
 
 }

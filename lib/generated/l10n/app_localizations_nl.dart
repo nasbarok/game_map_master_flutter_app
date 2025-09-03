@@ -2451,4 +2451,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => 'Verbonden als bezoeker';
+
+  @override
+  String get welcomeSubtitle => 'Verbind met een terrein om te beginnen';
 }

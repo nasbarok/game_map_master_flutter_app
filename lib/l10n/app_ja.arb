@@ -722,7 +722,8 @@
   "returnedToHostMode": "ホストモードへの復帰に成功しました",
   "errorReturningToHostMode": "ホストモードへの復帰エラー",
   "hostVisitorMode": "訪問者モード",
-  "connectedAsVisitor": "訪問者として接続"
+  "connectedAsVisitor": "訪問者として接続",
+  "welcomeSubtitle": "開始するにはフィールドに接続してください"
 
 
 

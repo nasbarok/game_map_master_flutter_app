@@ -2409,4 +2409,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get connectedAsVisitor => '訪問者として接続';
+
+  @override
+  String get welcomeSubtitle => '開始するにはフィールドに接続してください';
 }
