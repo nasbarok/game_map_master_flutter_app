@@ -2412,4 +2412,95 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get welcomeSubtitle => '開始するにはフィールドに接続してください';
+
+  @override
+  String genericError(Object message) {
+    return 'エラー $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return '$username に招待を送信しました';
+  }
+
+  @override
+  String get timeJustNow => 'たった今';
+
+  @override
+  String minutesAgo(Object count) {
+    return '$count 分前';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return '$count 時間前';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$month/$day';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username が $treasureName を見つけました！';
+  }
+
+  @override
+  String get seeScores => 'スコアを見る';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return '$ownerUsername のフィールドが開きました';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return '$ownerUsername のフィールドは閉鎖されました';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username が招待を拒否しました';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username がフィールドに参加しました！';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender がフィールド「$field」に参加するよう招待しています';
+  }
+
+  @override
+  String get decline => '拒否';
+
+  @override
+  String get accept => '承認';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username がフィールドを退出しました';
+  }
+
+  @override
+  String get scenariosFieldUpdated => 'フィールド上のシナリオが更新されました';
+
+  @override
+  String teamCreated(Object teamName) {
+    return '新しいチームが作成されました: $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'チームが削除されました。';
+
+  @override
+  String get disconnectedFieldByHost => 'ホストによってフィールドから切断されました';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username がフィールドから切断されました';
+  }
 }

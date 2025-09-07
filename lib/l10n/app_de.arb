@@ -723,7 +723,30 @@
   "errorReturningToHostMode": "Fehler beim Zurückkehren zum Host-Modus",
   "hostVisitorMode": "Besuchermodus",
   "connectedAsVisitor": "Als Besucher verbunden",
-  "welcomeSubtitle": "Verbinde dich mit einem Spielfeld, um zu starten"
+  "welcomeSubtitle": "Verbinde dich mit einem Spielfeld, um zu starten",
+  "genericError": "Fehler {message}",
+  "invitationSentTo": "Einladung gesendet an {username}",
+  "timeJustNow": "Gerade eben",
+  "minutesAgo": "Vor {count} Min.",
+  "hoursAgo": "Vor {count} Std.",
+  "shortDate": "{day}.{month}",
+  "treasureFound": "{username} hat {treasureName} gefunden!",
+  "seeScores": "Punktestand anzeigen",
+  "fieldOpened": "Das Spielfeld von {ownerUsername} ist jetzt geöffnet",
+  "fieldClosedBy": "Das Spielfeld von {ownerUsername} wurde geschlossen",
+  "invitationDeclinedBy": "{username} hat die Einladung abgelehnt",
+  "playerJoinedField": "{username} ist dem Spielfeld beigetreten!",
+  "invitationReceivedBody": "{sender} lädt dich ein, dem Spielfeld \"{field}\" beizutreten",
+  "decline": "Ablehnen",
+  "accept": "Akzeptieren",
+  "playerLeftField": "{username} hat das Spielfeld verlassen",
+  "scenariosFieldUpdated": "Szenarien auf dem Spielfeld aktualisiert",
+  "teamCreated": "Neues Team erstellt: {teamName}",
+  "teamDeleted": "Ein Team wurde gelöscht.",
+  "disconnectedFieldByHost": "Du wurdest vom Spielfeld durch den Host getrennt",
+  "playerDisconnectedOther": "{username} wurde vom Spielfeld getrennt"
+
+
 
 
 

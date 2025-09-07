@@ -2473,4 +2473,97 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get welcomeSubtitle =>
       'Verbinde dich mit einem Spielfeld, um zu starten';
+
+  @override
+  String genericError(Object message) {
+    return 'Fehler $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return 'Einladung gesendet an $username';
+  }
+
+  @override
+  String get timeJustNow => 'Gerade eben';
+
+  @override
+  String minutesAgo(Object count) {
+    return 'Vor $count Min.';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return 'Vor $count Std.';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$day.$month';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username hat $treasureName gefunden!';
+  }
+
+  @override
+  String get seeScores => 'Punktestand anzeigen';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return 'Das Spielfeld von $ownerUsername ist jetzt geöffnet';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return 'Das Spielfeld von $ownerUsername wurde geschlossen';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username hat die Einladung abgelehnt';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username ist dem Spielfeld beigetreten!';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender lädt dich ein, dem Spielfeld \"$field\" beizutreten';
+  }
+
+  @override
+  String get decline => 'Ablehnen';
+
+  @override
+  String get accept => 'Akzeptieren';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username hat das Spielfeld verlassen';
+  }
+
+  @override
+  String get scenariosFieldUpdated =>
+      'Szenarien auf dem Spielfeld aktualisiert';
+
+  @override
+  String teamCreated(Object teamName) {
+    return 'Neues Team erstellt: $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'Ein Team wurde gelöscht.';
+
+  @override
+  String get disconnectedFieldByHost =>
+      'Du wurdest vom Spielfeld durch den Host getrennt';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username wurde vom Spielfeld getrennt';
+  }
 }

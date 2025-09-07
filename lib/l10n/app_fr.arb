@@ -720,7 +720,28 @@
   "errorReturningToHostMode": "Erreur lors du retour au mode host",
   "hostVisitorMode": "Mode visiteur",
   "connectedAsVisitor": "Connecté en tant que visiteur",
-  "welcomeSubtitle": "Connectez-vous à un terrain pour commencer"
+  "welcomeSubtitle": "Connectez-vous à un terrain pour commencer",
+  "genericError": "Erreur {message}",
+  "invitationSentTo": "Invitation envoyée à {username}",
+  "timeJustNow": "À l'instant",
+  "minutesAgo": "Il y a {count} min",
+  "hoursAgo": "Il y a {count}h",
+  "shortDate": "{day}/{month}",
+  "treasureFound": "{username} a trouvé {treasureName} !",
+  "seeScores": "Voir scores",
+  "fieldOpened": "Le terrain de {ownerUsername} est maintenant ouvert",
+  "fieldClosedBy": "Le terrain de {ownerUsername} a été fermé",
+  "invitationDeclinedBy": "{username} a refusé l'invitation",
+  "playerJoinedField": "{username} a rejoint le terrain !",
+  "invitationReceivedBody": "{sender} vous invite à rejoindre la carte \"{field}\"",
+  "decline": "Refuser",
+  "accept": "Accepter",
+  "playerLeftField": "{username} a quitté le terrain",
+  "scenariosFieldUpdated": "Scénarios mis à jour sur le terrain",
+  "teamCreated": "Nouvelle équipe créée : {teamName}",
+  "teamDeleted": "Une équipe a été supprimée.",
+  "disconnectedFieldByHost": "Vous avez été déconnecté du terrain par l'hôte",
+  "playerDisconnectedOther": "{username} a été déconnecté du terrain"
 
 
 

@@ -2454,4 +2454,96 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get welcomeSubtitle => 'Połącz się z polem gry, aby rozpocząć';
+
+  @override
+  String genericError(Object message) {
+    return 'Błąd $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return 'Zaproszenie wysłane do $username';
+  }
+
+  @override
+  String get timeJustNow => 'Przed chwilą';
+
+  @override
+  String minutesAgo(Object count) {
+    return '$count min temu';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return '$count godz. temu';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$day.$month';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username znalazł $treasureName!';
+  }
+
+  @override
+  String get seeScores => 'Zobacz wyniki';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return 'Pole $ownerUsername jest teraz otwarte';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return 'Pole $ownerUsername zostało zamknięte';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username odrzucił zaproszenie';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username dołączył do pola!';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender zaprasza Cię do dołączenia do pola \"$field\"';
+  }
+
+  @override
+  String get decline => 'Odrzuć';
+
+  @override
+  String get accept => 'Akceptuj';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username opuścił pole';
+  }
+
+  @override
+  String get scenariosFieldUpdated => 'Scenariusze zaktualizowane na polu';
+
+  @override
+  String teamCreated(Object teamName) {
+    return 'Nowa drużyna utworzona: $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'Drużyna została usunięta.';
+
+  @override
+  String get disconnectedFieldByHost =>
+      'Zostałeś odłączony od pola przez hosta';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username został odłączony od pola';
+  }
 }

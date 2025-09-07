@@ -719,7 +719,28 @@
   "errorReturningToHostMode": "Fel vid återgång till värdläge",
   "hostVisitorMode": "Besökarläge",
   "connectedAsVisitor": "Ansluten som besökare",
-  "welcomeSubtitle": "Anslut till ett fält för att komma igång"
+  "welcomeSubtitle": "Anslut till ett fält för att komma igång",
+  "genericError": "Fel {message}",
+  "invitationSentTo": "Inbjudan skickad till {username}",
+  "timeJustNow": "Nyss",
+  "minutesAgo": "För {count} min sedan",
+  "hoursAgo": "För {count}h sedan",
+  "shortDate": "{day}/{month}",
+  "treasureFound": "{username} hittade {treasureName}!",
+  "seeScores": "Se poäng",
+  "fieldOpened": "{ownerUsername}s bana är nu öppen",
+  "fieldClosedBy": "{ownerUsername}s bana har stängts",
+  "invitationDeclinedBy": "{username} avböjde inbjudan",
+  "playerJoinedField": "{username} gick med på banan!",
+  "invitationReceivedBody": "{sender} bjuder in dig att gå med i banan \"{field}\"",
+  "decline": "Avböj",
+  "accept": "Acceptera",
+  "playerLeftField": "{username} lämnade banan",
+  "scenariosFieldUpdated": "Scenarier uppdaterade på banan",
+  "teamCreated": "Nytt lag skapat: {teamName}",
+  "teamDeleted": "Ett lag har tagits bort.",
+  "disconnectedFieldByHost": "Du har kopplats bort från banan av värden",
+  "playerDisconnectedOther": "{username} har kopplats bort från banan"
 
 
 }

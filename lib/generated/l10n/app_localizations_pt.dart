@@ -2456,4 +2456,96 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get welcomeSubtitle => 'Conecte-se a um campo para começar';
+
+  @override
+  String genericError(Object message) {
+    return 'Erro $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return 'Convite enviado para $username';
+  }
+
+  @override
+  String get timeJustNow => 'Agora mesmo';
+
+  @override
+  String minutesAgo(Object count) {
+    return 'Há $count min';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return 'Há ${count}h';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$day/$month';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username encontrou $treasureName!';
+  }
+
+  @override
+  String get seeScores => 'Ver pontuações';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return 'O campo de $ownerUsername está agora aberto';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return 'O campo de $ownerUsername foi fechado';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username recusou o convite';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username entrou no campo!';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender convida você a entrar no campo \"$field\"';
+  }
+
+  @override
+  String get decline => 'Recusar';
+
+  @override
+  String get accept => 'Aceitar';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username saiu do campo';
+  }
+
+  @override
+  String get scenariosFieldUpdated => 'Cenários atualizados no campo';
+
+  @override
+  String teamCreated(Object teamName) {
+    return 'Nova equipe criada: $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'Uma equipe foi excluída.';
+
+  @override
+  String get disconnectedFieldByHost =>
+      'Você foi desconectado do campo pelo anfitrião';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username foi desconectado do campo';
+  }
 }

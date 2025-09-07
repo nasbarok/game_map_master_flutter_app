@@ -2691,8 +2691,28 @@
   "errorReturningToHostMode": "Error returning to host mode",
   "hostVisitorMode": "Visitor mode",
   "connectedAsVisitor": "Connected as visitor",
-  "welcomeSubtitle": "Connect to a field to get started"
-
+  "welcomeSubtitle": "Connect to a field to get started",
+  "genericError": "Error {message}",
+  "invitationSentTo": "Invitation sent to {username}",
+  "timeJustNow": "Just now",
+  "minutesAgo": "{count} min ago",
+  "hoursAgo": "{count}h ago",
+  "shortDate": "{day}/{month}",
+  "treasureFound": "{username} found {treasureName}!",
+  "seeScores": "See scores",
+  "fieldOpened": "{ownerUsername}'s field is now open",
+  "fieldClosedBy": "{ownerUsername}'s field has been closed",
+  "invitationDeclinedBy": "{username} declined the invitation",
+  "playerJoinedField": "{username} joined the field!",
+  "invitationReceivedBody": "{sender} invites you to join the field \"{field}\"",
+  "decline": "Decline",
+  "accept": "Accept",
+  "playerLeftField": "{username} left the field",
+  "scenariosFieldUpdated": "Scenarios updated on the field",
+  "teamCreated": "New team created: {teamName}",
+  "teamDeleted": "A team has been deleted.",
+  "disconnectedFieldByHost": "You have been disconnected from the field by the host",
+  "playerDisconnectedOther": "{username} has been disconnected from the field"
 
 
 

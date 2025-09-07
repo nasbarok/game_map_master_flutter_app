@@ -723,7 +723,29 @@
   "errorReturningToHostMode": "Fout bij terugkeren naar host-modus",
   "hostVisitorMode": "Bezoeker-modus",
   "connectedAsVisitor": "Verbonden als bezoeker",
-  "welcomeSubtitle": "Verbind met een terrein om te beginnen"
+  "welcomeSubtitle": "Verbind met een terrein om te beginnen",
+  "genericError": "Fout {message}",
+  "invitationSentTo": "Uitnodiging verzonden naar {username}",
+  "timeJustNow": "Zojuist",
+  "minutesAgo": "{count} min geleden",
+  "hoursAgo": "{count}u geleden",
+  "shortDate": "{day}-{month}",
+  "treasureFound": "{username} heeft {treasureName} gevonden!",
+  "seeScores": "Scores bekijken",
+  "fieldOpened": "Het veld van {ownerUsername} is nu geopend",
+  "fieldClosedBy": "Het veld van {ownerUsername} is gesloten",
+  "invitationDeclinedBy": "{username} heeft de uitnodiging geweigerd",
+  "playerJoinedField": "{username} is het veld binnengekomen!",
+  "invitationReceivedBody": "{sender} nodigt je uit om het veld \"{field}\" te joinen",
+  "decline": "Weigeren",
+  "accept": "Accepteren",
+  "playerLeftField": "{username} heeft het veld verlaten",
+  "scenariosFieldUpdated": "Scenario's bijgewerkt op het veld",
+  "teamCreated": "Nieuw team aangemaakt: {teamName}",
+  "teamDeleted": "Een team is verwijderd.",
+  "disconnectedFieldByHost": "Je bent door de host van het veld losgekoppeld",
+  "playerDisconnectedOther": "{username} is van het veld losgekoppeld"
+
 
 
 }

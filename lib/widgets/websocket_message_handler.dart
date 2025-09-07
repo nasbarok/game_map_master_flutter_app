@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/invitation.dart';
 import '../models/scenario/scenario_dto.dart';
 import '../models/scenario/treasure_hunt/treasure_hunt_notification.dart';
@@ -148,6 +149,7 @@ class WebSocketMessageHandler {
     final bool accepted = payload['accepted'] == true;
     final int senderId = invitationResponse['senderId'];
     final currentUserId = authService.currentUser?.id;
+    final l10n = AppLocalizations.of(context)!;
 
     if (senderId == currentUserId) {
       logger.d(
@@ -162,7 +164,7 @@ class WebSocketMessageHandler {
       // ❌ Refus
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(username + ' a refusé l\'invitation'),
+          content: Text(l10n.invitationDeclinedBy(username)),
           backgroundColor: Colors.orange,
         ),
       );
@@ -182,7 +184,7 @@ class WebSocketMessageHandler {
         gameStateService.incrementConnectedPlayers(payload);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(username + ' a rejoint le terrain !'),
+            content: Text(l10n.playerJoinedField(username)),
             backgroundColor: Colors.green,
           ),
         );
@@ -193,13 +195,16 @@ class WebSocketMessageHandler {
   // méthode pour afficher le dialogue d'invitation
   void _showInvitationDialog(
       Map<String, dynamic> invitationJson, BuildContext context) {
-    InvitationReceivedMessage invitationReceivedMessage = InvitationReceivedMessage.fromJson(invitationJson);
+    InvitationReceivedMessage invitationReceivedMessage =
+        InvitationReceivedMessage.fromJson(invitationJson);
     final invitation = invitationReceivedMessage.toInvitation();
     final currentUser = authService.currentUser;
+    final l10n = AppLocalizations.of(context)!;
 
     if (gameStateService.selectedField?.id == invitation.fieldId &&
         gameStateService.isTerrainOpen) {
-      logger.d('⏩ Invitation ignorée car déjà connecté au terrain $invitation.fieldId');
+      logger.d(
+          '⏩ Invitation ignorée car déjà connecté au terrain $invitation.fieldId');
       return;
     }
 
@@ -217,19 +222,20 @@ class WebSocketMessageHandler {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Invitation reçue'),
-        content: Text(
-            '${invitation.senderUsername} vous invite à rejoindre la carte "${invitation.fieldName}"'),
+        title: Text(l10n.invitationReceivedTitle),
+        content: Text(l10n.invitationReceivedBody(
+            invitation.senderUsername, invitation.fieldName)),
         actions: [
           TextButton(
             onPressed: () {
               // Refuser l'invitation
               logger.d('❌ Invitation refusée par l\'utilisateur');
               final invitationService = context.read<InvitationService>();
-              invitationService.respondToInvitation(context, invitation.id, false);
+              invitationService.respondToInvitation(
+                  context, invitation.id, false);
               Navigator.of(context).pop();
             },
-            child: const Text('Refuser'),
+            child: Text(l10n.decline),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -258,7 +264,7 @@ class WebSocketMessageHandler {
                 }
               }
             },
-            child: const Text('Accepter'),
+            child: Text(l10n.accept),
           ),
         ],
       ),
@@ -268,6 +274,7 @@ class WebSocketMessageHandler {
   void _handlePlayerConnected(
       Map<String, dynamic> message, BuildContext context) {
     final payload = message['payload'];
+    final l10n = AppLocalizations.of(context)!;
 
     // Ajouter le joueur à la liste des joueurs connectés
     final player = {
@@ -281,7 +288,7 @@ class WebSocketMessageHandler {
     // Afficher une notification
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${payload['playerUsername']} a rejoint le terrain'),
+        content: Text(l10n.playerJoinedField(payload['playerUsername'])),
         backgroundColor: Colors.green,
       ),
     );
@@ -294,6 +301,7 @@ class WebSocketMessageHandler {
     final playerId = payload['playerId'];
     final fieldId = payload['fieldId'];
     final webSocketService = context.read<WebSocketService>();
+    final l10n = AppLocalizations.of(context)!;
 
     if (playerId == currentUserId) {
       // Si c'est l'utilisateur actuel qui a été déconnecté
@@ -307,7 +315,7 @@ class WebSocketMessageHandler {
       // Afficher une notification
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${payload['playerUsername']} a quitté la partie'),
+          content: Text(l10n.playerLeftField(payload['playerUsername'])),
           backgroundColor: Colors.orange,
         ),
       );
@@ -320,21 +328,21 @@ class WebSocketMessageHandler {
     final ownerUsername = payload['ownerUsername'];
     final senderId = message['senderId'];
     final currentUserId = authService.currentUser?.id;
-
+    final l10n = AppLocalizations.of(context)!;
     logger.d('🟢 FIELD_OPENED reçu : terrain ID=$fieldId, par $ownerUsername');
 
     // Si c’est le host lui-même (senderId == current user)
     if (senderId == currentUserId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Vous avez ouvert le terrain'),
+        SnackBar(
+          content: Text(l10n.fieldOpen),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('📢 Le terrain a été ouvert par $ownerUsername'),
+          content: Text(l10n.fieldOpened(ownerUsername)),
           backgroundColor: Colors.blue,
         ),
       );
@@ -349,6 +357,7 @@ class WebSocketMessageHandler {
     final fieldId = payload['fieldId'];
     final ownerUsername = payload['ownerUsername'];
     final senderId = message['senderId'];
+    final l10n = AppLocalizations.of(context)!;
 
     final webSocketService = context.read<WebSocketService>();
 
@@ -360,8 +369,8 @@ class WebSocketMessageHandler {
     if (senderId == currentUserId) {
       // ✅ Terrain fermé par moi-même
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Vous avez fermé le terrain avec succès'),
+        SnackBar(
+          content: Text(l10n.fieldClosed),
           backgroundColor: Colors.green,
         ),
       );
@@ -369,7 +378,7 @@ class WebSocketMessageHandler {
       // 🚫 Terrain fermé par un autre (et je ne suis pas Host)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('⛔ $ownerUsername à fermé le terrain'),
+          content: Text(l10n.fieldClosed),
           backgroundColor: Colors.red,
         ),
       );
@@ -433,6 +442,8 @@ class WebSocketMessageHandler {
   void _handleScenarioUpdate(
       Map<String, dynamic> message, BuildContext context) {
     final payload = message['payload'] as Map<String, dynamic>?;
+    final l10n = AppLocalizations.of(context)!;
+
     if (payload == null) {
       logger.d('❌ [WebSocketHandler] Payload manquant dans SCENARIO_UPDATE');
       return;
@@ -460,8 +471,8 @@ class WebSocketMessageHandler {
     gameStateService.setSelectedScenarios(scenarioDtos);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('✅ Scénarios mis à jour sur le terrain'),
+      SnackBar(
+        content: Text(l10n.scenariosFieldUpdated),
         backgroundColor: Colors.blueAccent,
       ),
     );
@@ -475,7 +486,7 @@ class WebSocketMessageHandler {
 
       final apiService = GetIt.I<ApiService>();
       final webSocketService = GetIt.I<WebSocketService>();
-
+      final l10n = AppLocalizations.of(context)!;
       if (playerKicked.userId == currentUserId) {
         // 🟥 Si c'est moi qui ai été kické
         logger.d('⛔ Vous avez été kické du terrain ${playerKicked.fieldId}');
@@ -499,7 +510,7 @@ class WebSocketMessageHandler {
         // Message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('⛔ Vous avez été exclu du terrain par l\'hôte'),
+            content: Text(l10n.disconnectedFieldByHost),
             backgroundColor: Colors.red,
           ),
         );
@@ -523,7 +534,7 @@ class WebSocketMessageHandler {
         // Message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('🚪 ${playerKicked.username} a été exclu du terrain'),
+            content: Text(l10n.playerDisconnectedOther(playerKicked.username)),
             backgroundColor: Colors.orange,
           ),
         );
@@ -538,6 +549,7 @@ class WebSocketMessageHandler {
     final payload = message['payload'];
     final team = payload['team'];
     final mapId = payload['mapId'];
+    final l10n = AppLocalizations.of(context)!;
 
     if (team == null || mapId == null) {
       logger.d('⚠️ Données TEAM_CREATED invalides');
@@ -548,7 +560,7 @@ class WebSocketMessageHandler {
       teamService.addTeam(team, mapId);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Nouvelle équipe créée : ${team['name']}'),
+          content: Text(l10n.teamCreated(team['name'])),
           backgroundColor: Colors.blueAccent,
         ),
       );
@@ -563,6 +575,7 @@ class WebSocketMessageHandler {
     final payload = message['payload'];
     final int teamId = payload['teamId'];
     final int mapId = payload['mapId'];
+    final l10n = AppLocalizations.of(context)!;
 
     // Ne fais rien si c'est moi qui ai supprimé
     if (message['senderId'] == authService.currentUser?.id) {
@@ -574,8 +587,8 @@ class WebSocketMessageHandler {
     teamService.deleteTeamLocally(teamId, mapId);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Une équipe a été supprimée.'),
+      SnackBar(
+        content: Text(l10n.teamDeleted),
         backgroundColor: Colors.redAccent,
       ),
     );
@@ -595,9 +608,10 @@ class WebSocketMessageHandler {
   }
 
   void _showDisconnectedNotification(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Vous avez été déconnecté de la partie par l\'hôte'),
+        content: Text(l10n.disconnectedFieldByHost),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 5),
       ),

@@ -2450,4 +2450,96 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get welcomeSubtitle => 'Koble til et felt for å komme i gang';
+
+  @override
+  String genericError(Object message) {
+    return 'Feil $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return 'Invitasjon sendt til $username';
+  }
+
+  @override
+  String get timeJustNow => 'Akkurat nå';
+
+  @override
+  String minutesAgo(Object count) {
+    return 'For $count min siden';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return 'For $count t siden';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$day.$month';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username fant $treasureName!';
+  }
+
+  @override
+  String get seeScores => 'Se poeng';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return '${ownerUsername}s bane er nå åpen';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return '${ownerUsername}s bane er stengt';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username avslo invitasjonen';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username ble med på banen!';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender inviterer deg til å bli med på banen \"$field\"';
+  }
+
+  @override
+  String get decline => 'Avslå';
+
+  @override
+  String get accept => 'Godta';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username forlot banen';
+  }
+
+  @override
+  String get scenariosFieldUpdated => 'Scenarier oppdatert på banen';
+
+  @override
+  String teamCreated(Object teamName) {
+    return 'Nytt lag opprettet: $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'Et lag har blitt slettet.';
+
+  @override
+  String get disconnectedFieldByHost =>
+      'Du har blitt koblet fra banen av verten';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username har blitt koblet fra banen';
+  }
 }

@@ -723,8 +723,27 @@
   "errorReturningToHostMode": "ホストモードへの復帰エラー",
   "hostVisitorMode": "訪問者モード",
   "connectedAsVisitor": "訪問者として接続",
-  "welcomeSubtitle": "開始するにはフィールドに接続してください"
-
-
+  "welcomeSubtitle": "開始するにはフィールドに接続してください",
+  "genericError": "エラー {message}",
+  "invitationSentTo": "{username} に招待を送信しました",
+  "timeJustNow": "たった今",
+  "minutesAgo": "{count} 分前",
+  "hoursAgo": "{count} 時間前",
+  "shortDate": "{month}/{day}",
+  "treasureFound": "{username} が {treasureName} を見つけました！",
+  "seeScores": "スコアを見る",
+  "fieldOpened": "{ownerUsername} のフィールドが開きました",
+  "fieldClosedBy": "{ownerUsername} のフィールドは閉鎖されました",
+  "invitationDeclinedBy": "{username} が招待を拒否しました",
+  "playerJoinedField": "{username} がフィールドに参加しました！",
+  "invitationReceivedBody": "{sender} がフィールド「{field}」に参加するよう招待しています",
+  "decline": "拒否",
+  "accept": "承認",
+  "playerLeftField": "{username} がフィールドを退出しました",
+  "scenariosFieldUpdated": "フィールド上のシナリオが更新されました",
+  "teamCreated": "新しいチームが作成されました: {teamName}",
+  "teamDeleted": "チームが削除されました。",
+  "disconnectedFieldByHost": "ホストによってフィールドから切断されました",
+  "playerDisconnectedOther": "{username} がフィールドから切断されました"
 
 }

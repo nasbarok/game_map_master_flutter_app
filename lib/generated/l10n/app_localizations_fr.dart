@@ -2463,4 +2463,96 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get welcomeSubtitle => 'Connectez-vous à un terrain pour commencer';
+
+  @override
+  String genericError(Object message) {
+    return 'Erreur $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return 'Invitation envoyée à $username';
+  }
+
+  @override
+  String get timeJustNow => 'À l\'instant';
+
+  @override
+  String minutesAgo(Object count) {
+    return 'Il y a $count min';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return 'Il y a ${count}h';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$day/$month';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username a trouvé $treasureName !';
+  }
+
+  @override
+  String get seeScores => 'Voir scores';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return 'Le terrain de $ownerUsername est maintenant ouvert';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return 'Le terrain de $ownerUsername a été fermé';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username a refusé l\'invitation';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username a rejoint le terrain !';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender vous invite à rejoindre la carte \"$field\"';
+  }
+
+  @override
+  String get decline => 'Refuser';
+
+  @override
+  String get accept => 'Accepter';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username a quitté le terrain';
+  }
+
+  @override
+  String get scenariosFieldUpdated => 'Scénarios mis à jour sur le terrain';
+
+  @override
+  String teamCreated(Object teamName) {
+    return 'Nouvelle équipe créée : $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'Une équipe a été supprimée.';
+
+  @override
+  String get disconnectedFieldByHost =>
+      'Vous avez été déconnecté du terrain par l\'hôte';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username a été déconnecté du terrain';
+  }
 }

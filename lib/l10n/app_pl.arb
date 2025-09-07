@@ -723,6 +723,27 @@
   "errorReturningToHostMode": "Błąd podczas powrotu do trybu hosta",
   "hostVisitorMode": "Tryb gościa",
   "connectedAsVisitor": "Połączony jako gość",
-  "welcomeSubtitle": "Połącz się z polem gry, aby rozpocząć"
+  "welcomeSubtitle": "Połącz się z polem gry, aby rozpocząć",
+  "genericError": "Błąd {message}",
+  "invitationSentTo": "Zaproszenie wysłane do {username}",
+  "timeJustNow": "Przed chwilą",
+  "minutesAgo": "{count} min temu",
+  "hoursAgo": "{count} godz. temu",
+  "shortDate": "{day}.{month}",
+  "treasureFound": "{username} znalazł {treasureName}!",
+  "seeScores": "Zobacz wyniki",
+  "fieldOpened": "Pole {ownerUsername} jest teraz otwarte",
+  "fieldClosedBy": "Pole {ownerUsername} zostało zamknięte",
+  "invitationDeclinedBy": "{username} odrzucił zaproszenie",
+  "playerJoinedField": "{username} dołączył do pola!",
+  "invitationReceivedBody": "{sender} zaprasza Cię do dołączenia do pola \"{field}\"",
+  "decline": "Odrzuć",
+  "accept": "Akceptuj",
+  "playerLeftField": "{username} opuścił pole",
+  "scenariosFieldUpdated": "Scenariusze zaktualizowane na polu",
+  "teamCreated": "Nowa drużyna utworzona: {teamName}",
+  "teamDeleted": "Drużyna została usunięta.",
+  "disconnectedFieldByHost": "Zostałeś odłączony od pola przez hosta",
+  "playerDisconnectedOther": "{username} został odłączony od pola"
 
 }

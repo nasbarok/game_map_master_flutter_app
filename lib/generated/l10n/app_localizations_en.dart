@@ -2447,4 +2447,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeSubtitle => 'Connect to a field to get started';
+
+  @override
+  String genericError(Object message) {
+    return 'Error $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return 'Invitation sent to $username';
+  }
+
+  @override
+  String get timeJustNow => 'Just now';
+
+  @override
+  String minutesAgo(Object count) {
+    return '$count min ago';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$day/$month';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username found $treasureName!';
+  }
+
+  @override
+  String get seeScores => 'See scores';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return '$ownerUsername\'s field is now open';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return '$ownerUsername\'s field has been closed';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username declined the invitation';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username joined the field!';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender invites you to join the field \"$field\"';
+  }
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username left the field';
+  }
+
+  @override
+  String get scenariosFieldUpdated => 'Scenarios updated on the field';
+
+  @override
+  String teamCreated(Object teamName) {
+    return 'New team created: $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'A team has been deleted.';
+
+  @override
+  String get disconnectedFieldByHost =>
+      'You have been disconnected from the field by the host';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username has been disconnected from the field';
+  }
 }

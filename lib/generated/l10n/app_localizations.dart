@@ -4396,6 +4396,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connect to a field to get started'**
   String get welcomeSubtitle;
+
+  /// No description provided for @genericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error {message}'**
+  String genericError(Object message);
+
+  /// No description provided for @invitationSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent to {username}'**
+  String invitationSentTo(Object username);
+
+  /// No description provided for @timeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get timeJustNow;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String minutesAgo(Object count);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String hoursAgo(Object count);
+
+  /// No description provided for @shortDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{day}/{month}'**
+  String shortDate(Object day, Object month);
+
+  /// No description provided for @treasureFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{username} found {treasureName}!'**
+  String treasureFound(Object treasureName, Object username);
+
+  /// No description provided for @seeScores.
+  ///
+  /// In en, this message translates to:
+  /// **'See scores'**
+  String get seeScores;
+
+  /// No description provided for @fieldOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'{ownerUsername}\'s field is now open'**
+  String fieldOpened(Object ownerUsername);
+
+  /// No description provided for @fieldClosedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{ownerUsername}\'s field has been closed'**
+  String fieldClosedBy(Object ownerUsername);
+
+  /// No description provided for @invitationDeclinedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{username} declined the invitation'**
+  String invitationDeclinedBy(Object username);
+
+  /// No description provided for @playerJoinedField.
+  ///
+  /// In en, this message translates to:
+  /// **'{username} joined the field!'**
+  String playerJoinedField(Object username);
+
+  /// No description provided for @invitationReceivedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} invites you to join the field \"{field}\"'**
+  String invitationReceivedBody(Object field, Object sender);
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// No description provided for @accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// No description provided for @playerLeftField.
+  ///
+  /// In en, this message translates to:
+  /// **'{username} left the field'**
+  String playerLeftField(Object username);
+
+  /// No description provided for @scenariosFieldUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenarios updated on the field'**
+  String get scenariosFieldUpdated;
+
+  /// No description provided for @teamCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'New team created: {teamName}'**
+  String teamCreated(Object teamName);
+
+  /// No description provided for @teamDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'A team has been deleted.'**
+  String get teamDeleted;
+
+  /// No description provided for @disconnectedFieldByHost.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been disconnected from the field by the host'**
+  String get disconnectedFieldByHost;
+
+  /// No description provided for @playerDisconnectedOther.
+  ///
+  /// In en, this message translates to:
+  /// **'{username} has been disconnected from the field'**
+  String playerDisconnectedOther(Object username);
 }
 
 class _AppLocalizationsDelegate

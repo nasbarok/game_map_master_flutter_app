@@ -723,7 +723,29 @@
   "errorReturningToHostMode": "Feil ved retur til vertsmodus",
   "hostVisitorMode": "Besøksmodus",
   "connectedAsVisitor": "Tilkoblet som besøkende",
-  "welcomeSubtitle": "Koble til et felt for å komme i gang"
+  "welcomeSubtitle": "Koble til et felt for å komme i gang",
+  "genericError": "Feil {message}",
+  "invitationSentTo": "Invitasjon sendt til {username}",
+  "timeJustNow": "Akkurat nå",
+  "minutesAgo": "For {count} min siden",
+  "hoursAgo": "For {count} t siden",
+  "shortDate": "{day}.{month}",
+  "treasureFound": "{username} fant {treasureName}!",
+  "seeScores": "Se poeng",
+  "fieldOpened": "{ownerUsername}s bane er nå åpen",
+  "fieldClosedBy": "{ownerUsername}s bane er stengt",
+  "invitationDeclinedBy": "{username} avslo invitasjonen",
+  "playerJoinedField": "{username} ble med på banen!",
+  "invitationReceivedBody": "{sender} inviterer deg til å bli med på banen \"{field}\"",
+  "decline": "Avslå",
+  "accept": "Godta",
+  "playerLeftField": "{username} forlot banen",
+  "scenariosFieldUpdated": "Scenarier oppdatert på banen",
+  "teamCreated": "Nytt lag opprettet: {teamName}",
+  "teamDeleted": "Et lag har blitt slettet.",
+  "disconnectedFieldByHost": "Du har blitt koblet fra banen av verten",
+  "playerDisconnectedOther": "{username} har blitt koblet fra banen"
+
 
 
 }

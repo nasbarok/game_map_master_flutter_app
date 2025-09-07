@@ -723,7 +723,28 @@
   "errorReturningToHostMode": "Errore nel ritorno alla modalità host",
   "hostVisitorMode": "Modalità visitatore",
   "connectedAsVisitor": "Connesso come visitatore",
-  "welcomeSubtitle": "Connettiti a un campo per iniziare"
+  "welcomeSubtitle": "Connettiti a un campo per iniziare",
+  "genericError": "Errore {message}",
+  "invitationSentTo": "Invito inviato a {username}",
+  "timeJustNow": "Proprio ora",
+  "minutesAgo": "{count} min fa",
+  "hoursAgo": "{count}h fa",
+  "shortDate": "{day}/{month}",
+  "treasureFound": "{username} ha trovato {treasureName}!",
+  "seeScores": "Vedi punteggi",
+  "fieldOpened": "Il campo di {ownerUsername} è ora aperto",
+  "fieldClosedBy": "Il campo di {ownerUsername} è stato chiuso",
+  "invitationDeclinedBy": "{username} ha rifiutato l'invito",
+  "playerJoinedField": "{username} si è unito al campo!",
+  "invitationReceivedBody": "{sender} ti invita a unirti al campo \"{field}\"",
+  "decline": "Rifiuta",
+  "accept": "Accetta",
+  "playerLeftField": "{username} ha lasciato il campo",
+  "scenariosFieldUpdated": "Scenari aggiornati sul campo",
+  "teamCreated": "Nuova squadra creata: {teamName}",
+  "teamDeleted": "Una squadra è stata eliminata.",
+  "disconnectedFieldByHost": "Sei stato disconnesso dal campo dall'host",
+  "playerDisconnectedOther": "{username} è stato disconnesso dal campo"
 
 
 

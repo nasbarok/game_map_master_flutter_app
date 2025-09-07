@@ -156,6 +156,7 @@ class _PlayersScreenState extends State<PlayersScreen>
   }
 
   Future<void> _searchUsers(String query) async {
+    final l10n = AppLocalizations.of(context)!;
     if (query.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -179,7 +180,7 @@ class _PlayersScreenState extends State<PlayersScreen>
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur lors de la recherche: $e'),
+          content: Text(l10n.genericError(e)),
           backgroundColor: Colors.red,
         ),
       );
@@ -191,19 +192,19 @@ class _PlayersScreenState extends State<PlayersScreen>
 
   void _sendInvitation(int userId, String username) {
     final invitationService = context.read<InvitationService>();
-
+    final l10n = AppLocalizations.of(context)!;
     try {
       invitationService.sendInvitation(userId);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Invitation envoyée à $username'),
+          content: Text(l10n.invitationSentTo(username)),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur: $e'),
+          content: Text(l10n.genericError(e)),
           backgroundColor: Colors.red,
         ),
       );
@@ -221,22 +222,23 @@ class _PlayersScreenState extends State<PlayersScreen>
 
   // Dans _PlayersScreenState
   Future<void> kickPlayer(int playerId, String playerName) async {
+
     if (!mounted) return;
     try {
       final gameStateService = context.read<GameStateService>();
       final fieldId = gameStateService.selectedMap?.field?.id;
+      final l10n = AppLocalizations.of(context)!;
 
       if (fieldId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur: Aucun terrain sélectionnée'),
+          SnackBar(
+            content: Text(l10n.noFieldsAvailable),
             backgroundColor: Colors.red,
           ),
         );
         return;
       }
 
-      final l10n = AppLocalizations.of(context)!;
       final apiService = context.read<ApiService>();
 
       // Appel à l'API pour déconnecter le joueur
@@ -682,8 +684,9 @@ class _PlayersScreenState extends State<PlayersScreen>
       int invitationId, InvitationService invitationService) async {
     try {
       await invitationService.cancelInvitation(invitationId);
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invitation annulée avec succès')),
+        SnackBar(content: Text(l10n.cancelInvitation)),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -695,15 +698,15 @@ class _PlayersScreenState extends State<PlayersScreen>
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-
+    final l10n = AppLocalizations.of(context)!;
     if (difference.inMinutes < 1) {
-      return 'À l\'instant';
+      return l10n.timeJustNow;
     } else if (difference.inHours < 1) {
-      return 'Il y a ${difference.inMinutes} min';
+      return l10n.minutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return 'Il y a ${difference.inHours}h';
+      return l10n.hoursAgo(difference.inHours);
     } else {
-      return '${timestamp.day}/${timestamp.month}';
+      return l10n.shortDate(timestamp.day, timestamp.month);
     }
   }
 

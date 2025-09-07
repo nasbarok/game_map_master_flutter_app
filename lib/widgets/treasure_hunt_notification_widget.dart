@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/scenario/treasure_hunt/treasure_hunt_notification.dart';
 import '../screens/scenario/treasure_hunt/scoreboard_screen.dart';
 import '../services/scenario/treasure_hunt/treasure_hunt_service.dart';
@@ -18,21 +19,24 @@ class TreasureHuntNotificationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final treasureHuntService = Provider.of<TreasureHuntService>(context, listen: false);
-
     return StreamBuilder<TreasureFoundData>(
       stream: treasureHuntService.treasureFoundStream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
 
         final treasureData = snapshot.data!;
+        final l10n = AppLocalizations.of(context)!;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('${treasureData.username} a trouvé "${treasureData.treasureName}" !'),
+              content: Text(l10n.treasureFound(
+                treasureData.username,
+                treasureData.treasureName,
+              )),
               duration: const Duration(seconds: 5),
               action: SnackBarAction(
-                label: 'Voir scores',
+                label: l10n.seeScores,
                 onPressed: () {
                   Navigator.push(
                     context,

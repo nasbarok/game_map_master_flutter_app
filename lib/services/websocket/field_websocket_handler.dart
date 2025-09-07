@@ -1,6 +1,7 @@
 // lib/services/websocket/field_websocket_handler.dart
 import 'package:flutter/material.dart';
 
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/websocket/field_closed_message.dart';
 import '../auth_service.dart';
 import '../game_state_service.dart';
@@ -12,22 +13,6 @@ class FieldWebSocketHandler {
 
   FieldWebSocketHandler(this._gameStateService, this._authService, this._navigatorKey);
 
-  void _handleFieldOpened(Map<String, dynamic> content) {
-    final fieldId = content['fieldId'];
-    final ownerId = content['ownerId'];
-    final ownerUsername = content['ownerUsername'];
-
-    logger.d('🏟️ Terrain ouvert : ID=$fieldId par $ownerUsername');
-
-    // Si l'utilisateur est le propriétaire, pas besoin de faire quoi que ce soit
-    // car il a déjà mis à jour son état local
-
-    // Pour les autres utilisateurs, afficher une notification
-    if (_authService!.currentUser!.id != ownerId) {
-      _showFieldOpenedNotification(ownerUsername);
-    }
-  }
-
   void handleFieldClosed(FieldClosedMessage message) {
     final fieldId = message.fieldId;
     final ownerId = message.ownerId;
@@ -38,32 +23,20 @@ class FieldWebSocketHandler {
     // car il a déjà mis à jour son état local
 
     // Pour les autres utilisateurs (gamers), réinitialiser l'état et naviguer vers l'écran principal
-    if (_authService!.currentUser!.id != ownerId) {
-      _gameStateService!.reset();
+    if (_authService.currentUser!.id != ownerId) {
+      _gameStateService.reset();
       _showFieldClosedNotification(ownerUsername);
       _navigateToMainScreen();
     }
   }
 
-  void _showFieldOpenedNotification(String ownerUsername) {
-    // Utiliser un GlobalKey<NavigatorState> pour accéder au Navigator
-    if (_navigatorKey.currentContext != null) {
-      ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Le terrain de $ownerUsername est maintenant ouvert'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 5),
-        ),
-      );
-    }
-  }
-
   void _showFieldClosedNotification(String ownerUsername) {
+    final l10n = AppLocalizations.of(_navigatorKey.currentContext!);
     // Utiliser un GlobalKey<NavigatorState> pour accéder au Navigator
     if (_navigatorKey.currentContext != null) {
       ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
         SnackBar(
-          content: Text('Le terrain de $ownerUsername a été fermé'),
+          content: Text(l10n!.fieldClosedBy(ownerUsername)),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 5),
         ),

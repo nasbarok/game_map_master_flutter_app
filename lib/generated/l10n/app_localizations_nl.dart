@@ -2454,4 +2454,96 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get welcomeSubtitle => 'Verbind met een terrein om te beginnen';
+
+  @override
+  String genericError(Object message) {
+    return 'Fout $message';
+  }
+
+  @override
+  String invitationSentTo(Object username) {
+    return 'Uitnodiging verzonden naar $username';
+  }
+
+  @override
+  String get timeJustNow => 'Zojuist';
+
+  @override
+  String minutesAgo(Object count) {
+    return '$count min geleden';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return '${count}u geleden';
+  }
+
+  @override
+  String shortDate(Object day, Object month) {
+    return '$day-$month';
+  }
+
+  @override
+  String treasureFound(Object treasureName, Object username) {
+    return '$username heeft $treasureName gevonden!';
+  }
+
+  @override
+  String get seeScores => 'Scores bekijken';
+
+  @override
+  String fieldOpened(Object ownerUsername) {
+    return 'Het veld van $ownerUsername is nu geopend';
+  }
+
+  @override
+  String fieldClosedBy(Object ownerUsername) {
+    return 'Het veld van $ownerUsername is gesloten';
+  }
+
+  @override
+  String invitationDeclinedBy(Object username) {
+    return '$username heeft de uitnodiging geweigerd';
+  }
+
+  @override
+  String playerJoinedField(Object username) {
+    return '$username is het veld binnengekomen!';
+  }
+
+  @override
+  String invitationReceivedBody(Object field, Object sender) {
+    return '$sender nodigt je uit om het veld \"$field\" te joinen';
+  }
+
+  @override
+  String get decline => 'Weigeren';
+
+  @override
+  String get accept => 'Accepteren';
+
+  @override
+  String playerLeftField(Object username) {
+    return '$username heeft het veld verlaten';
+  }
+
+  @override
+  String get scenariosFieldUpdated => 'Scenario\'s bijgewerkt op het veld';
+
+  @override
+  String teamCreated(Object teamName) {
+    return 'Nieuw team aangemaakt: $teamName';
+  }
+
+  @override
+  String get teamDeleted => 'Een team is verwijderd.';
+
+  @override
+  String get disconnectedFieldByHost =>
+      'Je bent door de host van het veld losgekoppeld';
+
+  @override
+  String playerDisconnectedOther(Object username) {
+    return '$username is van het veld losgekoppeld';
+  }
 }
