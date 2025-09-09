@@ -740,7 +740,26 @@
   "teamCreated": "Nytt lag skapat: {teamName}",
   "teamDeleted": "Ett lag har tagits bort.",
   "disconnectedFieldByHost": "Du har kopplats bort från banan av värden",
-  "playerDisconnectedOther": "{username} har kopplats bort från banan"
+  "playerDisconnectedOther": "{username} har kopplats bort från banan",
+  "invitationFromAndRole": "Inbjudan {role} {username}",
+  "roleTo": "till",
+  "roleFrom": "från",
+  "pendingInvitationsLabel": "Väntande inbjudningar {label}",
+  "mustBeHostAndFieldOpen": "Du måste vara värd och ha en öppen bana för att skicka inbjudningar",
+  "errorProcessingInvitation": "Fel vid bearbetning av inbjudan",
+  "connectedToFieldAsVisitor": "Ansluten till banan {fieldName} som besökare",
+  "errorConnectingToField": "Fel vid anslutning till banan",
+  "assignRoleEachTeam": "Tilldela varje lag en roll.",
+  "requireTAndCTeams": "Det måste finnas minst ett terroristlag och ett antiterroristlag.",
+  "bombAssignRolesTitle": "Rollfördelning för Bomboperation",
+  "bombAssignRolesSubtitle": "Välj vilket lag som blir Terrorist (anfall) och vilket som blir Antiterrorist (försvar).",
+  "confirmRoles": "Bekräfta roller",
+  "terroristAttackLabel": "Terrorist (Anfall)",
+  "counterTerroristDefenseLabel": "Antiterrorist (Försvar)",
+  "gameStartedToast": "Spelet har startat!",
+  "gameEndedToast": "Spelet är slut.",
+  "apply": "Verkställ"
+
 
 
 }

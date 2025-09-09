@@ -390,13 +390,13 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
 
   void _navigateToQRCodeScanner() {
     logger.d('📷 [GameSessionScreen] Ouverture scanner QR code');
-
+    final l10n = AppLocalizations.of(context)!;
     if (treasureHuntScenarioDTO?.treasureHuntScenario == null) {
       logger
           .d('⚠️ Aucun scénario de chasse au trésor actif trouvé dans le DTO');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Aucun scénario de chasse au trésor actif'),
+        SnackBar(
+          content: Text(l10n.noActiveTreasureHunt),
           backgroundColor: Colors.red,
         ),
       );

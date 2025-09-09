@@ -744,7 +744,25 @@
   "teamCreated": "Nytt lag opprettet: {teamName}",
   "teamDeleted": "Et lag har blitt slettet.",
   "disconnectedFieldByHost": "Du har blitt koblet fra banen av verten",
-  "playerDisconnectedOther": "{username} har blitt koblet fra banen"
+  "playerDisconnectedOther": "{username} har blitt koblet fra banen",
+  "invitationFromAndRole": "Invitasjon {role} {username}",
+  "roleTo": "til",
+  "roleFrom": "fra",
+  "pendingInvitationsLabel": "Ventende invitasjoner {label}",
+  "mustBeHostAndFieldOpen": "Du må være vert og ha en åpen bane for å sende invitasjoner",
+  "errorProcessingInvitation": "Feil under behandling av invitasjonen",
+  "connectedToFieldAsVisitor": "Koblet til banen {fieldName} som besøkende",
+  "errorConnectingToField": "Feil ved tilkobling til banen",
+  "assignRoleEachTeam": "Tildel en rolle til hvert lag.",
+  "requireTAndCTeams": "Det må være minst ett terroristlag og ett antiterroristlag.",
+  "bombAssignRolesTitle": "Rollefordeling for Bombeoperasjon",
+  "bombAssignRolesSubtitle": "Velg hvilket lag som blir Terrorist (angrep) og hvilket som blir Antiterrorist (forsvar).",
+  "confirmRoles": "Bekreft roller",
+  "terroristAttackLabel": "Terrorist (Angrep)",
+  "counterTerroristDefenseLabel": "Antiterrorist (Forsvar)",
+  "gameStartedToast": "Spillet har startet!",
+  "gameEndedToast": "Spillet er avsluttet.",
+  "apply": "Bruk"
 
 
 

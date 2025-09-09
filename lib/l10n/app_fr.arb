@@ -741,7 +741,25 @@
   "teamCreated": "Nouvelle équipe créée : {teamName}",
   "teamDeleted": "Une équipe a été supprimée.",
   "disconnectedFieldByHost": "Vous avez été déconnecté du terrain par l'hôte",
-  "playerDisconnectedOther": "{username} a été déconnecté du terrain"
+  "playerDisconnectedOther": "{username} a été déconnecté du terrain",
+  "invitationFromAndRole": "Invitation {role} {username}",
+  "roleTo": "à",
+  "roleFrom": "de",
+  "pendingInvitationsLabel": "Invitations en attente {label}",
+  "mustBeHostAndFieldOpen": "Vous devez être un hôte avec un terrain ouvert pour envoyer des invitations",
+  "errorProcessingInvitation": "Erreur lors du traitement de l'invitation",
+  "connectedToFieldAsVisitor": "Connecté au terrain {fieldName} en tant que visiteur",
+  "errorConnectingToField": "Erreur lors de la connexion au terrain",
+  "assignRoleEachTeam": "Veuillez assigner un rôle à chaque équipe.",
+  "requireTAndCTeams": "Il doit y avoir au moins une équipe Terroriste et une équipe Anti-terroriste.",
+  "bombAssignRolesTitle": "Assignation des rôles pour l’Opération Bombe",
+  "bombAssignRolesSubtitle": "Choisissez quelle équipe sera Terroriste (attaque) et quelle équipe sera Anti-terroriste (défense).",
+  "confirmRoles": "Confirmer les rôles",
+  "terroristAttackLabel": "Terroriste (Attaque)",
+  "counterTerroristDefenseLabel": "Anti-terroriste (Défense)",
+  "gameStartedToast": "La partie a commencé !",
+  "gameEndedToast": "La partie est terminée.",
+  "apply": "Appliquer"
 
 
 

@@ -1,5 +1,7 @@
 import 'package:game_map_master_flutter_app/models/websocket/websocket_message.dart';
 
+import '../../generated/l10n/app_localizations.dart';
+
 class ParticipantLeftMessage extends WebSocketMessage {
   final int gameSessionId;
   final int userId;
@@ -31,7 +33,7 @@ class ParticipantLeftMessage extends WebSocketMessage {
     return ParticipantLeftMessage(
       gameSessionId: payload['gameSessionId'],
       userId: payload['userId'],
-      username: payload['username'] ?? 'Joueur inconnu',
+      username: payload['username'],
       senderId: json['senderId'],
     );
   }

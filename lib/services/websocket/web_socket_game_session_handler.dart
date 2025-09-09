@@ -4,6 +4,7 @@ import 'package:game_map_master_flutter_app/models/websocket/scenario_activated_
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/coordinate.dart';
 import '../../models/game_session.dart';
 import '../../models/game_session_participant.dart';
@@ -78,17 +79,19 @@ class WebSocketGameSessionHandler {
 
     final gameSession = GameSession.fromWebSocketMessage(msg!);
 
+    final l10n = AppLocalizations.of(context)!;
+
     // Mettre à jour l'état global
     gameStateService.setActiveGameSession(gameSession);
     gameStateService.setGameRunning(true);
 
-    if (user != null && gameSession != null) {
+    if (user != null) {
       // Optionnel : petit feedback avant de naviguer
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("La partie a commencé !"),
+        SnackBar(
+          content: Text(l10n.gameStartedToast),
           backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
 
@@ -108,8 +111,8 @@ class WebSocketGameSessionHandler {
     } else {
       logger.d('❌ Impossible de rejoindre la partie : utilisateur ou session manquants');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Impossible de rejoindre la partie'),
+        SnackBar(
+          content: Text(l10n.cannotJoinGame),
           backgroundColor: Colors.red,
         ),
       );
@@ -143,6 +146,7 @@ class WebSocketGameSessionHandler {
     final endedSessionId = msg.gameSessionId;
 
     final currentSession = gameStateService.activeGameSession;
+    final l10n = AppLocalizations.of(context)!;
 
     if (currentSession != null && currentSession.id == endedSessionId) {
       logger.d("✅ Session en cours marquée comme terminée (ID: $endedSessionId)");
@@ -156,10 +160,10 @@ class WebSocketGameSessionHandler {
 
       // Message à l'utilisateur
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("⏹️ La partie est terminée."),
+        SnackBar(
+          content: Text(l10n.gameEndedToast),
           backgroundColor: Colors.blue,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
 

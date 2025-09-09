@@ -101,7 +101,7 @@ class DateFilterControls extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onReset,
                   icon: const Icon(Icons.clear, size: 18),
-                  label: const Text('Réinitialiser'),
+                  label: Text(l10n.resetButton),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF718096),
                     foregroundColor: Colors.white,
@@ -117,7 +117,7 @@ class DateFilterControls extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onApply,
                   icon: const Icon(Icons.search, size: 18),
-                  label: const Text('Appliquer'),
+                  label: Text(l10n.apply),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFED8936),
                     foregroundColor: Colors.white,

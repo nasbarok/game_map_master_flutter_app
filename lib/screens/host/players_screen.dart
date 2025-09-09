@@ -689,8 +689,9 @@ class _PlayersScreenState extends State<PlayersScreen>
         SnackBar(content: Text(l10n.cancelInvitation)),
       );
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(l10n.genericError(e)), backgroundColor: Colors.red),
       );
     }
   }

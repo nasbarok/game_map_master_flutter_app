@@ -2712,7 +2712,26 @@
   "teamCreated": "New team created: {teamName}",
   "teamDeleted": "A team has been deleted.",
   "disconnectedFieldByHost": "You have been disconnected from the field by the host",
-  "playerDisconnectedOther": "{username} has been disconnected from the field"
+  "playerDisconnectedOther": "{username} has been disconnected from the field",
+  "invitationFromAndRole": "Invitation {role} {username}",
+  "roleTo": "to",
+  "roleFrom": "from",
+  "pendingInvitationsLabel": "Pending invitations {label}",
+  "mustBeHostAndFieldOpen": "You must be a host with an open field to send invitations",
+  "errorProcessingInvitation": "Error processing the invitation",
+  "connectedToFieldAsVisitor": "Connected to the field {fieldName} as a visitor",
+  "errorConnectingToField": "Error connecting to the field",
+  "assignRoleEachTeam": "Please assign a role to each team.",
+  "requireTAndCTeams": "There must be at least one Terrorist team and one Counter-Terrorist team.",
+  "bombAssignRolesTitle": "Role assignment for Bomb Operation",
+  "bombAssignRolesSubtitle": "Choose which team will be Terrorist (attack) and which will be Counter-Terrorist (defense).",
+  "confirmRoles": "Confirm roles",
+  "terroristAttackLabel": "Terrorist (Attack)",
+  "counterTerroristDefenseLabel": "Counter-Terrorist (Defense)",
+  "gameStartedToast": "The game has started!",
+  "gameEndedToast": "The game has ended.",
+  "apply": "Apply"
+
 
 
 

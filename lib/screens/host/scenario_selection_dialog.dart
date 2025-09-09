@@ -8,6 +8,7 @@ import '../../models/scenario/treasure_hunt/treasure_hunt_scenario.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
+
 class ScenarioSelectionDialog extends StatefulWidget {
   final int mapId;
 
@@ -124,16 +125,19 @@ class _ScenarioSelectionDialogState extends State<ScenarioSelectionDialog> {
         });
 
         Navigator.pop(context); // Fermer le dialogue
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Scénarios bien sélectionnés')),
-        );
+        if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.scenariosSelectedSuccess)),
+          );
+        }
       }
     } catch (e) {
       logger.d('❌ Erreur lors de la mise à jour des scénarios: $e');
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur lors de la mise à jour des scénarios'),
+        SnackBar(
+          content: Text(l10n.errorSavingScenario(e)),
           backgroundColor: Colors.red,
         ),
       );

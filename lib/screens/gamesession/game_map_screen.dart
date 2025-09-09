@@ -167,7 +167,7 @@ class _GameMapScreenState extends State<GameMapScreen> {
                     });
                   },
                 ),
-                LocationIndicatorWidget(),
+                const LocationIndicatorWidget(),
               ],
             ),
       body: Stack(

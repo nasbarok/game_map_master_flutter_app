@@ -744,7 +744,26 @@
   "teamCreated": "Nuova squadra creata: {teamName}",
   "teamDeleted": "Una squadra è stata eliminata.",
   "disconnectedFieldByHost": "Sei stato disconnesso dal campo dall'host",
-  "playerDisconnectedOther": "{username} è stato disconnesso dal campo"
+  "playerDisconnectedOther": "{username} è stato disconnesso dal campo",
+  "invitationFromAndRole": "Invito {role} {username}",
+  "roleTo": "a",
+  "roleFrom": "da",
+  "pendingInvitationsLabel": "Inviti in sospeso {label}",
+  "mustBeHostAndFieldOpen": "Devi essere un host con un campo aperto per inviare inviti",
+  "errorProcessingInvitation": "Errore durante l'elaborazione dell'invito",
+  "connectedToFieldAsVisitor": "Connesso al campo {fieldName} come visitatore",
+  "errorConnectingToField": "Errore durante la connessione al campo",
+  "assignRoleEachTeam": "Assegna un ruolo a ogni squadra.",
+  "requireTAndCTeams": "Ci deve essere almeno una squadra Terrorista e una squadra Antiterrorista.",
+  "bombAssignRolesTitle": "Assegnazione dei ruoli per Operazione Bomba",
+  "bombAssignRolesSubtitle": "Scegli quale squadra sarà Terrorista (attacco) e quale sarà Antiterrorista (difesa).",
+  "confirmRoles": "Conferma ruoli",
+  "terroristAttackLabel": "Terrorista (Attacco)",
+  "counterTerroristDefenseLabel": "Antiterrorista (Difesa)",
+  "gameStartedToast": "La partita è iniziata!",
+  "gameEndedToast": "La partita è terminata.",
+  "apply": "Applica"
+
 
 
 

@@ -2546,4 +2546,68 @@ class AppLocalizationsPl extends AppLocalizations {
   String playerDisconnectedOther(Object username) {
     return '$username został odłączony od pola';
   }
+
+  @override
+  String invitationFromAndRole(Object role, Object username) {
+    return 'Zaproszenie $role $username';
+  }
+
+  @override
+  String get roleTo => 'do';
+
+  @override
+  String get roleFrom => 'od';
+
+  @override
+  String pendingInvitationsLabel(Object label) {
+    return 'Oczekujące zaproszenia $label';
+  }
+
+  @override
+  String get mustBeHostAndFieldOpen =>
+      'Musisz być hostem z otwartym polem, aby wysyłać zaproszenia';
+
+  @override
+  String get errorProcessingInvitation =>
+      'Błąd podczas przetwarzania zaproszenia';
+
+  @override
+  String connectedToFieldAsVisitor(Object fieldName) {
+    return 'Połączono z polem $fieldName jako odwiedzający';
+  }
+
+  @override
+  String get errorConnectingToField => 'Błąd podczas łączenia z polem';
+
+  @override
+  String get assignRoleEachTeam => 'Przypisz rolę każdej drużynie.';
+
+  @override
+  String get requireTAndCTeams =>
+      'Musi być co najmniej jedna drużyna terrorystów i jedna drużyna antyterrorystów.';
+
+  @override
+  String get bombAssignRolesTitle => 'Przydział ról dla Operacji Bomba';
+
+  @override
+  String get bombAssignRolesSubtitle =>
+      'Wybierz, która drużyna będzie Terrorystami (atak), a która Antyterrorystami (obrona).';
+
+  @override
+  String get confirmRoles => 'Potwierdź role';
+
+  @override
+  String get terroristAttackLabel => 'Terroryści (Atak)';
+
+  @override
+  String get counterTerroristDefenseLabel => 'Antyterroryści (Obrona)';
+
+  @override
+  String get gameStartedToast => 'Gra się rozpoczęła!';
+
+  @override
+  String get gameEndedToast => 'Gra została zakończona.';
+
+  @override
+  String get apply => 'Zastosuj';
 }

@@ -744,6 +744,24 @@
   "teamCreated": "新しいチームが作成されました: {teamName}",
   "teamDeleted": "チームが削除されました。",
   "disconnectedFieldByHost": "ホストによってフィールドから切断されました",
-  "playerDisconnectedOther": "{username} がフィールドから切断されました"
+  "playerDisconnectedOther": "{username} がフィールドから切断されました",
+  "invitationFromAndRole": "招待 {role} {username}",
+  "roleTo": "へ",
+  "roleFrom": "から",
+  "pendingInvitationsLabel": "保留中の招待 {label}",
+  "mustBeHostAndFieldOpen": "招待を送信するには、ホストであり、フィールドが開いている必要があります",
+  "errorProcessingInvitation": "招待の処理中にエラーが発生しました",
+  "connectedToFieldAsVisitor": "{fieldName} のフィールドにビジターとして接続しました",
+  "errorConnectingToField": "フィールドへの接続中にエラーが発生しました",
+  "assignRoleEachTeam": "各チームに役割を割り当ててください。",
+  "requireTAndCTeams": "テロリストチームと対テロリストチームがそれぞれ少なくとも1つ必要です。",
+  "bombAssignRolesTitle": "ボム作戦の役割割り当て",
+  "bombAssignRolesSubtitle": "どのチームをテロリスト（攻撃）、どのチームを対テロリスト（防御）にするか選択してください。",
+  "confirmRoles": "役割を確定",
+  "terroristAttackLabel": "テロリスト（攻撃）",
+  "counterTerroristDefenseLabel": "対テロリスト（防御）",
+  "gameStartedToast": "試合が開始しました！",
+  "gameEndedToast": "試合は終了しました。",
+  "apply": "適用"
 
 }

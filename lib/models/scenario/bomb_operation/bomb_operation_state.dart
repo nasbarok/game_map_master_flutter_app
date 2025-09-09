@@ -27,28 +27,7 @@ enum BombOperationState {
 
 /// Extensions pour ajouter des fonctionnalités à l'énumération BombOperationState
 extension BombOperationStateExtension on BombOperationState {
-  /// Obtient le nom d'affichage de l'état
-  String get displayName {
-    switch (this) {
-      case BombOperationState.waiting:
-        return 'En attente';
-      case BombOperationState.roundActive:
-        return 'Round actif';
-      case BombOperationState.bombPlanted:
-        return 'Bombe posée';
-      case BombOperationState.defusing:
-        return 'Désamorçage en cours';
-      case BombOperationState.bombDefused:
-        return 'Bombe désamorcée';
-      case BombOperationState.bombExploded:
-        return 'Bombe explosée';
-      case BombOperationState.roundEnd:
-        return 'Fin du round';
-      case BombOperationState.gameEnd:
-        return 'Fin de la partie';
-    }
-  }
-  
+
   /// Convertit une chaîne en BombOperationState
   static BombOperationState fromString(String value) {
     switch (value.toLowerCase()) {

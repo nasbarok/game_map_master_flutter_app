@@ -8,6 +8,7 @@ import '../../services/auth_service.dart';
 import '../../services/api_service.dart';
 import '../../services/game_state_service.dart';
 import '../../services/websocket_service.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/game_map.dart';
 import '../models/invitation.dart';
 import '../models/websocket/game_invitation_message.dart';
@@ -57,9 +58,9 @@ class InvitationService extends ChangeNotifier {
   }
 
   Future<void> sendInvitation(int userId) async {
+    final l10n = AppLocalizations.of(GetIt.instance.get<GlobalKey<NavigatorState>>().currentState!.context)!;
     if (!canSendInvitations()) {
-      throw Exception(
-          'Vous devez être un host avec un terrain ouvert pour envoyer des invitations');
+      throw Exception(l10n.mustBeHostAndFieldOpen);
     }
 
     final fieldId = _gameStateService.selectedMap!.field!.id!;
@@ -223,11 +224,15 @@ class InvitationService extends ChangeNotifier {
       logger.d('✅ Réponse à l\'invitation: ${accept ? "Acceptée" : "Refusée"}');
     } catch (e) {
       logger.e('Erreur lors de la réponse à l\'invitation: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text("Erreur lors du traitement de l'invitation"),
-            backgroundColor: Colors.red),
-      );
+      if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.errorProcessingInvitation),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -361,9 +366,10 @@ class InvitationService extends ChangeNotifier {
 
       // 6. Afficher notification
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Connecté au terrain ${invitation.fieldName} en tant que visiteur'),
+            content: Text(l10n.connectedToFieldAsVisitor(invitation.fieldName)),
             backgroundColor: Colors.blue,
             duration: Duration(seconds: 3),
           ),
@@ -375,9 +381,10 @@ class InvitationService extends ChangeNotifier {
     } catch (e) {
       logger.e('Erreur lors de la connexion host visiteur: $e');
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la connexion au terrain'),
+            content: Text(l10n.errorConnectingToField),
             backgroundColor: Colors.red,
           ),
         );
@@ -400,9 +407,10 @@ class InvitationService extends ChangeNotifier {
     } catch (e) {
       logger.e('Erreur lors de la connexion gamer: $e');
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la connexion au terrain'),
+            content: Text(l10n.errorConnectingToField),
             backgroundColor: Colors.red,
           ),
         );

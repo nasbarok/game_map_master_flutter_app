@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../generated/l10n/app_localizations.dart';
 import '../models/scenario/bomb_operation/bomb_operation_team.dart';
 import '../models/team.dart';
 
@@ -34,35 +35,35 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: Text(
-            'Assignation des rôles pour l\'Opération Bombe',
-            style: TextStyle(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Text(l10n.bombAssignRolesTitle,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        const Text(
-          'Choisissez quelle équipe sera Terroriste (attaque) et quelle équipe sera Anti-terroriste (défense).',
-          style: TextStyle(fontSize: 14),
+        Text(l10n.bombAssignRolesSubtitle,
+          style: const TextStyle(fontSize: 14),
         ),
         const SizedBox(height: 16),
         ...widget.teams.map((team) => _buildTeamRoleSelector(team)).toList(),
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: _validateAndSave,
-          child: const Text('Confirmer les rôles'),
+          child: Text(l10n.confirmRoles),
         ),
       ],
     );
   }
 
   Widget _buildTeamRoleSelector(Team team) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
@@ -94,20 +95,19 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
                 value: _assignedRoles[team.id] ?? BombOperationTeam.attack,
                 selectedItemBuilder: (context) {
                   return [
-                    const Text('Terroriste (Attaque)'),
-                    const Text('Anti-terroriste'),
+                    Text(l10n.terroristAttackLabel),
+                    Text(l10n.counterTerroristDefenseLabel),
                   ];
                 },
                 items: [
                   DropdownMenuItem(
                     value: BombOperationTeam.attack,
                     child: Row(
-                      children: const [
-                        Icon(Icons.dangerous, color: Colors.red),
-                        SizedBox(width: 8),
+                      children: [
+                        const Icon(Icons.dangerous, color: Colors.red),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            'Terroriste (Attaque)',
+                          child: Text(l10n.terroristAttackLabel,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -117,12 +117,11 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
                   DropdownMenuItem(
                     value: BombOperationTeam.defense,
                     child: Row(
-                      children: const [
-                        Icon(Icons.shield, color: Colors.blue),
-                        SizedBox(width: 8),
+                      children: [
+                        const Icon(Icons.shield, color: Colors.blue),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            'Anti-terroriste (Defense)',
+                          child: Text(l10n.counterTerroristDefenseLabel,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -154,10 +153,11 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
   }
 
   void _validateAndSave() {
+    final l10n = AppLocalizations.of(context)!;
     if (_assignedRoles.length != widget.teams.length) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez assigner un rôle à chaque équipe.'),
+        SnackBar(
+          content: Text(l10n.assignRoleEachTeam),
           backgroundColor: Colors.red,
         ),
       );
@@ -169,8 +169,8 @@ class _BombOperationTeamRoleSelectorState extends State<BombOperationTeamRoleSel
 
     if (!hasAttack || !hasDefense) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Il doit y avoir au moins une équipe Terroriste et une équipe Anti-terroriste.'),
+        SnackBar(
+          content: Text(l10n.requireTAndCTeams),
           backgroundColor: Colors.red,
         ),
       );

@@ -2503,4 +2503,65 @@ class AppLocalizationsJa extends AppLocalizations {
   String playerDisconnectedOther(Object username) {
     return '$username がフィールドから切断されました';
   }
+
+  @override
+  String invitationFromAndRole(Object role, Object username) {
+    return '招待 $role $username';
+  }
+
+  @override
+  String get roleTo => 'へ';
+
+  @override
+  String get roleFrom => 'から';
+
+  @override
+  String pendingInvitationsLabel(Object label) {
+    return '保留中の招待 $label';
+  }
+
+  @override
+  String get mustBeHostAndFieldOpen => '招待を送信するには、ホストであり、フィールドが開いている必要があります';
+
+  @override
+  String get errorProcessingInvitation => '招待の処理中にエラーが発生しました';
+
+  @override
+  String connectedToFieldAsVisitor(Object fieldName) {
+    return '$fieldName のフィールドにビジターとして接続しました';
+  }
+
+  @override
+  String get errorConnectingToField => 'フィールドへの接続中にエラーが発生しました';
+
+  @override
+  String get assignRoleEachTeam => '各チームに役割を割り当ててください。';
+
+  @override
+  String get requireTAndCTeams => 'テロリストチームと対テロリストチームがそれぞれ少なくとも1つ必要です。';
+
+  @override
+  String get bombAssignRolesTitle => 'ボム作戦の役割割り当て';
+
+  @override
+  String get bombAssignRolesSubtitle =>
+      'どのチームをテロリスト（攻撃）、どのチームを対テロリスト（防御）にするか選択してください。';
+
+  @override
+  String get confirmRoles => '役割を確定';
+
+  @override
+  String get terroristAttackLabel => 'テロリスト（攻撃）';
+
+  @override
+  String get counterTerroristDefenseLabel => '対テロリスト（防御）';
+
+  @override
+  String get gameStartedToast => '試合が開始しました！';
+
+  @override
+  String get gameEndedToast => '試合は終了しました。';
+
+  @override
+  String get apply => '適用';
 }

@@ -2546,4 +2546,68 @@ class AppLocalizationsNl extends AppLocalizations {
   String playerDisconnectedOther(Object username) {
     return '$username is van het veld losgekoppeld';
   }
+
+  @override
+  String invitationFromAndRole(Object role, Object username) {
+    return 'Uitnodiging $role $username';
+  }
+
+  @override
+  String get roleTo => 'aan';
+
+  @override
+  String get roleFrom => 'van';
+
+  @override
+  String pendingInvitationsLabel(Object label) {
+    return 'Openstaande uitnodigingen $label';
+  }
+
+  @override
+  String get mustBeHostAndFieldOpen =>
+      'Je moet host zijn met een geopend veld om uitnodigingen te versturen';
+
+  @override
+  String get errorProcessingInvitation =>
+      'Fout bij het verwerken van de uitnodiging';
+
+  @override
+  String connectedToFieldAsVisitor(Object fieldName) {
+    return 'Verbonden met het veld $fieldName als bezoeker';
+  }
+
+  @override
+  String get errorConnectingToField => 'Fout bij het verbinden met het veld';
+
+  @override
+  String get assignRoleEachTeam => 'Wijs elke ploeg een rol toe.';
+
+  @override
+  String get requireTAndCTeams =>
+      'Er moet minstens één Terroristenteam en één Antiterroristenteam zijn.';
+
+  @override
+  String get bombAssignRolesTitle => 'Rolverdeling voor Bomoperatie';
+
+  @override
+  String get bombAssignRolesSubtitle =>
+      'Kies welk team Terrorist (aanval) is en welk team Antiterrorist (defensie) is.';
+
+  @override
+  String get confirmRoles => 'Rollen bevestigen';
+
+  @override
+  String get terroristAttackLabel => 'Terrorist (Aanval)';
+
+  @override
+  String get counterTerroristDefenseLabel => 'Antiterrorist (Defensie)';
+
+  @override
+  String get gameStartedToast => 'De game is gestart!';
+
+  @override
+  String get gameEndedToast => 'De game is afgelopen.';
+
+  @override
+  String get apply => 'Toepassen';
 }

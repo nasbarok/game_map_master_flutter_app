@@ -8,6 +8,10 @@ import '../../services/player_location_service.dart';
 
 /// Widget indicateur GPS compact
 class LocationIndicatorWidget extends StatefulWidget {
+  /// Active l’affichage d’informations techniques de débogage
+  /// (compteur de positions reçues / filtrées).
+  /// Utile uniquement en mode développement pour analyser la qualité
+  /// du flux GPS. À laisser `false` en production.
   final bool showDebugInfo;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? padding;

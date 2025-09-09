@@ -744,7 +744,26 @@
   "teamCreated": "Nieuw team aangemaakt: {teamName}",
   "teamDeleted": "Een team is verwijderd.",
   "disconnectedFieldByHost": "Je bent door de host van het veld losgekoppeld",
-  "playerDisconnectedOther": "{username} is van het veld losgekoppeld"
+  "playerDisconnectedOther": "{username} is van het veld losgekoppeld",
+  "invitationFromAndRole": "Uitnodiging {role} {username}",
+  "roleTo": "aan",
+  "roleFrom": "van",
+  "pendingInvitationsLabel": "Openstaande uitnodigingen {label}",
+  "mustBeHostAndFieldOpen": "Je moet host zijn met een geopend veld om uitnodigingen te versturen",
+  "errorProcessingInvitation": "Fout bij het verwerken van de uitnodiging",
+  "connectedToFieldAsVisitor": "Verbonden met het veld {fieldName} als bezoeker",
+  "errorConnectingToField": "Fout bij het verbinden met het veld",
+  "assignRoleEachTeam": "Wijs elke ploeg een rol toe.",
+  "requireTAndCTeams": "Er moet minstens één Terroristenteam en één Antiterroristenteam zijn.",
+  "bombAssignRolesTitle": "Rolverdeling voor Bomoperatie",
+  "bombAssignRolesSubtitle": "Kies welk team Terrorist (aanval) is en welk team Antiterrorist (defensie) is.",
+  "confirmRoles": "Rollen bevestigen",
+  "terroristAttackLabel": "Terrorist (Aanval)",
+  "counterTerroristDefenseLabel": "Antiterrorist (Defensie)",
+  "gameStartedToast": "De game is gestart!",
+  "gameEndedToast": "De game is afgelopen.",
+  "apply": "Toepassen"
+
 
 
 

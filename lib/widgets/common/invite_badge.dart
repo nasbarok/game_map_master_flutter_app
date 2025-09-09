@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../generated/l10n/app_localizations.dart';
+
 class InviteBadge extends StatelessWidget {
   final int count;
   final EdgeInsets padding;
@@ -14,9 +16,10 @@ class InviteBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final label = count > 99 ? '99+' : '$count';
     return Semantics(
-      label: 'Invitations en attente: $label',
+      label: l10n.pendingInvitationsLabel(label),
       child: Container(
         padding: padding,
         constraints: const BoxConstraints(minWidth: 16, minHeight: 16),

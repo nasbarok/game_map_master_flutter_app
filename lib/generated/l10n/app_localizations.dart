@@ -4522,6 +4522,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{username} has been disconnected from the field'**
   String playerDisconnectedOther(Object username);
+
+  /// No description provided for @invitationFromAndRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation {role} {username}'**
+  String invitationFromAndRole(Object role, Object username);
+
+  /// No description provided for @roleTo.
+  ///
+  /// In en, this message translates to:
+  /// **'to'**
+  String get roleTo;
+
+  /// No description provided for @roleFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'from'**
+  String get roleFrom;
+
+  /// No description provided for @pendingInvitationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending invitations {label}'**
+  String pendingInvitationsLabel(Object label);
+
+  /// No description provided for @mustBeHostAndFieldOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be a host with an open field to send invitations'**
+  String get mustBeHostAndFieldOpen;
+
+  /// No description provided for @errorProcessingInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Error processing the invitation'**
+  String get errorProcessingInvitation;
+
+  /// No description provided for @connectedToFieldAsVisitor.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to the field {fieldName} as a visitor'**
+  String connectedToFieldAsVisitor(Object fieldName);
+
+  /// No description provided for @errorConnectingToField.
+  ///
+  /// In en, this message translates to:
+  /// **'Error connecting to the field'**
+  String get errorConnectingToField;
+
+  /// No description provided for @assignRoleEachTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Please assign a role to each team.'**
+  String get assignRoleEachTeam;
+
+  /// No description provided for @requireTAndCTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'There must be at least one Terrorist team and one Counter-Terrorist team.'**
+  String get requireTAndCTeams;
+
+  /// No description provided for @bombAssignRolesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Role assignment for Bomb Operation'**
+  String get bombAssignRolesTitle;
+
+  /// No description provided for @bombAssignRolesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which team will be Terrorist (attack) and which will be Counter-Terrorist (defense).'**
+  String get bombAssignRolesSubtitle;
+
+  /// No description provided for @confirmRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm roles'**
+  String get confirmRoles;
+
+  /// No description provided for @terroristAttackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Terrorist (Attack)'**
+  String get terroristAttackLabel;
+
+  /// No description provided for @counterTerroristDefenseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter-Terrorist (Defense)'**
+  String get counterTerroristDefenseLabel;
+
+  /// No description provided for @gameStartedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'The game has started!'**
+  String get gameStartedToast;
+
+  /// No description provided for @gameEndedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'The game has ended.'**
+  String get gameEndedToast;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
 }
 
 class _AppLocalizationsDelegate

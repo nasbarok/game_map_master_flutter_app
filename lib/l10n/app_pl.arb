@@ -744,6 +744,25 @@
   "teamCreated": "Nowa drużyna utworzona: {teamName}",
   "teamDeleted": "Drużyna została usunięta.",
   "disconnectedFieldByHost": "Zostałeś odłączony od pola przez hosta",
-  "playerDisconnectedOther": "{username} został odłączony od pola"
+  "playerDisconnectedOther": "{username} został odłączony od pola",
+  "invitationFromAndRole": "Zaproszenie {role} {username}",
+  "roleTo": "do",
+  "roleFrom": "od",
+  "pendingInvitationsLabel": "Oczekujące zaproszenia {label}",
+  "mustBeHostAndFieldOpen": "Musisz być hostem z otwartym polem, aby wysyłać zaproszenia",
+  "errorProcessingInvitation": "Błąd podczas przetwarzania zaproszenia",
+  "connectedToFieldAsVisitor": "Połączono z polem {fieldName} jako odwiedzający",
+  "errorConnectingToField": "Błąd podczas łączenia z polem",
+  "assignRoleEachTeam": "Przypisz rolę każdej drużynie.",
+  "requireTAndCTeams": "Musi być co najmniej jedna drużyna terrorystów i jedna drużyna antyterrorystów.",
+  "bombAssignRolesTitle": "Przydział ról dla Operacji Bomba",
+  "bombAssignRolesSubtitle": "Wybierz, która drużyna będzie Terrorystami (atak), a która Antyterrorystami (obrona).",
+  "confirmRoles": "Potwierdź role",
+  "terroristAttackLabel": "Terroryści (Atak)",
+  "counterTerroristDefenseLabel": "Antyterroryści (Obrona)",
+  "gameStartedToast": "Gra się rozpoczęła!",
+  "gameEndedToast": "Gra została zakończona.",
+  "apply": "Zastosuj"
+
 
 }

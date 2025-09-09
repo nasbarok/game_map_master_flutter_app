@@ -744,7 +744,26 @@
   "teamCreated": "Neues Team erstellt: {teamName}",
   "teamDeleted": "Ein Team wurde gelöscht.",
   "disconnectedFieldByHost": "Du wurdest vom Spielfeld durch den Host getrennt",
-  "playerDisconnectedOther": "{username} wurde vom Spielfeld getrennt"
+  "playerDisconnectedOther": "{username} wurde vom Spielfeld getrennt",
+  "invitationFromAndRole": "Einladung {role} {username}",
+  "roleTo": "an",
+  "roleFrom": "von",
+  "pendingInvitationsLabel": "Ausstehende Einladungen {label}",
+  "mustBeHostAndFieldOpen": "Sie müssen Host mit geöffnetem Spielfeld sein, um Einladungen zu senden",
+  "errorProcessingInvitation": "Fehler bei der Verarbeitung der Einladung",
+  "connectedToFieldAsVisitor": "Mit dem Spielfeld {fieldName} als Besucher verbunden",
+  "errorConnectingToField": "Fehler bei der Verbindung mit dem Spielfeld",
+  "assignRoleEachTeam": "Bitte weisen Sie jedem Team eine Rolle zu.",
+  "requireTAndCTeams": "Es muss mindestens ein Terroristen-Team und ein Anti-Terroristen-Team geben.",
+  "bombAssignRolesTitle": "Rollenverteilung für Bombenoperation",
+  "bombAssignRolesSubtitle": "Wählen Sie, welches Team Terrorist (Angriff) und welches Anti-Terrorist (Verteidigung) ist.",
+  "confirmRoles": "Rollen bestätigen",
+  "terroristAttackLabel": "Terrorist (Angriff)",
+  "counterTerroristDefenseLabel": "Anti-Terrorist (Verteidigung)",
+  "gameStartedToast": "Das Spiel hat begonnen!",
+  "gameEndedToast": "Das Spiel ist beendet.",
+  "apply": "Anwenden"
+
 
 
 

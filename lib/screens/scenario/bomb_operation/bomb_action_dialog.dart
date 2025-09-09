@@ -7,6 +7,8 @@ import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bom
 import 'package:game_map_master_flutter_app/services/scenario/bomb_operation/bomb_proximity_detection_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import '../../../generated/l10n/app_localizations.dart';
+
 /// Dialog automatique pour l'armement/désarmement de bombe avec compte à rebours
 class BombActionDialog extends StatefulWidget {
   final BombSite bombSite;
@@ -207,7 +209,7 @@ class _BombActionDialogState extends State<BombActionDialog>
   @override
   Widget build(BuildContext context) {
     final actionColor = _getActionColor();
-
+    final l10n = AppLocalizations.of(context)!;
     return WillPopScope(
       onWillPop: () async {
         _cancelAction();
@@ -278,7 +280,7 @@ class _BombActionDialogState extends State<BombActionDialog>
               // Temps restant (grand affichage)
               Text(
                 _formatTime(_timeRemaining),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
@@ -325,17 +327,15 @@ class _BombActionDialogState extends State<BombActionDialog>
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'Restez dans la zone pour continuer',
-                      style: TextStyle(
+                    Text(l10n.stayInZoneToContinue,
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Sortir de la zone annulera l\'action',
+                    Text(l10n.leavingZoneWillCancel,
                       style: TextStyle(
                         color: Colors.orange.shade300,
                         fontSize: 12,
@@ -354,7 +354,7 @@ class _BombActionDialogState extends State<BombActionDialog>
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white70,
                 ),
-                child: const Text('Annuler'),
+                child: Text(l10n.cancel),
               ),
             ],
           ),

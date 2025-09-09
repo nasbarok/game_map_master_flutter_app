@@ -2548,4 +2548,67 @@ class AppLocalizationsPt extends AppLocalizations {
   String playerDisconnectedOther(Object username) {
     return '$username foi desconectado do campo';
   }
+
+  @override
+  String invitationFromAndRole(Object role, Object username) {
+    return 'Convite $role $username';
+  }
+
+  @override
+  String get roleTo => 'para';
+
+  @override
+  String get roleFrom => 'de';
+
+  @override
+  String pendingInvitationsLabel(Object label) {
+    return 'Convites pendentes $label';
+  }
+
+  @override
+  String get mustBeHostAndFieldOpen =>
+      'Você precisa ser anfitrião e ter um campo aberto para enviar convites';
+
+  @override
+  String get errorProcessingInvitation => 'Erro ao processar o convite';
+
+  @override
+  String connectedToFieldAsVisitor(Object fieldName) {
+    return 'Conectado ao campo $fieldName como visitante';
+  }
+
+  @override
+  String get errorConnectingToField => 'Erro ao conectar ao campo';
+
+  @override
+  String get assignRoleEachTeam => 'Atribua um papel a cada equipe.';
+
+  @override
+  String get requireTAndCTeams =>
+      'Deve haver pelo menos uma equipe Terrorista e uma equipe Antiterrorista.';
+
+  @override
+  String get bombAssignRolesTitle => 'Atribuição de papéis para Operação Bomba';
+
+  @override
+  String get bombAssignRolesSubtitle =>
+      'Escolha qual equipe será Terrorista (ataque) e qual será Antiterrorista (defesa).';
+
+  @override
+  String get confirmRoles => 'Confirmar papéis';
+
+  @override
+  String get terroristAttackLabel => 'Terrorista (Ataque)';
+
+  @override
+  String get counterTerroristDefenseLabel => 'Antiterrorista (Defesa)';
+
+  @override
+  String get gameStartedToast => 'O jogo começou!';
+
+  @override
+  String get gameEndedToast => 'O jogo terminou.';
+
+  @override
+  String get apply => 'Aplicar';
 }

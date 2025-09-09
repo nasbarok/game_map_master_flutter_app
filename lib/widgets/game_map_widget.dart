@@ -72,6 +72,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
     logger.d('📍 [GameMapWidget] [initState] Initialisation du widget');
 
     final playerLocationService = GetIt.I<PlayerLocationService>();
+    final l10n = AppLocalizations.of(context)!;
 
     // 🚀 Initialisation complète du tracking
     playerLocationService.initialize(
@@ -94,8 +95,8 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         final userId = entry.key;
         final coord = entry.value;
         final participant = _findParticipantByUserId(userId);
-        final username = participant?.username ?? 'Inconnu';
-        final team = participant?.teamName ?? 'Sans équipe';
+        final username = participant?.username ?? l10n.unknownPlayerName;
+        final team = participant?.teamName ?? l10n.noTeam;
         final isMe = userId == widget.userId ? ' 👈 (moi)' : '';
         logger.d(
             '🧭 $username (ID: $userId, équipe: $team)$isMe → lat=${coord.latitude}, lng=${coord.longitude}');
@@ -107,7 +108,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         logger.w('⚠️ Participants sans position reçue :');
         for (final userId in missingUsers) {
           final participant = _findParticipantByUserId(userId);
-          final name = participant?.username ?? 'Inconnu';
+          final name = participant?.username ?? l10n.unknownPlayerName;
           logger.w('⛔ $name (ID: $userId)');
         }
       }
@@ -152,7 +153,7 @@ class _GameMapWidgetState extends State<GameMapWidget> {
         },
       );
     } catch (e) {
-      print('Erreur géolocalisation: $e');
+      logger.e('Erreur géolocalisation: $e');
     }
   }
 

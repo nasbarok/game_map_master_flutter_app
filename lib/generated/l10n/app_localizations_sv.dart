@@ -2544,4 +2544,67 @@ class AppLocalizationsSv extends AppLocalizations {
   String playerDisconnectedOther(Object username) {
     return '$username har kopplats bort från banan';
   }
+
+  @override
+  String invitationFromAndRole(Object role, Object username) {
+    return 'Inbjudan $role $username';
+  }
+
+  @override
+  String get roleTo => 'till';
+
+  @override
+  String get roleFrom => 'från';
+
+  @override
+  String pendingInvitationsLabel(Object label) {
+    return 'Väntande inbjudningar $label';
+  }
+
+  @override
+  String get mustBeHostAndFieldOpen =>
+      'Du måste vara värd och ha en öppen bana för att skicka inbjudningar';
+
+  @override
+  String get errorProcessingInvitation => 'Fel vid bearbetning av inbjudan';
+
+  @override
+  String connectedToFieldAsVisitor(Object fieldName) {
+    return 'Ansluten till banan $fieldName som besökare';
+  }
+
+  @override
+  String get errorConnectingToField => 'Fel vid anslutning till banan';
+
+  @override
+  String get assignRoleEachTeam => 'Tilldela varje lag en roll.';
+
+  @override
+  String get requireTAndCTeams =>
+      'Det måste finnas minst ett terroristlag och ett antiterroristlag.';
+
+  @override
+  String get bombAssignRolesTitle => 'Rollfördelning för Bomboperation';
+
+  @override
+  String get bombAssignRolesSubtitle =>
+      'Välj vilket lag som blir Terrorist (anfall) och vilket som blir Antiterrorist (försvar).';
+
+  @override
+  String get confirmRoles => 'Bekräfta roller';
+
+  @override
+  String get terroristAttackLabel => 'Terrorist (Anfall)';
+
+  @override
+  String get counterTerroristDefenseLabel => 'Antiterrorist (Försvar)';
+
+  @override
+  String get gameStartedToast => 'Spelet har startat!';
+
+  @override
+  String get gameEndedToast => 'Spelet är slut.';
+
+  @override
+  String get apply => 'Verkställ';
 }

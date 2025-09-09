@@ -2542,4 +2542,68 @@ class AppLocalizationsNo extends AppLocalizations {
   String playerDisconnectedOther(Object username) {
     return '$username har blitt koblet fra banen';
   }
+
+  @override
+  String invitationFromAndRole(Object role, Object username) {
+    return 'Invitasjon $role $username';
+  }
+
+  @override
+  String get roleTo => 'til';
+
+  @override
+  String get roleFrom => 'fra';
+
+  @override
+  String pendingInvitationsLabel(Object label) {
+    return 'Ventende invitasjoner $label';
+  }
+
+  @override
+  String get mustBeHostAndFieldOpen =>
+      'Du må være vert og ha en åpen bane for å sende invitasjoner';
+
+  @override
+  String get errorProcessingInvitation =>
+      'Feil under behandling av invitasjonen';
+
+  @override
+  String connectedToFieldAsVisitor(Object fieldName) {
+    return 'Koblet til banen $fieldName som besøkende';
+  }
+
+  @override
+  String get errorConnectingToField => 'Feil ved tilkobling til banen';
+
+  @override
+  String get assignRoleEachTeam => 'Tildel en rolle til hvert lag.';
+
+  @override
+  String get requireTAndCTeams =>
+      'Det må være minst ett terroristlag og ett antiterroristlag.';
+
+  @override
+  String get bombAssignRolesTitle => 'Rollefordeling for Bombeoperasjon';
+
+  @override
+  String get bombAssignRolesSubtitle =>
+      'Velg hvilket lag som blir Terrorist (angrep) og hvilket som blir Antiterrorist (forsvar).';
+
+  @override
+  String get confirmRoles => 'Bekreft roller';
+
+  @override
+  String get terroristAttackLabel => 'Terrorist (Angrep)';
+
+  @override
+  String get counterTerroristDefenseLabel => 'Antiterrorist (Forsvar)';
+
+  @override
+  String get gameStartedToast => 'Spillet har startet!';
+
+  @override
+  String get gameEndedToast => 'Spillet er avsluttet.';
+
+  @override
+  String get apply => 'Bruk';
 }

@@ -2,6 +2,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../generated/l10n/app_localizations.dart';
+
 class InvitationCard extends StatelessWidget {
   final Map<String, dynamic> invitation;
   final bool isSent;
@@ -22,23 +24,25 @@ class InvitationCard extends StatelessWidget {
     final String username;
     final String role;
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (isSent) {
-      username = payload['toUsername'] ?? 'Inconnu';
-      role = 'à';
+      username = payload['toUsername'] ?? l10n.unknown;
+      role = l10n.roleTo;
     } else {
-      username = payload['fromUsername'] ?? 'Inconnu';
-      role = 'de';
+      username = payload['fromUsername'] ?? l10n.unknown;
+      role = l10n.roleFrom;
     }
 
-    final mapName = payload['mapName'] ?? 'Carte inconnue';
+    final mapName = payload['mapName'] ?? l10n.unknownMap;
 
     String statusText;
     if (status == 'pending') {
-      statusText = 'En attente';
+      statusText = l10n.statusPending;
     } else if (status == 'accepted') {
-      statusText = 'Acceptée';
+      statusText = l10n.statusAccepted;
     } else {
-      statusText = 'Refusée';
+      statusText = l10n.statusDeclined;
     }
 
     return Card(
@@ -59,12 +63,12 @@ class InvitationCard extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        title: Text('Invitation $role $username'),
+        title: Text(l10n.invitationFromAndRole(username,role)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Carte: $mapName'),
-            Text('Statut: $statusText'),
+            Text(l10n.mapLabelShort(mapName)),
+            Text(l10n.sessionStatusLabel(statusText)),
           ],
         ),
         trailing: !isSent && status == 'pending' && onRespond != null
@@ -73,11 +77,11 @@ class InvitationCard extends StatelessWidget {
           children: [
             TextButton(
               onPressed: () => onRespond!(false),
-              child: const Text('Refuser'),
+              child: Text(l10n.decline),
             ),
             ElevatedButton(
               onPressed: () => onRespond!(true),
-              child: const Text('Accepter'),
+              child: Text(l10n.accept),
             ),
           ],
         )

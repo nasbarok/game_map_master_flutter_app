@@ -386,8 +386,9 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
 
   /// Construit la carte interactive
   Widget _buildMap() {
+    final l10n = AppLocalizations.of(context)!;
     if (_gameMap == null) {
-      return const Center(child: Text('Aucune carte disponible'));
+      return Center(child: Text(l10n.noMapAvailableError));
     }
     logger.d(
         '🗺️ [BombOperationConfigScreen] [_buildMap] Affichage de la carte avec ${_bombSites?.length ?? 0} sites.');
@@ -468,7 +469,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                     Icon(
                       _getIconDataFromIdentifier(poi.iconIdentifier),
                       // Icone dynamique selon le POI
-                      color: AppUtils.parsePoiColor(poi.color), // Couleur dynamique
+                      color: AppUtils.parsePoiColor(poi.color),
+                      // Couleur dynamique
                       size: 40, // Taille de l'icône
                     ),
                   ],
@@ -504,8 +506,6 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -514,7 +514,7 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
       backgroundOpacity: 0.9,
       appBar: AppBar(
         title: Text(l10n.bombConfigScreenTitle(widget.scenarioName)),
-        actions:  [
+        actions: [
           if (!_isLoading && !_isSaving)
             IconButton(
               icon: const Icon(Icons.save),
@@ -580,7 +580,8 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                       ),
                       maxLines: 5,
                       inputFormatters: [
-                        LengthLimitingTextInputFormatter(500), // bloque au-delà de 500 caractères
+                        LengthLimitingTextInputFormatter(500),
+                        // bloque au-delà de 500 caractères
                       ],
                     ),
 
@@ -657,9 +658,15 @@ class _BombOperationConfigScreenState extends State<BombOperationConfigScreen> {
                                       ),
                                     )
                                   : _mapLoadError
-                                      ? Center(child: Text(l10n.interactiveMapRequiredError, textAlign: TextAlign.center, style: TextStyle(color: Colors.red)))
+                                      ? Center(
+                                          child: Text(
+                                              l10n.interactiveMapRequiredError,
+                                              textAlign: TextAlign.center,
+                                              style:
+                                                  TextStyle(color: Colors.red)))
                                       : ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                           child: _buildMap(),
                                         ),
                             ),
