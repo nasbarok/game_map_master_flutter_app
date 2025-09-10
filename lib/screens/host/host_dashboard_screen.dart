@@ -17,6 +17,7 @@ import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/appbar/host_section_appbar_title.dart';
+import '../../widgets/dialog/invitation_dialog.dart';
 import '../../widgets/host_history_tab.dart';
 import '../../widgets/adaptive_background.dart';
 import '../../widgets/options/user_options_menu.dart';
@@ -102,41 +103,15 @@ class _HostDashboardScreenState extends State<HostDashboardScreen>
   }
 
   Future<void> _showInvitationDialog(Map<String, dynamic> payload) async {
-    final l10n = AppLocalizations.of(context)!;
     final invitation = Invitation.fromJson(payload);
 
     if (ModalRoute.of(context)?.isCurrent == true) {
       showDialog(
         context: context,
-        builder: (context) => _buildMilitaryDialog(
-          title: l10n.invitationReceivedTitle,
-          content: Text(
-            l10n.invitationReceivedMessage(
-              invitation.senderUsername ?? l10n.unknownPlayerName,
-              invitation.fieldName ?? l10n.unknownMap,
-            ),
-            style: const TextStyle(color: Color(0xFFF7FAFC)),
-          ),
-          actions: [
-            _buildMilitaryButton(
-              text: l10n.declineInvitation,
-              onPressed: () {
-                _invitationService.respondToInvitation(
-                    context, invitation.id, false);
-                Navigator.of(context).pop();
-              },
-              style: _MilitaryButtonStyle.secondary,
-            ),
-            _buildMilitaryButton(
-              text: l10n.acceptInvitation,
-              onPressed: () {
-                _invitationService.respondToInvitation(
-                    context, invitation.id, true);
-                Navigator.of(context).pop();
-              },
-              style: _MilitaryButtonStyle.primary,
-            ),
-          ],
+        barrierDismissible: false, // Empêcher fermeture pendant loading
+        builder: (context) => InvitationDialog(
+          invitation: invitation,
+          isWebSocketDialog: false, // ✅ Mode simple pour HostDashboard
         ),
       );
     } else {

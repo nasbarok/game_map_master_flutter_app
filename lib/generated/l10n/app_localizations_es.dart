@@ -2619,4 +2619,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get apply => 'Aplicar';
+
+  @override
+  String get processing => 'Procesando...';
+
+  @override
+  String get initializing => 'Inicializando...';
 }

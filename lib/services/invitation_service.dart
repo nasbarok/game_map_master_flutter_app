@@ -57,8 +57,8 @@ class InvitationService extends ChangeNotifier {
         _gameStateService.isTerrainOpen;
   }
 
-  Future<void> sendInvitation(int userId) async {
-    final l10n = AppLocalizations.of(GetIt.instance.get<GlobalKey<NavigatorState>>().currentState!.context)!;
+  Future<void> sendInvitation(int userId, BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     if (!canSendInvitations()) {
       throw Exception(l10n.mustBeHostAndFieldOpen);
     }

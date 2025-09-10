@@ -2614,4 +2614,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get apply => 'Applica';
+
+  @override
+  String get processing => 'Elaborazione in corso...';
+
+  @override
+  String get initializing => 'Inizializzazione...';
 }

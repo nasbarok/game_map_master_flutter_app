@@ -2610,4 +2610,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get apply => 'Toepassen';
+
+  @override
+  String get processing => 'Bezig met verwerken...';
+
+  @override
+  String get initializing => 'Initialiseren...';
 }

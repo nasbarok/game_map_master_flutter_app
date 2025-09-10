@@ -86,10 +86,14 @@ class _SplashScreenState extends State<SplashScreen> {
     final isHost = currentUser?.hasRole('HOST') ?? false;
 
     // Décomposition du test
-    bool isHostAndNotOwner = isHost && gameState.selectedMap != null && ownerId != null && currentUser?.id != ownerId;
+    bool isHostAndNotOwner = isHost &&
+        gameState.selectedMap != null &&
+        ownerId != null &&
+        currentUser?.id != ownerId;
 
     final goTo = (isHost && !isHostAndNotOwner) ? '/host' : '/gamer/lobby';
-    logger.d('➡️ Redirection finale: isHost=$isHost, isHostInOwnTerrain=${gameState.isHostInOwnTerrain}, goTo=$goTo');
+    logger.d(
+        '➡️ Redirection finale: isHost=$isHost, isHostInOwnTerrain=${gameState.isHostInOwnTerrain}, goTo=$goTo');
     context.go(goTo);
   }
 
@@ -236,7 +240,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
                 // 🎨 Texte de chargement
                 Text(
-                  'Initialisation...',
+                  l10n.initializing,
                   style: TextStyle(
                     fontSize: 14,
                     color: lightMetal.withOpacity(0.8),
@@ -249,7 +253,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 30),
                   child: Text(
-                    'Game Map Master v1.0.0',
+                    '${l10n.appTitle} v1.0.0',
                     style: TextStyle(
                       fontSize: 12,
                       color: lightMetal.withOpacity(0.5),

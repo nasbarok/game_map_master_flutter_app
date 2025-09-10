@@ -2730,7 +2730,9 @@
   "counterTerroristDefenseLabel": "Counter-Terrorist (Defense)",
   "gameStartedToast": "The game has started!",
   "gameEndedToast": "The game has ended.",
-  "apply": "Apply"
+  "apply": "Apply",
+  "processing": "Processing...",
+  "initializing": "Initializing..."
 
 
 

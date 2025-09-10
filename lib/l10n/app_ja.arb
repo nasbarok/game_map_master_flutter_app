@@ -762,6 +762,8 @@
   "counterTerroristDefenseLabel": "対テロリスト（防御）",
   "gameStartedToast": "試合が開始しました！",
   "gameEndedToast": "試合は終了しました。",
-  "apply": "適用"
+  "apply": "適用",
+  "processing": "処理中...",
+  "initializing": "初期化中..."
 
 }

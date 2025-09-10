@@ -2602,4 +2602,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apply => 'Apply';
+
+  @override
+  String get processing => 'Processing...';
+
+  @override
+  String get initializing => 'Initializing...';
 }

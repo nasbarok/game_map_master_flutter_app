@@ -2631,4 +2631,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get apply => 'Anwenden';
+
+  @override
+  String get processing => 'Verarbeitung läuft...';
+
+  @override
+  String get initializing => 'Initialisierung...';
 }

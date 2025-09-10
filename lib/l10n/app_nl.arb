@@ -762,7 +762,9 @@
   "counterTerroristDefenseLabel": "Antiterrorist (Defensie)",
   "gameStartedToast": "De game is gestart!",
   "gameEndedToast": "De game is afgelopen.",
-  "apply": "Toepassen"
+  "apply": "Toepassen",
+  "processing": "Bezig met verwerken...",
+  "initializing": "Initialiseren..."
 
 
 

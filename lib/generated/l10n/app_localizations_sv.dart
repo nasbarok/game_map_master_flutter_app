@@ -2607,4 +2607,10 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get apply => 'Verkställ';
+
+  @override
+  String get processing => 'Bearbetar...';
+
+  @override
+  String get initializing => 'Initierar...';
 }

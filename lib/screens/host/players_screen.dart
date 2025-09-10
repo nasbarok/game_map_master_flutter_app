@@ -194,7 +194,7 @@ class _PlayersScreenState extends State<PlayersScreen>
     final invitationService = context.read<InvitationService>();
     final l10n = AppLocalizations.of(context)!;
     try {
-      invitationService.sendInvitation(userId);
+      invitationService.sendInvitation(userId,context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.invitationSentTo(username)),

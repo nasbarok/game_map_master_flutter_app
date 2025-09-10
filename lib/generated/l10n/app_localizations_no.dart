@@ -2606,4 +2606,10 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get apply => 'Bruk';
+
+  @override
+  String get processing => 'Behandler...';
+
+  @override
+  String get initializing => 'Initialiserer...';
 }

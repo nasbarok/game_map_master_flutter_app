@@ -21,6 +21,8 @@ import '../services/invitation_service.dart';
 import '../../services/game_state_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import 'dialog/invitation_dialog.dart';
+
 class WebSocketMessageHandler {
   final AuthService authService;
   final GameStateService gameStateService;
@@ -221,52 +223,10 @@ class WebSocketMessageHandler {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.invitationReceivedTitle),
-        content: Text(l10n.invitationReceivedBody(
-            invitation.senderUsername, invitation.fieldName)),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Refuser l'invitation
-              logger.d('❌ Invitation refusée par l\'utilisateur');
-              final invitationService = context.read<InvitationService>();
-              invitationService.respondToInvitation(
-                  context, invitation.id, false);
-              Navigator.of(context).pop();
-            },
-            child: Text(l10n.decline),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final invitationService = context.read<InvitationService>();
-              final gameStateService = context.read<GameStateService>();
-              final apiService = context.read<ApiService>();
-
-              // 1. Envoi réponse ACCEPT
-              await invitationService.respondToInvitation(
-                  context, invitation.id, true);
-
-              // 3. Restore session complète
-              await gameStateService.restoreSessionIfNeeded(
-                  apiService, invitation.fieldId);
-
-              // 4. Fermer dialogue
-              if (context.mounted) {
-                Navigator.of(context).pop();
-                if (currentUser != null) {
-                  if (currentUser.hasRole('HOST')) {
-                    context.go('/host');
-                  } else {
-                    final timestamp = DateTime.now().millisecondsSinceEpoch;
-                    context.go('/gamer/lobby?refresh=$timestamp');
-                  }
-                }
-              }
-            },
-            child: Text(l10n.accept),
-          ),
-        ],
+      barrierDismissible: false, // Empêcher fermeture pendant loading
+      builder: (context) => InvitationDialog(
+        invitation: invitation,
+        isWebSocketDialog: true, // Mode complet pour WebSocket
       ),
     );
   }

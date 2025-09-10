@@ -758,7 +758,9 @@
   "counterTerroristDefenseLabel": "Antiterrorista (Defensa)",
   "gameStartedToast": "¡La partida ha comenzado!",
   "gameEndedToast": "La partida ha terminado.",
-  "apply": "Aplicar"
+  "apply": "Aplicar",
+  "processing": "Procesando...",
+  "initializing": "Inicializando..."
 
 
 

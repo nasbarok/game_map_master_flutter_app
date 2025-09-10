@@ -2564,4 +2564,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get apply => '適用';
+
+  @override
+  String get processing => '処理中...';
+
+  @override
+  String get initializing => '初期化中...';
 }

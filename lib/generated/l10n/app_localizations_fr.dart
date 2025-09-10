@@ -2620,4 +2620,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get apply => 'Appliquer';
+
+  @override
+  String get processing => 'Traitement en cours...';
+
+  @override
+  String get initializing => 'Initialisation...';
 }

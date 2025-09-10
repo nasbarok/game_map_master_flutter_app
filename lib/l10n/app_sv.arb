@@ -758,7 +758,9 @@
   "counterTerroristDefenseLabel": "Antiterrorist (Försvar)",
   "gameStartedToast": "Spelet har startat!",
   "gameEndedToast": "Spelet är slut.",
-  "apply": "Verkställ"
+  "apply": "Verkställ",
+  "processing": "Bearbetar...",
+  "initializing": "Initierar..."
 
 
 

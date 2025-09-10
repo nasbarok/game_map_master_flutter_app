@@ -2610,4 +2610,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get apply => 'Zastosuj';
+
+  @override
+  String get processing => 'Przetwarzanie...';
+
+  @override
+  String get initializing => 'Inicjalizacja...';
 }
