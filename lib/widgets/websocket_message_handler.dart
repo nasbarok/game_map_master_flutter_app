@@ -150,6 +150,7 @@ class WebSocketMessageHandler {
     final teamName = payload['teamName'] ?? 'Sans équipe';
     final bool accepted = payload['accepted'] == true;
     final int senderId = invitationResponse['senderId'];
+    final int targetUserId = invitationResponse['targetUserId'];
     final currentUserId = authService.currentUser?.id;
     final l10n = AppLocalizations.of(context)!;
 
@@ -176,7 +177,7 @@ class WebSocketMessageHandler {
 
       // ✅ Ne rien faire si le joueur est déjà dans la liste
       final alreadyInList = gameStateService.connectedPlayersList.any(
-        (player) => player['id'] == userId,
+        (player) => targetUserId == userId,
       );
       // ✅ Accepté → ajout du joueur dans GameStateService
       logger.d(

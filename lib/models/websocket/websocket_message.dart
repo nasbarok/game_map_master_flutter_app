@@ -42,7 +42,6 @@ abstract class WebSocketMessage {
       case 'GAME_INVITATION':
         return GameInvitationMessage.fromJson(json);
       case 'INVITATION_RESPONSE':
-        logger.d('InvitationResponseMessage fromJson');
         return InvitationResponseMessage.fromJson(json);
       case 'INVITATION_RECEIVED':
         return InvitationReceivedMessage.fromJson(json);
