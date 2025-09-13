@@ -2613,4 +2613,30 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get initializing => 'Initierar...';
+
+  @override
+  String get selectGameDuration => 'Välj speltid';
+
+  @override
+  String get popularDurations => 'Populära tider';
+
+  @override
+  String get customDuration => 'Anpassad tid';
+
+  @override
+  String get enterMinutes => 'Ange minuter';
+
+  @override
+  String get unlimitedDurationSet => 'Tid inställd på obegränsad';
+
+  @override
+  String durationSetToMinutes(String minutes) {
+    return 'Tid inställd på $minutes minuter';
+  }
+
+  @override
+  String get min => 'min';
+
+  @override
+  String get h => 'tim';
 }

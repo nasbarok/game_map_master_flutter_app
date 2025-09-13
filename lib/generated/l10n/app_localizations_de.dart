@@ -2637,4 +2637,30 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get initializing => 'Initialisierung...';
+
+  @override
+  String get selectGameDuration => 'Spieldauer auswählen';
+
+  @override
+  String get popularDurations => 'Beliebte Dauern';
+
+  @override
+  String get customDuration => 'Benutzerdefinierte Dauer';
+
+  @override
+  String get enterMinutes => 'Minuten eingeben';
+
+  @override
+  String get unlimitedDurationSet => 'Dauer auf unbegrenzt gesetzt';
+
+  @override
+  String durationSetToMinutes(String minutes) {
+    return 'Dauer auf $minutes Minuten gesetzt';
+  }
+
+  @override
+  String get min => 'Min';
+
+  @override
+  String get h => 'Std';
 }

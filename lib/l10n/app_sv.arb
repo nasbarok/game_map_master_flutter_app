@@ -760,7 +760,23 @@
   "gameEndedToast": "Spelet är slut.",
   "apply": "Verkställ",
   "processing": "Bearbetar...",
-  "initializing": "Initierar..."
+  "initializing": "Initierar...",
+  "selectGameDuration": "Välj speltid",
+  "popularDurations": "Populära tider",
+  "customDuration": "Anpassad tid",
+  "enterMinutes": "Ange minuter",
+  "unlimitedDurationSet": "Tid inställd på obegränsad",
+  "durationSetToMinutes": "Tid inställd på {minutes} minuter",
+  "min": "min",
+  "@durationSetToMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "h": "tim"
+
 
 
 

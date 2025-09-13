@@ -2612,4 +2612,30 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get initializing => 'Initialiserer...';
+
+  @override
+  String get selectGameDuration => 'Velg spillvarighet';
+
+  @override
+  String get popularDurations => 'Populære varigheter';
+
+  @override
+  String get customDuration => 'Tilpasset varighet';
+
+  @override
+  String get enterMinutes => 'Skriv inn minutter';
+
+  @override
+  String get unlimitedDurationSet => 'Varighet satt til ubegrenset';
+
+  @override
+  String durationSetToMinutes(String minutes) {
+    return 'Varighet satt til $minutes minutter';
+  }
+
+  @override
+  String get min => 'min';
+
+  @override
+  String get h => 't';
 }

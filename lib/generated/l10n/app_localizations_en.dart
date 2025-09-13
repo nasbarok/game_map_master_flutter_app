@@ -2608,4 +2608,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get initializing => 'Initializing...';
+
+  @override
+  String get selectGameDuration => 'Select game duration';
+
+  @override
+  String get popularDurations => 'Popular durations';
+
+  @override
+  String get customDuration => 'Custom duration';
+
+  @override
+  String get enterMinutes => 'Enter minutes';
+
+  @override
+  String get unlimitedDurationSet => 'Duration set to unlimited';
+
+  @override
+  String durationSetToMinutes(String minutes) {
+    return 'Duration set to $minutes minutes';
+  }
+
+  @override
+  String get min => 'min';
+
+  @override
+  String get h => 'h';
 }

@@ -764,7 +764,23 @@
   "gameEndedToast": "Das Spiel ist beendet.",
   "apply": "Anwenden",
   "processing": "Verarbeitung läuft...",
-  "initializing": "Initialisierung..."
+  "initializing": "Initialisierung...",
+  "selectGameDuration": "Spieldauer auswählen",
+  "popularDurations": "Beliebte Dauern",
+  "customDuration": "Benutzerdefinierte Dauer",
+  "enterMinutes": "Minuten eingeben",
+  "unlimitedDurationSet": "Dauer auf unbegrenzt gesetzt",
+  "durationSetToMinutes": "Dauer auf {minutes} Minuten gesetzt",
+  "min": "Min",
+  "@durationSetToMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "h": "Std"
+
 
 
 

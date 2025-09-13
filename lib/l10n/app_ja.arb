@@ -764,6 +764,20 @@
   "gameEndedToast": "試合は終了しました。",
   "apply": "適用",
   "processing": "処理中...",
-  "initializing": "初期化中..."
+  "initializing": "初期化中...",
+  "selectGameDuration": "ゲーム時間を選択",
+  "popularDurations": "人気の時間",
+  "customDuration": "カスタム時間",
+  "enterMinutes": "分を入力",
+  "unlimitedDurationSet": "時間を無制限に設定",
+  "durationSetToMinutes": "時間を{minutes}分に設定",
+  "min": "分",
+  "@durationSetToMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  }
 
 }

@@ -2570,4 +2570,30 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get initializing => '初期化中...';
+
+  @override
+  String get selectGameDuration => 'ゲーム時間を選択';
+
+  @override
+  String get popularDurations => '人気の時間';
+
+  @override
+  String get customDuration => 'カスタム時間';
+
+  @override
+  String get enterMinutes => '分を入力';
+
+  @override
+  String get unlimitedDurationSet => '時間を無制限に設定';
+
+  @override
+  String durationSetToMinutes(String minutes) {
+    return '時間を$minutes分に設定';
+  }
+
+  @override
+  String get min => '分';
+
+  @override
+  String get h => 'h';
 }

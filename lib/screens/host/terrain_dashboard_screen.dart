@@ -20,6 +20,7 @@ import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/bomb_operation_team_role_selector.dart';
+import '../../widgets/dialog/duration_picker_dialog.dart';
 import '../../widgets/zoomable_background_container.dart';
 import '../gamesession/game_session_screen.dart';
 import '../scenario/bomb_operation/bomb_operation_config.dart';
@@ -101,7 +102,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     }
   }
 
-  void _setGameDuration() {
+  void _showDurationPicker() {
     final l10n = AppLocalizations.of(context)!;
     final gameStateService = context.read<GameStateService>();
 
@@ -114,24 +115,26 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
       );
       return;
     }
-    DatePicker.showTimePicker(
-      context,
-      showSecondsColumn: false,
-      onChanged: (time) {},
-      onConfirm: (time) {
-        int minutes = time.hour * 60 + time.minute;
-        gameStateService.setGameDuration(minutes);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.durationSetSuccess(
-                time.hour.toString(), time.minute.toString())),
-            backgroundColor: Colors.green,
-          ),
-        );
-      },
-      currentTime: DateTime(2022, 1, 1, 0, 0),
-      locale: AppUtils.getDatePickerLocale(flutterLocale),
+    showDialog(
+      context: context,
+      builder: (context) => DurationPickerDialog(
+        initialDuration: gameStateService.gameDuration,
+        onDurationSelected: (duration) {
+          gameStateService.setGameDuration(duration);
+
+          final message = duration == null
+              ? l10n.unlimitedDurationSet
+              : l10n.durationSetToMinutes(duration.toString());
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.green,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -639,7 +642,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             title: l10n.duration,
             value: gameStateService.gameDuration == null
                 ? l10n.unlimitedDurationInfoCard
-                : "${gameStateService.gameDuration} min",
+                : "${gameStateService.gameDuration} ${l10n.min}",
+            onTap: gameStateService.isTerrainOpen ? _showDurationPicker : null,  // ✅ NOUVEAU
           ),
         ),
       ],
@@ -764,7 +768,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             Expanded(
               child: ElevatedButton.icon(
                 onPressed:
-                    gameStateService.isTerrainOpen ? _setGameDuration : null,
+                    gameStateService.isTerrainOpen ? _showDurationPicker : null,
                 icon: const Icon(Icons.timer),
                 label: Text(l10n.setDurationButtonLabel),
               ),
@@ -996,22 +1000,27 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
     required IconData icon,
     required String title,
     required String value,
+    VoidCallback? onTap,
   }) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Icon(icon),
-            Text(title, style: const TextStyle(fontSize: 12)),
-            Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Icon(icon),
+              Text(title, style: const TextStyle(fontSize: 12)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1323,8 +1332,8 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                     icon: Icons.timer,
                     title: l10n.duration,
                     value: gameStateService.gameDuration == null
-                        ? l10n.unlimitedDurationInfoCard
-                        : "${gameStateService.gameDuration} min",
+                        ? "∞"
+                        : "${gameStateService.gameDuration} ${l10n.min}",
                   ),
                 ),
               ],
@@ -1435,7 +1444,7 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                     child: ElevatedButton.icon(
                       onPressed: gameStateService.isGameRunning
                           ? null
-                          : _setGameDuration,
+                          : _showDurationPicker,
                       icon: const Icon(Icons.timer),
                       label: Text(l10n.setDurationButtonLabel),
                       style: ElevatedButton.styleFrom(

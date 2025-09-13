@@ -764,7 +764,23 @@
   "gameEndedToast": "Spillet er avsluttet.",
   "apply": "Bruk",
   "processing": "Behandler...",
-  "initializing": "Initialiserer..."
+  "initializing": "Initialiserer...",
+  "selectGameDuration": "Velg spillvarighet",
+  "popularDurations": "Populære varigheter",
+  "customDuration": "Tilpasset varighet",
+  "enterMinutes": "Skriv inn minutter",
+  "unlimitedDurationSet": "Varighet satt til ubegrenset",
+  "durationSetToMinutes": "Varighet satt til {minutes} minutter",
+  "min": "min",
+  "@durationSetToMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "h": "t"
+
 
 
 

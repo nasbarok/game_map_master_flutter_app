@@ -764,7 +764,23 @@
   "gameEndedToast": "De game is afgelopen.",
   "apply": "Toepassen",
   "processing": "Bezig met verwerken...",
-  "initializing": "Initialiseren..."
+  "initializing": "Initialiseren...",
+  "selectGameDuration": "Spelduur selecteren",
+  "popularDurations": "Populaire duren",
+  "customDuration": "Aangepaste duur",
+  "enterMinutes": "Voer minuten in",
+  "unlimitedDurationSet": "Duur ingesteld op onbeperkt",
+  "durationSetToMinutes": "Duur ingesteld op {minutes} minuten",
+  "min": "min",
+  "@durationSetToMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "h": "u"
+
 
 
 

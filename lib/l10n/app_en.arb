@@ -2732,7 +2732,23 @@
   "gameEndedToast": "The game has ended.",
   "apply": "Apply",
   "processing": "Processing...",
-  "initializing": "Initializing..."
+  "initializing": "Initializing...",
+  "selectGameDuration": "Select game duration",
+  "popularDurations": "Popular durations",
+  "customDuration": "Custom duration",
+  "enterMinutes": "Enter minutes",
+  "unlimitedDurationSet": "Duration set to unlimited",
+  "durationSetToMinutes": "Duration set to {minutes} minutes",
+  "min": "min",
+  "@durationSetToMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "h": "h"
+
 
 
 

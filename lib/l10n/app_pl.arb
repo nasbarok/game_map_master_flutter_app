@@ -764,7 +764,23 @@
   "gameEndedToast": "Gra została zakończona.",
   "apply": "Zastosuj",
   "processing": "Przetwarzanie...",
-  "initializing": "Inicjalizacja..."
+  "initializing": "Inicjalizacja...",
+  "selectGameDuration": "Wybierz czas gry",
+  "popularDurations": "Popularne czasy",
+  "customDuration": "Niestandardowy czas",
+  "enterMinutes": "Wprowadź minuty",
+  "unlimitedDurationSet": "Czas ustawiony na nieograniczony",
+  "durationSetToMinutes": "Czas ustawiony na {minutes} minut",
+  "min": "min",
+  "@durationSetToMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "h": "godz"
+
 
 
 }

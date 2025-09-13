@@ -4642,6 +4642,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Initializing...'**
   String get initializing;
+
+  /// No description provided for @selectGameDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Select game duration'**
+  String get selectGameDuration;
+
+  /// No description provided for @popularDurations.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular durations'**
+  String get popularDurations;
+
+  /// No description provided for @customDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom duration'**
+  String get customDuration;
+
+  /// No description provided for @enterMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter minutes'**
+  String get enterMinutes;
+
+  /// No description provided for @unlimitedDurationSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration set to unlimited'**
+  String get unlimitedDurationSet;
+
+  /// No description provided for @durationSetToMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration set to {minutes} minutes'**
+  String durationSetToMinutes(String minutes);
+
+  /// No description provided for @min.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get min;
+
+  /// No description provided for @h.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get h;
 }
 
 class _AppLocalizationsDelegate

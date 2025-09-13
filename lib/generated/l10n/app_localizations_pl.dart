@@ -2616,4 +2616,30 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get initializing => 'Inicjalizacja...';
+
+  @override
+  String get selectGameDuration => 'Wybierz czas gry';
+
+  @override
+  String get popularDurations => 'Popularne czasy';
+
+  @override
+  String get customDuration => 'Niestandardowy czas';
+
+  @override
+  String get enterMinutes => 'Wprowadź minuty';
+
+  @override
+  String get unlimitedDurationSet => 'Czas ustawiony na nieograniczony';
+
+  @override
+  String durationSetToMinutes(String minutes) {
+    return 'Czas ustawiony na $minutes minut';
+  }
+
+  @override
+  String get min => 'min';
+
+  @override
+  String get h => 'godz';
 }
