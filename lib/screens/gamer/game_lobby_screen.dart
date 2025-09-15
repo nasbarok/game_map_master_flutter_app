@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:game_map_master_flutter_app/screens/gamer/team_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -7,6 +9,7 @@ import '../../models/field.dart';
 import '../../models/invitation.dart';
 import '../../models/pagination/paginated_response.dart';
 import '../../models/websocket/player_left_message.dart';
+import '../../models/websocket/websocket_message.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/game_state_service.dart';
@@ -44,6 +47,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
   String? _visitedError;
   final int _visitedPageSize = 5;
   int _lastIndex = 0;
+  StreamSubscription<WebSocketMessage>? _webSocketSubscription;
 
   @override
   void initState() {
@@ -88,6 +92,14 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
         context.read<InvitationService>().loadReceivedInvitations();
       }
     });
+
+    _webSocketSubscription = _webSocketService.messageStream.listen((message) {
+      if (message != null && message.type == 'FIELD_CLOSED') {
+        logger.d('🔄 Terrain fermé détecté, actualisation de la liste des terrains visités');
+        _loadVisitedFields(page: _visitedPage);
+      }
+    });
+
   }
 
   @override
@@ -1308,8 +1320,9 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       logger.d('📡 Désabonnement du topic du terrain depuis GameLobbyScreen');
       _webSocketService.unsubscribeFromField(fieldId);
     }
-
     _tabController.dispose();
+    _webSocketSubscription?.cancel();
+
     super.dispose();
   }
 }
