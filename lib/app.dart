@@ -55,6 +55,24 @@ class App extends StatelessWidget {
               },
 
               theme: GlobalMilitaryTheme.themeData,
+              // Wrapper global pour fermer le clavier
+              builder: (context, child) {
+                return Listener(
+                  // ✅ Écoute les changements de navigation
+                  onPointerDown: (_) {
+                    // Ferme le clavier sur tout tap/interaction
+                    FocusScope.of(context).unfocus();
+                  },
+                  child: GestureDetector(
+                    // ✅ Garde votre logique existante pour les zones vides
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                    },
+                    child: child,
+                  ),
+                );
+              },
               routerConfig: _router, // Votre configuration GoRouter
             );
           },
