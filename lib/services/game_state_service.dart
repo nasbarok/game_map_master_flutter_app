@@ -95,7 +95,8 @@ class GameStateService extends ChangeNotifier {
 
   Stream<GameSession?> get gameSessionStream => _gameSessionController.stream;
 
-  GameStateService(this._apiService,this._authService, this._treasureHuntService);
+  GameStateService(
+      this._apiService, this._authService, this._treasureHuntService);
 
 // 🔐 Config temporaire pour BombOperation avant création de GameSession
   BombOperationScenarioConfig? _bombOperationConfig;
@@ -103,8 +104,11 @@ class GameStateService extends ChangeNotifier {
   BombOperationScenarioConfig? get bombOperationConfig => _bombOperationConfig;
 
   bool get isHostVisiting => _isHostVisiting;
+
   GameMap? get originalHostMap => _originalHostMap;
-  bool get isCurrentUserHost => _authService.currentUser?.hasRole('HOST') ?? false;
+
+  bool get isCurrentUserHost =>
+      _authService.currentUser?.hasRole('HOST') ?? false;
 
   bool get isHostInOwnTerrain {
     // Récupérer l'utilisateur actuel
@@ -113,19 +117,32 @@ class GameStateService extends ChangeNotifier {
     // Vérifier si l'utilisateur est un hôte
     final isHost = currentUser?.hasRole('HOST') ?? false;
 
+    if(!isHost) {
+      //gamer jamais propriétaire de la carte
+      return false;
+    }
+
     // Récupérer l'ID du propriétaire de la carte
     final ownerId = _selectedMap?.owner?.id;
 
     // Vérification détaillée de l'état
-    logger.d('Vérification si l\'hôte est sur son terrain: Utilisateur est hôte: $isHost, Visite en cours: ${_isHostVisiting}, Propriétaire de la carte: $ownerId, ID utilisateur actuel: ${currentUser?.id}');
+    logger.d(
+        'Vérification si l\'hôte est sur son terrain: Utilisateur est hôte: $isHost, Visite en cours: ${_isHostVisiting}, Propriétaire de la carte: $ownerId, ID utilisateur actuel: ${currentUser?.id}');
 
     // Retourner si l'utilisateur est un hôte, n'est pas en visite et est le propriétaire
-    final result = isHost && !_isHostVisiting && ownerId != null && currentUser?.id == ownerId;
+    // Si pas de selectedMap, considérer que le host est sur son terrain
+    if (_selectedMap == null) {
+      logger.d(
+          'Pas de carte sélectionnée - Host considéré sur son terrain par défaut');
+      return true;
+    }
+
+    // Logique normale pour les cas avec selectedMap
+    final result = ownerId != null && currentUser?.id == ownerId;
 
     logger.d('  Résultat final (est-ce l\'hôte sur son terrain) : $result');
     return result;
   }
-
 
   void dispose() {
     _gameTimer?.cancel();
@@ -158,8 +175,8 @@ class GameStateService extends ChangeNotifier {
   }
 
   factory GameStateService.placeholder() {
-    return GameStateService(
-        ApiService.placeholder(),AuthService.placeholder(), TreasureHuntService(ApiService.placeholder()))
+    return GameStateService(ApiService.placeholder(), AuthService.placeholder(),
+        TreasureHuntService(ApiService.placeholder()))
       .._isTerrainOpen = false
       .._selectedMap = null
       .._selectedScenarios = []
@@ -447,7 +464,8 @@ class GameStateService extends ChangeNotifier {
         _teamService!.loadTeams(_selectedMap!.id!);
       }
     } catch (e) {
-      logger.d('⚠️ [GameStateService] Erreur lors de la resynchro des équipes: $e');
+      logger.d(
+          '⚠️ [GameStateService] Erreur lors de la resynchro des équipes: $e');
     }
 
     // Notifier les listeners (UI)
@@ -900,6 +918,7 @@ class GameStateService extends ChangeNotifier {
   void clearBombOperationConfig() {
     _bombOperationConfig = null;
   }
+
   /// 🆕 Démarrer une visite en tant que host
   void startHostVisit(GameMap visitedMap) {
     // Sauvegarder l'état host actuel
@@ -939,6 +958,4 @@ class GameStateService extends ChangeNotifier {
   bool canStartHostVisit() {
     return isCurrentUserHost && !_isHostVisiting;
   }
-
-
 }

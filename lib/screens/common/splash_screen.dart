@@ -82,16 +82,12 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
     final currentUser = authService.currentUser;
-    final ownerId = gameState.selectedMap?.owner?.id;
     final isHost = currentUser?.hasRole('HOST') ?? false;
 
-    // Décomposition du test
-    bool isHostAndNotOwner = isHost &&
-        gameState.selectedMap != null &&
-        ownerId != null &&
-        currentUser?.id != ownerId;
-
-    final goTo = (isHost && !isHostAndNotOwner) ? '/host' : '/gamer/lobby';
+    var goTo = '/gamer/lobby';
+    if(isHost) {
+      goTo = gameState.isHostInOwnTerrain ? '/host' : '/gamer/lobby';
+    }
     logger.d(
         '➡️ Redirection finale: isHost=$isHost, isHostInOwnTerrain=${gameState.isHostInOwnTerrain}, goTo=$goTo');
     context.go(goTo);
