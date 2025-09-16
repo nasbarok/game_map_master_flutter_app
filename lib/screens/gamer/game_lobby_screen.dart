@@ -1164,8 +1164,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen>
       final apiService = GetIt.I<ApiService>();
       await apiService.delete('fields-history/history/${field.id}');
 
-      setState(
-          () {}); // ❗ Recharge le FutureBuilder (déclenche à nouveau _loadPreviousFields)
+      await _loadVisitedFields(page: _visitedPage);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.fieldDeletedFromHistory)),
