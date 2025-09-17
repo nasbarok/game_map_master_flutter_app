@@ -20,6 +20,7 @@ import '../../services/team_service.dart';
 import '../../services/websocket_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/bomb_operation_team_role_selector.dart';
+import '../../widgets/button/favorite_star_button.dart';
 import '../../widgets/dialog/duration_picker_dialog.dart';
 import '../../widgets/zoomable_background_container.dart';
 import '../gamesession/game_session_screen.dart';
@@ -643,7 +644,9 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
             value: gameStateService.gameDuration == null
                 ? l10n.unlimitedDurationInfoCard
                 : "${gameStateService.gameDuration} ${l10n.min}",
-            onTap: gameStateService.isTerrainOpen ? _showDurationPicker : null,  // ✅ NOUVEAU
+            onTap: gameStateService.isTerrainOpen
+                ? _showDurationPicker
+                : null, // ✅ NOUVEAU
           ),
         ),
       ],
@@ -979,7 +982,18 @@ class _TerrainDashboardScreenState extends State<TerrainDashboardScreen> {
                           ? l10n.teamLabelPlayerList(player['teamName'])
                           : l10n.noTeam,
                     ),
-                    trailing: isHost ? Text(l10n.youHostLabel) : null,
+                    trailing: isHost
+                        ? Text(l10n.youHostLabel)
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              FavoriteStarButton(
+                                playerId: player['id'],
+                                playerName: player['username'] ?? 'Joueur',
+                                size: 20.0,
+                              ),
+                            ],
+                          ),
                   );
                 },
               )

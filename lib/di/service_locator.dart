@@ -9,6 +9,7 @@ import '../config/environment_config.dart';
 import '../services/api_service.dart';
 import '../services/audio/simple_voice_service.dart';
 import '../services/auth_service.dart';
+import '../services/favorites_service.dart';
 import '../services/game_map_service.dart';
 import '../services/game_session_service.dart';
 import '../services/game_state_service.dart';
@@ -92,6 +93,9 @@ void setupServiceLocator() {
   final bombOperationWebSocketHandler = BombOperationWebSocketHandler(authService,webSocketService, navigatorKey,apiService);
   final bombOperationService = BombOperationService(apiService,bombOperationWebSocketHandler);
 
+  // Service de gestion des favoris
+  final favoritesService = FavoritesService(apiService, authService);
+
   // Services de géolocalisation avancée
   final locationFilter = LocationFilter();
   final movementDetector = MovementDetector();
@@ -147,6 +151,7 @@ void setupServiceLocator() {
   GetIt.I.registerSingleton<PlayerLocationService>(playerLocationService);
   GetIt.I.registerSingleton<BombOperationService>(bombOperationService);
   GetIt.I.registerSingleton<BombOperationWebSocketHandler>(bombOperationWebSocketHandler);
+  GetIt.I.registerSingleton<FavoritesService>(favoritesService);
   GetIt.I.registerSingleton<LocationFilter>(locationFilter);
   GetIt.I.registerSingleton<MovementDetector>(movementDetector);
   GetIt.I.registerSingleton<AdvancedLocationService>(advancedLocationService);

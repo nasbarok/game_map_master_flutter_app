@@ -9,6 +9,7 @@ import '../../services/team_service.dart';
 import '../../services/api_service.dart';
 import 'package:game_map_master_flutter_app/utils/logger.dart';
 
+import '../../widgets/button/favorite_star_button.dart';
 import '../../widgets/common/invite_badge.dart';
 
 class PlayersScreen extends StatefulWidget {
@@ -194,7 +195,7 @@ class _PlayersScreenState extends State<PlayersScreen>
     final invitationService = context.read<InvitationService>();
     final l10n = AppLocalizations.of(context)!;
     try {
-      invitationService.sendInvitation(userId,context);
+      invitationService.sendInvitation(userId, context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.invitationSentTo(username)),
@@ -222,7 +223,6 @@ class _PlayersScreenState extends State<PlayersScreen>
 
   // Dans _PlayersScreenState
   Future<void> kickPlayer(int playerId, String playerName) async {
-
     if (!mounted) return;
     try {
       final gameStateService = context.read<GameStateService>();
@@ -382,8 +382,7 @@ class _PlayersScreenState extends State<PlayersScreen>
                         child: Icon(Icons.person, color: Colors.white),
                       ),
                       title: Text(
-                        l10n.invitationFrom(
-                            inv.senderUsername),
+                        l10n.invitationFrom(inv.senderUsername),
                       ),
                       subtitle: Text(
                         l10n.mapLabelShort(inv.fieldName),
@@ -691,7 +690,8 @@ class _PlayersScreenState extends State<PlayersScreen>
     } catch (e) {
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.genericError(e)), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text(l10n.genericError(e)), backgroundColor: Colors.red),
       );
     }
   }
@@ -727,6 +727,13 @@ class _PlayersScreenState extends State<PlayersScreen>
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Bouton étoile pour les favoris (seulement pour l'host)
+                if (isMapOwner && !isCurrentUser)
+                  FavoriteStarButton(
+                    playerId: player['id'],
+                    playerName: player['username'],
+                    size: 20.0,
+                  ),
                 DropdownButton<int>(
                   hint: Text(l10n.assignTeamHint),
                   onChanged: (teamId) {
@@ -776,6 +783,12 @@ class _PlayersScreenState extends State<PlayersScreen>
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (isMapOwner && !isCurrentUser)
+                  FavoriteStarButton(
+                    playerId: player['id'],
+                    playerName: player['username'],
+                    size: 20.0,
+                  ),
                 IconButton(
                   icon: const Icon(Icons.group_remove),
                   tooltip: l10n.removeFromTeamTooltip,

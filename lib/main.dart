@@ -1,4 +1,5 @@
 import 'package:game_map_master_flutter_app/services/audio/simple_voice_service.dart';
+import 'package:game_map_master_flutter_app/services/favorites_service.dart';
 import 'package:game_map_master_flutter_app/services/game_map_service.dart';
 import 'package:game_map_master_flutter_app/services/game_session_service.dart';
 import 'package:game_map_master_flutter_app/services/game_state_service.dart';
