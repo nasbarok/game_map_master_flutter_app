@@ -11,6 +11,7 @@ import 'package:game_map_master_flutter_app/utils/logger.dart';
 
 import '../../widgets/button/favorite_star_button.dart';
 import '../../widgets/common/invite_badge.dart';
+import '../../widgets/tab/favorites_tab_widget.dart';
 
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({Key? key, this.onGoToFieldTab}) : super(key: key);
@@ -417,28 +418,7 @@ class _PlayersScreenState extends State<PlayersScreen>
   }
 
   Widget _buildFavoritesTab() {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            l10n.favoritesTab,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          SizedBox(height: 16),
-          Expanded(
-            child: Center(
-              child: Text(
-                l10n.favoritesComingSoon,
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const FavoritesTabWidget();
   }
 
   Widget _buildSearchTab() {

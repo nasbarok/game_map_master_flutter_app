@@ -82,8 +82,9 @@ void main() async {
             value: GetIt.I<PlayerConnectionService>()),
         Provider<TreasureHuntService>.value(
             value: GetIt.I<TreasureHuntService>()),
-        Provider<TreasureHuntService>.value(
-            value: GetIt.I<TreasureHuntService>()),
+        ChangeNotifierProvider<FavoritesService>.value(
+          value: GetIt.I<FavoritesService>(),
+        ),
         Provider<BombOperationService>.value(
             value: GetIt.I<BombOperationService>()),
         Provider<BombOperationScenarioService>.value(
