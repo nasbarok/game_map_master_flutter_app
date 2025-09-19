@@ -779,7 +779,22 @@
       }
     }
   },
-  "h": "u"
+  "h": "u",
+  "refreshFavorites": "Favorieten vernieuwen",
+  "loadingFavorites": "Favorieten laden...",
+  "errorLoadingFavorites": "Fout bij het laden van favorieten",
+  "retry": "Opnieuw proberen",
+  "noFavorites": "Geen favoriete spelers",
+  "markPlayersAsFavorites": "Markeer spelers als favoriet door op de ster te klikken in andere tabbladen",
+  "allFavoritesConnected": "Al je favorieten zijn al verbonden!",
+  "favoritesInGame": "{count} favoriete speler(s) in het spel",
+  "unknownPlayer": "Onbekende speler",
+  "invitationSent": "Uitnodiging verzonden",
+  "available": "Beschikbaar",
+  "invited": "Uitgenodigd",
+  "invite": "Uitnodigen",
+  "playerAlreadyInvited": "⚠️ {playerName} is al uitgenodigd",
+  "errorSendingInvitation": "❌ Fout bij het verzenden van uitnodiging naar {playerName}"
 
 
 

@@ -2642,4 +2642,56 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get h => 'u';
+
+  @override
+  String get refreshFavorites => 'Favorieten vernieuwen';
+
+  @override
+  String get loadingFavorites => 'Favorieten laden...';
+
+  @override
+  String get errorLoadingFavorites => 'Fout bij het laden van favorieten';
+
+  @override
+  String get retry => 'Opnieuw proberen';
+
+  @override
+  String get noFavorites => 'Geen favoriete spelers';
+
+  @override
+  String get markPlayersAsFavorites =>
+      'Markeer spelers als favoriet door op de ster te klikken in andere tabbladen';
+
+  @override
+  String get allFavoritesConnected => 'Al je favorieten zijn al verbonden!';
+
+  @override
+  String favoritesInGame(Object count) {
+    return '$count favoriete speler(s) in het spel';
+  }
+
+  @override
+  String get unknownPlayer => 'Onbekende speler';
+
+  @override
+  String get invitationSent => 'Uitnodiging verzonden';
+
+  @override
+  String get available => 'Beschikbaar';
+
+  @override
+  String get invited => 'Uitgenodigd';
+
+  @override
+  String get invite => 'Uitnodigen';
+
+  @override
+  String playerAlreadyInvited(Object playerName) {
+    return '⚠️ $playerName is al uitgenodigd';
+  }
+
+  @override
+  String errorSendingInvitation(Object playerName) {
+    return '❌ Fout bij het verzenden van uitnodiging naar $playerName';
+  }
 }

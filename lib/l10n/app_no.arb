@@ -779,7 +779,22 @@
       }
     }
   },
-  "h": "t"
+  "h": "t",
+  "refreshFavorites": "Oppdater favoritter",
+  "loadingFavorites": "Laster favoritter...",
+  "errorLoadingFavorites": "Feil ved lasting av favoritter",
+  "retry": "Prøv igjen",
+  "noFavorites": "Ingen favorittspillere",
+  "markPlayersAsFavorites": "Merk spillere som favoritter ved å klikke på stjernen i andre faner",
+  "allFavoritesConnected": "Alle favorittene dine er allerede tilkoblet!",
+  "favoritesInGame": "{count} favorittspiller(e) i spillet",
+  "unknownPlayer": "Ukjent spiller",
+  "invitationSent": "Invitasjon sendt",
+  "available": "Tilgjengelig",
+  "invited": "Invitert",
+  "invite": "Inviter",
+  "playerAlreadyInvited": "⚠️ {playerName} er allerede invitert",
+  "errorSendingInvitation": "❌ Feil ved sending av invitasjon til {playerName}"
 
 
 

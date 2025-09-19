@@ -82,29 +82,41 @@ class _FavoriteStarButtonState extends State<FavoriteStarButton> {
       listenable: _favoritesService,
       builder: (context, child) {
         final isFavorite = _favoritesService.isFavorite(widget.playerId);
-        final effectiveNotFavoriteColor = widget.notFavoriteColor ??
-            Colors.grey.withOpacity(0.4);
+        final effectiveNotFavoriteColor =
+            widget.notFavoriteColor ?? Colors.grey.withOpacity(0.4);
 
         return IconButton(
           onPressed: _isLoading ? null : _toggleFavorite,
           icon: _isLoading
               ? SizedBox(
-            width: widget.size * 0.8,
-            height: widget.size * 0.8,
-            child: const CircularProgressIndicator(
-              strokeWidth: 2,
-            ),
-          )
-              : Icon(
-            isFavorite ? Icons.star : Icons.star_border,
-            color: isFavorite
-                ? widget.favoriteColor
-                : effectiveNotFavoriteColor,
-            size: widget.size,
-          ),
-          tooltip: isFavorite
-              ? 'Retirer des favoris'
-              : 'Ajouter aux favoris',
+                  width: widget.size * 0.8,
+                  height: widget.size * 0.8,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                )
+              : Stack(
+                  children: [
+                    // Étoile avec contour noir pour la visibilité
+                    Icon(
+                      isFavorite ? Icons.star : Icons.star_border,
+                      color:
+                          Colors.black.withOpacity(0.3), // Contour noir léger
+                      size: widget.size +
+                          2, // Légèrement plus grande pour l'effet contour
+                    ),
+                    // Étoile principale
+                    Icon(
+                      isFavorite ? Icons.star : Icons.star_border,
+                      color: isFavorite
+                          ? widget.favoriteColor
+                          : Colors.grey
+                              .withOpacity(0.6), // Plus visible que 0.4
+                      size: widget.size,
+                    ),
+                  ],
+                ),
+          tooltip: isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
         );
       },
     );

@@ -778,6 +778,22 @@
         "type": "String"
       }
     }
-  }
+  },
+  "h": "時間",
+  "refreshFavorites": "お気に入りを更新",
+  "loadingFavorites": "お気に入りを読み込み中...",
+  "errorLoadingFavorites": "お気に入りの読み込みエラー",
+  "retry": "再試行",
+  "noFavorites": "お気に入りプレイヤーなし",
+  "markPlayersAsFavorites": "他のタブで星をクリックしてプレイヤーをお気に入りに追加",
+  "allFavoritesConnected": "お気に入りのプレイヤーは全員接続済みです！",
+  "favoritesInGame": "ゲーム内のお気に入りプレイヤー{count}人",
+  "unknownPlayer": "不明なプレイヤー",
+  "invitationSent": "招待送信済み",
+  "available": "利用可能",
+  "invited": "招待済み",
+  "invite": "招待",
+  "playerAlreadyInvited": "⚠️ {playerName}は既に招待済みです",
+  "errorSendingInvitation": "❌ {playerName}への招待送信エラー"
 
 }

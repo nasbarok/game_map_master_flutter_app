@@ -779,7 +779,22 @@
       }
     }
   },
-  "h": "h"
+  "h": "h",
+  "refreshFavorites": "Atualizar favoritos",
+  "loadingFavorites": "Carregando favoritos...",
+  "errorLoadingFavorites": "Erro ao carregar favoritos",
+  "retry": "Tentar novamente",
+  "noFavorites": "Nenhum jogador favorito",
+  "markPlayersAsFavorites": "Marque jogadores como favoritos clicando na estrela em outras abas",
+  "allFavoritesConnected": "Todos os seus favoritos já estão conectados!",
+  "favoritesInGame": "{count} jogador(es) favorito(s) no jogo",
+  "unknownPlayer": "Jogador desconhecido",
+  "invitationSent": "Convite enviado",
+  "available": "Disponível",
+  "invited": "Convidado",
+  "invite": "Convidar",
+  "playerAlreadyInvited": "⚠️ {playerName} já está convidado",
+  "errorSendingInvitation": "❌ Erro ao enviar convite para {playerName}"
 
 
 

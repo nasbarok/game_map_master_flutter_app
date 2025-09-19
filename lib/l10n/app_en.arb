@@ -2747,7 +2747,22 @@
       }
     }
   },
-  "h": "h"
+  "h": "h",
+  "refreshFavorites": "Refresh favorites",
+  "loadingFavorites": "Loading favorites...",
+  "errorLoadingFavorites": "Error loading favorites",
+  "retry": "Retry",
+  "noFavorites": "No favorite players",
+  "markPlayersAsFavorites": "Mark players as favorites by clicking the star in other tabs",
+  "allFavoritesConnected": "All your favorites are already connected!",
+  "favoritesInGame": "{count} favorite player(s) in the game",
+  "unknownPlayer": "Unknown player",
+  "invitationSent": "Invitation sent",
+  "available": "Available",
+  "invited": "Invited",
+  "invite": "Invite",
+  "playerAlreadyInvited": "⚠️ {playerName} is already invited",
+  "errorSendingInvitation": "❌ Error sending invitation to {playerName}"
 
 
 

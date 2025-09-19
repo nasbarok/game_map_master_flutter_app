@@ -2639,4 +2639,56 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get h => 'tim';
+
+  @override
+  String get refreshFavorites => 'Uppdatera favoriter';
+
+  @override
+  String get loadingFavorites => 'Laddar favoriter...';
+
+  @override
+  String get errorLoadingFavorites => 'Fel vid laddning av favoriter';
+
+  @override
+  String get retry => 'Försök igen';
+
+  @override
+  String get noFavorites => 'Inga favoritspelare';
+
+  @override
+  String get markPlayersAsFavorites =>
+      'Markera spelare som favoriter genom att klicka på stjärnan i andra flikar';
+
+  @override
+  String get allFavoritesConnected => 'Alla dina favoriter är redan anslutna!';
+
+  @override
+  String favoritesInGame(Object count) {
+    return '$count favoritspelare i spelet';
+  }
+
+  @override
+  String get unknownPlayer => 'Okänd spelare';
+
+  @override
+  String get invitationSent => 'Inbjudan skickad';
+
+  @override
+  String get available => 'Tillgänglig';
+
+  @override
+  String get invited => 'Inbjuden';
+
+  @override
+  String get invite => 'Bjud in';
+
+  @override
+  String playerAlreadyInvited(Object playerName) {
+    return '⚠️ $playerName är redan inbjuden';
+  }
+
+  @override
+  String errorSendingInvitation(Object playerName) {
+    return '❌ Fel vid skickande av inbjudan till $playerName';
+  }
 }

@@ -2642,4 +2642,56 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get h => 'godz';
+
+  @override
+  String get refreshFavorites => 'Odśwież ulubione';
+
+  @override
+  String get loadingFavorites => 'Ładowanie ulubionych...';
+
+  @override
+  String get errorLoadingFavorites => 'Błąd podczas ładowania ulubionych';
+
+  @override
+  String get retry => 'Spróbuj ponownie';
+
+  @override
+  String get noFavorites => 'Brak ulubionych graczy';
+
+  @override
+  String get markPlayersAsFavorites =>
+      'Oznacz graczy jako ulubionych klikając gwiazdkę w innych zakładkach';
+
+  @override
+  String get allFavoritesConnected => 'Wszyscy Twoi ulubieni są już połączeni!';
+
+  @override
+  String favoritesInGame(Object count) {
+    return '$count ulubiony(ch) gracz(y) w grze';
+  }
+
+  @override
+  String get unknownPlayer => 'Nieznany gracz';
+
+  @override
+  String get invitationSent => 'Zaproszenie wysłane';
+
+  @override
+  String get available => 'Dostępny';
+
+  @override
+  String get invited => 'Zaproszony';
+
+  @override
+  String get invite => 'Zaproś';
+
+  @override
+  String playerAlreadyInvited(Object playerName) {
+    return '⚠️ $playerName jest już zaproszony';
+  }
+
+  @override
+  String errorSendingInvitation(Object playerName) {
+    return '❌ Błąd podczas wysyłania zaproszenia do $playerName';
+  }
 }

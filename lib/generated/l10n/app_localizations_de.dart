@@ -2663,4 +2663,57 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get h => 'Std';
+
+  @override
+  String get refreshFavorites => 'Favoriten aktualisieren';
+
+  @override
+  String get loadingFavorites => 'Favoriten werden geladen...';
+
+  @override
+  String get errorLoadingFavorites => 'Fehler beim Laden der Favoriten';
+
+  @override
+  String get retry => 'Wiederholen';
+
+  @override
+  String get noFavorites => 'Keine Lieblingsspieler';
+
+  @override
+  String get markPlayersAsFavorites =>
+      'Markieren Sie Spieler als Favoriten, indem Sie auf den Stern in anderen Registerkarten klicken';
+
+  @override
+  String get allFavoritesConnected =>
+      'Alle Ihre Favoriten sind bereits verbunden!';
+
+  @override
+  String favoritesInGame(Object count) {
+    return '$count Lieblingsspieler im Spiel';
+  }
+
+  @override
+  String get unknownPlayer => 'Unbekannter Spieler';
+
+  @override
+  String get invitationSent => 'Einladung gesendet';
+
+  @override
+  String get available => 'Verfügbar';
+
+  @override
+  String get invited => 'Eingeladen';
+
+  @override
+  String get invite => 'Einladen';
+
+  @override
+  String playerAlreadyInvited(Object playerName) {
+    return '⚠️ $playerName ist bereits eingeladen';
+  }
+
+  @override
+  String errorSendingInvitation(Object playerName) {
+    return '❌ Fehler beim Senden der Einladung an $playerName';
+  }
 }

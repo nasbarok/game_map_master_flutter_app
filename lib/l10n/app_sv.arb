@@ -775,7 +775,22 @@
       }
     }
   },
-  "h": "tim"
+  "h": "tim",
+  "refreshFavorites": "Uppdatera favoriter",
+  "loadingFavorites": "Laddar favoriter...",
+  "errorLoadingFavorites": "Fel vid laddning av favoriter",
+  "retry": "Försök igen",
+  "noFavorites": "Inga favoritspelare",
+  "markPlayersAsFavorites": "Markera spelare som favoriter genom att klicka på stjärnan i andra flikar",
+  "allFavoritesConnected": "Alla dina favoriter är redan anslutna!",
+  "favoritesInGame": "{count} favoritspelare i spelet",
+  "unknownPlayer": "Okänd spelare",
+  "invitationSent": "Inbjudan skickad",
+  "available": "Tillgänglig",
+  "invited": "Inbjuden",
+  "invite": "Bjud in",
+  "playerAlreadyInvited": "⚠️ {playerName} är redan inbjuden",
+  "errorSendingInvitation": "❌ Fel vid skickande av inbjudan till {playerName}"
 
 
 

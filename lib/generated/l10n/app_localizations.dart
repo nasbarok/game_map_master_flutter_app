@@ -4690,6 +4690,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'h'**
   String get h;
+
+  /// No description provided for @refreshFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh favorites'**
+  String get refreshFavorites;
+
+  /// No description provided for @loadingFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading favorites...'**
+  String get loadingFavorites;
+
+  /// No description provided for @errorLoadingFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading favorites'**
+  String get errorLoadingFavorites;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorite players'**
+  String get noFavorites;
+
+  /// No description provided for @markPlayersAsFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark players as favorites by clicking the star in other tabs'**
+  String get markPlayersAsFavorites;
+
+  /// No description provided for @allFavoritesConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'All your favorites are already connected!'**
+  String get allFavoritesConnected;
+
+  /// No description provided for @favoritesInGame.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} favorite player(s) in the game'**
+  String favoritesInGame(Object count);
+
+  /// No description provided for @unknownPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown player'**
+  String get unknownPlayer;
+
+  /// No description provided for @invitationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent'**
+  String get invitationSent;
+
+  /// No description provided for @available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get available;
+
+  /// No description provided for @invited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get invited;
+
+  /// No description provided for @invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get invite;
+
+  /// No description provided for @playerAlreadyInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ {playerName} is already invited'**
+  String playerAlreadyInvited(Object playerName);
+
+  /// No description provided for @errorSendingInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Error sending invitation to {playerName}'**
+  String errorSendingInvitation(Object playerName);
 }
 
 class _AppLocalizationsDelegate

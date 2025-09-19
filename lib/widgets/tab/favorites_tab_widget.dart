@@ -42,7 +42,7 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
         children: [
           // En-tête avec titre et bouton refresh
           _buildHeader(l10n, favoritesService),
-          SizedBox(height: 16),
+          SizedBox(height: 12), // Plus compact
 
           // Contenu principal avec FutureBuilder
           Expanded(
@@ -59,8 +59,8 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
             ),
           ),
 
-          // Informations en bas selon l'état du terrain
-          _buildBottomInfo(canInvite),
+          // ✅ SUPPRESSION DU MESSAGE INFORMATIF EN BAS
+          // _buildBottomInfo(canInvite), // SUPPRIMÉ
         ],
       ),
     );
@@ -94,14 +94,16 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
     required InvitationService invitationService,
     required bool canInvite,
   }) {
+    final l10n = AppLocalizations.of(context)!;
+
     // État de chargement
     if (snapshot.connectionState == ConnectionState.waiting) {
-      return _buildLoadingState();
+      return _buildLoadingState(l10n);
     }
 
     // État d'erreur
     if (snapshot.hasError) {
-      return _buildErrorState();
+      return _buildErrorState(l10n);
     }
 
     final favoritePlayersList = snapshot.data ?? [];
@@ -116,84 +118,87 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
 
     // Aucun favori
     if (favoritePlayersList.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(l10n);
     }
 
     // Tous les favoris sont connectés
     if (availableFavorites.isEmpty) {
-      return _buildAllConnectedState(favoritePlayersList.length);
+      return _buildAllConnectedState(favoritePlayersList.length, l10n);
     }
 
-    // Affichage de la liste avec statistiques
-    return _buildFavoritesList(
-      favoritePlayersList: favoritePlayersList,
-      availableFavorites: availableFavorites,
-      invitationService: invitationService,
-      canInvite: canInvite,
+    // ✅ SUPPRESSION DES STATISTIQUES - Liste directe
+    return ListView.builder(
+      itemCount: availableFavorites.length,
+      itemBuilder: (context, index) {
+        final player = availableFavorites[index];
+        return _buildCompactPlayerCard(
+          player: player,
+          canInvite: canInvite,
+          invitationService: invitationService,
+          l10n: l10n,
+        );
+      },
     );
   }
 
   /// État de chargement
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(),
-          SizedBox(height: 16),
+          SizedBox(height: 12), // Plus compact
           Text(
-            'Chargement des favoris...',
-            style: TextStyle(color: Colors.grey),
+            l10n.loadingFavorites,
+            style: TextStyle(color: Colors.grey, fontSize: 14), // Plus petit
           ),
         ],
       ),
     );
   }
 
-  /// État d'erreur
-  Widget _buildErrorState() {
+  Widget _buildErrorState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error, size: 64, color: Colors.red),
-          SizedBox(height: 16),
+          Icon(Icons.error, size: 48, color: Colors.red), // Plus petit
+          SizedBox(height: 12),
           Text(
-            'Erreur lors du chargement des favoris',
-            style: TextStyle(color: Colors.red),
+            l10n.errorLoadingFavorites,
+            style: TextStyle(color: Colors.red, fontSize: 14),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 12),
           ElevatedButton.icon(
             onPressed: () {
               final favoritesService = context.read<FavoritesService>();
               favoritesService.loadFavorites();
             },
-            icon: Icon(Icons.refresh),
-            label: Text('Réessayer'),
+            icon: Icon(Icons.refresh, size: 16),
+            label: Text(l10n.retry, style: TextStyle(fontSize: 14)),
           ),
         ],
       ),
     );
   }
 
-  /// État aucun favori
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.star_border,
-              size: 80, color: Colors.grey.withOpacity(0.5)),
-          SizedBox(height: 16),
+          Icon(Icons.star_border, size: 64, color: Colors.grey.withOpacity(0.5)), // Plus petit
+          SizedBox(height: 12),
           Text(
-            'Aucun joueur favori',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            l10n.noFavorites,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // Plus petit
           ),
           SizedBox(height: 8),
           Text(
-            'Marquez des joueurs en favoris en cliquant sur l\'étoile dans les autres onglets',
-            style: TextStyle(color: Colors.grey),
+            l10n.markPlayersAsFavorites,
+            style: TextStyle(color: Colors.grey, fontSize: 12),
             textAlign: TextAlign.center,
           ),
         ],
@@ -201,330 +206,148 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
     );
   }
 
-  /// État tous connectés
-  Widget _buildAllConnectedState(int totalFavorites) {
+  Widget _buildAllConnectedState(int totalFavorites, AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people, size: 80, color: Colors.green.withOpacity(0.5)),
-          SizedBox(height: 16),
+          Icon(Icons.people, size: 64, color: Colors.green.withOpacity(0.5)), // Plus petit
+          SizedBox(height: 12),
           Text(
-            'Tous vos favoris sont déjà connectés !',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            l10n.allFavoritesConnected,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // Plus petit
           ),
           SizedBox(height: 8),
           Text(
-            '$totalFavorites joueur(s) favori(s) dans la partie',
-            style: TextStyle(color: Colors.grey),
+            l10n.favoritesInGame(totalFavorites),
+            style: TextStyle(color: Colors.grey, fontSize: 12),
           ),
         ],
       ),
     );
   }
 
-  /// Liste des favoris avec statistiques
-  Widget _buildFavoritesList({
-    required List<Map<String, dynamic>> favoritePlayersList,
-    required List<Map<String, dynamic>> availableFavorites,
-    required InvitationService invitationService,
-    required bool canInvite,
-  }) {
-    return Column(
-      children: [
-        // Statistiques en haut
-        _buildStatistics(
-          favoritePlayersList: favoritePlayersList,
-          availableFavorites: availableFavorites,
-          invitationService: invitationService,
-        ),
-        SizedBox(height: 16),
-
-        // Liste des favoris disponibles
-        Expanded(
-          child: ListView.builder(
-            itemCount: availableFavorites.length,
-            itemBuilder: (context, index) {
-              final player = availableFavorites[index];
-              return _buildPlayerCard(
-                player: player,
-                canInvite: canInvite,
-                invitationService: invitationService,
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Construit les statistiques des favoris
-  Widget _buildStatistics({
-    required List<Map<String, dynamic>> favoritePlayersList,
-    required List<Map<String, dynamic>> availableFavorites,
-    required InvitationService invitationService,
-  }) {
-    final totalFavorites = favoritePlayersList.length;
-    final availableCount = availableFavorites.length;
-    final connectedCount = totalFavorites - availableCount;
-
-    // Compter les invités parmi les disponibles
-    final invitedCount = availableFavorites.where((player) {
-      return invitationService.sentInvitations
-          .any((invitation) => invitation.targetUserId == player['id']);
-    }).length;
-
-    final readyToInviteCount = availableCount - invitedCount;
-
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem(
-            icon: Icons.star,
-            label: 'Total',
-            value: totalFavorites.toString(),
-            color: Colors.amber,
-          ),
-          _buildStatItem(
-            icon: Icons.people,
-            label: 'Connectés',
-            value: connectedCount.toString(),
-            color: Colors.green,
-          ),
-          _buildStatItem(
-            icon: Icons.schedule,
-            label: 'Invités',
-            value: invitedCount.toString(),
-            color: Colors.orange,
-          ),
-          _buildStatItem(
-            icon: Icons.send,
-            label: 'Disponibles',
-            value: readyToInviteCount.toString(),
-            color: Colors.blue,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Construit un élément de statistique
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 20),
-        SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Construit une carte pour un joueur favori
-  Widget _buildPlayerCard({
+  Widget _buildCompactPlayerCard({
     required Map<String, dynamic> player,
     required bool canInvite,
     required InvitationService invitationService,
+    required AppLocalizations l10n,
   }) {
     final playerId = player['id'] as int;
-    final playerName = player['username'] ?? 'Joueur inconnu';
-    final playerEmail = player['email'] ?? '';
+    final playerName = player['username'] ?? l10n.unknownPlayer;
 
     // Vérifier si une invitation est déjà envoyée
     final isAlreadyInvited = invitationService.sentInvitations
         .any((invitation) => invitation.targetUserId == playerId);
 
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 4),
-      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 2), // Plus compact
+      elevation: 1, // Plus discret
       child: ListTile(
-        leading: CircleAvatar(
+        dense: true, // Plus compact
+        leading: const CircleAvatar(
           backgroundColor: Colors.amber,
-          child: Icon(Icons.star, color: Colors.white),
+          radius: 16, // Plus petit
+          child: Icon(Icons.star, color: Colors.white, size: 16),
         ),
         title: Text(
           playerName,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), // Plus petit
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (playerEmail.isNotEmpty)
-              Text(
-                playerEmail,
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            SizedBox(height: 4),
-            _buildStatusChip(isAlreadyInvited),
-          ],
-        ),
+        subtitle: _buildCompactStatusChip(isAlreadyInvited, l10n),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Bouton d'invitation intelligent
-            _buildInvitationButton(
+            // Bouton d'invitation compact
+            _buildCompactInvitationButton(
               player: player,
               canInvite: canInvite,
               isAlreadyInvited: isAlreadyInvited,
+              l10n: l10n,
             ),
-            SizedBox(width: 8),
-            // Bouton pour retirer des favoris
+            SizedBox(width: 4),
+            // Bouton étoile compact
             FavoriteStarButton(
               playerId: playerId,
               playerName: playerName,
-              size: 20.0,
+              size: 16.0, // Plus petit
             ),
           ],
         ),
-        isThreeLine: playerEmail.isNotEmpty,
       ),
     );
   }
 
-  /// Construit un chip indiquant le statut du joueur
-  Widget _buildStatusChip(bool isAlreadyInvited) {
+  Widget _buildCompactStatusChip(bool isAlreadyInvited, AppLocalizations l10n) {
     if (isAlreadyInvited) {
-      return const Chip(
+      return Chip(
         label: Text(
-          'Invitation envoyée',
-          style: TextStyle(color: Colors.white, fontSize: 12),
+          l10n.invitationSent,
+          style: TextStyle(color: Colors.white, fontSize: 10), // Plus petit
         ),
         backgroundColor: Colors.orange,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact, // Plus compact
       );
     } else {
-      return const Chip(
+      return Chip(
         label: Text(
-          'Disponible',
-          style: TextStyle(color: Colors.white, fontSize: 12),
+          l10n.available,
+          style: TextStyle(color: Colors.white, fontSize: 10), // Plus petit
         ),
         backgroundColor: Colors.blue,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact, // Plus compact
       );
     }
   }
 
-  /// Construit un bouton d'invitation intelligent
-  Widget _buildInvitationButton({
+  Widget _buildCompactInvitationButton({
     required Map<String, dynamic> player,
     required bool canInvite,
     required bool isAlreadyInvited,
+    required AppLocalizations l10n,
   }) {
-    // Déterminer l'état du bouton
     String buttonText;
     Color? buttonColor;
     IconData buttonIcon;
     bool isEnabled;
 
     if (isAlreadyInvited) {
-      // Joueur déjà invité
-      buttonText = 'Invité';
+      buttonText = l10n.invited;
       buttonColor = Colors.orange;
       buttonIcon = Icons.schedule;
       isEnabled = false;
     } else if (!canInvite) {
-      // Terrain fermé
-      buttonText = 'Inviter';
+      buttonText = l10n.invite;
       buttonColor = Colors.grey;
       buttonIcon = Icons.send;
       isEnabled = false;
     } else {
-      // Disponible pour invitation
-      buttonText = 'Inviter';
+      buttonText = l10n.invite;
       buttonColor = Colors.green;
       buttonIcon = Icons.send;
       isEnabled = true;
     }
 
     return ElevatedButton.icon(
-      onPressed: isEnabled ? () => _sendInvitation(player) : null,
-      icon: Icon(buttonIcon, size: 16),
-      label: Text(buttonText),
+      onPressed: isEnabled ? () => _sendInvitation(player, l10n) : null,
+      icon: Icon(buttonIcon, size: 12), // Plus petit
+      label: Text(buttonText, style: TextStyle(fontSize: 12)), // Plus petit
       style: ElevatedButton.styleFrom(
         backgroundColor: buttonColor,
         foregroundColor: Colors.white,
         disabledBackgroundColor: Colors.grey[300],
         disabledForegroundColor: Colors.grey[600],
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Plus compact
+        minimumSize: Size(60, 28), // Plus petit
       ),
     );
   }
 
-  /// Construit les informations en bas selon l'état du terrain
-  Widget _buildBottomInfo(bool canInvite) {
-    if (canInvite) {
-      return Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.green.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.green.withOpacity(0.3)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.info, color: Colors.green, size: 16),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Vous pouvez inviter vos joueurs favoris à rejoindre votre terrain',
-                style: TextStyle(color: Colors.green[700], fontSize: 12),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.orange.withOpacity(0.3)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.warning, color: Colors.orange, size: 16),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Ouvrez votre terrain pour pouvoir envoyer des invitations',
-                style: TextStyle(color: Colors.orange[700], fontSize: 12),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  /// Méthode pour envoyer une invitation à un joueur favori
-  Future<void> _sendInvitation(Map<String, dynamic> player) async {
+  Future<void> _sendInvitation(Map<String, dynamic> player, AppLocalizations l10n) async {
     final invitationService = context.read<InvitationService>();
-    final playerName = player['username'] ?? 'Joueur inconnu';
+    final playerName = player['username'] ?? l10n.unknownPlayer;
 
     // Vérifier une dernière fois si pas déjà invité
     final isAlreadyInvited = invitationService.sentInvitations
@@ -533,7 +356,7 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
     if (isAlreadyInvited) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('⚠️ $playerName est déjà invité'),
+          content: Text(l10n.playerAlreadyInvited(playerName)),
           backgroundColor: Colors.orange,
         ),
       );
@@ -549,7 +372,7 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✉️ Invitation envoyée à $playerName'),
+            content: Text(l10n.invitationSentTo(playerName)),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
@@ -560,8 +383,7 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-                '❌ Erreur lors de l\'envoi de l\'invitation à $playerName'),
+            content: Text(l10n.errorSendingInvitation(playerName)),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 3),
           ),
@@ -569,4 +391,5 @@ class _FavoritesTabWidgetState extends State<FavoritesTabWidget> {
       }
     }
   }
+
 }

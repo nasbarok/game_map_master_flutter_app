@@ -2595,5 +2595,56 @@ class AppLocalizationsJa extends AppLocalizations {
   String get min => '分';
 
   @override
-  String get h => 'h';
+  String get h => '時間';
+
+  @override
+  String get refreshFavorites => 'お気に入りを更新';
+
+  @override
+  String get loadingFavorites => 'お気に入りを読み込み中...';
+
+  @override
+  String get errorLoadingFavorites => 'お気に入りの読み込みエラー';
+
+  @override
+  String get retry => '再試行';
+
+  @override
+  String get noFavorites => 'お気に入りプレイヤーなし';
+
+  @override
+  String get markPlayersAsFavorites => '他のタブで星をクリックしてプレイヤーをお気に入りに追加';
+
+  @override
+  String get allFavoritesConnected => 'お気に入りのプレイヤーは全員接続済みです！';
+
+  @override
+  String favoritesInGame(Object count) {
+    return 'ゲーム内のお気に入りプレイヤー$count人';
+  }
+
+  @override
+  String get unknownPlayer => '不明なプレイヤー';
+
+  @override
+  String get invitationSent => '招待送信済み';
+
+  @override
+  String get available => '利用可能';
+
+  @override
+  String get invited => '招待済み';
+
+  @override
+  String get invite => '招待';
+
+  @override
+  String playerAlreadyInvited(Object playerName) {
+    return '⚠️ $playerNameは既に招待済みです';
+  }
+
+  @override
+  String errorSendingInvitation(Object playerName) {
+    return '❌ $playerNameへの招待送信エラー';
+  }
 }
