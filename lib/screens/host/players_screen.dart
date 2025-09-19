@@ -173,10 +173,20 @@ class _PlayersScreenState extends State<PlayersScreen>
 
     try {
       final apiService = context.read<ApiService>();
+      final authService = context.read<AuthService>();
+      // Récupérer l'utilisateur actuel
+      final currentUser = authService.currentUser;
+      final currentUserId = currentUser?.id;
+
       final results = await apiService.get('users/search?query=$query');
 
+      // Filtrer l'utilisateur actuel des résultats
+      final filteredResults = (results as List).where((user) {
+        return user['id'] != currentUserId;
+      }).toList();
+
       setState(() {
-        _searchResults = results as List;
+        _searchResults = filteredResults;
         _isSearching = false;
       });
     } catch (e) {
