@@ -11,13 +11,16 @@ import '../treasure_hunt/qr_codes_display_screen.dart';
 class TargetEliminationConfigScreen extends StatefulWidget {
   final Scenario scenario;
 
-  const TargetEliminationConfigScreen({Key? key, required this.scenario}) : super(key: key);
+  const TargetEliminationConfigScreen({Key? key, required this.scenario})
+      : super(key: key);
 
   @override
-  _TargetEliminationConfigScreenState createState() => _TargetEliminationConfigScreenState();
+  _TargetEliminationConfigScreenState createState() =>
+      _TargetEliminationConfigScreenState();
 }
 
-class _TargetEliminationConfigScreenState extends State<TargetEliminationConfigScreen> {
+class _TargetEliminationConfigScreenState
+    extends State<TargetEliminationConfigScreen> {
   final _formKey = GlobalKey<FormState>();
 
   GameMode _selectedMode = GameMode.solo;
@@ -26,6 +29,7 @@ class _TargetEliminationConfigScreenState extends State<TargetEliminationConfigS
   int _cooldownMinutes = 5;
   int _maxTargets = 50;
   String _announcementTemplate = '{killer} a sorti {victim}';
+  List<String> _generatedQRCodes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +212,6 @@ class _TargetEliminationConfigScreenState extends State<TargetEliminationConfigS
               style: Theme.of(context).textTheme.titleLarge,
             ),
             SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
@@ -249,10 +252,16 @@ class _TargetEliminationConfigScreenState extends State<TargetEliminationConfigS
       );
       final l10n = AppLocalizations.of(context)!;
       try {
-
         final service = context.watch<TargetEliminationService>();
-        await service.saveScenario(scenario);
-
+        final scenario = await service.createScenario(
+          gameSessionId: widget.scenario.gameSessionId!,
+          isTeamMode: _selectedMode == GameMode.team,
+          friendlyFire: _friendlyFire,
+          pointsPerElimination: _pointsPerElimination,
+          cooldownMinutes: _cooldownMinutes,
+          numberOfQRCodes: _maxTargets,
+          announcementTemplate: _announcementTemplate,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.configurationSaved)),
         );
@@ -265,16 +274,32 @@ class _TargetEliminationConfigScreenState extends State<TargetEliminationConfigS
   }
 
   void _generateQRCodes() {
+    final l10n = AppLocalizations.of(context)!;
     // Navigation vers l'écran de génération des QR codes
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QRCodesDisplayScreen(scenario: widget.scenario),
+        builder: (context) => QRCodesDisplayScreen(
+          qrCodes: _generatedQRCodes.map((code) => {'code': code}).toList(),
+          scenarioName: l10n.targetEliminationConfig,
+        ),
       ),
     );
   }
 
   void _downloadPDF() {
-    // Logique de téléchargement PDF
+    final l10n = AppLocalizations.of(context)!;
+
+    if (_generatedQRCodes.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QRCodesDisplayScreen(
+            qrCodes: _generatedQRCodes.map((code) => {'code': code}).toList(),
+            scenarioName: l10n.targetEliminationConfig,
+          ),
+        ),
+      );
+    }
   }
 }
