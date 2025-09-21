@@ -2687,4 +2687,170 @@ class AppLocalizationsEn extends AppLocalizations {
   String errorSendingInvitation(Object playerName) {
     return '❌ Error sending invitation to $playerName';
   }
+
+  @override
+  String get targetEliminationConfig => 'Target Elimination Configuration';
+
+  @override
+  String get targetEliminationScenario => 'Target Elimination (QR Codes)';
+
+  @override
+  String get targetEliminationDescription =>
+      'Eliminate your targets by scanning their QR code';
+
+  @override
+  String get gameRules => 'Game Rules';
+
+  @override
+  String get gameMode => 'Game Mode';
+
+  @override
+  String get soloMode => 'Solo';
+
+  @override
+  String get teamMode => 'Team Mode';
+
+  @override
+  String get friendlyFire => 'Friendly Fire';
+
+  @override
+  String get friendlyFireDescription => 'Allow elimination of teammates';
+
+  @override
+  String get parameters => 'Parameters';
+
+  @override
+  String get pointsPerElimination => 'Points per elimination';
+
+  @override
+  String get immunityCooldownMinutes => 'Immunity cooldown (minutes)';
+
+  @override
+  String get numberOfQRCodes => 'Number of QR codes to generate';
+
+  @override
+  String get announcementTemplate => 'Announcement template';
+
+  @override
+  String announcementTemplateHelp(
+      Object killer, Object killerTeam, Object victim, Object victimTeam) {
+    return 'Use $killer, $victim, $killerTeam, $victimTeam';
+  }
+
+  @override
+  String get qrCodeGeneration => 'QR Code Generation';
+
+  @override
+  String get generateQRCodes => 'Generate QR Codes';
+
+  @override
+  String get downloadPDF => 'Download PDF';
+
+  @override
+  String get shareQRCodes => 'Share';
+
+  @override
+  String get printQRCodes => 'Print';
+
+  @override
+  String youAreTargetNumber(Object number) {
+    return 'You are target number $number for elimination';
+  }
+
+  @override
+  String get waitingForTargetAssignment => 'Waiting for target assignment...';
+
+  @override
+  String get myQRCode => 'My QR Code';
+
+  @override
+  String get scanQRCode => 'Scan QR Code';
+
+  @override
+  String get showMyQRCode => 'Show My QR';
+
+  @override
+  String get kills => 'Kills';
+
+  @override
+  String get deaths => 'Deaths';
+
+  @override
+  String get killDeathRatio => 'K/D Ratio';
+
+  @override
+  String get recentEliminations => 'Recent Eliminations';
+
+  @override
+  String get noRecentEliminations => 'No recent eliminations';
+
+  @override
+  String playerEliminated(Object killer, Object victim) {
+    return '$killer eliminated $victim';
+  }
+
+  @override
+  String youEliminatedPlayer(Object victim) {
+    return 'You eliminated $victim';
+  }
+
+  @override
+  String youWereEliminated(Object killer) {
+    return 'You were eliminated by $killer';
+  }
+
+  @override
+  String playerInCooldown(Object time, Object victim) {
+    return '$victim is still immune for $time';
+  }
+
+  @override
+  String friendlyFireBlocked(Object victim) {
+    return 'Friendly fire blocked: $victim is on your team';
+  }
+
+  @override
+  String get cannotEliminateSelf => 'You cannot eliminate yourself';
+
+  @override
+  String get qrCodeNotRecognized => 'QR code not recognized';
+
+  @override
+  String get scenarioNotActive => 'Scenario is not active';
+
+  @override
+  String get scoresLocked => 'Scores are locked';
+
+  @override
+  String get alreadyEliminated => 'Target already eliminated recently';
+
+  @override
+  String get errorScanningQR => 'Error scanning QR code';
+
+  @override
+  String get configurationSaved => 'Configuration saved';
+
+  @override
+  String get errorSavingConfiguration => 'Error saving configuration';
+
+  @override
+  String get invalidPoints => 'Invalid points';
+
+  @override
+  String get invalidCooldown => 'Invalid cooldown';
+
+  @override
+  String get scoreboard => 'Scoreboard';
+
+  @override
+  String get leaderboard => 'Leaderboard';
+
+  @override
+  String get topKillers => 'Top Killers';
+
+  @override
+  String get teamScores => 'Team Scores';
+
+  @override
+  String get individualScores => 'Individual Scores';
 }

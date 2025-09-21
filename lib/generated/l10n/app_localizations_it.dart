@@ -2699,4 +2699,172 @@ class AppLocalizationsIt extends AppLocalizations {
   String errorSendingInvitation(Object playerName) {
     return '❌ Errore nell\'invio dell\'invito a $playerName';
   }
+
+  @override
+  String get targetEliminationConfig => 'Configurazione Eliminazione Mirata';
+
+  @override
+  String get targetEliminationScenario => 'Eliminazione Mirata (Codici QR)';
+
+  @override
+  String get targetEliminationDescription =>
+      'Elimina i tuoi bersagli scansionando il loro codice QR';
+
+  @override
+  String get gameRules => 'Regole del Gioco';
+
+  @override
+  String get gameMode => 'Modalità di Gioco';
+
+  @override
+  String get soloMode => 'Solo';
+
+  @override
+  String get teamMode => 'A Squadre';
+
+  @override
+  String get friendlyFire => 'Fuoco Amico';
+
+  @override
+  String get friendlyFireDescription =>
+      'Consenti eliminazione dei compagni di squadra';
+
+  @override
+  String get parameters => 'Parametri';
+
+  @override
+  String get pointsPerElimination => 'Punti per eliminazione';
+
+  @override
+  String get immunityCooldownMinutes => 'Tempo di immunità (minuti)';
+
+  @override
+  String get numberOfQRCodes => 'Numero di codici QR da generare';
+
+  @override
+  String get announcementTemplate => 'Template di annuncio';
+
+  @override
+  String announcementTemplateHelp(
+      Object killer, Object killerTeam, Object victim, Object victimTeam) {
+    return 'Usa $killer, $victim, $killerTeam, $victimTeam';
+  }
+
+  @override
+  String get qrCodeGeneration => 'Generazione Codici QR';
+
+  @override
+  String get generateQRCodes => 'Genera Codici QR';
+
+  @override
+  String get downloadPDF => 'Scarica PDF';
+
+  @override
+  String get shareQRCodes => 'Condividi';
+
+  @override
+  String get printQRCodes => 'Stampa';
+
+  @override
+  String youAreTargetNumber(Object number) {
+    return 'Sei il bersaglio numero $number per l\'eliminazione';
+  }
+
+  @override
+  String get waitingForTargetAssignment =>
+      'In attesa di assegnazione bersaglio...';
+
+  @override
+  String get myQRCode => 'Il Mio Codice QR';
+
+  @override
+  String get scanQRCode => 'Scansiona QR';
+
+  @override
+  String get showMyQRCode => 'Mostra Il Mio QR';
+
+  @override
+  String get kills => 'Eliminazioni';
+
+  @override
+  String get deaths => 'Morti';
+
+  @override
+  String get killDeathRatio => 'Rapporto K/D';
+
+  @override
+  String get recentEliminations => 'Eliminazioni Recenti';
+
+  @override
+  String get noRecentEliminations => 'Nessuna eliminazione recente';
+
+  @override
+  String playerEliminated(Object killer, Object victim) {
+    return '$killer ha eliminato $victim';
+  }
+
+  @override
+  String youEliminatedPlayer(Object victim) {
+    return 'Hai eliminato $victim';
+  }
+
+  @override
+  String youWereEliminated(Object killer) {
+    return 'Sei stato eliminato da $killer';
+  }
+
+  @override
+  String playerInCooldown(Object time, Object victim) {
+    return '$victim è ancora immune per $time';
+  }
+
+  @override
+  String friendlyFireBlocked(Object victim) {
+    return 'Fuoco amico bloccato: $victim è nella tua squadra';
+  }
+
+  @override
+  String get cannotEliminateSelf => 'Non puoi eliminare te stesso';
+
+  @override
+  String get qrCodeNotRecognized => 'Codice QR non riconosciuto';
+
+  @override
+  String get scenarioNotActive => 'Lo scenario non è attivo';
+
+  @override
+  String get scoresLocked => 'I punteggi sono bloccati';
+
+  @override
+  String get alreadyEliminated => 'Bersaglio già eliminato di recente';
+
+  @override
+  String get errorScanningQR => 'Errore nella scansione del codice QR';
+
+  @override
+  String get configurationSaved => 'Configurazione salvata';
+
+  @override
+  String get errorSavingConfiguration => 'Errore nel salvare la configurazione';
+
+  @override
+  String get invalidPoints => 'Punti non validi';
+
+  @override
+  String get invalidCooldown => 'Tempo di attesa non valido';
+
+  @override
+  String get scoreboard => 'Tabellone Punteggi';
+
+  @override
+  String get leaderboard => 'Classifica';
+
+  @override
+  String get topKillers => 'Top Eliminatori';
+
+  @override
+  String get teamScores => 'Punteggi Squadra';
+
+  @override
+  String get individualScores => 'Punteggi Individuali';
 }

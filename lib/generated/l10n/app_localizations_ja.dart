@@ -2647,4 +2647,169 @@ class AppLocalizationsJa extends AppLocalizations {
   String errorSendingInvitation(Object playerName) {
     return '❌ $playerNameへの招待送信エラー';
   }
+
+  @override
+  String get targetEliminationConfig => 'ターゲット排除設定';
+
+  @override
+  String get targetEliminationScenario => 'ターゲット排除（QRコード）';
+
+  @override
+  String get targetEliminationDescription => 'QRコードをスキャンしてターゲットを排除する';
+
+  @override
+  String get gameRules => 'ゲームルール';
+
+  @override
+  String get gameMode => 'ゲームモード';
+
+  @override
+  String get soloMode => 'ソロ';
+
+  @override
+  String get teamMode => 'チーム戦';
+
+  @override
+  String get friendlyFire => 'フレンドリーファイア';
+
+  @override
+  String get friendlyFireDescription => 'チームメイトの排除を許可';
+
+  @override
+  String get parameters => 'パラメータ';
+
+  @override
+  String get pointsPerElimination => '排除あたりのポイント';
+
+  @override
+  String get immunityCooldownMinutes => '免疫クールダウン（分）';
+
+  @override
+  String get numberOfQRCodes => '生成するQRコード数';
+
+  @override
+  String get announcementTemplate => 'アナウンステンプレート';
+
+  @override
+  String announcementTemplateHelp(
+      Object killer, Object killerTeam, Object victim, Object victimTeam) {
+    return '$killer、$victim、$killerTeam、$victimTeamを使用';
+  }
+
+  @override
+  String get qrCodeGeneration => 'QRコード生成';
+
+  @override
+  String get generateQRCodes => 'QRコード生成';
+
+  @override
+  String get downloadPDF => 'PDFダウンロード';
+
+  @override
+  String get shareQRCodes => '共有';
+
+  @override
+  String get printQRCodes => '印刷';
+
+  @override
+  String youAreTargetNumber(Object number) {
+    return 'あなたは排除のターゲット番号$numberです';
+  }
+
+  @override
+  String get waitingForTargetAssignment => 'ターゲット割り当て待ち...';
+
+  @override
+  String get myQRCode => 'マイQRコード';
+
+  @override
+  String get scanQRCode => 'QRスキャン';
+
+  @override
+  String get showMyQRCode => 'マイQR表示';
+
+  @override
+  String get kills => 'キル数';
+
+  @override
+  String get deaths => 'デス数';
+
+  @override
+  String get killDeathRatio => 'K/D比';
+
+  @override
+  String get recentEliminations => '最近の排除';
+
+  @override
+  String get noRecentEliminations => '最近の排除なし';
+
+  @override
+  String playerEliminated(Object killer, Object victim) {
+    return '$killerが$victimを排除しました';
+  }
+
+  @override
+  String youEliminatedPlayer(Object victim) {
+    return '$victimを排除しました';
+  }
+
+  @override
+  String youWereEliminated(Object killer) {
+    return '$killerに排除されました';
+  }
+
+  @override
+  String playerInCooldown(Object time, Object victim) {
+    return '$victimはまだ$time免疫中です';
+  }
+
+  @override
+  String friendlyFireBlocked(Object victim) {
+    return 'フレンドリーファイアブロック：$victimはあなたのチームです';
+  }
+
+  @override
+  String get cannotEliminateSelf => '自分自身を排除することはできません';
+
+  @override
+  String get qrCodeNotRecognized => 'QRコードが認識されません';
+
+  @override
+  String get scenarioNotActive => 'シナリオがアクティブではありません';
+
+  @override
+  String get scoresLocked => 'スコアがロックされています';
+
+  @override
+  String get alreadyEliminated => 'ターゲットは最近すでに排除されています';
+
+  @override
+  String get errorScanningQR => 'QRコードスキャンエラー';
+
+  @override
+  String get configurationSaved => '設定が保存されました';
+
+  @override
+  String get errorSavingConfiguration => '設定保存エラー';
+
+  @override
+  String get invalidPoints => '無効なポイント';
+
+  @override
+  String get invalidCooldown => '無効なクールダウン';
+
+  @override
+  String get scoreboard => 'スコアボード';
+
+  @override
+  String get leaderboard => 'リーダーボード';
+
+  @override
+  String get topKillers => 'トップキラー';
+
+  @override
+  String get teamScores => 'チームスコア';
+
+  @override
+  String get individualScores => '個人スコア';
 }

@@ -2691,4 +2691,170 @@ class AppLocalizationsSv extends AppLocalizations {
   String errorSendingInvitation(Object playerName) {
     return '❌ Fel vid skickande av inbjudan till $playerName';
   }
+
+  @override
+  String get targetEliminationConfig => 'Måleliminering Konfiguration';
+
+  @override
+  String get targetEliminationScenario => 'Måleliminering (QR-koder)';
+
+  @override
+  String get targetEliminationDescription =>
+      'Eliminera dina mål genom att skanna deras QR-kod';
+
+  @override
+  String get gameRules => 'Spelregler';
+
+  @override
+  String get gameMode => 'Spelläge';
+
+  @override
+  String get soloMode => 'Solo';
+
+  @override
+  String get teamMode => 'Lagläge';
+
+  @override
+  String get friendlyFire => 'Vänlig Eld';
+
+  @override
+  String get friendlyFireDescription => 'Tillåt eliminering av lagkamrater';
+
+  @override
+  String get parameters => 'Parametrar';
+
+  @override
+  String get pointsPerElimination => 'Poäng per eliminering';
+
+  @override
+  String get immunityCooldownMinutes => 'Immunitet nedkylning (minuter)';
+
+  @override
+  String get numberOfQRCodes => 'Antal QR-koder att generera';
+
+  @override
+  String get announcementTemplate => 'Meddelande mall';
+
+  @override
+  String announcementTemplateHelp(
+      Object killer, Object killerTeam, Object victim, Object victimTeam) {
+    return 'Använd $killer, $victim, $killerTeam, $victimTeam';
+  }
+
+  @override
+  String get qrCodeGeneration => 'QR-kod Generering';
+
+  @override
+  String get generateQRCodes => 'Generera QR-koder';
+
+  @override
+  String get downloadPDF => 'Ladda ner PDF';
+
+  @override
+  String get shareQRCodes => 'Dela';
+
+  @override
+  String get printQRCodes => 'Skriv ut';
+
+  @override
+  String youAreTargetNumber(Object number) {
+    return 'Du är mål nummer $number för eliminering';
+  }
+
+  @override
+  String get waitingForTargetAssignment => 'Väntar på måltilldelning...';
+
+  @override
+  String get myQRCode => 'Min QR-kod';
+
+  @override
+  String get scanQRCode => 'Skanna QR';
+
+  @override
+  String get showMyQRCode => 'Visa Min QR';
+
+  @override
+  String get kills => 'Dödande';
+
+  @override
+  String get deaths => 'Dödsfall';
+
+  @override
+  String get killDeathRatio => 'K/D Förhållande';
+
+  @override
+  String get recentEliminations => 'Senaste Elimineringar';
+
+  @override
+  String get noRecentEliminations => 'Inga senaste elimineringar';
+
+  @override
+  String playerEliminated(Object killer, Object victim) {
+    return '$killer eliminerade $victim';
+  }
+
+  @override
+  String youEliminatedPlayer(Object victim) {
+    return 'Du eliminerade $victim';
+  }
+
+  @override
+  String youWereEliminated(Object killer) {
+    return 'Du blev eliminerad av $killer';
+  }
+
+  @override
+  String playerInCooldown(Object time, Object victim) {
+    return '$victim är fortfarande immun i $time';
+  }
+
+  @override
+  String friendlyFireBlocked(Object victim) {
+    return 'Vänlig eld blockerad: $victim är i ditt lag';
+  }
+
+  @override
+  String get cannotEliminateSelf => 'Du kan inte eliminera dig själv';
+
+  @override
+  String get qrCodeNotRecognized => 'QR-kod inte igenkänd';
+
+  @override
+  String get scenarioNotActive => 'Scenario är inte aktivt';
+
+  @override
+  String get scoresLocked => 'Poäng är låsta';
+
+  @override
+  String get alreadyEliminated => 'Mål redan eliminerat nyligen';
+
+  @override
+  String get errorScanningQR => 'Fel vid skanning av QR-kod';
+
+  @override
+  String get configurationSaved => 'Konfiguration sparad';
+
+  @override
+  String get errorSavingConfiguration => 'Fel vid sparande av konfiguration';
+
+  @override
+  String get invalidPoints => 'Ogiltiga poäng';
+
+  @override
+  String get invalidCooldown => 'Ogiltig nedkylning';
+
+  @override
+  String get scoreboard => 'Poängtavla';
+
+  @override
+  String get leaderboard => 'Topplista';
+
+  @override
+  String get topKillers => 'Topp Dödare';
+
+  @override
+  String get teamScores => 'Lag Poäng';
+
+  @override
+  String get individualScores => 'Individuella Poäng';
 }

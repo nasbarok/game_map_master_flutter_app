@@ -2694,4 +2694,170 @@ class AppLocalizationsNl extends AppLocalizations {
   String errorSendingInvitation(Object playerName) {
     return '❌ Fout bij het verzenden van uitnodiging naar $playerName';
   }
+
+  @override
+  String get targetEliminationConfig => 'Doelwit Eliminatie Configuratie';
+
+  @override
+  String get targetEliminationScenario => 'Doelwit Eliminatie (QR Codes)';
+
+  @override
+  String get targetEliminationDescription =>
+      'Elimineer je doelwitten door hun QR-code te scannen';
+
+  @override
+  String get gameRules => 'Spelregels';
+
+  @override
+  String get gameMode => 'Spelmodus';
+
+  @override
+  String get soloMode => 'Solo';
+
+  @override
+  String get teamMode => 'Team Modus';
+
+  @override
+  String get friendlyFire => 'Friendly Fire';
+
+  @override
+  String get friendlyFireDescription => 'Eliminatie van teamgenoten toestaan';
+
+  @override
+  String get parameters => 'Parameters';
+
+  @override
+  String get pointsPerElimination => 'Punten per eliminatie';
+
+  @override
+  String get immunityCooldownMinutes => 'Immuniteit cooldown (minuten)';
+
+  @override
+  String get numberOfQRCodes => 'Aantal QR-codes om te genereren';
+
+  @override
+  String get announcementTemplate => 'Aankondiging sjabloon';
+
+  @override
+  String announcementTemplateHelp(
+      Object killer, Object killerTeam, Object victim, Object victimTeam) {
+    return 'Gebruik $killer, $victim, $killerTeam, $victimTeam';
+  }
+
+  @override
+  String get qrCodeGeneration => 'QR-Code Generatie';
+
+  @override
+  String get generateQRCodes => 'QR-Codes Genereren';
+
+  @override
+  String get downloadPDF => 'PDF Downloaden';
+
+  @override
+  String get shareQRCodes => 'Delen';
+
+  @override
+  String get printQRCodes => 'Afdrukken';
+
+  @override
+  String youAreTargetNumber(Object number) {
+    return 'Je bent doelwit nummer $number voor eliminatie';
+  }
+
+  @override
+  String get waitingForTargetAssignment => 'Wachten op doelwit toewijzing...';
+
+  @override
+  String get myQRCode => 'Mijn QR-Code';
+
+  @override
+  String get scanQRCode => 'QR Scannen';
+
+  @override
+  String get showMyQRCode => 'Toon Mijn QR';
+
+  @override
+  String get kills => 'Eliminaties';
+
+  @override
+  String get deaths => 'Doden';
+
+  @override
+  String get killDeathRatio => 'K/D Verhouding';
+
+  @override
+  String get recentEliminations => 'Recente Eliminaties';
+
+  @override
+  String get noRecentEliminations => 'Geen recente eliminaties';
+
+  @override
+  String playerEliminated(Object killer, Object victim) {
+    return '$killer elimineerde $victim';
+  }
+
+  @override
+  String youEliminatedPlayer(Object victim) {
+    return 'Je elimineerde $victim';
+  }
+
+  @override
+  String youWereEliminated(Object killer) {
+    return 'Je werd geëlimineerd door $killer';
+  }
+
+  @override
+  String playerInCooldown(Object time, Object victim) {
+    return '$victim is nog $time immuun';
+  }
+
+  @override
+  String friendlyFireBlocked(Object victim) {
+    return 'Friendly fire geblokkeerd: $victim zit in je team';
+  }
+
+  @override
+  String get cannotEliminateSelf => 'Je kunt jezelf niet elimineren';
+
+  @override
+  String get qrCodeNotRecognized => 'QR-code niet herkend';
+
+  @override
+  String get scenarioNotActive => 'Scenario is niet actief';
+
+  @override
+  String get scoresLocked => 'Scores zijn vergrendeld';
+
+  @override
+  String get alreadyEliminated => 'Doelwit al recent geëlimineerd';
+
+  @override
+  String get errorScanningQR => 'Fout bij scannen QR-code';
+
+  @override
+  String get configurationSaved => 'Configuratie opgeslagen';
+
+  @override
+  String get errorSavingConfiguration => 'Fout bij opslaan configuratie';
+
+  @override
+  String get invalidPoints => 'Ongeldige punten';
+
+  @override
+  String get invalidCooldown => 'Ongeldige cooldown';
+
+  @override
+  String get scoreboard => 'Scorebord';
+
+  @override
+  String get leaderboard => 'Ranglijst';
+
+  @override
+  String get topKillers => 'Top Eliminators';
+
+  @override
+  String get teamScores => 'Team Scores';
+
+  @override
+  String get individualScores => 'Individuele Scores';
 }

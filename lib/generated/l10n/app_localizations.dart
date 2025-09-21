@@ -4780,6 +4780,307 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'❌ Error sending invitation to {playerName}'**
   String errorSendingInvitation(Object playerName);
+
+  /// No description provided for @targetEliminationConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Elimination Configuration'**
+  String get targetEliminationConfig;
+
+  /// No description provided for @targetEliminationScenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Elimination (QR Codes)'**
+  String get targetEliminationScenario;
+
+  /// No description provided for @targetEliminationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Eliminate your targets by scanning their QR code'**
+  String get targetEliminationDescription;
+
+  /// No description provided for @gameRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Rules'**
+  String get gameRules;
+
+  /// No description provided for @gameMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Mode'**
+  String get gameMode;
+
+  /// No description provided for @soloMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Solo'**
+  String get soloMode;
+
+  /// No description provided for @teamMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Mode'**
+  String get teamMode;
+
+  /// No description provided for @friendlyFire.
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly Fire'**
+  String get friendlyFire;
+
+  /// No description provided for @friendlyFireDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow elimination of teammates'**
+  String get friendlyFireDescription;
+
+  /// No description provided for @parameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get parameters;
+
+  /// No description provided for @pointsPerElimination.
+  ///
+  /// In en, this message translates to:
+  /// **'Points per elimination'**
+  String get pointsPerElimination;
+
+  /// No description provided for @immunityCooldownMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Immunity cooldown (minutes)'**
+  String get immunityCooldownMinutes;
+
+  /// No description provided for @numberOfQRCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of QR codes to generate'**
+  String get numberOfQRCodes;
+
+  /// No description provided for @announcementTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement template'**
+  String get announcementTemplate;
+
+  /// No description provided for @announcementTemplateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {killer}, {victim}, {killerTeam}, {victimTeam}'**
+  String announcementTemplateHelp(
+      Object killer, Object killerTeam, Object victim, Object victimTeam);
+
+  /// No description provided for @qrCodeGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Code Generation'**
+  String get qrCodeGeneration;
+
+  /// No description provided for @generateQRCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate QR Codes'**
+  String get generateQRCodes;
+
+  /// No description provided for @downloadPDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get downloadPDF;
+
+  /// No description provided for @shareQRCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareQRCodes;
+
+  /// No description provided for @printQRCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get printQRCodes;
+
+  /// No description provided for @youAreTargetNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'You are target number {number} for elimination'**
+  String youAreTargetNumber(Object number);
+
+  /// No description provided for @waitingForTargetAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for target assignment...'**
+  String get waitingForTargetAssignment;
+
+  /// No description provided for @myQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'My QR Code'**
+  String get myQRCode;
+
+  /// No description provided for @scanQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scanQRCode;
+
+  /// No description provided for @showMyQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show My QR'**
+  String get showMyQRCode;
+
+  /// No description provided for @kills.
+  ///
+  /// In en, this message translates to:
+  /// **'Kills'**
+  String get kills;
+
+  /// No description provided for @deaths.
+  ///
+  /// In en, this message translates to:
+  /// **'Deaths'**
+  String get deaths;
+
+  /// No description provided for @killDeathRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'K/D Ratio'**
+  String get killDeathRatio;
+
+  /// No description provided for @recentEliminations.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Eliminations'**
+  String get recentEliminations;
+
+  /// No description provided for @noRecentEliminations.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent eliminations'**
+  String get noRecentEliminations;
+
+  /// No description provided for @playerEliminated.
+  ///
+  /// In en, this message translates to:
+  /// **'{killer} eliminated {victim}'**
+  String playerEliminated(Object killer, Object victim);
+
+  /// No description provided for @youEliminatedPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'You eliminated {victim}'**
+  String youEliminatedPlayer(Object victim);
+
+  /// No description provided for @youWereEliminated.
+  ///
+  /// In en, this message translates to:
+  /// **'You were eliminated by {killer}'**
+  String youWereEliminated(Object killer);
+
+  /// No description provided for @playerInCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'{victim} is still immune for {time}'**
+  String playerInCooldown(Object time, Object victim);
+
+  /// No description provided for @friendlyFireBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly fire blocked: {victim} is on your team'**
+  String friendlyFireBlocked(Object victim);
+
+  /// No description provided for @cannotEliminateSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot eliminate yourself'**
+  String get cannotEliminateSelf;
+
+  /// No description provided for @qrCodeNotRecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code not recognized'**
+  String get qrCodeNotRecognized;
+
+  /// No description provided for @scenarioNotActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario is not active'**
+  String get scenarioNotActive;
+
+  /// No description provided for @scoresLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores are locked'**
+  String get scoresLocked;
+
+  /// No description provided for @alreadyEliminated.
+  ///
+  /// In en, this message translates to:
+  /// **'Target already eliminated recently'**
+  String get alreadyEliminated;
+
+  /// No description provided for @errorScanningQR.
+  ///
+  /// In en, this message translates to:
+  /// **'Error scanning QR code'**
+  String get errorScanningQR;
+
+  /// No description provided for @configurationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration saved'**
+  String get configurationSaved;
+
+  /// No description provided for @errorSavingConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving configuration'**
+  String get errorSavingConfiguration;
+
+  /// No description provided for @invalidPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid points'**
+  String get invalidPoints;
+
+  /// No description provided for @invalidCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid cooldown'**
+  String get invalidCooldown;
+
+  /// No description provided for @scoreboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoreboard'**
+  String get scoreboard;
+
+  /// No description provided for @leaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get leaderboard;
+
+  /// No description provided for @topKillers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Killers'**
+  String get topKillers;
+
+  /// No description provided for @teamScores.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Scores'**
+  String get teamScores;
+
+  /// No description provided for @individualScores.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual Scores'**
+  String get individualScores;
 }
 
 class _AppLocalizationsDelegate

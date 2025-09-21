@@ -2,7 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/scenario/target_elimination/elimination.dart';
+import '../../models/scenario/target_elimination/player_target.dart';
 import '../../models/scenario/target_elimination/target_elimination_scenario.dart';
+import '../../models/scenario/target_elimination/target_elimination_score.dart';
+import '../../screens/scenario/target_elimination/player_target_display_screen.dart';
+import '../../screens/scenario/target_elimination/target_elimination_scanner_screen.dart';
+import '../../screens/scenario/target_elimination/target_elimination_scoreboard_screen.dart';
+import '../../services/scenario/target_elimination/target_elimination_score_service.dart';
 
 class EliminationHudWidget extends StatefulWidget {
   final TargetEliminationScenario scenario;

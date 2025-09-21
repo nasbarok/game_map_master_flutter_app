@@ -2691,4 +2691,170 @@ class AppLocalizationsNo extends AppLocalizations {
   String errorSendingInvitation(Object playerName) {
     return '❌ Feil ved sending av invitasjon til $playerName';
   }
+
+  @override
+  String get targetEliminationConfig => 'Måleliminering Konfigurasjon';
+
+  @override
+  String get targetEliminationScenario => 'Måleliminering (QR-koder)';
+
+  @override
+  String get targetEliminationDescription =>
+      'Eliminer målene dine ved å skanne QR-koden deres';
+
+  @override
+  String get gameRules => 'Spilleregler';
+
+  @override
+  String get gameMode => 'Spillmodus';
+
+  @override
+  String get soloMode => 'Solo';
+
+  @override
+  String get teamMode => 'Lag Modus';
+
+  @override
+  String get friendlyFire => 'Vennlig Ild';
+
+  @override
+  String get friendlyFireDescription => 'Tillat eliminering av lagkamerater';
+
+  @override
+  String get parameters => 'Parametere';
+
+  @override
+  String get pointsPerElimination => 'Poeng per eliminering';
+
+  @override
+  String get immunityCooldownMinutes => 'Immunitet nedkjøling (minutter)';
+
+  @override
+  String get numberOfQRCodes => 'Antall QR-koder å generere';
+
+  @override
+  String get announcementTemplate => 'Kunngjøringsmal';
+
+  @override
+  String announcementTemplateHelp(
+      Object killer, Object killerTeam, Object victim, Object victimTeam) {
+    return 'Bruk $killer, $victim, $killerTeam, $victimTeam';
+  }
+
+  @override
+  String get qrCodeGeneration => 'QR-kode Generering';
+
+  @override
+  String get generateQRCodes => 'Generer QR-koder';
+
+  @override
+  String get downloadPDF => 'Last ned PDF';
+
+  @override
+  String get shareQRCodes => 'Del';
+
+  @override
+  String get printQRCodes => 'Skriv ut';
+
+  @override
+  String youAreTargetNumber(Object number) {
+    return 'Du er mål nummer $number for eliminering';
+  }
+
+  @override
+  String get waitingForTargetAssignment => 'Venter på måltildeling...';
+
+  @override
+  String get myQRCode => 'Min QR-kode';
+
+  @override
+  String get scanQRCode => 'Skann QR';
+
+  @override
+  String get showMyQRCode => 'Vis Min QR';
+
+  @override
+  String get kills => 'Drep';
+
+  @override
+  String get deaths => 'Dødsfall';
+
+  @override
+  String get killDeathRatio => 'K/D Forhold';
+
+  @override
+  String get recentEliminations => 'Nylige Elimineringer';
+
+  @override
+  String get noRecentEliminations => 'Ingen nylige elimineringer';
+
+  @override
+  String playerEliminated(Object killer, Object victim) {
+    return '$killer eliminerte $victim';
+  }
+
+  @override
+  String youEliminatedPlayer(Object victim) {
+    return 'Du eliminerte $victim';
+  }
+
+  @override
+  String youWereEliminated(Object killer) {
+    return 'Du ble eliminert av $killer';
+  }
+
+  @override
+  String playerInCooldown(Object time, Object victim) {
+    return '$victim er fortsatt immun i $time';
+  }
+
+  @override
+  String friendlyFireBlocked(Object victim) {
+    return 'Vennlig ild blokkert: $victim er på laget ditt';
+  }
+
+  @override
+  String get cannotEliminateSelf => 'Du kan ikke eliminere deg selv';
+
+  @override
+  String get qrCodeNotRecognized => 'QR-kode ikke gjenkjent';
+
+  @override
+  String get scenarioNotActive => 'Scenario er ikke aktivt';
+
+  @override
+  String get scoresLocked => 'Poengsummer er låst';
+
+  @override
+  String get alreadyEliminated => 'Mål allerede eliminert nylig';
+
+  @override
+  String get errorScanningQR => 'Feil ved skanning av QR-kode';
+
+  @override
+  String get configurationSaved => 'Konfigurasjon lagret';
+
+  @override
+  String get errorSavingConfiguration => 'Feil ved lagring av konfigurasjon';
+
+  @override
+  String get invalidPoints => 'Ugyldige poeng';
+
+  @override
+  String get invalidCooldown => 'Ugyldig nedkjøling';
+
+  @override
+  String get scoreboard => 'Poengtavle';
+
+  @override
+  String get leaderboard => 'Toppliste';
+
+  @override
+  String get topKillers => 'Topp Drapsmenn';
+
+  @override
+  String get teamScores => 'Lag Poengsum';
+
+  @override
+  String get individualScores => 'Individuelle Poengsum';
 }
