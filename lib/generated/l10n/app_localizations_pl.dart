@@ -2861,4 +2861,16 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get individualScores => 'Wyniki Indywidualne';
+
+  @override
+  String get killer => 'Strzelec';
+
+  @override
+  String get killerTeam => 'Drużyna strzelca';
+
+  @override
+  String get victim => 'Ofiara';
+
+  @override
+  String get victimTeam => 'Drużyna ofiary';
 }

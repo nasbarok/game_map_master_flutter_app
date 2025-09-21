@@ -844,5 +844,9 @@
   "leaderboard": "Ranking",
   "topKillers": "Najlepsi Zabójcy",
   "teamScores": "Wyniki Drużyn",
-  "individualScores": "Wyniki Indywidualne"
+  "individualScores": "Wyniki Indywidualne",
+  "killer": "Strzelec",
+  "killerTeam": "Drużyna strzelca",
+  "victim": "Ofiara",
+  "victimTeam": "Drużyna ofiary"
 }

@@ -840,5 +840,9 @@
   "leaderboard": "Clasificación",
   "topKillers": "Mejores Eliminadores",
   "teamScores": "Puntuaciones de Equipo",
-  "individualScores": "Puntuaciones Individuales"
+  "individualScores": "Puntuaciones Individuales",
+  "killer": "Tirador",
+  "killerTeam": "Equipo del tirador",
+  "victim": "Víctima",
+  "victimTeam": "Equipo de la víctima"
 }

@@ -844,5 +844,9 @@
   "leaderboard": "Toppliste",
   "topKillers": "Topp Drapsmenn",
   "teamScores": "Lag Poengsum",
-  "individualScores": "Individuelle Poengsum"
+  "individualScores": "Individuelle Poengsum",
+  "killer": "Skytter",
+  "killerTeam": "Skytterens lag",
+  "victim": "Offer",
+  "victimTeam": "Offerets lag"
 }

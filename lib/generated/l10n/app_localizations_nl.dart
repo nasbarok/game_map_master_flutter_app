@@ -2860,4 +2860,16 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get individualScores => 'Individuele Scores';
+
+  @override
+  String get killer => 'Schutter';
+
+  @override
+  String get killerTeam => 'Team van de schutter';
+
+  @override
+  String get victim => 'Slachtoffer';
+
+  @override
+  String get victimTeam => 'Team van het slachtoffer';
 }

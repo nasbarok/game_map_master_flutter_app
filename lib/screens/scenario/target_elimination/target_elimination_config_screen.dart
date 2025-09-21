@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../generated/l10n/app_localizations.dart';
 import '../../../models/scenario.dart';
 import '../../../models/scenario/target_elimination/target_elimination_scenario.dart';
+import '../../../services/scenario/target_elimination/target_elimination_service.dart';
 import '../treasure_hunt/qr_codes_display_screen.dart';
 
 class TargetEliminationConfigScreen extends StatefulWidget {
@@ -172,7 +174,12 @@ class _TargetEliminationConfigScreenState extends State<TargetEliminationConfigS
               decoration: InputDecoration(
                 labelText: l10n.announcementTemplate,
                 border: OutlineInputBorder(),
-                helperText: l10n.announcementTemplateHelp,
+                helperText: l10n.announcementTemplateHelp(
+                  l10n.killer,
+                  l10n.killerTeam,
+                  l10n.victim,
+                  l10n.victimTeam,
+                ),
               ),
               maxLines: 2,
               validator: (value) {
@@ -240,9 +247,10 @@ class _TargetEliminationConfigScreenState extends State<TargetEliminationConfigS
         maxTargets: _maxTargets,
         announcementTemplate: _announcementTemplate,
       );
-
+      final l10n = AppLocalizations.of(context)!;
       try {
-        final service = context.read<TargetEliminationService>();
+
+        final service = context.watch<TargetEliminationService>();
         await service.saveScenario(scenario);
 
         ScaffoldMessenger.of(context).showSnackBar(

@@ -2872,4 +2872,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get individualScores => 'Puntuaciones Individuales';
+
+  @override
+  String get killer => 'Tirador';
+
+  @override
+  String get killerTeam => 'Equipo del tirador';
+
+  @override
+  String get victim => 'Víctima';
+
+  @override
+  String get victimTeam => 'Equipo de la víctima';
 }

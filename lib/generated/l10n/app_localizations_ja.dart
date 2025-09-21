@@ -2812,4 +2812,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get individualScores => '個人スコア';
+
+  @override
+  String get killer => 'キルした側';
+
+  @override
+  String get killerTeam => 'キル側チーム';
+
+  @override
+  String get victim => '被害者';
+
+  @override
+  String get victimTeam => '被害者チーム';
 }

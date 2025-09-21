@@ -5081,6 +5081,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Individual Scores'**
   String get individualScores;
+
+  /// No description provided for @killer.
+  ///
+  /// In en, this message translates to:
+  /// **'Killer'**
+  String get killer;
+
+  /// No description provided for @killerTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Killer team'**
+  String get killerTeam;
+
+  /// No description provided for @victim.
+  ///
+  /// In en, this message translates to:
+  /// **'Victim'**
+  String get victim;
+
+  /// No description provided for @victimTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Victim team'**
+  String get victimTeam;
 }
 
 class _AppLocalizationsDelegate

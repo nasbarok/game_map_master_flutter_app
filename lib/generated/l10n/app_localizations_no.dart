@@ -2857,4 +2857,16 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String get individualScores => 'Individuelle Poengsum';
+
+  @override
+  String get killer => 'Skytter';
+
+  @override
+  String get killerTeam => 'Skytterens lag';
+
+  @override
+  String get victim => 'Offer';
+
+  @override
+  String get victimTeam => 'Offerets lag';
 }

@@ -2853,4 +2853,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get individualScores => 'Individual Scores';
+
+  @override
+  String get killer => 'Killer';
+
+  @override
+  String get killerTeam => 'Killer team';
+
+  @override
+  String get victim => 'Victim';
+
+  @override
+  String get victimTeam => 'Victim team';
 }

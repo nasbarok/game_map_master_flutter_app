@@ -2873,4 +2873,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get individualScores => 'Scores individuels';
+
+  @override
+  String get killer => 'Tireur';
+
+  @override
+  String get killerTeam => 'Équipe du tireur';
+
+  @override
+  String get victim => 'Victime';
+
+  @override
+  String get victimTeam => 'Équipe de la victime';
 }

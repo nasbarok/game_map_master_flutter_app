@@ -2812,5 +2812,9 @@
   "leaderboard": "Leaderboard",
   "topKillers": "Top Killers",
   "teamScores": "Team Scores",
-  "individualScores": "Individual Scores"
+  "individualScores": "Individual Scores",
+  "killer": "Killer",
+  "killerTeam": "Killer team",
+  "victim": "Victim",
+  "victimTeam": "Victim team"
 }

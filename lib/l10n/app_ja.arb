@@ -844,5 +844,9 @@
   "leaderboard": "リーダーボード",
   "topKillers": "トップキラー",
   "teamScores": "チームスコア",
-  "individualScores": "個人スコア"
+  "individualScores": "個人スコア",
+  "killer": "キルした側",
+  "killerTeam": "キル側チーム",
+  "victim": "被害者",
+  "victimTeam": "被害者チーム"
 }

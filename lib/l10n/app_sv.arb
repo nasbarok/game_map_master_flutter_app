@@ -840,5 +840,9 @@
   "leaderboard": "Topplista",
   "topKillers": "Topp Dödare",
   "teamScores": "Lag Poäng",
-  "individualScores": "Individuella Poäng"
+  "individualScores": "Individuella Poäng",
+  "killer": "Skytt",
+  "killerTeam": "Skyttens lag",
+  "victim": "Offer",
+  "victimTeam": "Offrets lag"
 }

@@ -2863,4 +2863,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get individualScores => 'Pontuações Individuais';
+
+  @override
+  String get killer => 'Atirador';
+
+  @override
+  String get killerTeam => 'Equipe do atirador';
+
+  @override
+  String get victim => 'Vítima';
+
+  @override
+  String get victimTeam => 'Equipe da vítima';
 }

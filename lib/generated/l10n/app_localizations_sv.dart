@@ -2857,4 +2857,16 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get individualScores => 'Individuella Poäng';
+
+  @override
+  String get killer => 'Skytt';
+
+  @override
+  String get killerTeam => 'Skyttens lag';
+
+  @override
+  String get victim => 'Offer';
+
+  @override
+  String get victimTeam => 'Offrets lag';
 }

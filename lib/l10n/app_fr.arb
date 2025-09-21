@@ -841,5 +841,9 @@
   "leaderboard": "Classement",
   "topKillers": "Top tueurs",
   "teamScores": "Scores d'équipe",
-  "individualScores": "Scores individuels"
+  "individualScores": "Scores individuels",
+  "killer": "Tireur",
+  "killerTeam": "Équipe du tireur",
+  "victim": "Victime",
+  "victimTeam": "Équipe de la victime"
 }

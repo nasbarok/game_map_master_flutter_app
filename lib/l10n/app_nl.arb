@@ -844,5 +844,9 @@
   "leaderboard": "Ranglijst",
   "topKillers": "Top Eliminators",
   "teamScores": "Team Scores",
-  "individualScores": "Individuele Scores"
+  "individualScores": "Individuele Scores",
+  "killer": "Schutter",
+  "killerTeam": "Team van de schutter",
+  "victim": "Slachtoffer",
+  "victimTeam": "Team van het slachtoffer"
 }
