@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/scenario/target_elimination/elimination.dart';
@@ -10,14 +11,19 @@ import '../../screens/scenario/target_elimination/player_target_display_screen.d
 import '../../screens/scenario/target_elimination/target_elimination_scanner_screen.dart';
 import '../../screens/scenario/target_elimination/target_elimination_scoreboard_screen.dart';
 import '../../services/scenario/target_elimination/target_elimination_score_service.dart';
+import '../../services/team_service.dart';
 
 class EliminationHudWidget extends StatefulWidget {
   final TargetEliminationScenario scenario;
+  final int gameSessionId;
+  final int currentPlayerId;
   final PlayerTarget? playerTarget;
 
   const EliminationHudWidget({
     Key? key,
     required this.scenario,
+    required this.gameSessionId,
+    required this.currentPlayerId,
     this.playerTarget,
   }) : super(key: key);
 
@@ -33,7 +39,8 @@ class _EliminationHudWidgetState extends State<EliminationHudWidget> {
   @override
   void initState() {
     super.initState();
-    _scoreService = context.read<TargetEliminationScoreService>();
+    _scoreService =
+        Provider.of<TargetEliminationScoreService>(context, listen: false);
     _loadPlayerScore();
     _loadRecentEliminations();
   }
@@ -119,7 +126,7 @@ class _EliminationHudWidgetState extends State<EliminationHudWidget> {
         Expanded(
           child: _buildStatCard(
             'K/D',
-            _playerScore?.getKillDeathRatio().toStringAsFixed(2) ?? '0.00',
+            _playerScore?.killDeathRatio.toStringAsFixed(2) ?? '0.00',
             Colors.blue,
             Icons.trending_up,
           ),
@@ -128,7 +135,8 @@ class _EliminationHudWidgetState extends State<EliminationHudWidget> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+  Widget _buildStatCard(
+      String title, String value, Color color, IconData icon) {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -176,18 +184,18 @@ class _EliminationHudWidgetState extends State<EliminationHudWidget> {
           Expanded(
             child: _recentEliminations.isEmpty
                 ? Center(
-              child: Text(
-                l10n.noRecentEliminations,
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
+                    child: Text(
+                      l10n.noRecentEliminations,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
                 : ListView.builder(
-              itemCount: _recentEliminations.length,
-              itemBuilder: (context, index) {
-                final elimination = _recentEliminations[index];
-                return _buildEliminationItem(elimination);
-              },
-            ),
+                    itemCount: _recentEliminations.length,
+                    itemBuilder: (context, index) {
+                      final elimination = _recentEliminations[index];
+                      return _buildEliminationItem(elimination);
+                    },
+                  ),
           ),
         ],
       ),
@@ -195,11 +203,12 @@ class _EliminationHudWidgetState extends State<EliminationHudWidget> {
   }
 
   Widget _buildEliminationItem(Elimination elimination) {
+    final l10n = AppLocalizations.of(context)!;
     final message = widget.scenario.announcementTemplate
-        .replaceAll('{killer}', elimination.killer.username)
-        .replaceAll('{victim}', elimination.victim.username)
-        .replaceAll('{killerTeam}', elimination.killerTeam?.name ?? '')
-        .replaceAll('{victimTeam}', elimination.victimTeam?.name ?? '');
+        .replaceAll('{killer}', elimination.killerName!)
+        .replaceAll('{victim}', elimination.victimName!)
+        .replaceAll('{killerTeam}', elimination.killerTeamName ?? l10n.noTeam)
+        .replaceAll('{victimTeam}', elimination.victimTeamName ?? l10n.noTeam);
 
     return Container(
       margin: EdgeInsets.only(bottom: 4),
@@ -263,19 +272,33 @@ class _EliminationHudWidgetState extends State<EliminationHudWidget> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TargetEliminationScannerScreen(
-          scenario: widget.scenario,
+        builder: (_) => TargetEliminationScannerScreen(
+          scenarioId: widget.scenario.id!,
+          // adapte si le champ est différent (ex: scenario.scenarioId)
+          gameSessionId: widget.gameSessionId,
+          currentPlayerId: widget.currentPlayerId,
         ),
       ),
     );
   }
 
   void _showScoreboard() {
+    final teamService = context.watch()<TeamService>();
+    // Règle métier : mode équipes actif si AU MOINS 2 équipes ont ≥ 2 joueurs
+    final validTeamsCount =
+        teamService.teams.where((t) => (t.players.length) >= 2).length;
+    final bool isTeamMode = validTeamsCount >= 2;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TargetEliminationScoreboardScreen(
-          scenario: widget.scenario,
+        builder: (_) => TargetEliminationScoreboardScreen(
+          scenarioId: widget.scenario.id!,
+          // int
+          gameSessionId: widget.gameSessionId,
+          // int
+          currentPlayerId: widget.currentPlayerId,
+          // pour surligner le joueur courant
+          isTeamMode: isTeamMode, // active l’onglet Équipes
         ),
       ),
     );
